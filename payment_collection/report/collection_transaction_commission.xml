@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <template id="collection_transaction_commission_report">
+        <t t-call="web.html_container">
+            <t t-call="web.basic_layout">
+                <div class="page">
+                    <style>
+                        table, thead, tbody, tfoot, tr, td, th {
+                        border: none;
+                        border-collapse: collapse;
+                        }
+
+                        .border {
+                        border: 2px solid black;
+                        }
+                    </style>
+                    <table class="table" style="text-align: center; width: 100%; border:none;">
+                        <thead class="border" style="background-color: #8dd0f0;">
+                            <tr class="border">
+                                <th class="border">Fecha</th>
+                                <th class="border">Nro Transaccion</th>
+                                <th class="border">Cliente</th>
+                                <th class="border">Servicio</th>
+                                <th class="border">Descripcion</th>
+                                <th class="border">Tasa de Comisión (%)</th>
+                                <th class="border">Monto de Comisión</th>
+                                <th class="border">Monto de Operación</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <t t-set="total_amount" t-value="0" />
+                            <t t-set="total_op_amount" t-value="0" />
+                            <tr>
+                                <td colspan="5"></td>
+                                <td style="background-color: #8dd0f0;">Saldo Anterior:</td>
+                                <td style="background-color: #8dd0f0;"><span t-field="docs[0].previous_month" t-options="{'widget': 'float', 'precision': 2}"/></td>
+                                <td></td>
+                            </tr>
+                            <t t-foreach="docs" t-as="o">
+                                <t t-set="total_amount" t-value="total_amount + o.commission_amount" />
+                                <t t-set="total_op_amount"
+                                    t-value="total_op_amount + o.operation_amount" />
+                                <tr class="border">
+                                    <td class="border">
+                                        <span t-field="o.date" />
+                                    </td>
+                                    <td class="border">
+                                        <span t-field="o.transaction_name" />
+                                    </td>
+                                    <td class="border">
+                                        <span t-field="o.customer.name" />
+                                    </td>
+                                    <td class="border">
+                                        <span t-field="o.transaction_service.name" />
+                                    </td>
+                                    <td class="border">
+                                        <span t-field="o.description" />
+                                    </td>
+                                    <td class="border" style="text-align: right;">
+                                        <span t-field="o.commission_rate"
+                                            t-options="{'widget': 'float', 'precision': 2}"/>
+                                    </td>
+                                    <td class="border" style="text-align: right;">
+                                        <span t-field="o.commission_amount"
+                                            t-options="{'widget': 'float', 'precision': 2}"/>
+                                    </td>
+                                    <td class="border" style="text-align: right;">
+                                        <span t-field="o.operation_amount"
+                                            t-options="{'widget': 'float', 'precision': 2}"/>
+                                    </td>
+                                </tr>
+                            </t>
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <td style="background-color: #adf58c;">Agente:</td>
+                                <td style="background-color: #adf58c;">
+                                    <span t-field="docs[0].agent.name" />
+                                </td>
+                                <td colspan="3"></td>
+                                <td style="background-color: #adf58c;">Total:</td>
+                                <td style="background-color: #adf58c; text-align: right;">
+                                    <span t-esc="total_amount + docs[0].previous_month"
+                                        t-options="{'widget': 'float', 'precision': 2}" />
+                                </td>
+                                <td></td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </t>
+        </t>
+    </template>
+
+</odoo>

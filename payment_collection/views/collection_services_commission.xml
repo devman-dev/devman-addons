@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="collection_services_commission_view_tree" model="ir.ui.view">
+        <field name="name">collection.services.commission.view.tree</field>
+        <field name="model">collection.services.commission</field>
+        <field name="arch" type="xml">
+            <tree string="Comisión de servicios de cobranza">
+                <field name="customer" />
+                <field name="services" />
+                <field name="commission" />
+                <field name="agent_services_commission" widget="many2many_tags" />
+            </tree>
+        </field>
+    </record>
+
+    <record id="collection_services_commission_view_form" model="ir.ui.view">
+        <field name="name">collection.services.commission.view.form</field>
+        <field name="model">collection.services.commission</field>
+        <field name="arch" type="xml">
+            <form string="Comisión de servicios de cobranza">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="customer" />
+                            <field name="services" />
+                        </group>
+                        <group>
+                            <field name="commission" />
+                        </group>
+                    </group>
+                    <field name="agent_services_commission">
+                        <tree editable="bottom">
+                            <field name="agent" width="50%"/>
+                            <field name="commission_rate"/>
+                        </tree>
+                    </field>
+                    <field name="name" invisible="1"/>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="collection_services_commission_view_search" model="ir.ui.view">
+        <field name="name">collection.services.commission.view.search</field>
+        <field name="model">collection.services.commission</field>
+        <field name="arch" type="xml">
+            <search string="">
+                <field name="customer" />
+                <field name="services" />
+                <field name="agent_services_commission" />
+                <group>
+                    <filter name="customer" string="Cliente" context="{'group_by': 'customer'}" />
+                    <filter name="services" string="Servicio" context="{'group_by': 'services'}" />
+                    <filter name="agent_services_commission" string="Comisión de servicios de agente" context="{'group_by': 'agent_services_commission'}" />
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="collection_services_commission_action" model="ir.actions.act_window">
+        <field name="name">Comision de servicios de cobranza</field>
+        <field name="res_model">collection.services.commission</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+</odoo>

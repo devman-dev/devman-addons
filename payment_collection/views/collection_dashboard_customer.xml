@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="collection_dashboard_customer_view_tree" model="ir.ui.view">
+        <field name="name">collection.dashboard.customer.view.tree</field>
+        <field name="model">collection.dashboard.customer</field>
+        <field name="arch" type="xml">
+            <tree string="Dashboard de Cobro de cliente" js_class="button_update_dashboard">
+                 <header>
+                    <button string="Actualizar Saldos Disponibles" type="object" name="update_available_balance"
+                            class="oe_highlight"/>
+                 </header>
+                <field name="customer" />
+                <field name="customer_real_balance" sum="Total Saldo Real"/>
+                <field name="customer_available_balance" sum="Total Saldo Disponible"/>
+                <field name="collection_balance" sum="Total Saldo de pagos" />
+                <field name="commission_balance" sum="Total Saldo de comisión"/>
+                <field name="last_operation_date" />
+                <field name="commission_app_rate" />
+                <field name="commission_app_amount"  sum="Monto Total de la App"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="collection_dashboard_customer_view_search" model="ir.ui.view">
+        <field name="name">collection.dashboard.customer.view.search</field>
+        <field name="model">collection.dashboard.customer</field>
+        <field name="arch" type="xml">
+            <search string="">
+                <field name="customer"/>
+                <group>
+                    <filter name="last_operation_date" string="Fecha de ultima operación" context="{'group_by': 'last_operation_date'}" />
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="collection_dashboard_customer_action" model="ir.actions.act_window">
+        <field name="name">Dashboard</field>
+        <field name="res_model">collection.dashboard.customer</field>
+        <field name="view_mode">tree</field>
+        <field name="view_id" ref="collection_dashboard_customer_view_tree"></field>
+    </record>
+</odoo>

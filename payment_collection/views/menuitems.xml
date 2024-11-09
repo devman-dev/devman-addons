@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <menuitem
+        id="collection_transaction_menu"
+        name="PagoFlex"
+        action="collection_transaction_action"
+        web_icon="payment_collection,static/description/icon.png"
+    />
+    <menuitem
+        id="collection_transaction_submenu"
+        name="Recaudación de Pagos"
+        action="collection_transaction_action"
+        parent="collection_transaction_menu"
+        sequence="1"
+    />
+
+    <menuitem
+        id="collection_transaction_commission_menu"
+        name="Comisión por agente"
+        action="collection_transaction_commission_action"
+        parent="collection_transaction_menu"
+        sequence="2"
+    />
+    <menuitem
+        id="collection_dashboard_customer_menu"
+        name="Dashboard"
+        action="collection_dashboard_customer_action"
+        parent="collection_transaction_menu"
+        sequence="2"
+    />
+
+    <menuitem
+        id="collection_configuration_menu"
+        name="Configuración"
+        parent="collection_transaction_menu"
+        sequence="4"
+    />
+
+    <menuitem
+        id="collection_services_commission_menu"
+        name="Comisión-Cliente-Servicio-Agente"
+        action="collection_services_commission_action"
+        parent="collection_configuration_menu"
+        sequence="2"
+    />
+
+    <menuitem
+        id="commission_app_menu"
+        name="Comisión App"
+        action="commission_app_action"
+        parent="collection_configuration_menu"
+        sequence="1"/>
+</odoo>

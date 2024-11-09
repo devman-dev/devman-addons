@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="agent_commission_service_view_tree" model="ir.ui.view">
+        <field name="name">agent.commission.service.view.tree</field>
+        <field name="model">agent.commission.service</field>
+        <field name="arch" type="xml">
+            <tree string="Servicio de comision de Agente">
+                <field name="agent" />
+                <field name="commission_rate"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="agent_commission_service_view_form" model="ir.ui.view">
+        <field name="name">agent.commission.service.view.form</field>
+        <field name="model">agent.commission.service</field>
+        <field name="arch" type="xml">
+            <form string="Servicio de comision de Agente">
+                <sheet>
+                    <group>
+                        <field name="agent" />
+                        <field name="commission_rate"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="agent_commission_service_view_search" model="ir.ui.view">
+        <field name="name">agent.commission.service.view.search</field>
+        <field name="model">agent.commission.service</field>
+        <field name="arch" type="xml">
+            <search string="">
+                <field name="agent" />
+                <group>
+                    <filter name="agent" string="Agente" context="{'group_by': 'agent'}" />
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="agent_commission_service_action" model="ir.actions.act_window">
+        <field name="name">Servicio de comision de Agente</field>
+        <field name="res_model">agent.commission.service</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+</odoo>

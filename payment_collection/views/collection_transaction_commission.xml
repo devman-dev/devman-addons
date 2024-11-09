@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+
+    <record id="collection_transaction_commission_view_tree" model="ir.ui.view">
+        <field name="name">collection.transaction.commission.view.tree</field>
+        <field name="model">collection.transaction.commission</field>
+        <field name="arch" type="xml">
+            <tree string="Comisión por transacción de cobro" js_class="button_print_transaction_commission">
+                <header>
+                    <button string="Pagar" type="object" name="open_payment_wiz"
+                        class="btn btn-primary" />
+                    <button string="Imprimir Reporte" type="object" name="open_report_agent_wiz"
+                        class="btn btn-primary" />
+                </header>
+                <field name="date" />
+                <field name="transaction_name" />
+                <field name="customer" />
+                <field name="transaction_service" />
+                <field name="transaction_operation" />
+                <field name="agent" />
+                <field name="commission_rate" />
+                <field name="operation_amount" sum="Total monto de operacion"/>
+                <field name="commission_amount" sum="Total Comisión"/>
+                <field name="payment_amount" sum="Monto Total de Pago"/>
+                <field name="payment_rest" sum="Monto Total de Resta"/>
+                <field name="payment_state" widget="badge"
+                    decoration-success="payment_state == 'pay'"
+                    decoration-warning="payment_state == 'partial_payment'"
+                    decoration-danger="payment_state == 'debt'" />
+                <field name="payment_date" />
+                <field name="description"/>
+                <field name="duplicate" invisible="1" optional="hide"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="collection_transaction_commission_view_form" model="ir.ui.view">
+        <field name="name">collection.transaction.commission.view.form</field>
+        <field name="model">collection.transaction.commission</field>
+        <field name="arch" type="xml">
+            <form string="Comisión por transacción de cobro">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="check_view_fields"/>
+                            <field name="date" />
+                            <field name="transaction_name" invisible="check_view_fields == False"/>
+                            <field name="customer" invisible="check_view_fields == False"/>
+                            <field name="transaction_service" invisible="check_view_fields == False"/>
+                            <field name="transaction_operation" invisible="check_view_fields == False"/>
+                            <field name="agent"/>
+                            <field name="commission_rate" invisible="check_view_fields == False"/>
+                        </group>
+                        <group>
+                            <field name="operation_amount" invisible="check_view_fields == False"/>
+                            <field name="commission_amount"/>
+                            <field name="payment_state" invisible="check_view_fields == False"/>
+                            <field name="payment_amount" invisible="check_view_fields == False"/>
+                            <field name="payment_rest" invisible="check_view_fields == False"/>
+                        </group>
+                    </group>
+                    <group>
+                        <field name="description"/>
+                        <field name="duplicate" invisible="1"/>
+                        <field name="previous_month" invisible="1"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="collection_transaction_commission_view_search" model="ir.ui.view">
+        <field name="name">collection.transaction.commission.view.search</field>
+        <field name="model">collection.transaction.commission</field>
+        <field name="arch" type="xml">
+            <search string="">
+                <field name="transaction_name" />
+                <field name="customer" />
+                <field name="transaction_service" />
+                <field name="transaction_operation" />
+                <field name="agent" />
+                <group>
+                    <filter name="customer" string="Cliente" context="{'group_by': 'customer'}" />
+                    <filter name="transaction_service" string="Servicio"
+                        context="{'group_by': 'transaction_service'}" />
+                    <filter name="transaction_operation" string="Operación"
+                        context="{'group_by': 'transaction_operation'}" />
+                    <filter name="agent" string="Agente" context="{'group_by': 'agent'}" />
+                    <filter name="payment_state" string="Estado"
+                        context="{'group_by': 'payment_state'}" />
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="collection_transaction_commission_action" model="ir.actions.act_window">
+        <field name="name">Comisión por transacción de cobro</field>
+        <field name="res_model">collection.transaction.commission</field>
+        <field name="view_mode">tree,form</field>
+        <field name="view_id" ref="payment_collection.collection_transaction_commission_view_tree"/>
+    </record>
+
+</odoo>
