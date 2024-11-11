@@ -17,7 +17,9 @@
     <record id="groups_payment_collection_user" model="res.groups">
         <field name="name">Cliente</field>
         <field name="category_id" ref="payment_collection.payment_collection_categ" />
-        <field name="implied_ids" eval="[(4, ref('base.group_user')),(4, ref('groups_payment_collection_admin'))]"/>
+
+        <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+
         <field name="users" eval="[(4, ref('base.user_root')), (4, ref('base.user_admin'))]" />
     </record>
     
@@ -25,7 +27,8 @@
     <record id="groups_payment_collection_comi" model="res.groups">
         <field name="name">Comisionista</field>
         <field name="category_id" ref="payment_collection.payment_collection_categ" />
-        <field name="implied_ids" eval="[(4, ref('base.group_user')),(4, ref('groups_payment_collection_admin')),(4, ref('groups_payment_collection_user'))]"/>
+
+        <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
     </record>
     
 
