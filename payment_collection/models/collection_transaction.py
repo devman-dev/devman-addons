@@ -23,7 +23,9 @@ class CollectionTransaction(models.Model):
     origin_account_cuit = fields.Char(string='CUIT de cuenta de origen', tracking=True, required=True, default=False)
     origin_account_cvu = fields.Char(string='CVU de cuenta de origen', tracking=True,)
     origin_account_cbu = fields.Char(string='CBU de cuenta de origen', tracking=True,)
+
     related_customer = fields.Char(string='Cliente Relacionado', tracking=True)
+
     amount = fields.Float(string='Monto', tracking=True, required=True)
     date_available_amount = fields.Date('Fecha del monto disponible')
     real_balance = fields.Float(string='Saldo Real')
@@ -76,7 +78,6 @@ class CollectionTransaction(models.Model):
                             'count': 1,
                             }
             self.env['collection.transaction'].sudo().create(dict_transac)
-
 
         res = super(CollectionTransaction, self).create(vals)
 
