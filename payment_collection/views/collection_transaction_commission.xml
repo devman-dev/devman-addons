@@ -10,8 +10,6 @@
                 <header>
                     <button string="Pagar" type="object" name="open_payment_wiz"
                         class="btn btn-primary" />
-                    <button string="Imprimir Reporte" type="object" name="open_report_agent_wiz"
-                        class="btn btn-primary" />
                 </header>
                 <field name="date" />
                 <field name="transaction_name" />
@@ -66,6 +64,12 @@
                         <field name="previous_month" invisible="1"/>
                     </group>
                 </sheet>
+                 <!-- Chatter -->
+                <div class="oe_chatter">
+                    <field name="message_follower_ids" groups="base.group_user"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>
             </form>
         </field>
     </record>

@@ -1,36 +1,37 @@
-from odoo import fields, models, api
+from odoo import fields, models, api, _
 from datetime import datetime, timedelta
 import datetime as dt
 from dateutil.relativedelta import relativedelta
-
+from markupsafe import Markup
 from odoo.exceptions import ValidationError
 
 class CollectionTransaction(models.Model):
     _name = 'collection.transaction'
+    _inherit=['mail.thread', 'mail.activity.mixin']
     _rec_name = 'transaction_name'
     _order = 'id desc'
 
-    customer = fields.Many2one('res.partner', string='Cliente', required=True)
-    transaction_name = fields.Char(string='N° Transacción')
-    service = fields.Many2one('product.template', string='Servicio', required=True, domain=[('collection_type', '=', 'service')])
+    customer = fields.Many2one('res.partner', string='Cliente', required=True, tracking=True,)
+    transaction_name = fields.Char(string='N° Transacción', tracking=True,)
+    service = fields.Many2one('product.template', string='Servicio', required=True, tracking=True, domain=[('collection_type', '=', 'service')])
     commission = fields.Float(string='Comisión', required=True,)
     operation = fields.Many2one(
-        'product.template', relation='operation', string='Operación', required=True, domain=[('collection_type', '=', 'operation')]
+        'product.template', relation='operation', string='Operación', required=True, tracking=True, domain=[('collection_type', '=', 'operation')]
     )
-    date = fields.Date(string='Fecha', default=datetime.now())
-    description = fields.Text(string='Descripción')
-    origin_account_cuit = fields.Char(string='CUIT de cuenta de origen', required=True, default=False)
-    origin_account_cvu = fields.Char(string='CVU de cuenta de origen')
-    origin_account_cbu = fields.Char(string='CBU de cuenta de origen')
-    related_customer = fields.Char(string='Cliente Relacionado', required=True)
-    amount = fields.Float(string='Monto', required=True)
+    date = fields.Date(string='Fecha', tracking=True, default=datetime.now())
+    description = fields.Text(string='Descripción', tracking=True,)
+    origin_account_cuit = fields.Char(string='CUIT de cuenta de origen', tracking=True, required=True, default=False)
+    origin_account_cvu = fields.Char(string='CVU de cuenta de origen', tracking=True,)
+    origin_account_cbu = fields.Char(string='CBU de cuenta de origen', tracking=True,)
+    related_customer = fields.Char(string='Cliente Relacionado', tracking=True, required=True)
+    amount = fields.Float(string='Monto', tracking=True, required=True)
     date_available_amount = fields.Date('Fecha del monto disponible')
     real_balance = fields.Float(string='Saldo Real')
-    available_balance = fields.Float(string='Saldo Disponible')
-    cbu_destination_account = fields.Integer(string='CBU de cuenta de destino', required=True, default=False)
-    name_destination_account = fields.Char(string='Nombre de cuenta de destino')
-    commission_app_rate = fields.Float(string='Comisión de la App')
-    commission_app_amount = fields.Float(string='Monto de la App')
+    available_balance = fields.Float(string='Saldo Disponible', tracking=True,)
+    cbu_destination_account = fields.Char(string='CBU de cuenta de destino', tracking=True, required=True, default=False)
+    name_destination_account = fields.Char(string='Nombre de cuenta de destino', tracking=True,)
+    commission_app_rate = fields.Float(string='Comisión de la App', tracking=True,)
+    commission_app_amount = fields.Float(string='Monto de la App', tracking=True,)
     cbu_check = fields.Char('Check cbu')
     previous_month = fields.Float('Mes Anterior', compute='compute_previous_month')
     count = fields.Integer('', default=0)
@@ -48,7 +49,12 @@ class CollectionTransaction(models.Model):
     @api.onchange('service')
     def get_commission_service(self):
         if self.service:
-            self.commission = self.service.commission_default
+            service = self.env['collection.services.commission'].search(
+                [('services', '=', self.service.id), ('customer', '=', self.customer.id)], limit=1, order='id desc')
+            if service:
+                self.commission = service.commission
+            else:
+                self.commission = 0
 
     @api.model
     def create(self, vals):
@@ -72,8 +78,12 @@ class CollectionTransaction(models.Model):
             duplicate_negative = self.env['collection.transaction'].sudo().create(dict_transac)
 
 
-
         res = super(CollectionTransaction, self).create(vals)
+
+        message = ("Se ha creado la siguiente transaccion: %s.") % (str(vals['transaction_name']))
+
+        res.message_post(body=message)
+
         return res
 
     def _compute_account_move(self):
@@ -86,7 +96,7 @@ class CollectionTransaction(models.Model):
         service = self.env['collection.services.commission'].search([('services', '=', self.service.id),('customer','=', self.customer.id)], limit=1, order='id desc')
         for agent_service in service.agent_services_commission:
             commission_amount = (agent_service.commission_rate * self.amount) / 100
-            if commission_amount > 0:
+            if commission_amount > 0 and self.count == 0:
                 self.env['collection.transaction.commission'].sudo().create(
                     {
                         'date': self.date,
@@ -222,13 +232,16 @@ class CollectionTransaction(models.Model):
         for rec in self:
             if self.count != 1:
                 if rec.origin_account_cuit:
-                    if len(rec.origin_account_cuit) > 13 or len(rec.origin_account_cuit) < 13:
+                    if rec.origin_account_cuit.isdigit():
+                        pass
+                    else:
+                        rec.origin_account_cuit = rec.origin_account_cuit.replace('-','').replace(' ','')
+
+                    if len(rec.origin_account_cuit) > 11 or len(rec.origin_account_cuit) < 11:
                         raise ValidationError(F'La longitud del campo CUIT es incorrecta.{len(rec.origin_account_cuit)}')
 
-                    if rec.origin_account_cuit[2:3] != '-' or rec.origin_account_cuit[11:12] != '-':
-                        raise ValidationError('El formato del campo CUIL debe ser el siguiente: 00-00000000-0.')
 
-    @api.constrains('origin_account_cbu')
+    @api.constrains('origin_account_cbu', 'origin_account_cvu', 'cbu_destination_account')
     def cant_numeros_cbu(self):
         for rec in self:
             if self.count != 1:
@@ -239,10 +252,22 @@ class CollectionTransaction(models.Model):
                         pass
                     else:
                         raise ValidationError('El campo CBU debe contener solo números.')
-                elif self.origin_account_cvu:
+
+
+
+                if self.origin_account_cvu:
                     if len(self.origin_account_cvu) != 22:
                         raise ValidationError(f'La longitud del campo CVU es incorrecta.{str(len(self.origin_account_cvu))}')
                     if self.origin_account_cvu.isdigit():
                         pass
                     else:
                         raise ValidationError('El campo CVU debe contener solo números.')
+
+                if self.cbu_destination_account:
+                    if len(self.cbu_destination_account) != 22:
+                        raise ValidationError(
+                            f'La longitud del campo CBU de cuenta de destino es incorrecta.{str(len(self.cbu_destination_account))}')
+                    if self.cbu_destination_account.isdigit():
+                        pass
+                    else:
+                        raise ValidationError('El campo CBU de cuenta de destino debe contener solo números.')
