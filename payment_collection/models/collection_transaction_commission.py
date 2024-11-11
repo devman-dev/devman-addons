@@ -6,27 +6,38 @@ import datetime
 
 class CollectionTransactionCommission(models.Model):
     _name = 'collection.transaction.commission'
+    _inherit = ['mail.thread', 'mail.activity.mixin']
     _rec_name = 'transaction_name'
     _order = "transaction_name, id"
 
-    date = fields.Date(string='Fecha', default=datetime.datetime.now())
-    transaction_name = fields.Char(string='N° Transaccion')
-    customer = fields.Many2one('res.partner', string='Cliente')
-    transaction_service = fields.Many2one('product.template', string='Servicio de Transacción')
-    transaction_operation = fields.Many2one('product.template', relation='operation', string='Operación de Transacción')
-    agent = fields.Many2one('res.partner', string='Agente')
-    commission_rate = fields.Float(string='Tasa de comisión')
-    operation_amount = fields.Float(string='Monto de Operación')
-    commission_amount = fields.Float(string='Monto de Comisión')
-    payment_state = fields.Selection([('debt', 'Deuda'), ('pay', 'Pagado'), ('partial_payment', 'Pago Parcial')], default='debt', string='Estado')
-    payment_amount = fields.Float(string='Pago')
-    payment_rest = fields.Float(string='Resto')
-    payment_date = fields.Datetime(string='Fecha de Pago')
+    date = fields.Date(string='Fecha', tracking=True, default=datetime.datetime.now())
+    transaction_name = fields.Char(string='N° Transaccion', tracking=True,)
+    customer = fields.Many2one('res.partner', string='Cliente', tracking=True,)
+    transaction_service = fields.Many2one('product.template', string='Servicio de Transacción', tracking=True,)
+    transaction_operation = fields.Many2one('product.template', relation='operation', string='Operación de Transacción', tracking=True,)
+    agent = fields.Many2one('res.partner', string='Agente', tracking=True,)
+    commission_rate = fields.Float(string='Tasa de comisión', tracking=True,)
+    operation_amount = fields.Float(string='Monto de Operación', tracking=True,)
+    commission_amount = fields.Float(string='Monto de Comisión', tracking=True,)
+    payment_state = fields.Selection([('debt', 'Deuda'), ('pay', 'Pagado'), ('partial_payment', 'Pago Parcial')], default='debt', string='Estado', tracking=True,)
+    payment_amount = fields.Float(string='Pago', tracking=True,)
+    payment_rest = fields.Float(string='Resto', tracking=True,)
+    payment_date = fields.Datetime(string='Fecha de Pago', tracking=True,)
     check_view_fields = fields.Boolean('Crear linea en positivo')
-    description = fields.Text('Descripción')
+    description = fields.Text('Descripción', tracking=True,)
     duplicate = fields.Boolean('Duplicado')
     previous_month = fields.Float('Mes Anterior')
 
+    @api.model
+    def create(self, vals):
+
+        res = super(CollectionTransactionCommission, self).create(vals)
+
+        message = ("Se ha creado la siguiente transaccion: %s.") % (str(vals['transaction_name']))
+
+        res.message_post(body=message)
+
+        return res
 
     def unlink(self):
         # Custom code before deletion

@@ -6,7 +6,112 @@
             <field name="code">collection.transaction</field>
             <field name="prefix">TC</field>
             <field name="padding">5</field>
-            <field eval="False" name="company_id"/>
+            <field eval="False" name="company_id" />
         </record>
     </data>
+
+    <!-- Default Records -->
+    <!-- Services -->
+    <data>
+        <record model="product.template" id="services_cvu">
+            <field name="name">CVU</field>
+            <field name="commission_default">0</field>
+            <field name="collection_type">service</field>
+        </record>
+    </data>
+    <data>
+        <record model="product.template" id="services_cbu">
+            <field name="name">CBU</field>
+            <field name="commission_default">0</field>
+            <field name="collection_type">service</field>
+        </record>
+    </data>
+    <data>
+        <record model="product.template" id="services_alias">
+            <field name="name">Alias</field>
+            <field name="commission_default">0</field>
+            <field name="collection_type">service</field>
+        </record>
+    </data>
+    <data>
+        <record model="product.template" id="services_qr">
+            <field name="name">QR</field>
+            <field name="commission_default">0</field>
+            <field name="collection_type">service</field>
+        </record>
+    </data>
+    <data>
+        <record model="product.template" id="services_postner">
+            <field name="name">POSNET</field>
+            <field name="commission_default">0</field>
+            <field name="collection_type">service</field>
+        </record>
+    </data>
+    <data>
+        <record model="product.template" id="services_cta">
+            <field name="name">Cta</field>
+            <field name="commission_default">0</field>
+            <field name="collection_type">service</field>
+        </record>
+    </data>
+    <data>
+        <record model="product.template" id="services_usd">
+            <field name="name">U$D</field>
+            <field name="commission_default">0</field>
+            <field name="collection_type">service</field>
+        </record>
+    </data>
+
+    <!-- Operation -->
+
+    <data>
+        <record model="product.template" id="operation_accreditation">
+            <field name="name">Acreditación</field>
+            <field name="commission_default">0</field>
+            <field name="collection_type">operation</field>
+        </record>
+    </data>
+    <data>
+        <record model="product.template" id="operation_transfer">
+            <field name="name">Transferencia</field>
+            <field name="commission_default">0</field>
+            <field name="collection_type">operation</field>
+        </record>
+    </data>
+    <data>
+        <record model="product.template" id="operation_extraction">
+            <field name="name">Extracción</field>
+            <field name="commission_default">0</field>
+            <field name="collection_type">operation</field>
+        </record>
+    </data>
+    <data>
+        <record model="product.template" id="operation_change">
+            <field name="name">Cambio</field>
+            <field name="commission_default">0</field>
+            <field name="collection_type">operation</field>
+        </record>
+    </data>
+    <data>
+        <record model="product.template" id="operation_bills">
+            <field name="name">Gastos</field>
+            <field name="commission_default">0</field>
+            <field name="collection_type">operation</field>
+        </record>
+    </data>
+    <data>
+        <record model="product.template" id="operation_change">
+            <field name="name">Cambio</field>
+            <field name="commission_default">0</field>
+            <field name="collection_type">operation</field>
+        </record>
+    </data>
+    <data>
+        <record model="product.template" id="operation_debt">
+            <field name="name">Debito</field>
+            <field name="commission_default">0</field>
+            <field name="collection_type">operation</field>
+        </record>
+    </data>
+
 </odoo>

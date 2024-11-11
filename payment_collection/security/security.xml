@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="0">
+    <record id="payment_collection.payment_collection_categ" model="ir.module.category">
+        <field name="name">PagoFlex</field>
+        <field name="description">Nivel de acceso para el módulo PagoFlex</field>
+        <field name="sequence">4</field>
+    </record>
+
+    <!-- Grupo Administrador -->
+    <record id="groups_payment_collection_admin" model="res.groups">
+        <field name="name">Administrador</field>
+        <field name="category_id" ref="payment_collection.payment_collection_categ" />
+        <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+    </record>
+ 
+    <!-- Grupo Cliente -->
+    <record id="groups_payment_collection_user" model="res.groups">
+        <field name="name">Cliente</field>
+        <field name="category_id" ref="payment_collection.payment_collection_categ" />
+        <field name="implied_ids" eval="[(4, ref('base.group_user')),(4, ref('groups_payment_collection_admin'))]"/>
+        <field name="users" eval="[(4, ref('base.user_root')), (4, ref('base.user_admin'))]" />
+    </record>
+    
+    <!-- Grupo Comisionista -->
+    <record id="groups_payment_collection_comi" model="res.groups">
+        <field name="name">Comisionista</field>
+        <field name="category_id" ref="payment_collection.payment_collection_categ" />
+        <field name="implied_ids" eval="[(4, ref('base.group_user')),(4, ref('groups_payment_collection_admin')),(4, ref('groups_payment_collection_user'))]"/>
+    </record>
+    
+
+    <!-- Reglas de acceso y permisos por grupo -->
+    <record id="ir_rule_admin_collection_transaction" model="ir.rule">
+        <field name="model_id" ref="payment_collection.model_collection_transaction" />
+        <field name="domain_force">[(1, '=', 1)]</field>
+        <field name="name">Filtro para Administrador</field>
+        <field eval="1" name="perm_unlink" />
+        <field eval="1" name="perm_write" />
+        <field eval="1" name="perm_read" />
+        <field eval="1" name="perm_create" />
+        <field name="groups" eval="[(4, ref('payment_collection.groups_payment_collection_admin'))]" />
+    </record>
+
+    <record id="ir_rule_user_collection_transaction" model="ir.rule">
+        <field name="model_id" ref="payment_collection.model_collection_transaction" />
+        <field name="domain_force">[('customer', '=', user.partner_id.id)]</field>
+        <field name="name">Filtro para que solo pueda ver los documentos donde está asociado</field>
+        <field eval="0" name="perm_unlink" />
+        <field eval="0" name="perm_write" />
+        <field eval="1" name="perm_read" />
+        <field eval="0" name="perm_create" />
+        <field name="groups" eval="[(4, ref('payment_collection.groups_payment_collection_user'))]" />
+    </record>
+
+    <record id="ir_rule_user_collection_dashboard" model="ir.rule">
+        <field name="model_id" ref="payment_collection.model_collection_dashboard_customer" />
+        <field name="domain_force">[('customer', '=', user.partner_id.id)]</field>
+        <field name="name">Filtro para que solo pueda ver los documentos donde está asociado</field>
+        <field eval="0" name="perm_unlink" />
+        <field eval="0" name="perm_write" />
+        <field eval="1" name="perm_read" />
+        <field eval="0" name="perm_create" />
+        <field name="groups" eval="[(4, ref('payment_collection.groups_payment_collection_user'))]" />
+    </record>
+
+    <record id="ir_rule_comi_collection_transaction_commission" model="ir.rule">
+        <field name="model_id" ref="payment_collection.model_collection_transaction_commission" />
+        <field name="domain_force">[('agent', '=', user.partner_id.id)]</field>
+        <field name="name">Filtro para que solo pueda ver los documentos donde está asociado</field>
+        <field eval="0" name="perm_unlink" />
+        <field eval="0" name="perm_write" />
+        <field eval="1" name="perm_read" />
+        <field eval="0" name="perm_create" />
+        <field name="groups" eval="[(4, ref('payment_collection.groups_payment_collection_comi'))]" />
+    </record>
+</odoo>

@@ -6,10 +6,10 @@
         <field name="model">collection.transaction</field>
         <field name="arch" type="xml">
             <tree string="Transacción de cobro" js_class="button_print_transaction">
-                <header>
-                    <button string="Imprimir Reporte" type="object" name="open_commi_trans_wiz"
-                        class="btn btn-primary" />
-                </header>
+<!--                <header>-->
+<!--                    <button string="Imprimir Reporte" type="object" name="open_commi_trans_wiz"-->
+<!--                        class="btn btn-primary" />-->
+<!--                </header>-->
 
                 <field name="date"/>
                 <field name="customer" />
@@ -67,6 +67,12 @@
                         <field name="count" invisible="1"/>
                     </group>
                 </sheet>
+                <!-- Chatter -->
+                <div class="oe_chatter">
+                    <field name="message_follower_ids" groups="base.group_user"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>
             </form>
         </field>
     </record>

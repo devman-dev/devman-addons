@@ -3,7 +3,7 @@
 
     <template id="collection_transaction_report">
         <t t-call="web.html_container">
-            <t t-call="web.basic_layout">
+            <t t-call="web.external_layout">
                 <div class="page">
                     <style>
                         table, thead, tbody, tfoot, tr, td, th {
@@ -15,7 +15,8 @@
                         border: 2px solid black;
                         }
                     </style>
-                    <table class="table" style="text-align: center; width: 100%; border:none;">
+                    <table class="table"
+                        style="text-align: center; width: 100%; border:none; font-size: 13px;">
                         <thead class="border" style="background-color: #8dd0f0;">
                             <tr class="border">
                                 <th class="border">Fecha</th>
@@ -23,11 +24,11 @@
                                 <th class="border">Cliente</th>
                                 <th class="border">Servicio</th>
                                 <th class="border">Operación</th>
-                                <th class="border">CUIT cuenta origen</th>
+                                <th class="border">CUIT</th>
                                 <th class="border">Descripción</th>
-                                <th class="border">Importe Operación</th>
+                                <th class="border">Imp. Operación</th>
                                 <th class="border">% de Comisión</th>
-                                <th class="border">Importe Comisión</th>
+                                <th class="border">Imp. Comisión</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -36,8 +37,12 @@
                                 <td style="border: none; background-color: #8dd0f0;" colspan="2">
                                     <span>Saldo Anterior:</span>
                                 </td>
-                                <td style="border: none; background-color: #8dd0f0;">
-                                    <span t-field="docs[0].previous_month" t-options="{'widget': 'float', 'precision': 2}"/>
+                                <td
+                                    style="border: none; background-color: #8dd0f0; text-align: right;">
+                                    <b>
+                                        <span t-field="docs[0].previous_month"
+                                            t-options="{'widget': 'float', 'precision': 2}" />
+                                    </b>
                                 </td>
                                 <td colspan="1" style="border: none;"></td>
                             </tr>
@@ -67,13 +72,28 @@
                                         <span t-field="o.description" />
                                     </td>
                                     <td class="border" style="text-align: right;">
-                                        <span t-field="o.amount" t-options="{'widget': 'float', 'precision': 2}" />
+                                        <b>
+                                            <span t-field="o.amount"
+                                                t-options="{'widget': 'float', 'precision': 2}" />
+                                        </b>
                                     </td>
                                     <td class="border" style="text-align: right;">
-                                        <span t-field="o.commission" t-options="{'widget': 'float', 'precision': 2}" />
+                                        <t t-if="o.amount > 0">
+                                            <span t-field="o.commission"
+                                                t-options="{'widget': 'float', 'precision': 2}" />
+                                        </t>
+                                        <t t-else="">
+                                            <span>0</span>
+                                        </t>
                                     </td>
                                     <td class="border" style="text-align: right;">
-                                        <span t-esc="(o.commission * o.amount) / 100" t-options="{'widget': 'float', 'precision': 2}" />
+                                        <t t-if="o.amount> 0">
+                                            <span t-esc="(o.commission * o.amount) / 100"
+                                                t-options="{'widget': 'float', 'precision': 2}" />
+                                        </t>
+                                        <t t-else="">
+                                            <span>0</span>
+                                        </t>
                                     </td>
 
                                 </tr>
@@ -85,14 +105,18 @@
                                 <td style="border: none; background-color: #adf58c;" colspan="2">
                                     <span>Saldo Final:</span>
                                 </td>
-                                <td style="border: none; background-color: #adf58c; text-align: right;">
-                                    <span t-esc="total_amount + docs[0].previous_month" t-options="{'widget': 'float', 'precision': 2}" />
+                                <td
+                                    style="border: none; background-color: #adf58c; text-align: right;">
+                                    <b>
+                                        <span t-esc="total_amount + docs[0].previous_month"
+                                            t-options="{'widget': 'float', 'precision': 2}" />
+                                    </b>
                                 </td>
                                 <td colspan="1" style="border: none;"></td>
                             </tr>
                         </tfoot>
                     </table>
-
+                    <p style="margin-top: 50px; color: #757575;">El saldo disponible correspondientes a los movimientos  anteriores a las 48hs es:  <span t-field="docs[0].available_balance"/></p>
                 </div>
             </t>
         </t>

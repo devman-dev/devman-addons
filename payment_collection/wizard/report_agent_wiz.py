@@ -1,13 +1,14 @@
 from odoo import fields, models
-from datetime import datetime
+from datetime import datetime, timedelta
+from dateutil.relativedelta import relativedelta
 from odoo.exceptions import ValidationError
 
 class ReportAgentWiz(models.TransientModel):
     _name = 'report.agent.wiz'
 
     previous_balance = fields.Float('Saldo anterior',)
-    start_date = fields.Date('Fecha de inicio', required=True)
-    end_date = fields.Date('Fecha Fin', required=True)
+    start_date = fields.Date('Fecha de inicio', required=True, default=lambda self: fields.Date.today() - relativedelta(months=1))
+    end_date = fields.Date('Fecha Fin', required=True, default=fields.Date.today)
     agent = fields.Many2one('res.partner', string='Agente', required=True)
     total_balance = fields.Float('Saldo Total')
 
