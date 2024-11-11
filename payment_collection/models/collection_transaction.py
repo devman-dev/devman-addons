@@ -23,12 +23,12 @@ class CollectionTransaction(models.Model):
     origin_account_cuit = fields.Char(string='CUIT de cuenta de origen', tracking=True, required=True, default=False)
     origin_account_cvu = fields.Char(string='CVU de cuenta de origen', tracking=True,)
     origin_account_cbu = fields.Char(string='CBU de cuenta de origen', tracking=True,)
-    related_customer = fields.Char(string='Cliente Relacionado', tracking=True, required=True)
+    related_customer = fields.Char(string='Cliente Relacionado', tracking=True)
     amount = fields.Float(string='Monto', tracking=True, required=True)
     date_available_amount = fields.Date('Fecha del monto disponible')
     real_balance = fields.Float(string='Saldo Real')
     available_balance = fields.Float(string='Saldo Disponible', tracking=True,)
-    cbu_destination_account = fields.Char(string='CBU de cuenta de destino', tracking=True, required=True, default=False)
+    cbu_destination_account = fields.Char(string='CBU de cuenta de destino', tracking=True, default=False)
     name_destination_account = fields.Char(string='Nombre de cuenta de destino', tracking=True,)
     commission_app_rate = fields.Float(string='Comisión de la App', tracking=True,)
     commission_app_amount = fields.Float(string='Monto de la App', tracking=True,)
@@ -75,7 +75,7 @@ class CollectionTransaction(models.Model):
                             'cbu_destination_account': 0,
                             'count': 1,
                             }
-            duplicate_negative = self.env['collection.transaction'].sudo().create(dict_transac)
+            self.env['collection.transaction'].sudo().create(dict_transac)
 
 
         res = super(CollectionTransaction, self).create(vals)
@@ -241,33 +241,32 @@ class CollectionTransaction(models.Model):
                         raise ValidationError(F'La longitud del campo CUIT es incorrecta.{len(rec.origin_account_cuit)}')
 
 
-    @api.constrains('origin_account_cbu', 'origin_account_cvu', 'cbu_destination_account')
-    def cant_numeros_cbu(self):
-        for rec in self:
-            if self.count != 1:
-                if self.origin_account_cbu:
-                    if len(self.origin_account_cbu) != 22:
-                        raise ValidationError(f'La longitud del campo CBU es incorrecta.{str(len(self.origin_account_cbu))}')
-                    if self.origin_account_cbu.isdigit():
-                        pass
-                    else:
-                        raise ValidationError('El campo CBU debe contener solo números.')
+    # @api.constrains('origin_account_cbu', 'origin_account_cvu', 'cbu_destination_account')
+    # def cant_numeros_cbu(self):
+    #     if self.count != 1:
+    #         if self.origin_account_cbu:
+    #             if len(self.origin_account_cbu) != 22:
+    #                 raise ValidationError(f'La longitud del campo CBU es incorrecta.{str(len(self.origin_account_cbu))}')
+    #             if self.origin_account_cbu.isdigit():
+    #                 pass
+    #             else:
+    #                 raise ValidationError('El campo CBU debe contener solo números.')
 
 
 
-                if self.origin_account_cvu:
-                    if len(self.origin_account_cvu) != 22:
-                        raise ValidationError(f'La longitud del campo CVU es incorrecta.{str(len(self.origin_account_cvu))}')
-                    if self.origin_account_cvu.isdigit():
-                        pass
-                    else:
-                        raise ValidationError('El campo CVU debe contener solo números.')
+    #         if self.origin_account_cvu:
+    #             if len(self.origin_account_cvu) != 22:
+    #                 raise ValidationError(f'La longitud del campo CVU es incorrecta.{str(len(self.origin_account_cvu))}')
+    #             if self.origin_account_cvu.isdigit():
+    #                 pass
+    #             else:
+    #                 raise ValidationError('El campo CVU debe contener solo números.')
 
-                if self.cbu_destination_account:
-                    if len(self.cbu_destination_account) != 22:
-                        raise ValidationError(
-                            f'La longitud del campo CBU de cuenta de destino es incorrecta.{str(len(self.cbu_destination_account))}')
-                    if self.cbu_destination_account.isdigit():
-                        pass
-                    else:
-                        raise ValidationError('El campo CBU de cuenta de destino debe contener solo números.')
+    #         if self.cbu_destination_account:
+    #             if len(self.cbu_destination_account) != 22:
+    #                 raise ValidationError(
+    #                     f'La longitud del campo CBU de cuenta de destino es incorrecta.{str(len(self.cbu_destination_account))}')
+    #             if self.cbu_destination_account.isdigit():
+    #                 pass
+    #             else:
+    #                 raise ValidationError('El campo CBU de cuenta de destino debe contener solo números.')
