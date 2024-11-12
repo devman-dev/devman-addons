@@ -8,4 +8,3 @@ class AgentCommissionService(models.Model):
     agent = fields.Many2one('res.partner', string='Agente', required=True)
     commission_rate = fields.Float(string='Tasa de Comisión', required=True)
     collection_services_commission_id = fields.Many2one('collection.services.commission')
-    

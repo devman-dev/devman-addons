@@ -16,19 +16,19 @@
                         }
                     </style>
                     <table class="table"
-                        style="text-align: center; width: 100%; border:none; font-size: 13px;">
+                        style="width: 100%; border:none; font-size: 13px;">
                         <thead class="border" style="background-color: #8dd0f0;">
                             <tr class="border">
-                                <th class="border">Fecha</th>
-                                <th class="border">Nro Transaccion</th>
-                                <th class="border">Cliente</th>
-                                <th class="border">Servicio</th>
-                                <th class="border">Operación</th>
-                                <th class="border">CUIT</th>
-                                <th class="border">Descripción</th>
-                                <th class="border">Imp. Operación</th>
-                                <th class="border">% de Comisión</th>
-                                <th class="border">Imp. Comisión</th>
+                                <th class="border" style="text-align: left;">Fecha</th>
+                                <th class="border" style="text-align: left;">Nro T</th>
+                                <th class="border" style="text-align: left;">Cliente</th>
+                                <th class="border" style="text-align: left;">Servicio</th>
+                                <th class="border" style="text-align: left;">Operación</th>
+                                <th class="border" style="text-align: left;">CUIT</th>
+                                <th class="border" style="text-align: left;">Descripción</th>
+                                <th class="border" style="text-align: right;">Imp. Operación</th>
+                                <th class="border" style="text-align: right;">% de Comisión</th>
+                                <th class="border" style="text-align: right;">Imp. Comisión</th>
                             </tr>
                         </thead>
                         <tbody style="font-size: 10px;">

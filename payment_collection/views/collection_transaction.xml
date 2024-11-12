@@ -21,6 +21,7 @@
                 <field name="amount" sum="Total"/>
                 <field name="available_balance" />
                 <field name="cbu_destination_account" />
+                <field name="alias_destination_account" />
                 <field name="name_destination_account" />
             </tree>
         </field>

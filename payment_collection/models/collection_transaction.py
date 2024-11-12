@@ -11,62 +11,32 @@ class CollectionTransaction(models.Model):
     _rec_name = 'transaction_name'
     _order = 'id desc'
 
-    customer = fields.Many2one(
-        'res.partner',
-        string='Cliente',
-        required=True,
-        tracking=True,
-    )
-    transaction_name = fields.Char(
-        string='N° Transacción',
-        tracking=True,
-    )
+    customer = fields.Many2one('res.partner', string='Cliente', required=True, tracking=True)
+    transaction_name = fields.Char(string='N° Transacción', tracking=True)
     service = fields.Many2one('product.template', string='Servicio', tracking=True, domain=[('collection_type', '=', 'service')])
-    commission = fields.Float(string='Comisión')
+    commission = fields.Float(string='Comisión (%)')
     operation = fields.Many2one(
         'product.template', relation='operation', string='Operación', tracking=True, domain=[('collection_type', '=', 'operation')]
     )
     date = fields.Date(string='Fecha', tracking=True, default=datetime.now())
-    description = fields.Text(
-        string='Descripción',
-        tracking=True,
-    )
+    description = fields.Text(string='Descripción', tracking=True)
     origin_account_cuit = fields.Char(string='CUIT de cuenta de origen', tracking=True, default=False)
-    origin_account_cvu = fields.Char(
-        string='CVU de cuenta de origen',
-        tracking=True,
-    )
-    origin_account_cbu = fields.Char(
-        string='CBU de cuenta de origen',
-        tracking=True,
-    )
-
+    origin_account_cvu = fields.Char(string='CVU de cuenta de origen', tracking=True)
+    origin_account_cbu = fields.Char(string='CBU de cuenta de origen', tracking=True)
     related_customer = fields.Char(string='Cliente Relacionado', tracking=True)
-
     amount = fields.Float(string='Monto', tracking=True, required=True)
     date_available_amount = fields.Date('Fecha del monto disponible')
     real_balance = fields.Float(string='Saldo Real')
-    available_balance = fields.Float(
-        string='Saldo Disponible',
-        tracking=True,
-    )
+    available_balance = fields.Float(string='Saldo Disponible', tracking=True)
     cbu_destination_account = fields.Char(string='CBU de cuenta de destino', tracking=True, default=False)
-    name_destination_account = fields.Char(
-        string='Nombre de cuenta de destino',
-        tracking=True,
-    )
-    commission_app_rate = fields.Float(
-        string='Comisión de la App',
-        tracking=True,
-    )
-    commission_app_amount = fields.Float(
-        string='Monto de la App',
-        tracking=True,
-    )
+    name_destination_account = fields.Char(string='Nombre de cuenta de destino', tracking=True)
+    commission_app_rate = fields.Float(string='Comisión de la App', tracking=True)
+    commission_app_amount = fields.Float(string='Monto de la App', tracking=True)
     cbu_check = fields.Char('Check cbu')
     previous_month = fields.Float('Mes Anterior', compute='compute_previous_month')
     count = fields.Integer('', default=0)
     is_withdrawal = fields.Boolean(string='Retiro de Dinero', default=False)
+    alias_destination_account = fields.Char(string='Alias de cuenta de destino')
 
     @api.onchange('amount')
     def withdrawal_amount(self):
@@ -228,9 +198,10 @@ class CollectionTransaction(models.Model):
 
                 domain = [('customer', '=', self.customer.id), ('date', '<=', rec.date - timedelta)]
                 payments = self.env['collection.transaction'].sudo().search(domain)
-                available_balance = sum([pay.amount for pay in payments])
-                rec.available_balance = available_balance
-                rec.date_available_amount = rec.date - timedelta
+                if payments:
+                    available_balance = sum([pay.amount for pay in payments])
+                    rec.available_balance = available_balance
+                    rec.date_available_amount = payments[0].date
 
     @api.onchange('service')
     def check_service(self):
