@@ -29,7 +29,7 @@
                                 <th class="border">Monto de Operación</th>
                             </tr>
                         </thead>
-                        <tbody>
+                        <tbody style="font-size: 10px;">
                             <t t-set="total_amount" t-value="0" />
                             <t t-set="total_op_amount" t-value="0" />
                             <tr>
@@ -80,7 +80,7 @@
                                 </tr>
                             </t>
                         </tbody>
-                        <tfoot>
+                        <tfoot style="font-size: 10px;">
                             <tr>
                                 <td style="background-color: #adf58c;">Agente:</td>
                                 <td style="background-color: #adf58c;">
