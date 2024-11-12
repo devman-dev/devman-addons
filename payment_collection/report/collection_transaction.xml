@@ -31,7 +31,7 @@
                                 <th class="border">Imp. Comisión</th>
                             </tr>
                         </thead>
-                        <tbody>
+                        <tbody style="font-size: 10px;">
                             <tr style="border: none;">
                                 <td style="border: none;" colspan="5"></td>
                                 <td style="border: none; background-color: #8dd0f0;" colspan="2">
@@ -99,7 +99,7 @@
                                 </tr>
                             </t>
                         </tbody>
-                        <tfoot>
+                        <tfoot style="font-size: 10px;">
                             <tr style="border: none;">
                                 <td style="border: none;" colspan="5"></td>
                                 <td style="border: none; background-color: #adf58c;" colspan="2">

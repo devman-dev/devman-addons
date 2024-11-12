@@ -1,36 +1,34 @@
 <?xml version="1.0" encoding="utf-8"?>
-<odoo noupdate="0">
+<odoo noupdate="1">
     <record id="payment_collection.payment_collection_categ" model="ir.module.category">
         <field name="name">PagoFlex</field>
         <field name="description">Nivel de acceso para el módulo PagoFlex</field>
         <field name="sequence">4</field>
     </record>
-
+    
     <!-- Grupo Administrador -->
     <record id="groups_payment_collection_admin" model="res.groups">
         <field name="name">Administrador</field>
         <field name="category_id" ref="payment_collection.payment_collection_categ" />
-        <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+        <field name="implied_ids" eval="[(4, ref('base.group_user'))]" />
     </record>
- 
+
     <!-- Grupo Cliente -->
     <record id="groups_payment_collection_user" model="res.groups">
         <field name="name">Cliente</field>
         <field name="category_id" ref="payment_collection.payment_collection_categ" />
-
-        <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
-
+        <field name="implied_ids"
+            eval="[(4, ref('base.group_user')),(3, ref('groups_payment_collection_admin'))]" />
         <field name="users" eval="[(4, ref('base.user_root')), (4, ref('base.user_admin'))]" />
     </record>
-    
+
     <!-- Grupo Comisionista -->
     <record id="groups_payment_collection_comi" model="res.groups">
         <field name="name">Comisionista</field>
         <field name="category_id" ref="payment_collection.payment_collection_categ" />
-
-        <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+        <field name="implied_ids"
+            eval="[(4, ref('base.group_user')),(3, ref('groups_payment_collection_admin')),(3, ref('groups_payment_collection_user'))]" />
     </record>
-    
 
     <!-- Reglas de acceso y permisos por grupo -->
     <record id="ir_rule_admin_collection_transaction" model="ir.rule">
