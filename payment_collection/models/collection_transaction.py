@@ -13,55 +13,55 @@ class CollectionTransaction(models.Model):
 
     customer = fields.Many2one('res.partner', string='Cliente', required=True, tracking=True)
     transaction_name = fields.Char(string='N° Transacción', tracking=True)
-    service = fields.Many2one('product.template', string='Servicio', tracking=True, domain=[('collection_type', '=', 'service')])
+    service = fields.Many2one('collection.services.commission', string='Servicio', tracking=True)
     commission = fields.Float(string='Comisión (%)')
     operation = fields.Many2one(
         'product.template', relation='operation', string='Operación', tracking=True, domain=[('collection_type', '=', 'operation')]
     )
     date = fields.Date(string='Fecha', tracking=True, default=datetime.now())
     description = fields.Text(string='Descripción', tracking=True)
-    origin_account_cuit = fields.Char(string='CUIT de cuenta de origen', tracking=True, default=False)
-    origin_account_cvu = fields.Char(string='CVU de cuenta de origen', tracking=True)
-    origin_account_cbu = fields.Char(string='CBU de cuenta de origen', tracking=True)
+    origin_account_cuit = fields.Char(string='CUIT origen', tracking=True, default=False)
+    origin_account_cvu = fields.Char(string='CVU origen', tracking=True)
+    origin_account_cbu = fields.Char(string='CBU origen', tracking=True)
     related_customer = fields.Char(string='Cliente Relacionado', tracking=True)
     amount = fields.Float(string='Monto', tracking=True, required=True)
     date_available_amount = fields.Date('Fecha del monto disponible')
     real_balance = fields.Float(string='Saldo Real')
     available_balance = fields.Float(string='Saldo Disponible', tracking=True)
-    cbu_destination_account = fields.Char(string='CBU de cuenta de destino', tracking=True, default=False)
-    name_destination_account = fields.Char(string='Nombre de cuenta de destino', tracking=True)
+    cbu_destination_account = fields.Char(string='CBU destino', tracking=True, default=False)
+    cvu_destination_account = fields.Char(string='CVU destino', tracking=True, default=False)
+    name_destination_account = fields.Char(string='Cta destino', tracking=True)
     commission_app_rate = fields.Float(string='Comisión de la App', tracking=True)
     commission_app_amount = fields.Float(string='Monto de la App', tracking=True)
     cbu_check = fields.Char('Check cbu')
     previous_month = fields.Float('Mes Anterior', compute='compute_previous_month')
     count = fields.Integer('', default=0)
-    is_withdrawal = fields.Boolean(string='Retiro de Dinero', default=False)
-    alias_destination_account = fields.Char(string='Alias de cuenta de destino')
-
+    alias_destination_account = fields.Char(string='Alias Cta destino')
+    alias_origen = fields.Char(string='Alias Cta origen')
+    transaction_state = fields.Selection([('ejecutada_datos_completos','Ejecutada-Datos Completos'), ('falta_ejecutar','Falta Ejecutar'), ('ejecutada_faltan_datos','Ejecutada-Faltan Datos')], string='Estado', default='falta_ejecutar')
+    collection_trans_type = fields.Selection([('retiro','Retiro'),('movimiento_interno','Movimiento Interno'),('movimiento_recaudacion','Movimiento de Recaudación')],default='movimiento_recaudacion', string='Tipo de Transacción')
     @api.onchange('amount')
     def withdrawal_amount(self):
-        if self.is_withdrawal:
-            self.amount = self.amount * -1
+        if self.collection_trans_type == 'retiro':
+            self.amount = self.amount * -1 if self.amount > 0 else self.amount
 
     @api.onchange('amount')
     def calculate_commission_app_amount(self):
         self.commission_app_amount = (self.commission_app_rate * self.amount) / 100
 
-    @api.onchange('customer')
+    @api.onchange('customer','service')
     def get_last_app_commission(self):
-        last_app_commission = self.env['commission.app'].search([], order='date desc', limit=1)
-        self.commission_app_rate = last_app_commission.commission_rate
 
-    @api.onchange('service')
-    def get_commission_service(self):
-        if self.service:
-            service = self.env['collection.services.commission'].search(
-                [('services', '=', self.service.id), ('customer', '=', self.customer.id)], limit=1, order='id desc'
-            )
-            if service:
-                self.commission = service.commission
-            else:
-                self.commission = 0
+        self.commission_app_rate = self.service.commission_app_rate if self.service else 0
+
+        # TRAEMOS DATOS DEL CLIENTE DESDE RES PARTNER.
+
+        self.cbu_destination_account = self.customer.cbu_destination if self.customer.cbu_destination else ''
+        self.cvu_destination_account = self.customer.cvu_destination if self.customer.cvu_destination else ''
+        self.alias_destination_account = self.customer.alias_destination if self.customer.alias_destination else ''
+        self.name_destination_account = self.customer.name_account_destination if self.customer.name_account_destination else ''
+
+
 
     @api.model
     def create(self, vals):
@@ -83,8 +83,9 @@ class CollectionTransaction(models.Model):
                 'cbu_destination_account': 0,
                 'count': 1,
             }
-            if not vals['is_withdrawal']:
+            if not vals['collection_trans_type'] == 'retiro' and not vals['collection_trans_type'] == 'movimiento_interno':
                 self.env['collection.transaction'].sudo().create(dict_transac)
+
 
         res = super(CollectionTransaction, self).create(vals)
 
@@ -100,11 +101,7 @@ class CollectionTransaction(models.Model):
     @api.constrains('customer')
     def compute_commission_agent(self):
         self.ensure_one()
-
-        service = self.env['collection.services.commission'].search(
-            [('services', '=', self.service.id), ('customer', '=', self.customer.id)], limit=1, order='id desc'
-        )
-        for agent_service in service.agent_services_commission:
+        for agent_service in self.service.agent_services_commission:
             commission_amount = (agent_service.commission_rate * self.amount) / 100
             if commission_amount > 0 and self.count == 0:
                 self.env['collection.transaction.commission'].sudo().create(
@@ -128,7 +125,7 @@ class CollectionTransaction(models.Model):
     @api.constrains('customer')
     def create_dashboard_customer(self):
         self.ensure_one()
-        if self.is_withdrawal or self.count == 1:
+        if self.collection_trans_type == 'retiro' or self.count == 1:
             return
         customer = self.env['collection.transaction'].sudo().search([('customer', '=', self.customer.id)])
         real_balance_list = [c.amount for c in customer]
@@ -278,3 +275,24 @@ class CollectionTransaction(models.Model):
     #                 pass
     #             else:
     #                 raise ValidationError('El campo CBU de cuenta de destino debe contener solo números.')
+
+    @api.onchange('collection_trans_type','service')
+    def no_commission_on_withdrawal(self):
+        for rec in self:
+            if rec.collection_trans_type == 'retiro' or rec.collection_trans_type == 'movimiento_interno':
+                rec.commission = 0
+            else:
+                rec.commission = rec.service.commission
+
+
+    @api.onchange('collection_trans_type')
+    def set_default_operation(self):
+        for rec in self:
+            if rec.collection_trans_type == 'movimiento_recaudacion':
+                acreditacion = rec.operation.search([('name','ilike', 'acreditaci%')], limit=1)
+                rec.operation = acreditacion.id
+
+            elif rec.collection_trans_type == 'retiro':
+                extraccion = rec.operation.search([('name','ilike', 'extracc%')], limit=1)
+                transferencia = rec.operation.search([('name', 'ilike', 'transferencia')], limit=1)
+

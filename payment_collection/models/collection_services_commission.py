@@ -5,6 +5,7 @@ from odoo.exceptions import ValidationError
 
 class CollectionServicesCommission(models.Model):
     _name = 'collection.services.commission'
+    _rec_name='services'
     
     customer = fields.Many2one('res.partner', string='Cliente', required=True)
     services = fields.Many2one('product.template', string='Servicio', required=True, domain=['|',('collection_type', '=','operation'),('collection_type', '=','service')])
@@ -22,10 +23,10 @@ class CollectionServicesCommission(models.Model):
     def _compute_commission_rate(self):
         pass
     
-    @api.constrains('customer', 'services')
-    def _get_name(self):
-        for r in self:
-            r.name = f'{r.customer.name} - {r.services.name}'
+    # @api.constrains('customer', 'services')
+    # def _get_name(self):
+    #     for r in self:
+    #         r.name = f'{r.services.name}'
 
 
     @api.onchange('services')
@@ -49,16 +50,9 @@ class CollectionServicesCommission(models.Model):
                 raise ValidationError('El total de comisiones de agentes supera la cantidad de comisión. Para agregar un nuevo comisionista edite las cantidades anteriores.')
 
 
-
-                # def action_notification(self):
-    #     return {
-    #         'type': 'ir.actions.client',
-    #         'tag': 'display_notification',
-    #         'params': {
-    #             'title': 'Registrar marcación de salida',
-    #             'message': 'Recordá registrar tu marcación de salida',
-    #             'type': 'danger',
-    #             'sticky': False
-    #         }
-    #     }
-
+    @api.constrains('agent_services_commission')
+    def delete_agent_commission_zero(self):
+        for rec in self:
+            for reg in  rec.agent_services_commission:
+                if reg.commission_rate == 0:
+                    reg.unlink()

@@ -5,3 +5,4 @@ from . import collection_dashboard_customer
 from . import collection_transaction
 from . import product_template
 from . import commission_app
+from . import res_partner

@@ -5,8 +5,8 @@
         <field name="name">collection.transaction.view.tree</field>
         <field name="model">collection.transaction</field>
         <field name="arch" type="xml">
-            <tree string="Transacción de cobro" js_class="button_print_transaction" decoration-danger="is_withdrawal == True">
-                <field name="is_withdrawal" invisible="True"/>
+            <tree string="Transacción de cobro" js_class="button_print_transaction" decoration-danger="collection_trans_type == 'retiro'" decoration-info="collection_trans_type == 'movimiento_interno'">
+                <field name="collection_trans_type" invisible="1"/>
                 <field name="date"/>
                 <field name="customer" />
                 <field name="transaction_name" />
@@ -37,27 +37,33 @@
                         <field name="transaction_name" readonly="True"/>
                     </h1>
                     <group>
+                        <field name="collection_trans_type" widget="radio" options="{'horizontal': True}"/>
+                    </group>
+                    <group>
                         <group>
-                            <field name="is_withdrawal" />
                             <field name="customer"/>
-                            <field name="service" invisible="is_withdrawal == True" required="is_withdrawal != True"/>
-                            <field name="commission" invisible="is_withdrawal == True"/>
+                            <field name="service" required="1" domain="[('services.collection_type', '=', 'service'), ('customer', '=', customer)]"/>
+                            <field name="commission" invisible="collection_trans_type == 'retiro'"/>
                             <field name="operation" />
                             <field name="date" />
-                            <field name="related_customer" invisible="is_withdrawal == True"/>
+                            <field name="related_customer" invisible="collection_trans_type == 'retiro'"/>
                             <field name="amount"/>
                             <field name="real_balance" readonly="1" force_save="1"/>
                             <field name="available_balance" readonly="1" force_save="1"/>
                             <field name="date_available_amount" readonly="1" force_save="1"/>
                         </group>
                         <group>
-                            <field name="origin_account_cuit" invisible="is_withdrawal == True" />
+                            <field name="origin_account_cuit" invisible="collection_trans_type == 'retiro'" />
                             <field name="origin_account_cvu" force_save="1" invisible="cbu_check != 'cvu'" required="cbu_check != 'cvu'"/>
                             <field name="origin_account_cbu" force_save="1" invisible="cbu_check != 'cbu'" required="cbu_check != 'cbu'"/>
                             <field name="cbu_destination_account" />
+                            <field name="cvu_destination_account"/>
+                            <field name="alias_origen"/>
+                            <field name="alias_destination_account"/>
                             <field name="name_destination_account" />
                             <field name="commission_app_rate" readonly="1" force_save="1"/>
                             <field name="commission_app_amount" readonly="1" force_save="1"/>
+                            <field name="transaction_state"/>
                             <field name="cbu_check" invisible="1"/>
                             <field name="previous_month" invisible="1"/>
                         </group>
