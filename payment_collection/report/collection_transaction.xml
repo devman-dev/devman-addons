@@ -99,7 +99,24 @@
                                 </tr>
                             </t>
                         </tbody>
-                        <tfoot style="font-size: 10px;">
+                    </table>
+                    <table class="table"
+                        style="width: 100%; border:none; font-size: 13px; margin-top: -45px;">
+                        <thead>
+                            <tr>
+                                <th  style="color: transparent; text-align: left; padding-right: 35px;">Fecha</th>
+                                <th  style="color: transparent; text-align: left;">Nro T</th>
+                                <th  style="color: transparent; text-align: left;">Cliente</th>
+                                <th  style="color: transparent; text-align: left;">Servicio</th>
+                                <th  style="color: transparent; text-align: left;">Operación</th>
+                                <th  style="color: transparent; text-align: left;">CUIT</th>
+                                <th  style="color: transparent; text-align: left;">Descripción</th>
+                                <th  style="color: transparent; text-align: right;">Imp. Operación</th>
+                                <th  style="color: transparent; text-align: right;">% de Comisión</th>
+                                <th  style="color: transparent; text-align: right;">Imp. Comisión</th>
+                            </tr>
+                        </thead>
+                        <tbody style="font-size: 10px;">
                             <tr style="border: none;">
                                 <td style="border: none;" colspan="5"></td>
                                 <td style="border: none; background-color: #adf58c;" colspan="2">
@@ -114,9 +131,11 @@
                                 </td>
                                 <td colspan="1" style="border: none;"></td>
                             </tr>
-                        </tfoot>
+                        </tbody>
                     </table>
-                    <p style="margin-top: 50px; color: #757575;">El saldo disponible correspondientes a los movimientos  anteriores a las 48hs es:  <span t-field="docs[0].available_balance"/></p>
+                    <p style="margin-top: 50px; color: #757575;">El saldo disponible
+                        correspondientes a los movimientos anteriores a las 48hs es: <span
+                            t-field="docs[0].available_balance" /></p>
                 </div>
             </t>
         </t>
