@@ -22,7 +22,7 @@ class CommiTransWiz(models.TransientModel):
         previous_months = self.env['collection.transaction'].search(domain)
 
         self.previous_balance = sum([pm.amount for pm in previous_months])
-        dashboard_customer = self.env['collection.dashboard.customer'].search([('customer', '=', self.customer.id)])
+        dashboard_customer = self.env['collection.dashboard.customer'].search([('customer', '=', self.customer.id)], limit=1)
         dashboard_customer.update_available_balance()
         domain_2 = [('date', '>=', start_date), ('date', '<=', end_date),('customer', '=', customer.id)]
         filtered_records = self.env['collection.transaction'].search(domain_2)

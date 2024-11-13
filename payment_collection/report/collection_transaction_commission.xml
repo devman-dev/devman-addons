@@ -16,17 +16,17 @@
                         }
                     </style>
                     <table class="table"
-                        style="text-align: center; width: 100%; border:none; font-size: 13px;">
+                        style="width: 100%; border:none; font-size: 13px;">
                         <thead class="border" style="background-color: #8dd0f0;">
                             <tr class="border">
-                                <th class="border">Fecha</th>
-                                <th class="border">Nro Transaccion</th>
-                                <th class="border">Cliente</th>
-                                <th class="border">Servicio</th>
-                                <th class="border">Descripción</th>
-                                <th class="border">Tasa de Comisión (%)</th>
-                                <th class="border">Monto de Comisión</th>
-                                <th class="border">Monto de Operación</th>
+                                <th class="border" style="text-align: left;">Fecha</th>
+                                <th class="border" style="text-align: left;">Nro T</th>
+                                <th class="border" style="text-align: left;">Cliente</th>
+                                <th class="border" style="text-align: left;">Servicio</th>
+                                <th class="border" style="text-align: left;">Descripción</th>
+                                <th class="border" style="text-align: right;">Tasa de Comisión (%)</th>
+                                <th class="border" style="text-align: right;">Monto de Comisión</th>
+                                <th class="border" style="text-align: right;">Monto de Operación</th>
                             </tr>
                         </thead>
                         <tbody style="font-size: 10px;">
@@ -34,7 +34,7 @@
                             <t t-set="total_op_amount" t-value="0" />
                             <tr>
                                 <td colspan="5"></td>
-                                <td style="background-color: #8dd0f0;">Saldo Anterior:</td>
+                                <td style="background-color: #8dd0f0; text-align: left;">Saldo Anterior:</td>
                                 <td style="background-color: #8dd0f0; text-align: right;">
                                     <b>
                                         <span t-field="docs[0].previous_month"

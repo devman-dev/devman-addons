@@ -41,7 +41,7 @@
         name="Configuración"
         parent="collection_transaction_menu"
         sequence="4"
-        groups="payment_collection.groups_payment_collection_admin"
+        groups="payment_collection.groups_payment_collection_admin,base.user_root"
     />
 
     <menuitem
@@ -67,4 +67,10 @@
         parent="collection_configuration_menu"
         sequence="3" />
 
+    <menuitem
+        id="res_partner_menu"
+        name="Clientes"
+        action="contacts.action_contacts"
+        parent="collection_configuration_menu"
+        sequence="4" />
 </odoo>
