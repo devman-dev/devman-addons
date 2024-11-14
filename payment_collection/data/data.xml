@@ -14,25 +14,19 @@
     <!-- Services -->
     <data noupdate="1">
         <record model="product.template" id="services_cvu">
-            <field name="name">CVU</field>
+            <field name="name">CVU / Alias</field>
             <field name="commission_default">0</field>
             <field name="collection_type">service</field>
         </record>
     </data>
     <data noupdate="1">
         <record model="product.template" id="services_cbu">
-            <field name="name">CBU</field>
+            <field name="name">CBU / Alias</field>
             <field name="commission_default">0</field>
             <field name="collection_type">service</field>
         </record>
     </data>
-    <data noupdate="1">
-        <record model="product.template" id="services_alias">
-            <field name="name">Alias</field>
-            <field name="commission_default">0</field>
-            <field name="collection_type">service</field>
-        </record>
-    </data>
+
     <data noupdate="1">
         <record model="product.template" id="services_qr">
             <field name="name">QR</field>
@@ -42,25 +36,40 @@
     </data>
     <data noupdate="1">
         <record model="product.template" id="services_postner">
-            <field name="name">POSNET</field>
+            <field name="name">PosNet</field>
             <field name="commission_default">0</field>
             <field name="collection_type">service</field>
         </record>
     </data>
     <data noupdate="1">
-        <record model="product.template" id="services_cta">
-            <field name="name">Cta</field>
+        <record model="product.template" id="services_cta_usd">
+            <field name="name">Cta U$d</field>
             <field name="commission_default">0</field>
             <field name="collection_type">service</field>
         </record>
     </data>
     <data noupdate="1">
-        <record model="product.template" id="services_usd">
-            <field name="name">U$D</field>
+        <record model="product.template" id="services_eur">
+            <field name="name">Cta Euro</field>
             <field name="commission_default">0</field>
             <field name="collection_type">service</field>
         </record>
     </data>
+    <data noupdate="1">
+        <record model="product.template" id="services_reales">
+            <field name="name">Cta Reales</field>
+            <field name="commission_default">0</field>
+            <field name="collection_type">service</field>
+        </record>
+    </data>
+    <data noupdate="1">
+        <record model="product.template" id="services_crypto">
+            <field name="name">Cta Crypto</field>
+            <field name="commission_default">0</field>
+            <field name="collection_type">service</field>
+        </record>
+    </data>
+
 
     <!-- Operation -->
 
@@ -95,13 +104,6 @@
     <data noupdate="1">
         <record model="product.template" id="operation_bills">
             <field name="name">Gastos</field>
-            <field name="commission_default">0</field>
-            <field name="collection_type">operation</field>
-        </record>
-    </data>
-    <data noupdate="1">
-        <record model="product.template" id="operation_change">
-            <field name="name">Cambio</field>
             <field name="commission_default">0</field>
             <field name="collection_type">operation</field>
         </record>

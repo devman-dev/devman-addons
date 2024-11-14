@@ -22,6 +22,7 @@
         'views/collection_transaction.xml',
         'views/collection_dashboard_customer.xml',
         'views/product_template.xml',
+        'views/res_partner.xml',
         'views/commission_app.xml',
         'views/menuitems.xml',
         'wizard/payment_wiz.xml',
