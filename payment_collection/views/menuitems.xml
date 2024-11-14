@@ -16,7 +16,7 @@
     <menuitem
         id="collection_transaction_submenu"
         name="Recaudación de Pagos"
-        action="collection_transaction_action"
+        action="collection_transaction_action2"
         parent="collection_transaction_menu"
         sequence="1"
     />

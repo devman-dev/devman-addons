@@ -6,10 +6,6 @@
         <field name="model">collection.dashboard.customer</field>
         <field name="arch" type="xml">
             <tree string="Dashboard de Cobro de cliente" js_class="button_update_dashboard">
-                 <header>
-                    <button string="Actualizar Saldos Disponibles" type="object" name="update_available_balance"
-                            class="oe_highlight"/>
-                 </header>
                 <field name="customer" />
                 <field name="customer_real_balance" sum="Total Saldo Real"/>
                 <field name="customer_available_balance" sum="Total Saldo Disponible"/>
