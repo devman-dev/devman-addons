@@ -25,3 +25,4 @@ class CollectionDashboardCustomer(models.Model):
                 d.sudo().customer_available_balance = 0
             for c in ct:
                 d.sudo().customer_available_balance += c.amount
+                
