@@ -6,12 +6,12 @@
         <field name="model">res.partner</field>
         <field name="inherit_id" ref="base.view_partner_form" />
         <field name="arch" type="xml">
-            <field name="vat" position="after">
+            <xpath expr="//group[1]/group[2]" position="inside">
                 <field name="cbu_destination"/>
                 <field name="cvu_destination"/>
                 <field name="alias_destination"/>
                 <field name="name_account_destination"/>
-            </field>
+            </xpath>
         </field>
     </record>
 

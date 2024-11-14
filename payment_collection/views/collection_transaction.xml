@@ -5,9 +5,11 @@
         <field name="name">collection.transaction.view.tree</field>
         <field name="model">collection.transaction</field>
         <field name="arch" type="xml">
-            <tree string="Transacción de cobro" js_class="button_print_transaction" decoration-danger="collection_trans_type == 'retiro'" decoration-info="collection_trans_type == 'movimiento_interno'">
-                <field name="collection_trans_type" invisible="1"/>
-                <field name="date"/>
+            <tree string="Transacción de cobro" js_class="button_print_transaction"
+                decoration-danger="collection_trans_type == 'retiro'"
+                decoration-info="collection_trans_type == 'movimiento_interno'">
+                <field name="collection_trans_type" string="Tipo T." />
+                <field name="date" />
                 <field name="customer" />
                 <field name="transaction_name" />
                 <field name="service" />
@@ -16,13 +18,17 @@
                 <field name="description" />
                 <field name="origin_account_cuit" />
                 <field name="origin_account_cvu" />
-                <field name="origin_account_cbu"/>
+                <field name="origin_account_cbu" />
                 <field name="related_customer" />
-                <field name="amount" sum="Total"/>
+                <field name="amount" sum="Total" />
                 <field name="available_balance" />
                 <field name="cbu_destination_account" />
                 <field name="alias_destination_account" />
                 <field name="name_destination_account" />
+                <field name="transaction_state" widget="badge"
+                    decoration-danger="transaction_state == 'falta_ejecutar'"
+                    decoration-warning="transaction_state == 'ejecutada_faltan_datos'"
+                    decoration-success="transaction_state == 'ejecutada_datos_completos'" />
             </tree>
         </field>
     </record>
@@ -34,48 +40,61 @@
             <form string="Transacción de cobro">
                 <sheet>
                     <h1>
-                        <field name="transaction_name" readonly="True"/>
+                        <field name="transaction_name" readonly="True" />
                     </h1>
                     <group>
-                        <field name="collection_trans_type" widget="radio" options="{'horizontal': True}"/>
+                        <field name="collection_trans_type" widget="radio"
+                            options="{'horizontal': True}" />
                     </group>
                     <group>
                         <group>
-                            <field name="customer"/>
-                            <field name="service" required="1" domain="[('services.collection_type', '=', 'service'), ('customer', '=', customer)]"/>
-                            <field name="commission" invisible="collection_trans_type == 'retiro'"/>
-                            <field name="operation" />
+                            <field name="customer" />
+                            <field name="service" required="1"
+                                domain="[('services.collection_type', '=', 'service'), ('customer', '=', customer)]" />
+                            <field name="commission" invisible="collection_trans_type == 'retiro'" />
+                            <field name="operation" domain="withdrawal_operations" />
+                            <field name="withdrawal_operations" invisible="1" />
                             <field name="date" />
-                            <field name="related_customer" invisible="collection_trans_type == 'retiro'"/>
-                            <field name="amount"/>
-                            <field name="real_balance" readonly="1" force_save="1"/>
-                            <field name="available_balance" readonly="1" force_save="1"/>
-                            <field name="date_available_amount" readonly="1" force_save="1"/>
+                            <field name="related_customer"
+                                invisible="collection_trans_type == 'retiro'" />
+                            <field name="amount" />
+                            <field name="real_balance" readonly="1" force_save="1" />
+                            <field name="available_balance" readonly="1" force_save="1" />
+                            <field name="date_available_amount" readonly="1" force_save="1" />
                         </group>
                         <group>
-                            <field name="origin_account_cuit" invisible="collection_trans_type == 'retiro'" />
-                            <field name="origin_account_cvu" force_save="1" invisible="cbu_check != 'cvu'" required="cbu_check != 'cvu'"/>
-                            <field name="origin_account_cbu" force_save="1" invisible="cbu_check != 'cbu'" required="cbu_check != 'cbu'"/>
+                            <field name="origin_account_cuit"
+                                invisible="collection_trans_type == 'retiro'" />
+                            <field name="origin_account_cvu" force_save="1"
+                                invisible="cbu_check != 'cvu'" required="cbu_check != 'cvu'" />
+                            <field name="origin_account_cbu" force_save="1"
+                                invisible="cbu_check != 'cbu'" required="cbu_check != 'cbu'" />
                             <field name="cbu_destination_account" />
-                            <field name="cvu_destination_account"/>
-                            <field name="alias_origen"/>
-                            <field name="alias_destination_account"/>
+                            <field name="cvu_destination_account" />
+                            <field name="alias_origen" />
+                            <field name="alias_destination_account" />
                             <field name="name_destination_account" />
-                            <field name="commission_app_rate" readonly="1" force_save="1"/>
-                            <field name="commission_app_amount" readonly="1" force_save="1"/>
-                            <field name="transaction_state"/>
-                            <field name="cbu_check" invisible="1"/>
-                            <field name="previous_month" invisible="1"/>
+                            <field name="commission_app_rate" readonly="1" force_save="1" />
+                            <field name="commission_app_amount" readonly="1" force_save="1" />
+                            <field name="transaction_state" />
+                            <field name="cbu_check" invisible="1" />
+                            <field name="previous_month" invisible="1" />
                         </group>
-                        <field name="description" placeholder="Descripcion..."/>
-                        <field name="count" invisible="1"/>
+                        <field name="description" placeholder="Descripción..." />
+                        <div id="alertWithdrawal" role="alert" class="alert alert-danger"
+                            style="height: 40px; width: 90%; margin-bottom: 20px;"
+                            invisible="alert_withdrawal != True">
+                            AVISO! Estas retirando mas de lo disponible.
+                        </div>
+                        <field name="count" invisible="1" />
+                        <field name="alert_withdrawal" invisible="1" />
                     </group>
                 </sheet>
                 <!-- Chatter -->
                 <div class="oe_chatter">
-                    <field name="message_follower_ids" groups="base.group_user"/>
-                    <field name="activity_ids"/>
-                    <field name="message_ids"/>
+                    <field name="message_follower_ids" groups="base.group_user" />
+                    <field name="activity_ids" />
+                    <field name="message_ids" />
                 </div>
             </form>
         </field>
@@ -102,6 +121,12 @@
 
 
     <record id="collection_transaction_action" model="ir.actions.act_window">
+        <field name="name">Recaudación de Pagos</field>
+        <field name="res_model">collection.transaction</field>
+        <field name="view_mode">form,tree</field>
+    </record>
+
+    <record id="collection_transaction_action2" model="ir.actions.act_window">
         <field name="name">Recaudación de Pagos</field>
         <field name="res_model">collection.transaction</field>
         <field name="view_mode">tree,form</field>
