@@ -345,7 +345,7 @@ class CollectionTransaction(models.Model):
             if rec.collection_trans_type == 'movimiento_recaudacion':
                 acreditacion = rec.operation.search([('name', 'ilike', 'acreditaci%')], limit=1)
                 rec.operation = acreditacion.id
-
+                rec.withdrawal_operations = [('collection_type', '=', 'operation')]
             elif rec.collection_trans_type == 'retiro':
                 extraccion = rec.operation.search([('name', 'ilike', 'extracc%')], limit=1)
                 transferencia = rec.operation.search([('name', 'ilike', 'transferencia')], limit=1)
