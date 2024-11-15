@@ -43,35 +43,34 @@
                         <field name="transaction_name" readonly="True" />
                     </h1>
                     <group>
-                        <field name="collection_trans_type" widget="radio"
-                            options="{'horizontal': True}" />
-                    </group>
-                    <group>
                         <group>
+                            <field name="collection_trans_type" widget="radio"
+                                options="{'horizontal': True}" />
                             <field name="customer" />
                             <field name="service" required="1"
                                 domain="[('services.collection_type', '=', 'service'), ('customer', '=', customer)]" />
                             <field name="commission" invisible="collection_trans_type == 'retiro'" />
-                            <field name="operation" domain="withdrawal_operations" />
+                            <field name="operation" domain="[('id', 'in', withdrawal_operations)]" />
                             <field name="withdrawal_operations" invisible="1" />
                             <field name="date" />
                             <field name="related_customer"
                                 invisible="collection_trans_type == 'retiro'" />
-                            <field name="amount" />
+                                <field name="amount" />
+                            <separator/>
                             <field name="real_balance" readonly="1" force_save="1" />
                             <field name="available_balance" readonly="1" force_save="1" />
                             <field name="date_available_amount" readonly="1" force_save="1" />
                         </group>
                         <group>
+                            <field name="account_source"/>
                             <field name="origin_account_cuit"
                                 invisible="collection_trans_type == 'retiro'" />
-                            <field name="origin_account_cvu" force_save="1"
-                                invisible="cbu_check != 'cvu'" required="cbu_check != 'cvu'" />
-                            <field name="origin_account_cbu" force_save="1"
-                                invisible="cbu_check != 'cbu'" required="cbu_check != 'cbu'" />
+                            <field name="origin_account_cvu" force_save="1"/>
+                            <field name="origin_account_cbu" force_save="1"/>
+                            <field name="alias_origen" />
+                            <separator/>
                             <field name="cbu_destination_account" />
                             <field name="cvu_destination_account" />
-                            <field name="alias_origen" />
                             <field name="alias_destination_account" />
                             <field name="name_destination_account" />
                             <field name="commission_app_rate" readonly="1" force_save="1" />
@@ -80,12 +79,13 @@
                             <field name="cbu_check" invisible="1" />
                             <field name="previous_month" invisible="1" />
                         </group>
-                        <field name="description" placeholder="Descripción..." />
                         <div id="alertWithdrawal" role="alert" class="alert alert-danger"
                             style="height: 40px; width: 90%; margin-bottom: 20px;"
                             invisible="alert_withdrawal != True">
                             AVISO! Estas retirando mas de lo disponible.
                         </div>
+                        <field name="description" placeholder="Descripción..." />
+                        <field name="internal_notes" placeholder="Notas Internas del Cliente..." />
                         <field name="count" invisible="1" />
                         <field name="alert_withdrawal" invisible="1" />
                     </group>

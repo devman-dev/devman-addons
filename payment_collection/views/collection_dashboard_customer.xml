@@ -10,10 +10,10 @@
                 <field name="customer_real_balance" sum="Total Saldo Real"/>
                 <field name="customer_available_balance" sum="Total Saldo Disponible"/>
                 <field name="collection_balance" sum="Total Saldo de pagos" />
-                <field name="commission_balance" sum="Total Saldo de comisión"/>
+                <field name="commission_balance" sum="Total Saldo de comisión" invisible="1"/>
                 <field name="last_operation_date" />
-                <field name="commission_app_rate" />
-                <field name="commission_app_amount"  sum="Monto Total de la App"/>
+                <field name="commission_app_rate" invisible="1"/>
+                <field name="commission_app_amount" invisible="1" sum="Monto Total de la App"/>
             </tree>
         </field>
     </record>
