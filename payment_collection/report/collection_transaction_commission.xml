@@ -24,7 +24,7 @@
                                 <th class="border" style="text-align: left;">Cliente</th>
                                 <th class="border" style="text-align: left;">Servicio</th>
                                 <th class="border" style="text-align: left;">Descripción</th>
-                                <th class="border" style="text-align: right;">Tasa de Comisión (%)</th>
+                                <th class="border" style="text-align: right;">Comi(%)</th>
                                 <th class="border" style="text-align: right;">Monto de Comisión</th>
                                 <th class="border" style="text-align: right;">Monto de Operación</th>
                             </tr>
@@ -34,7 +34,8 @@
                             <t t-set="total_op_amount" t-value="0" />
                             <tr>
                                 <td colspan="5"></td>
-                                <td style="background-color: #8dd0f0; text-align: left;">Saldo Anterior:</td>
+                                <td style="background-color: #8dd0f0; text-align: left;">Saldo
+                                    Anterior:</td>
                                 <td style="background-color: #8dd0f0; text-align: right;">
                                     <b>
                                         <span t-field="docs[0].previous_month"
@@ -44,59 +45,93 @@
                                 <td></td>
                             </tr>
                             <t t-foreach="docs" t-as="o">
-                                <t t-set="total_amount" t-value="total_amount + o.commission_amount" />
+                                <t t-set="total_amount"
+                                    t-value="total_amount + o.commission_amount" />
                                 <t t-set="total_op_amount"
                                     t-value="total_op_amount + o.operation_amount" />
-                                <tr class="border">
-                                    <td class="border">
-                                        <span t-field="o.date" />
-                                    </td>
-                                    <td class="border">
-                                        <span t-field="o.transaction_name" />
-                                    </td>
-                                    <td class="border">
-                                        <span t-field="o.customer.name" />
-                                    </td>
-                                    <td class="border">
-                                        <span t-field="o.transaction_service.name" />
-                                    </td>
-                                    <td class="border">
-                                        <span t-field="o.description" />
-                                    </td>
-                                    <td class="border" style="text-align: right;">
-                                        <span t-field="o.commission_rate"
-                                            t-options="{'widget': 'float', 'precision': 2}" />
-                                    </td>
-                                    <td class="border" style="text-align: right;">
-                                        <b>
-                                            <span t-field="o.commission_amount"
+                                <t t-if="o == docs[-1]">
+                                    <tr class="border">
+                                        <td class="border">
+                                            <span t-field="o.date" />
+                                        </td>
+                                        <td class="border">
+                                            <span t-field="o.transaction_name" />
+                                        </td>
+                                        <td class="border">
+                                            <span t-field="o.customer.name" />
+                                        </td>
+                                        <td class="border">
+                                            <span t-field="o.transaction_service.name" />
+                                        </td>
+                                        <td class="border">
+                                            <span t-field="o.description" />
+                                        </td>
+                                        <td class="border" style="text-align: right;">
+                                            <span t-field="o.commission_rate"
                                                 t-options="{'widget': 'float', 'precision': 2}" />
-                                        </b>
-                                    </td>
-                                    <td class="border" style="text-align: right;">
-                                        <span t-field="o.operation_amount"
-                                            t-options="{'widget': 'float', 'precision': 2}" />
-                                    </td>
-                                </tr>
+                                        </td>
+                                        <td class="border" style="text-align: right;">
+                                            <b>
+                                                <span t-field="o.commission_amount"
+                                                    t-options="{'widget': 'float', 'precision': 2}" />
+                                            </b>
+                                        </td>
+                                        <td class="border" style="text-align: right;">
+                                            <span t-field="o.operation_amount"
+                                                t-options="{'widget': 'float', 'precision': 2}" />
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td style="background-color: #adf58c;">Agente:</td>
+                                        <td style="background-color: #adf58c;">
+                                            <span t-field="docs[0].agent.name" />
+                                        </td>
+                                        <td colspan="3"></td>
+                                        <td style="background-color: #adf58c;">Total:</td>
+                                        <td style="background-color: #adf58c; text-align: right;">
+                                            <b>
+                                                <span t-esc="total_amount + docs[0].previous_month"
+                                                    t-options="{'widget': 'float', 'precision': 2}" />
+                                            </b>
+                                        </td>
+                                        <td></td>
+                                    </tr>
+                                </t>
+                                <t t-else="">
+                                    <tr class="border">
+                                        <td class="border">
+                                            <span t-field="o.date" />
+                                        </td>
+                                        <td class="border">
+                                            <span t-field="o.transaction_name" />
+                                        </td>
+                                        <td class="border">
+                                            <span t-field="o.customer.name" />
+                                        </td>
+                                        <td class="border">
+                                            <span t-field="o.transaction_service.name" />
+                                        </td>
+                                        <td class="border">
+                                            <span t-field="o.description" />
+                                        </td>
+                                        <td class="border" style="text-align: right;">
+                                            <span t-field="o.commission_rate"
+                                                t-options="{'widget': 'float', 'precision': 2}" />
+                                        </td>
+                                        <td class="border" style="text-align: right;">
+                                            <b>
+                                                <span t-field="o.commission_amount"
+                                                    t-options="{'widget': 'float', 'precision': 2}" />
+                                            </b>
+                                        </td>
+                                        <td class="border" style="text-align: right;">
+                                            <span t-field="o.operation_amount"
+                                                t-options="{'widget': 'float', 'precision': 2}" />
+                                        </td>
+                                    </tr>
+                                </t>
                             </t>
                         </tbody>
-                        <tfoot style="font-size: 10px;">
-                            <tr>
-                                <td style="background-color: #adf58c;">Agente:</td>
-                                <td style="background-color: #adf58c;">
-                                    <span t-field="docs[0].agent.name" />
-                                </td>
-                                <td colspan="3"></td>
-                                <td style="background-color: #adf58c;">Total:</td>
-                                <td style="background-color: #adf58c; text-align: right;">
-                                    <b>
-                                        <span t-esc="total_amount + docs[0].previous_month"
-                                            t-options="{'widget': 'float', 'precision': 2}" />
-                                    </b>
-                                </td>
-                                <td></td>
-                            </tr>
-                        </tfoot>
                     </table>
                 </div>
             </t>
