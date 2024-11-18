@@ -40,7 +40,7 @@
                                 <td
                                     style="border: none; background-color: #8dd0f0; text-align: right;">
                                     <b>
-                                        <span t-field="docs[0].previous_month"
+                                        <span t-field="docs[-1].previous_month"
                                             t-options="{'widget': 'float', 'precision': 2}" />
                                     </b>
                                 </td>

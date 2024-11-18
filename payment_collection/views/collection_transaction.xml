@@ -16,12 +16,12 @@
                 <field name="commission" />
                 <field name="operation" />
                 <field name="description" />
+                <field name="amount" sum="Total" />
+                <field name="available_balance" />
                 <field name="origin_account_cuit" />
                 <field name="origin_account_cvu" />
                 <field name="origin_account_cbu" />
                 <field name="related_customer" />
-                <field name="amount" sum="Total" />
-                <field name="available_balance" />
                 <field name="cbu_destination_account" />
                 <field name="alias_destination_account" />
                 <field name="name_destination_account" />
@@ -85,7 +85,7 @@
                             AVISO! Estas retirando mas de lo disponible.
                         </div>
                         <field name="description" placeholder="Descripción..." />
-                        <field name="internal_notes" placeholder="Notas Internas del Cliente..." />
+                        <field name="internal_notes" placeholder="Notas Internas del Cliente..." widget="html"/>
                         <field name="count" invisible="1" />
                         <field name="alert_withdrawal" invisible="1" />
                     </group>
@@ -105,8 +105,8 @@
         <field name="model">collection.transaction</field>
         <field name="arch" type="xml">
             <search string="Buscador">
-                <field name="transaction_name" />
                 <field name="customer" />
+                <field name="transaction_name" />
                 <field name="service" />
                 <field name="operation" />
                 <group expand="1" string="Group By">
@@ -123,13 +123,9 @@
     <record id="collection_transaction_action" model="ir.actions.act_window">
         <field name="name">Recaudación de Pagos</field>
         <field name="res_model">collection.transaction</field>
-        <field name="view_mode">form,tree</field>
-    </record>
-
-    <record id="collection_transaction_action2" model="ir.actions.act_window">
-        <field name="name">Recaudación de Pagos</field>
-        <field name="res_model">collection.transaction</field>
         <field name="view_mode">tree,form</field>
     </record>
+
+
 
 </odoo>
