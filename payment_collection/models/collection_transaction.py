@@ -46,7 +46,7 @@ class CollectionTransaction(models.Model):
         default='falta_ejecutar',
     )
     collection_trans_type = fields.Selection(
-        [('retiro', 'Mov. Retiro'), ('movimiento_interno', 'Mov. Interno'), ('movimiento_recaudacion', 'Acreditación (Mov. de Recaudación)')],
+        [('retiro', 'Mov. Retiro'), ('movimiento_interno', 'Mov. Interno'), ('movimiento_recaudacion', 'Acreditación')],
         default='movimiento_recaudacion',
         string='Tipo de Transacción',
     )
@@ -171,7 +171,7 @@ class CollectionTransaction(models.Model):
 
             available_balance_list = [a.amount for a in available_balance_ids]
             available_withdrawal_list = [a.amount for a in avaiable_withdrawal_ids]
-            real_balance_list = [c.amount for c in customer]
+            real_balance_list = [c.amount if c.count != 1 else 0 for c in customer]
             commission_balance_list = [c.amount for c in customer if c.amount < 0 and c.collection_trans_type == 'movimiento_recaudacion']
             commission_app_rate_list = [c.commission_app_rate for c in customer]
             commission_app_amount_list = [c.commission_app_amount for c in customer]
