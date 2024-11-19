@@ -9,22 +9,17 @@
             <xpath expr="//group[1]" position="before">
                 <group>
                     <group>
-                        <field name="cuit_account_source" />
-                        <field name="cbu_account_source" />
-                        <field name="cvu_account_source" />
-                        <field name="alias_account_source" />
-                        <field name="name_account_source" />
-                    </group>
-                    <group>
-                        <field name="cuit_destination" />
-                        <field name="cbu_destination" />
-                        <field name="cvu_destination" />
-                        <field name="alias_destination" />
-                        <field name="name_account_destination" />
+                        <field name="check_origin_account"/>
                     </group>
                 </group>
             </xpath>
             <xpath expr="//page[@name='internal_notes']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+            <xpath expr="//field[@name='title']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+             <xpath expr="//field[@name='function']" position="attributes">
                 <attribute name="invisible">1</attribute>
             </xpath>
             <xpath expr="//page[@name='contact_addresses']" position="attributes">
@@ -35,6 +30,18 @@
                     <field name="comment"
                         placeholder="Ingresar los datos de las credenciales de acceso de la
                     cuenta origen..." />
+                </page>
+                <page string="Servicios">
+                    <field name="customer_services_ids">
+                        <tree editable="bottom">
+                            <field name="service" options="{'no_create': True, 'no_create_edit': True,'no_quick_create': True}"/>
+                            <field name="name_account"/>
+                            <field name="cuit"/>
+                            <field name="cbu"/>
+                            <field name="cvu"/>
+                            <field name="alias"/>
+                        </tree>
+                    </field>
                 </page>
             </xpath>
         </field>

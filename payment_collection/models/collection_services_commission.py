@@ -7,7 +7,7 @@ class CollectionServicesCommission(models.Model):
     _name = 'collection.services.commission'
     _rec_name = 'services'
 
-    customer = fields.Many2one('res.partner', string='Cliente', required=True)
+    customer = fields.Many2one('res.partner', string='Cliente', required=True, domain="[('check_origin_account','!=', True)]")
     services = fields.Many2one('product.template', string='Servicio', required=True, domain=[('collection_type', '=', 'service')])
     commission = fields.Float(string='Comisión', required=True)
     agent_services_commission = fields.One2many(

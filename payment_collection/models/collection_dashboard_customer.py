@@ -6,9 +6,9 @@ class CollectionDashboardCustomer(models.Model):
     
     
     customer = fields.Many2one('res.partner', string='Cliente')
-    customer_real_balance = fields.Float(string='Saldo Real')
+    customer_real_balance = fields.Float(string='Saldo Real App')
     customer_available_balance = fields.Float(string='Saldo Disponible')
-    collection_balance = fields.Float(string='Saldo Recaudado')
+    collection_balance = fields.Float(string='Saldo Total Cliente')
     last_operation_date = fields.Date(string='Fecha de ultima operación')
     commission_balance = fields.Float(string='Saldo de Comisión')
     commission_app_rate = fields.Float(string='Comi. App (%)')

@@ -10,14 +10,14 @@
                 decoration-info="collection_trans_type == 'movimiento_interno'">
                 <field name="collection_trans_type" string="Tipo T." />
                 <field name="date" />
-                <field name="customer" />
+                <field name="customer"/>
                 <field name="transaction_name" />
-                <field name="service" />
+                <field name="service"/>
                 <field name="commission" />
                 <field name="operation" />
                 <field name="description" />
                 <field name="amount" sum="Total" />
-                <field name="available_balance" />
+                <field name="available_balance" invisible="1" optional="hide"/>
                 <field name="origin_account_cuit" />
                 <field name="origin_account_cvu" />
                 <field name="origin_account_cbu" />
@@ -45,36 +45,40 @@
                     <group>
                         <group>
                             <field name="collection_trans_type" widget="radio"
-                                options="{'horizontal': True}" />
-                            <field name="customer" />
+                                options="{'horizontal': True}"/>
+                            <field name="customer" options="{'no_create': True, 'no_create_edit': True,'no_quick_create': True}"/>
                             <field name="service" required="1"
-                                domain="[('services.collection_type', '=', 'service'), ('customer', '=', customer)]" />
+                                domain="[('services.collection_type', '=', 'service'), ('customer', '=', customer)]" options="{'no_create': True, 'no_create_edit': True,'no_quick_create': True}"/>
                             <field name="commission" invisible="collection_trans_type == 'retiro'" />
-                            <field name="operation" domain="[('id', 'in', withdrawal_operations)]" />
+                            <field name="operation" domain="[('id', 'in', withdrawal_operations)]" options="{'no_create': True, 'no_create_edit': True,'no_quick_create': True}"/>
                             <field name="withdrawal_operations" invisible="1" />
                             <field name="date" />
                             <field name="related_customer"
                                 invisible="collection_trans_type == 'retiro'" />
                                 <field name="amount" />
                             <separator/>
-                            <field name="real_balance" readonly="1" force_save="1" />
                             <field name="available_balance" readonly="1" force_save="1" />
+                            <field name="total_balance_customer" readonly="1" force_save="1"/>
+                            <field name="real_balance" readonly="1" force_save="1" groups="payment_collection.groups_payment_collection_admin"/>
                             <field name="date_available_amount" readonly="1" force_save="1" />
                         </group>
                         <group>
-                            <field name="account_source"/>
+
+                            <field name="origin_account" domain="[('customer_services_id','=',customer)]" options="{'no_create': True, 'no_create_edit': True,'no_quick_create': True}"/>
                             <field name="origin_account_cuit"
-                                invisible="collection_trans_type == 'retiro'" />
-                            <field name="origin_account_cvu" force_save="1"/>
-                            <field name="origin_account_cbu" force_save="1"/>
-                            <field name="alias_origen" />
+                                invisible="collection_trans_type == 'movimiento_recaudacion'" />
+                            <field name="origin_account_cvu" force_save="1" invisible="collection_trans_type == 'movimiento_recaudacion'"/>
+                            <field name="origin_account_cbu" force_save="1" invisible="collection_trans_type == 'movimiento_recaudacion'"/>
+                            <field name="alias_origen" invisible="collection_trans_type == 'movimiento_recaudacion'"/>
                             <separator/>
-                            <field name="cbu_destination_account" />
-                            <field name="cvu_destination_account" />
-                            <field name="alias_destination_account" />
-                            <field name="name_destination_account" />
-                            <field name="commission_app_rate" readonly="1" force_save="1" />
-                            <field name="commission_app_amount" readonly="1" force_save="1" />
+                            <field name="customer_destination" invisible="collection_trans_type != 'movimiento_interno'" options="{'no_create': True, 'no_create_edit': True,'no_quick_create': True}"/>
+                            <field name="destination_account" invisible="collection_trans_type != 'movimiento_interno'" domain="[('customer_services_id','=',customer_destination)]" options="{'no_create': True, 'no_create_edit': True,'no_quick_create': True}"/>
+                            <field name="cuit_destination_account" invisible="collection_trans_type == 'retiro'"/>
+                            <field name="cbu_destination_account" invisible="collection_trans_type == 'retiro'"/>
+                            <field name="cvu_destination_account" invisible="collection_trans_type == 'retiro'"/>
+                            <field name="alias_destination_account" invisible="collection_trans_type == 'retiro'"/>
+                            <field name="commission_app_rate" readonly="1" force_save="1" invisible="collection_trans_type == 'movimiento_interno'"/>
+                            <field name="commission_app_amount" readonly="1" force_save="1" invisible="collection_trans_type == 'movimiento_interno'"/>
                             <field name="transaction_state" />
                             <field name="cbu_check" invisible="1" />
                             <field name="previous_month" invisible="1" />
