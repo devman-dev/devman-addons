@@ -39,15 +39,6 @@ class CollectionServicesCommission(models.Model):
             record.display_name = name
 
 
-
-    @api.onchange('customer')
-    def get_last_app_commission(self):
-        last_app_commission = self.env['commission.app'].search([], order='date desc', limit=1)
-        self.commission_app_rate = last_app_commission.commission_rate
-
-    def _compute_commission_rate(self):
-        pass
-
     @api.onchange('services')
     def get_commission(self):
         for rec in self:
