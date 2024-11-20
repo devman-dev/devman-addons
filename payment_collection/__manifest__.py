@@ -23,7 +23,6 @@
         'views/collection_dashboard_customer.xml',
         'views/product_template.xml',
         'views/res_partner.xml',
-        'views/commission_app.xml',
         'views/menuitems.xml',
         'wizard/payment_wiz.xml',
         'wizard/report_agent_wiz.xml',

@@ -36,6 +36,13 @@
                             <field name="commission_rate"/>
                         </tree>
                     </field>
+                    <group>
+                        <field name="name_account"/>
+                        <field name="cuit"/>
+                        <field name="cbu"/>
+                        <field name="cvu"/>
+                        <field name="alias"/>
+                    </group>
                     <field name="name" invisible="1"/>
                 </sheet>
             </form>

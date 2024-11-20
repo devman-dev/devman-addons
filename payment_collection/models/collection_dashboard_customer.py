@@ -5,7 +5,7 @@ class CollectionDashboardCustomer(models.Model):
     _name = 'collection.dashboard.customer'
     
     
-    customer = fields.Many2one('res.partner', string='Cliente')
+    customer = fields.Many2one('res.partner', string='Cliente', domain="[('check_origin_account','!=', True)]")
     customer_real_balance = fields.Float(string='Saldo Real App')
     customer_available_balance = fields.Float(string='Saldo Disponible')
     collection_balance = fields.Float(string='Saldo Total Cliente')

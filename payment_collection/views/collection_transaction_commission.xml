@@ -44,10 +44,10 @@
                             <field name="check_view_fields"/>
                             <field name="date" />
                             <field name="transaction_name" invisible="check_view_fields == False"/>
-                            <field name="customer" invisible="check_view_fields == False"/>
-                            <field name="transaction_service" invisible="check_view_fields == False"/>
-                            <field name="transaction_operation" invisible="check_view_fields == False"/>
-                            <field name="agent"/>
+                            <field name="customer" invisible="check_view_fields == False" options="{'no_create': True, 'no_create_edit': True,'no_quick_create': True}"/>
+                            <field name="transaction_service" invisible="check_view_fields == False" options="{'no_create': True, 'no_create_edit': True,'no_quick_create': True}"/>
+                            <field name="transaction_operation" invisible="check_view_fields == False" options="{'no_create': True, 'no_create_edit': True,'no_quick_create': True}"/>
+                            <field name="agent" options="{'no_create': True, 'no_create_edit': True,'no_quick_create': True}"/>
                             <field name="commission_rate" invisible="check_view_fields == False"/>
                         </group>
                         <group>

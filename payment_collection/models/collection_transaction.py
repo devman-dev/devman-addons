@@ -24,8 +24,8 @@ class CollectionTransaction(models.Model):
     related_customer = fields.Char(string='Cliente Relacionado', tracking=True)
     amount = fields.Float(string='Monto', tracking=True, required=True)
     date_available_amount = fields.Date('Fecha del monto disponible')
-    real_balance = fields.Float(string='Saldo Real App')
-    available_balance = fields.Float(string='Saldo Disponible Cliente', tracking=True)
+    real_balance = fields.Float(string='Saldo Real App', compute='compute_real_balance_costumer')
+    available_balance = fields.Float(string='Saldo Disponible Cliente', tracking=True, compute="compute_available_balance")
     total_balance_customer = fields.Float(string='Saldo Total Cliente', compute='get_total_balance_customer', tracking=True)
     cuit_destination_account = fields.Char('CUIT Destino')
     cbu_destination_account = fields.Char(string='CBU Destino', tracking=True, default=False)
@@ -33,7 +33,6 @@ class CollectionTransaction(models.Model):
     name_destination_account = fields.Char(string='Cta Destino', tracking=True)
     commission_app_rate = fields.Float(string='Comisión de la App', tracking=True)
     commission_app_amount = fields.Float(string='Monto de la App', tracking=True)
-    cbu_check = fields.Char('Check cbu')
     previous_month = fields.Float('Mes Anterior', compute='compute_previous_month')
     count = fields.Integer('', default=0)
     alias_destination_account = fields.Char(string='Alias Destino')
@@ -55,11 +54,11 @@ class CollectionTransaction(models.Model):
     withdrawal_operations = fields.Many2many('product.template', domain=[('collection_type', '=', 'operation')])
     alert_withdrawal = fields.Boolean()
     internal_notes = fields.Text()
-    account_source = fields.Many2one('res.partner', string='Cuenta Origen') # no se usa
-    origin_account = fields.Many2one('customer.services', string='Cuenta Origen')
 
-    customer_destination = fields.Many2one('res.partner', string="Cliente Destino")
-    destination_account = fields.Many2one('customer.services', string="Cuenta Destino")
+    origin_account = fields.Many2one('collection.services.commission', string='Cuenta Origen')
+
+    customer_destination = fields.Many2one('res.partner', string="Cliente Destino", domain="[('check_origin_account','!=', True)]")
+    destination_account = fields.Many2one('collection.services.commission', string="Cuenta Destino")
 
     @api.onchange('destination_account')
     def get_destination_account_data(self):
@@ -99,7 +98,7 @@ class CollectionTransaction(models.Model):
                 'destination_account':False,
                 'customer_destination': False
             })
-        elif self.origin_account and self.collection_trans_type == 'movimiento_interno':
+        elif self.origin_account and self.collection_trans_type == 'movimiento_interno' or self.collection_trans_type == 'retiro':
             self.sudo().write({
                 'origin_account_cuit': self.origin_account.cuit,
                 'origin_account_cbu': self.origin_account.cbu,
@@ -118,7 +117,12 @@ class CollectionTransaction(models.Model):
                 'cbu_destination_account': '',
                 'cvu_destination_account': '',
                 'alias_destination_account': '',
-                'name_destination_account': ''
+                'name_destination_account': '',
+
+                'origin_account_cuit': '',
+                'origin_account_cbu': '',
+                'origin_account_cvu': '',
+                'alias_origen': '',
             })
 
     @api.onchange('transaction_name')
@@ -288,21 +292,43 @@ class CollectionTransaction(models.Model):
                     }
                 )
 
-    @api.onchange('customer', 'amount')
-    @api.constrains('amount')
-    def _compute_real_balance_costumer(self):
+    @api.depends('customer','real_balance')
+    def compute_real_balance_costumer(self):
         for rec in self:
             if rec.customer:
                 dashboard_customer = self.env['collection.dashboard.customer'].sudo().search([('customer', '=', rec.customer.id)], limit=1)
-                rec.sudo().write({'real_balance': dashboard_customer.customer_real_balance})
+                if dashboard_customer:
+                    rec.sudo().write({'real_balance': dashboard_customer.customer_real_balance})
+                else:
+                    rec.sudo().write({'real_balance': 0})
+            else:
+                rec.real_balance = 0
+
+
+    @api.depends('customer', 'amount')
+    def compute_available_balance(self):
+        for rec in self:
+            if rec.customer:
+                dashboard_customer = self.env['collection.dashboard.customer'].sudo().search(
+                    [('customer', '=', rec.customer.id)], limit=1)
+                if dashboard_customer:
+                    rec.sudo().write({'available_balance': dashboard_customer.customer_available_balance})
+                else:
+                    rec.sudo().write({'available_balance': 0})
+            else:
+                rec.sudo().write({'available_balance': 0})
 
     @api.onchange('amount', 'date', 'customer')
-    def _compute_available_balance_costumer(self):
+    def _calculate_amount_withdrawal(self):
         for rec in self:
             if rec.customer:
-                dashboard_customer = self.env['collection.dashboard.customer'].sudo().search([('customer', '=', rec.customer.id)], limit=1)
-                rec.sudo().write({'available_balance': dashboard_customer.customer_available_balance})
-                if (rec.amount * -1) > rec.available_balance and rec.collection_trans_type == 'retiro':
+                amount = 0
+                if rec.amount > 0:
+                    amount = rec.amount
+                else:
+                    amount = rec.amount * -1
+
+                if amount > rec.available_balance and rec.collection_trans_type == 'retiro':
                     rec.alert_withdrawal = True
 
     @api.constrains('amount')
@@ -311,17 +337,7 @@ class CollectionTransaction(models.Model):
             if rec.collection_trans_type == 'retiro' and rec.alert_withdrawal:
                 rec.alert_withdrawal = False
 
-    @api.onchange('service')
-    def check_service(self):
-        for rec in self:
-            if not rec.service:
-                rec.cbu_check = ''
-                continue
-            service_name = rec.service.display_name.lower()
-            if service_name == 'cbu':
-                rec.cbu_check = 'cbu'
-            elif service_name == 'cvu':
-                rec.cbu_check = 'cvu'
+
 
     @api.depends('date')
     def compute_previous_month(self):

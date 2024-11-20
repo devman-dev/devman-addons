@@ -31,18 +31,6 @@
                         placeholder="Ingresar los datos de las credenciales de acceso de la
                     cuenta origen..." />
                 </page>
-                <page string="Servicios">
-                    <field name="customer_services_ids">
-                        <tree editable="bottom">
-                            <field name="service" options="{'no_create': True, 'no_create_edit': True,'no_quick_create': True}"/>
-                            <field name="name_account"/>
-                            <field name="cuit"/>
-                            <field name="cbu"/>
-                            <field name="cvu"/>
-                            <field name="alias"/>
-                        </tree>
-                    </field>
-                </page>
             </xpath>
         </field>
     </record>
