@@ -11,6 +11,23 @@
                 <field name="commission_default" />
                 <separator/>
             </field>
+            <xpath expr="//group[1]" position="before">
+
+                 <div name="options" style="margin-bottom:5px;">
+                        <span class="d-inline-block">
+                            <field name="check_internal" field_id="check_internal_0"/>
+                            <label for="check_internal"/>
+                        </span>
+                        <span class="d-inline-block">
+                            <field name="check_withdrawal" field_id="check_withdrawal_0"/>
+                            <label for="check_withdrawal"/>
+                        </span>
+                        <span class="d-inline-block">
+                            <field name="check_accreditation" field_id="check_accreditation_0"/>
+                            <label for="check_accreditation"/>
+                        </span>
+                 </div>
+            </xpath>
         </field>
     </record>
 

@@ -12,10 +12,10 @@ class CollectionTransactionCommission(models.Model):
 
     date = fields.Date(string='Fecha', tracking=True, default=datetime.datetime.now())
     transaction_name = fields.Char(string='N° Transaccion', tracking=True,)
-    customer = fields.Many2one('res.partner', string='Cliente', tracking=True,)
+    customer = fields.Many2one('res.partner', string='Cliente', tracking=True, domain="[('check_origin_account','!=', True)]")
     transaction_service = fields.Many2one('collection.services.commission', string='Servicio de Transacción', tracking=True,)
     transaction_operation = fields.Many2one('product.template', relation='operation', string='Operación de Transacción', tracking=True,)
-    agent = fields.Many2one('res.partner', string='Agente', tracking=True,)
+    agent = fields.Many2one('res.partner', string='Agente', tracking=True, domain="[('check_origin_account','!=', True)]")
     commission_rate = fields.Float(string='Tasa de comisión', tracking=True,)
     operation_amount = fields.Float(string='Monto de Operación', tracking=True,)
     commission_amount = fields.Float(string='Monto de Comisión', tracking=True,)

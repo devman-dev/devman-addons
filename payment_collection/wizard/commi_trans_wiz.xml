@@ -8,7 +8,7 @@
             <form string="Recaudación de Pagos">
                 <sheet>
                     <group>
-                        <field name="customer"/>
+                        <field name="customer" options="{'no_create': True, 'no_create_edit': True,'no_quick_create': True}"/>
                         <field name="previous_balance" invisible="1"/>
                     </group>
                     <group>

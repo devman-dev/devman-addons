@@ -22,8 +22,8 @@
                 <sheet>
                     <group>
                         <group>
-                            <field name="customer" />
-                            <field name="services" />
+                            <field name="customer" options="{'no_create': True, 'no_create_edit': True,'no_quick_create': True}"/>
+                            <field name="services" options="{'no_create': True, 'no_create_edit': True,'no_quick_create': True}"/>
                         </group>
                         <group>
                             <field name="commission" />
@@ -32,10 +32,17 @@
                     </group>
                     <field name="agent_services_commission">
                         <tree editable="bottom">
-                            <field name="agent" width="50%"/>
+                            <field name="agent" width="50%" options="{'no_create': True, 'no_create_edit': True,'no_quick_create': True}"/>
                             <field name="commission_rate"/>
                         </tree>
                     </field>
+                    <group>
+                        <field name="name_account"/>
+                        <field name="cuit"/>
+                        <field name="cbu"/>
+                        <field name="cvu"/>
+                        <field name="alias"/>
+                    </group>
                     <field name="name" invisible="1"/>
                 </sheet>
             </form>
