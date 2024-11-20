@@ -12,8 +12,6 @@ access_to_collection_transaction_user,access.collection.transaction,model_collec
 access_to_collection_dashboard_admin,access.collection.dashboard,model_collection_dashboard_customer,groups_payment_collection_admin,1,0,0,0
 access_to_collection_dashboard_user,access.collection.dashboard,model_collection_dashboard_customer,groups_payment_collection_user,1,0,0,0
 
-access_to_commission_app_admin,access.commission.app,model_commission_app,groups_payment_collection_admin,1,1,1,1
-
 access_to_payment_wiz_admin,access.payment.wiz,model_payment_wiz,groups_payment_collection_admin,1,1,1,1
 access_to_payment_wiz_user,access.payment.wiz,model_payment_wiz,groups_payment_collection_user,1,1,1,1
 access_to_payment_wiz_comi,access.payment.wiz,model_payment_wiz,groups_payment_collection_comi,1,1,1,1
