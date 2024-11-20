@@ -9,7 +9,7 @@ class ReportAgentWiz(models.TransientModel):
     previous_balance = fields.Float('Saldo anterior',)
     start_date = fields.Date('Fecha de inicio', required=True, default=lambda self: fields.Date.today() - relativedelta(months=1))
     end_date = fields.Date('Fecha Fin', required=True, default=fields.Date.today)
-    agent = fields.Many2one('res.partner', string='Agente', required=True)
+    agent = fields.Many2one('res.partner', string='Agente', required=True, domain="[('check_origin_account','!=', True)]")
     total_balance = fields.Float('Saldo Total')
 
 

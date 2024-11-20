@@ -5,9 +5,9 @@ from odoo.exceptions import ValidationError
 
 class CollectionServicesCommission(models.Model):
     _name = 'collection.services.commission'
-    _rec_name = 'services'
 
-    customer = fields.Many2one('res.partner', string='Cliente', required=True)
+
+    customer = fields.Many2one('res.partner', string='Cliente', required=True, domain="[('check_origin_account','!=', True)]")
     services = fields.Many2one('product.template', string='Servicio', required=True, domain=[('collection_type', '=', 'service')])
     commission = fields.Float(string='Comisión', required=True)
     agent_services_commission = fields.One2many(
@@ -16,13 +16,28 @@ class CollectionServicesCommission(models.Model):
     name = fields.Char()
     commission_app_rate = fields.Float(string='Comisión de la App', tracking=True)
 
-    @api.onchange('customer')
-    def get_last_app_commission(self):
-        last_app_commission = self.env['commission.app'].search([], order='date desc', limit=1)
-        self.commission_app_rate = last_app_commission.commission_rate
+    cbu = fields.Char('CBU')
+    cvu = fields.Char('CVU')
+    alias = fields.Char('Alias')
+    name_account = fields.Char('Nombre Cuenta')
+    cuit = fields.Char('CUIT')
 
-    def _compute_commission_rate(self):
-        pass
+
+    @api.depends('services')
+    @api.depends_context('show_account_name')
+    def _compute_display_name(self):
+        for record in self:
+            if self.env.context.get('show_servicio_name', False):
+                # Mostrar el nombre del servicio
+                name = record.services.display_name or "Sin Servicio"
+            elif self.env.context.get('show_account_name', False):
+                # Mostrar el nombre de la cuenta
+                name = record.name_account or "Sin Nombre de Cuenta"
+            else:
+                # Nombre por defecto
+                name = record.name or "Registro Sin Nombre"
+            record.display_name = name
+
 
     @api.onchange('services')
     def get_commission(self):
@@ -33,17 +48,18 @@ class CollectionServicesCommission(models.Model):
     @api.onchange('commission', 'commission_app_rate', 'agent_services_commission')
     def commission_limit(self):
         for rec in self:
-            total = rec.commission - rec.commission_app_rate
-            total_ac = []
-            for ac in rec.agent_services_commission:
-                total_ac.append(ac.commission_rate)
+            if rec.commission > 0:
+                total = rec.commission - rec.commission_app_rate
+                total_ac = []
+                for ac in rec.agent_services_commission:
+                    total_ac.append(ac.commission_rate)
 
-            total_agent_commission = sum(total_ac)
+                total_agent_commission = sum(total_ac)
 
-            if total_agent_commission > total:
-                raise ValidationError(
-                    'El total de comisiones de agentes supera la cantidad de comisión. Para agregar un nuevo comisionista edite las cantidades anteriores.'
-                )
+                if total_agent_commission > total:
+                    raise ValidationError(
+                        'El total de comisiones de agentes supera la cantidad de comisión. Para agregar un nuevo comisionista edite las cantidades anteriores.'
+                    )
 
     @api.constrains('agent_services_commission')
     def delete_agent_commission_zero(self):

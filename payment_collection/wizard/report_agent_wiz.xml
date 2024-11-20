@@ -8,7 +8,7 @@
             <form string="Reporte de agente">
                 <sheet>
                     <group>
-                        <field name="agent"/>
+                        <field name="agent" options="{'no_create': True, 'no_create_edit': True,'no_quick_create': True}"/>
                         <field name="previous_balance" invisible="1"/>
                     </group>
                     <group>
