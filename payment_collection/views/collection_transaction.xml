@@ -12,7 +12,7 @@
                 <field name="date" />
                 <field name="customer"/>
                 <field name="transaction_name" />
-                <field name="service"/>
+                <field name="service" context="{'show_servicio_name': True}"/>
                 <field name="commission" />
                 <field name="operation" />
                 <field name="description" />

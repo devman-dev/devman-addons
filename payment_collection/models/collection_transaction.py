@@ -165,17 +165,19 @@ class CollectionTransaction(models.Model):
     @api.model
     def create(self, vals):
         if vals['count'] == 0:
+
             vals['transaction_name'] = self.env['ir.sequence'].next_by_code('collection.transaction') or ('New')
+
             bills_id = self.env['product.template'].sudo().search([('name', 'ilike', 'gastos')], limit=1)
+
+
             dict_transac = {
                 'customer': vals['customer'],
                 'transaction_name': str(vals['transaction_name']),
                 'service': vals['service'],
                 'date': vals['date'],
-                'commission': vals['commission'],
                 'operation': bills_id.id,
                 'description': 'Comisión',
-                'amount': ((vals['commission'] / 100) * vals['amount']) * -1,
                 'origin_account_cuit': 0,
                 'origin_account_cvu': 0,
                 'origin_account_cbu': 0,
@@ -183,8 +185,18 @@ class CollectionTransaction(models.Model):
                 'cbu_destination_account': 0,
                 'count': 1,
             }
+
+            if 'commission' not in vals:
+                commission_search = self.env['collection.services.commission'].sudo().search([('id', '=', vals['service'])], limit=1)
+                dict_transac['commission'] = commission_search.commission
+                dict_transac['amount'] = ((dict_transac['commission'] / 100) * vals['amount']) * -1
+            else:
+                dict_transac['commission'] = vals['commission']
+                dict_transac['amount'] = ((vals['commission'] / 100) * vals['amount']) * -1
+
             if not vals['collection_trans_type'] == 'retiro' and not vals['collection_trans_type'] == 'movimiento_interno':
                 self.env['collection.transaction'].sudo().create(dict_transac)
+
         res = super(CollectionTransaction, self).create(vals)
 
         message = ('Se ha creado la siguiente transaccion: %s.') % (str(vals['transaction_name']))
