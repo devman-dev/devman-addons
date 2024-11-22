@@ -35,7 +35,7 @@ class CollectionServicesCommission(models.Model):
                 name = record.name_account or "Sin Nombre de Cuenta"
             else:
                 # Nombre por defecto
-                name = record.name or "Registro Sin Nombre"
+                name = record.services.display_name or "Registro Sin Nombre"
             record.display_name = name
 
 

@@ -25,7 +25,7 @@ class CollectionTransaction(models.Model):
     amount = fields.Float(string='Monto', tracking=True, required=True)
     date_available_amount = fields.Date('Fecha del monto disponible')
     real_balance = fields.Float(string='Saldo Real App', compute='compute_real_balance_costumer')
-    available_balance = fields.Float(string='Saldo Disponible Cliente', tracking=True, compute="compute_available_balance")
+    available_balance = fields.Float(string='Saldo Disponible Cliente', tracking=True, compute='compute_available_balance')
     total_balance_customer = fields.Float(string='Saldo Total Cliente', compute='get_total_balance_customer', tracking=True)
     cuit_destination_account = fields.Char('CUIT Destino')
     cbu_destination_account = fields.Char(string='CBU Destino', tracking=True, default=False)
@@ -47,7 +47,11 @@ class CollectionTransaction(models.Model):
         default='falta_ejecutar',
     )
     collection_trans_type = fields.Selection(
-        [('movimiento_recaudacion', 'Acreditación'), ('retiro', 'Mov. Retiro'), ('movimiento_interno', 'Mov. Interno'),],
+        [
+            ('movimiento_recaudacion', 'Acreditación'),
+            ('retiro', 'Mov. Retiro'),
+            ('movimiento_interno', 'Mov. Interno'),
+        ],
         default='movimiento_recaudacion',
         string='Tipo de Transacción',
     )
@@ -57,73 +61,164 @@ class CollectionTransaction(models.Model):
 
     origin_account = fields.Many2one('collection.services.commission', string='Cuenta Origen')
 
-    customer_destination = fields.Many2one('res.partner', string="Cliente Destino", domain="[('check_origin_account','!=', True)]")
-    destination_account = fields.Many2one('collection.services.commission', string="Cuenta Destino")
+    customer_destination = fields.Many2one('res.partner', string='Cliente Destino', domain="[('check_origin_account','!=', True)]")
+    destination_account = fields.Many2one('collection.services.commission', string='Cuenta Destino')
+
+    def write(self, values):
+        return super().write(values)
+        for rec in self:
+            if 'amount' in values:
+                if values['amount'] > rec.amount:
+                    pass
+
+    def unlink(self):
+        for rec in self:
+            if rec.amount < 0 and rec.collection_trans_type == 'movimiento_recaudacion':
+                continue
+            domain = [('transaction_name', '=', rec.transaction_name), ('customer', '=', rec.customer.id), ('amount', '<', 0), ('id', '!=', rec.id)]
+            rec_commission = self.env['collection.transaction'].search(domain)
+            if rec_commission:
+                rec_commission.unlink()
+                
+            if rec.collection_trans_type == 'movimiento_recaudacion':
+                self.recalculate_customer_balance_unlink()
+            elif rec.collection_trans_type == 'retiro' or rec.collection_trans_type == 'movimiento_interno':
+                self.recalculate_customer_balance_withdrawal_internal()
+
+        return super().unlink()
+
+    def recalculate_customer_balance_withdrawal_internal(self):
+        for rec in self:
+            if rec.amount > 0:
+                continue
+            rec_customer = self.env['collection.transaction'].search([('customer', '=', rec.customer.id), ('id', '!=', rec.id), ('amount', '>', 0)])
+            rec_dashboard = self.env['collection.dashboard.customer'].search([('customer', '=', rec.customer.id)])
+            rec_service_id = rec.service.id
+            agent_domain = [
+                ('transaction_service', '=', rec_service_id),
+                ('transaction_name', '=', rec.transaction_name),
+                ('customer', '=', rec.customer.id),
+            ]
+            rec_agent_trans = self.env['collection.transaction.commission'].search(agent_domain)
+            for agent in rec_agent_trans:
+                agent.unlink()
+            if not rec_customer:
+                rec_dashboard.sudo().unlink()
+            elif rec_customer and rec_dashboard:
+                rec.amount *= -1
+                rec_amount = rec.amount + ((rec.amount * rec.commission) / 100)
+                rec_amount_app = rec.amount + ((rec.amount * rec.commission_app_rate) / 100)
+                available_balance = rec_dashboard.customer_available_balance
+                available_balance += rec_amount
+                total_balance = rec_dashboard.collection_balance + rec_amount
+                real_balance_app = rec_dashboard.customer_real_balance + rec_amount_app
+                rec_dashboard.sudo().write(
+                    {'collection_balance': total_balance, 'customer_real_balance': real_balance_app, 'customer_available_balance': available_balance}
+                )
+
+    def recalculate_customer_balance_unlink(self):
+        for rec in self:
+            if rec.amount < 0:
+                continue
+            rec_customer = self.env['collection.transaction'].search([('customer', '=', rec.customer.id), ('id', '!=', rec.id), ('amount', '>', 0)])
+            rec_dashboard = self.env['collection.dashboard.customer'].search([('customer', '=', rec.customer.id)])
+            rec_service_id = rec.service.id
+            agent_domain = [
+                ('transaction_service', '=', rec_service_id),
+                ('transaction_name', '=', rec.transaction_name),
+                ('customer', '=', rec.customer.id),
+            ]
+            rec_agent_trans = self.env['collection.transaction.commission'].search(agent_domain)
+            for agent in rec_agent_trans:
+                agent.unlink()
+            if not rec_customer:
+                rec_dashboard.sudo().unlink()
+            elif rec_customer and rec_dashboard:
+                rec_amount = rec.amount - ((rec.amount * rec.commission) / 100)
+                rec_amount_app = rec.amount - ((rec.amount * rec.commission_app_rate) / 100)
+                available_balance = rec_dashboard.customer_available_balance
+                if available_balance > 0:
+                    available_balance -= rec_amount
+                total_balance = rec_dashboard.collection_balance - rec_amount
+                real_balance_app = rec_dashboard.customer_real_balance - rec_amount_app
+                rec_dashboard.sudo().write({'collection_balance': total_balance, 'customer_real_balance': real_balance_app})
+
+        pass
 
     @api.onchange('destination_account')
     def get_destination_account_data(self):
         if self.destination_account:
-            self.sudo().write({
-                'cuit_destination_account': self.destination_account.cuit,
-                'cbu_destination_account': self.destination_account.cbu,
-                'cvu_destination_account': self.destination_account.cvu,
-                'alias_destination_account': self.destination_account.alias,
-            })
+            self.sudo().write(
+                {
+                    'cuit_destination_account': self.destination_account.cuit,
+                    'cbu_destination_account': self.destination_account.cbu,
+                    'cvu_destination_account': self.destination_account.cvu,
+                    'alias_destination_account': self.destination_account.alias,
+                }
+            )
         else:
-            self.sudo().write({
-                'cuit_destination_account': '',
-                'cbu_destination_account': '',
-                'cvu_destination_account': '',
-                'alias_destination_account': '',
-                'name_destination_account': ''
-            })
+            self.sudo().write(
+                {
+                    'cuit_destination_account': '',
+                    'cbu_destination_account': '',
+                    'cvu_destination_account': '',
+                    'alias_destination_account': '',
+                    'name_destination_account': '',
+                }
+            )
 
     @api.depends('customer')
     def get_total_balance_customer(self):
         for rec in self:
-            customer = rec.env['collection.transaction'].sudo().search([('customer','=',rec.customer.id),('collection_trans_type','!=', 'movimiento_interno')])
+            customer = (
+                rec.env['collection.transaction']
+                .sudo()
+                .search([('customer', '=', rec.customer.id), ('collection_trans_type', '!=', 'movimiento_interno')])
+            )
             total_balance = sum([r.amount for r in customer])
-            rec.sudo().write({'total_balance_customer':total_balance})
+            rec.sudo().write({'total_balance_customer': total_balance})
 
-    
-    @api.onchange('origin_account','collection_trans_type')
+    @api.onchange('origin_account', 'collection_trans_type')
     def get_origin_account_data(self):
         if self.origin_account and self.collection_trans_type == 'movimiento_recaudacion':
-            self.sudo().write({
-                'cuit_destination_account': self.origin_account.cuit,
-                'cbu_destination_account': self.origin_account.cbu,
-                'cvu_destination_account': self.origin_account.cvu,
-                'alias_destination_account': self.origin_account.alias,
-
-                'destination_account':False,
-                'customer_destination': False
-            })
+            self.sudo().write(
+                {
+                    'cuit_destination_account': self.origin_account.cuit,
+                    'cbu_destination_account': self.origin_account.cbu,
+                    'cvu_destination_account': self.origin_account.cvu,
+                    'alias_destination_account': self.origin_account.alias,
+                    'destination_account': False,
+                    'customer_destination': False,
+                }
+            )
         elif self.origin_account and self.collection_trans_type == 'movimiento_interno' or self.collection_trans_type == 'retiro':
-            self.sudo().write({
-                'origin_account_cuit': self.origin_account.cuit,
-                'origin_account_cbu': self.origin_account.cbu,
-                'origin_account_cvu': self.origin_account.cvu,
-                'alias_origen': self.origin_account.alias,
-
-                'cuit_destination_account': '',
-                'cbu_destination_account': '',
-                'cvu_destination_account': '',
-                'alias_destination_account': '',
-                'name_destination_account': ''
-            })
+            self.sudo().write(
+                {
+                    'origin_account_cuit': self.origin_account.cuit,
+                    'origin_account_cbu': self.origin_account.cbu,
+                    'origin_account_cvu': self.origin_account.cvu,
+                    'alias_origen': self.origin_account.alias,
+                    'cuit_destination_account': '',
+                    'cbu_destination_account': '',
+                    'cvu_destination_account': '',
+                    'alias_destination_account': '',
+                    'name_destination_account': '',
+                }
+            )
         else:
-            self.sudo().write({
-                'cuit_destination_account': '',
-                'cbu_destination_account': '',
-                'cvu_destination_account': '',
-                'alias_destination_account': '',
-                'name_destination_account': '',
-
-                'origin_account_cuit': '',
-                'origin_account_cbu': '',
-                'origin_account_cvu': '',
-                'alias_origen': '',
-            })
+            self.sudo().write(
+                {
+                    'cuit_destination_account': '',
+                    'cbu_destination_account': '',
+                    'cvu_destination_account': '',
+                    'alias_destination_account': '',
+                    'name_destination_account': '',
+                    'origin_account_cuit': '',
+                    'origin_account_cbu': '',
+                    'origin_account_cvu': '',
+                    'alias_origen': '',
+                }
+            )
 
     @api.onchange('transaction_name')
     def get_last_client(self):
@@ -147,29 +242,28 @@ class CollectionTransaction(models.Model):
 
         # TRAEMOS DATOS DEL CLIENTE DESDE RES PARTNER.
         if self.customer:
-            self.sudo().write({
-                'cbu_destination_account': '',
-                'cvu_destination_account': '',
-                'alias_destination_account': '',
-                'name_destination_account': '',
-                'destination_account': '',
-                'internal_notes': self.customer.comment,
-
-                'origin_account_cuit': '',
-                'origin_account_cbu': '',
-                'origin_account_cvu': '',
-                'alias_origen': '',
-                'origin_account': '',
-            })
+            self.sudo().write(
+                {
+                    'cbu_destination_account': '',
+                    'cvu_destination_account': '',
+                    'alias_destination_account': '',
+                    'name_destination_account': '',
+                    'destination_account': '',
+                    'internal_notes': self.customer.comment,
+                    'origin_account_cuit': '',
+                    'origin_account_cbu': '',
+                    'origin_account_cvu': '',
+                    'alias_origen': '',
+                    'origin_account': '',
+                }
+            )
 
     @api.model
     def create(self, vals):
         if vals['count'] == 0:
-
             vals['transaction_name'] = self.env['ir.sequence'].next_by_code('collection.transaction') or ('New')
 
             bills_id = self.env['product.template'].sudo().search([('name', 'ilike', 'gastos')], limit=1)
-
 
             dict_transac = {
                 'customer': vals['customer'],
@@ -205,9 +299,6 @@ class CollectionTransaction(models.Model):
 
         return res
 
-    def _compute_account_move(self):
-        pass
-
     @api.constrains('customer')
     def compute_commission_agent(self):
         for rec in self:
@@ -228,9 +319,6 @@ class CollectionTransaction(models.Model):
                             'commission_amount': commission_amount,
                         }
                     )
-
-    def _compute_generate_expense(self):
-        pass
 
     @api.constrains('customer')
     def create_dashboard_customer(self):
@@ -304,7 +392,7 @@ class CollectionTransaction(models.Model):
                     }
                 )
 
-    @api.depends('customer','real_balance')
+    @api.depends('customer', 'real_balance')
     def compute_real_balance_costumer(self):
         for rec in self:
             if rec.customer:
@@ -316,13 +404,11 @@ class CollectionTransaction(models.Model):
             else:
                 rec.real_balance = 0
 
-
     @api.depends('customer', 'amount')
     def compute_available_balance(self):
         for rec in self:
             if rec.customer:
-                dashboard_customer = self.env['collection.dashboard.customer'].sudo().search(
-                    [('customer', '=', rec.customer.id)], limit=1)
+                dashboard_customer = self.env['collection.dashboard.customer'].sudo().search([('customer', '=', rec.customer.id)], limit=1)
                 if dashboard_customer:
                     rec.sudo().write({'available_balance': dashboard_customer.customer_available_balance})
                 else:
@@ -348,8 +434,6 @@ class CollectionTransaction(models.Model):
         for rec in self:
             if rec.collection_trans_type == 'retiro' and rec.alert_withdrawal:
                 rec.alert_withdrawal = False
-
-
 
     @api.depends('date')
     def compute_previous_month(self):
@@ -399,20 +483,20 @@ class CollectionTransaction(models.Model):
     def set_default_operation(self):
         for rec in self:
             if rec.collection_trans_type == 'movimiento_recaudacion':
-                accreditation = rec.operation.search([('check_accreditation', '=', True),('collection_type', '=', 'operation')])
+                accreditation = rec.operation.search([('check_accreditation', '=', True), ('collection_type', '=', 'operation')])
                 if accreditation:
                     rec.withdrawal_operations = accreditation.ids
                 else:
                     rec.withdrawal_operations = accreditation
 
             elif rec.collection_trans_type == 'retiro':
-                extraction = rec.operation.search([('check_withdrawal', '=', True),('collection_type', '=', 'operation')])
+                extraction = rec.operation.search([('check_withdrawal', '=', True), ('collection_type', '=', 'operation')])
                 if extraction:
                     rec.withdrawal_operations = extraction.ids
                 else:
                     rec.withdrawal_operations = extraction
             elif rec.collection_trans_type == 'movimiento_interno':
-                internal = rec.operation.search([('check_internal', '=', True),('collection_type', '=', 'operation')])
+                internal = rec.operation.search([('check_internal', '=', True), ('collection_type', '=', 'operation')])
                 if internal:
                     rec.withdrawal_operations = internal.ids
                 else:
