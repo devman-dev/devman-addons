@@ -12,7 +12,7 @@
                 <field name="date" />
                 <field name="customer"/>
                 <field name="transaction_name" />
-                <field name="service" context="{'show_servicio_name': True}"/>
+                <field name="service"/>
                 <field name="commission" />
                 <field name="operation" />
                 <field name="description" />
@@ -62,26 +62,91 @@
                             <field name="real_balance" readonly="1" force_save="1" groups="payment_collection.groups_payment_collection_admin"/>
                             <field name="date_available_amount" readonly="1" force_save="1" />
                         </group>
-                        <group>
+                        <!-- Acreditacion -->
+                        <group invisible="collection_trans_type != 'movimiento_recaudacion'">
+                            <field name="name_destination_account" readonly="1" force_save="1"/>
+                            <field name="cuit_destination_account" readonly="1" force_save="1"/>
+                            <field name="cbu_destination_account" readonly="1" force_save="1"/>
+                            <field name="cvu_destination_account" readonly="1" force_save="1"/>
+                            <field name="alias_destination_account" readonly="1" force_save="1"/>
 
-                            <field name="origin_account" domain="[('customer','=',customer)]" context="{'show_account_name': True}" options="{'no_create': True, 'no_create_edit': True,'no_quick_create': True}"/>
-                            <field name="origin_account_cuit"
-                                invisible="collection_trans_type == 'movimiento_recaudacion'" />
-                            <field name="origin_account_cvu" force_save="1" invisible="collection_trans_type == 'movimiento_recaudacion'"/>
-                            <field name="origin_account_cbu" force_save="1" invisible="collection_trans_type == 'movimiento_recaudacion'"/>
-                            <field name="alias_origen" invisible="collection_trans_type == 'movimiento_recaudacion'"/>
                             <separator/>
-                            <field name="customer_destination" invisible="collection_trans_type != 'movimiento_interno'" options="{'no_create': True, 'no_create_edit': True,'no_quick_create': True}"/>
-                            <field name="destination_account" invisible="collection_trans_type != 'movimiento_interno'" domain="[('customer','=',customer_destination)]" options="{'no_create': True, 'no_create_edit': True,'no_quick_create': True}"/>
-                            <field name="cuit_destination_account" invisible="collection_trans_type == 'retiro'"/>
-                            <field name="cbu_destination_account" invisible="collection_trans_type == 'retiro'"/>
-                            <field name="cvu_destination_account" invisible="collection_trans_type == 'retiro'"/>
-                            <field name="alias_destination_account" invisible="collection_trans_type == 'retiro'"/>
-                            <field name="commission_app_rate" readonly="1" force_save="1" invisible="collection_trans_type == 'movimiento_interno'"/>
-                            <field name="commission_app_amount" readonly="1" force_save="1" invisible="collection_trans_type == 'movimiento_interno'"/>
-                            <field name="transaction_state" />
-                            <field name="previous_month" invisible="1" />
+
+                            <field name="origin_type" help="Seleccione Interno si el cliente pertenece a PagoFlex" widget="radio" options="{'horizontal': True}"/>
+
+                            <field name="customer_origin" options="{'no_create': True, 'no_create_edit': True,'no_quick_create': True}" invisible="origin_type == 'externo'"/>
+                            <field name="origin_account" domain="[('customer','=',customer_origin)]"
+                                   context="{'show_account_name': True}"
+                                   options="{'no_create': True, 'no_create_edit': True,'no_quick_create': True}" invisible="origin_type == 'externo'"/>
+                            <field name="origen_name_account_extern" invisible="origin_type == 'interno'"/>
+                            <field name="origin_account_cuit" readonly="origin_type == 'interno'"/>
+                            <field name="origin_account_cvu" readonly="origin_type == 'interno'" force_save="1"/>
+                            <field name="origin_account_cbu" readonly="origin_type == 'interno'" force_save="1"/>
+                            <field name="alias_origen" readonly="origin_type == 'interno'" force_save="1"/>
+
+
+                            <field name="commission_app_rate" readonly="1" force_save="1"/>
+                            <field name="commission_app_amount" readonly="1" force_save="1"/>
+                            <field name="transaction_state"/>
+                            <field name="previous_month" invisible="1"/>
                         </group>
+
+                        <!--retiro -->
+                        <group invisible="collection_trans_type != 'retiro'">
+
+                            <!--                            <field name="customer_destination" options="{'no_create': True, 'no_create_edit': True,'no_quick_create': True}"/>-->
+                            <!--                            <field name="destination_account" domain="[('customer','=',customer_destination)]" options="{'no_create': True, 'no_create_edit': True,'no_quick_create': True}"/>-->
+                            <field name="name_destination_account"/>
+                            <field name="cuit_destination_account"/>
+                            <field name="cbu_destination_account"/>
+                            <field name="cvu_destination_account"/>
+                            <field name="alias_destination_account"/>
+
+                            <separator/>
+
+                            <field name="origin_account" domain="[('customer','=',customer)]"
+                                   context="{'show_account_name': True}"
+                                   options="{'no_create': True, 'no_create_edit': True,'no_quick_create': True}"/>
+                            <field name="origin_account_cuit"/>
+                            <field name="origin_account_cvu" force_save="1"/>
+                            <field name="origin_account_cbu" force_save="1"/>
+                            <field name="alias_origen" force_save="1"/>
+
+
+                            <field name="commission_app_rate" readonly="1" force_save="1"/>
+                            <field name="commission_app_amount" readonly="1" force_save="1"/>
+                            <field name="transaction_state"/>
+                            <field name="previous_month" invisible="1"/>
+                        </group>
+
+                         <!-- Interno -->
+                        <group invisible="collection_trans_type != 'movimiento_interno'">
+
+                            <!--                            <field name="customer_destination" options="{'no_create': True, 'no_create_edit': True,'no_quick_create': True}"/>-->
+                            <!--                            <field name="destination_account" domain="[('customer','=',customer_destination)]" options="{'no_create': True, 'no_create_edit': True,'no_quick_create': True}"/>-->
+                            <field name="name_destination_account"/>
+                            <field name="cuit_destination_account"/>
+                            <field name="cbu_destination_account"/>
+                            <field name="cvu_destination_account"/>
+                            <field name="alias_destination_account"/>
+
+                            <separator/>
+
+                            <field name="origin_account" domain="[('customer','=',customer)]"
+                                   context="{'show_account_name': True}"
+                                   options="{'no_create': True, 'no_create_edit': True,'no_quick_create': True}"/>
+                            <field name="origin_account_cuit"/>
+                            <field name="origin_account_cvu" force_save="1"/>
+                            <field name="origin_account_cbu" force_save="1"/>
+                            <field name="alias_origen" force_save="1"/>
+
+
+                            <field name="commission_app_rate" readonly="1" force_save="1"/>
+                            <field name="commission_app_amount" readonly="1" force_save="1"/>
+                            <field name="transaction_state"/>
+                            <field name="previous_month" invisible="1"/>
+                        </group>
+
                         <div id="alertWithdrawal" role="alert" class="alert alert-danger"
                             style="height: 40px; width: 90%; margin-bottom: 20px;"
                             invisible="alert_withdrawal != True">
