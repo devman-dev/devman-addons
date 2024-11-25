@@ -299,13 +299,23 @@ class CollectionTransaction(models.Model):
                     'name_destination_account': '',
                     'destination_account': '',
                     'internal_notes': self.customer.comment,
-                    'origin_account_cuit': '',
-                    'origin_account_cbu': '',
-                    'origin_account_cvu': '',
-                    'alias_origen': '',
-                    'origin_account': '',
                 }
             )
+        if not self.service:
+            self.sudo().write({
+             'cbu_destination_account': '',
+             'cvu_destination_account': '',
+             'alias_destination_account': '',
+             'name_destination_account': '',
+             'destination_account': '',
+             'internal_notes': self.customer.comment,
+             'origin_account_cuit': '',
+             'origin_account_cbu': '',
+             'origin_account_cvu': '',
+             'alias_origen': '',
+             'origin_account': '',
+             'customer_origin': '',
+            })
 
     @api.model
     def create(self, vals):
