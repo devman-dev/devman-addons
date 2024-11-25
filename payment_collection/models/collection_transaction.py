@@ -70,7 +70,7 @@ class CollectionTransaction(models.Model):
 
 
     def write(self, values):
-        return super().write(values)
+        print('hola write')
         for rec in self:
             if 'amount' in values:
                 if 'collection_trans_type' in values:
@@ -80,13 +80,33 @@ class CollectionTransaction(models.Model):
                 if values['amount'] < 0 and collection_trans_type == 'movimiento_recaudacion':
                     continue
                 if values['amount'] != rec.amount:
+
+                    # Relculo de comision
                     commission = ((rec.commission / 100) * values['amount']) * -1
 
                     domain = [('transaction_name', '=', rec.transaction_name), ('customer', '=', rec.customer.id),
                               ('amount', '<', 0), ('id', '!=', rec.id)]
                     rec_commission = self.env['collection.transaction'].search(domain)
 
+
+
+                    # Relculo de comision de agentes
+
+                    domain = [('transaction_name', '=', rec.transaction_name), ('customer', '=', rec.customer.id)]
+                    commission_agent = self.env['collection.transaction.commission'].search(domain)
+                    for agent_service in commission_agent:
+                        commission_amount = (agent_service.commission_rate * values['amount']) / 100
+                        if commission_amount > 0 and rec.count == 0:
+                            agent_service.sudo().write(
+                                {
+                                    'operation_amount': values['amount'],
+                                    'payment_rest': commission_amount,
+                                    'commission_amount': commission_amount,
+                                }
+                            )
                     rec_commission.amount = commission
+                    # self.create_dashboard_customer(values)
+        return super().write(values)
 
     def unlink(self):
         for rec in self:
@@ -385,7 +405,7 @@ class CollectionTransaction(models.Model):
                     )
 
     @api.constrains('customer')
-    def create_dashboard_customer(self):
+    def create_dashboard_customer(self, values):
         for rec in self:
             if rec.collection_trans_type == 'movimiento_interno' or rec.count == 1:
                 return
