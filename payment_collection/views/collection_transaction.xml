@@ -71,7 +71,7 @@
 
                         <!-- Acreditacion -->
                         <group invisible="collection_trans_type != 'movimiento_recaudacion'">
-                            <field name="destination_account" domain="[('customer','=',customer)]"
+                            <field name="destination_account" domain="[('customer','=', customer)]"
                                 options="{'no_create': True, 'no_create_edit': True,'no_quick_create': True}"
                                 context="{'show_account_name': True}"
                             />
@@ -112,7 +112,10 @@
 
                         <!--Retiro -->
                         <group invisible="collection_trans_type != 'retiro'">
-                            
+                            <field name="destination_account"
+                            domain="[('id','in',binary_domain)]"
+                            context="{'show_account_name': True}"
+                            options="{'no_create': True, 'no_create_edit': True, 'no_quick_create': True}"/>
                             <field name="cuit_destination_account" />
                             <field name="cbu_destination_account" />
                             <field name="cvu_destination_account" />
@@ -170,6 +173,7 @@
                             widget="html" />
                         <field name="count" invisible="1" />
                         <field name="alert_withdrawal" invisible="1" />
+                        <field name="binary_domain" invisible="1"/>
                     </group>
                 </sheet>
                 <!-- Chatter -->
