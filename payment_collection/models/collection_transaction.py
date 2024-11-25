@@ -165,17 +165,7 @@ class CollectionTransaction(models.Model):
 
     @api.onchange('service')
     def get_service_destination_account_data(self):
-        if self.service:
-            self.sudo().write(
-                {
-                    'name_destination_account': self.service.name_account,
-                    'cuit_destination_account': self.service.cuit,
-                    'cbu_destination_account': self.service.cbu,
-                    'cvu_destination_account': self.service.cvu,
-                    'alias_destination_account': self.service.alias,
-                }
-            )
-        else:
+        if not self.service:
             self.sudo().write(
                 {
                     'cuit_destination_account': '',
