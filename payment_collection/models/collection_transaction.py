@@ -5,6 +5,7 @@ from dateutil.relativedelta import relativedelta
 from odoo.exceptions import ValidationError
 
 
+
 class CollectionTransaction(models.Model):
     _name = 'collection.transaction'
     _inherit = ['mail.thread', 'mail.activity.mixin']
@@ -21,7 +22,7 @@ class CollectionTransaction(models.Model):
     origin_account_cuit = fields.Char(string='CUIT origen', tracking=True, default=False)
     origin_account_cvu = fields.Char(string='CVU origen', tracking=True)
     origin_account_cbu = fields.Char(string='CBU origen', tracking=True)
-    origen_name_account_extern = fields.Char(string='Cta Origen')
+    origen_name_account_extern = fields.Char(string='Cuenta Origen')
     related_customer = fields.Char(string='Cliente Relacionado', tracking=True)
     amount = fields.Float(string='Monto', tracking=True, required=True)
     date_available_amount = fields.Date('Fecha del monto disponible')
@@ -31,7 +32,7 @@ class CollectionTransaction(models.Model):
     cuit_destination_account = fields.Char('CUIT Destino')
     cbu_destination_account = fields.Char(string='CBU Destino', tracking=True, default=False)
     cvu_destination_account = fields.Char(string='CVU Destino', tracking=True, default=False)
-    name_destination_account = fields.Char(string='Cta Destino', tracking=True)
+    name_destination_account = fields.Char(string='Cuenta Destino', tracking=True)
     commission_app_rate = fields.Float(string='Comisión de la App', tracking=True)
     commission_app_amount = fields.Float(string='Monto de la App', tracking=True)
     previous_month = fields.Float('Mes Anterior', compute='compute_previous_month')
@@ -65,12 +66,27 @@ class CollectionTransaction(models.Model):
     customer_origin = fields.Many2one('res.partner', string='Cliente Origen', domain="[('check_origin_account','!=', True)]")
     origin_type = fields.Selection([('externo', 'Externo'), ('interno', 'Interno')], default='externo', string='Tipo de Origen')
     binary_domain = fields.Binary(default=[])
+    origin_account_table = fields.Many2many('collection.services.commission')
+
+
     def write(self, values):
         return super().write(values)
         for rec in self:
             if 'amount' in values:
-                if values['amount'] > rec.amount:
-                    pass
+                if 'collection_trans_type' in values:
+                    collection_trans_type = values['collection_trans_type']
+                else:
+                    collection_trans_type = rec.collection_trans_type
+                if values['amount'] < 0 and collection_trans_type == 'movimiento_recaudacion':
+                    continue
+                if values['amount'] != rec.amount:
+                    commission = ((rec.commission / 100) * values['amount']) * -1
+
+                    domain = [('transaction_name', '=', rec.transaction_name), ('customer', '=', rec.customer.id),
+                              ('amount', '<', 0), ('id', '!=', rec.id)]
+                    rec_commission = self.env['collection.transaction'].search(domain)
+
+                    rec_commission.amount = commission
 
     def unlink(self):
         for rec in self:
@@ -214,7 +230,7 @@ class CollectionTransaction(models.Model):
                     'origin_account_cbu': self.origin_account.cbu,
                     'origin_account_cvu': self.origin_account.cvu,
                     'alias_origen': self.origin_account.alias,
-                    'destination_account': False,
+                    # 'destination_account': False,
                     'customer_destination': False,
                 }
             )
@@ -341,7 +357,6 @@ class CollectionTransaction(models.Model):
                 self.env['collection.transaction'].sudo().create(dict_transac)
 
 
-        vals['binary_domain'] = []
         res = super(CollectionTransaction, self).create(vals)
         message = ('Se ha creado la siguiente transaccion: %s.') % (str(vals['transaction_name']))
         res.message_post(body=message)
@@ -546,7 +561,7 @@ class CollectionTransaction(models.Model):
                 else:
                     rec.withdrawal_operations = extraction
                 if services:
-                    rec.binary_domain = services.ids
+                    rec.origin_account_table = services.ids
             elif rec.collection_trans_type == 'movimiento_interno':
                 internal = rec.operation.search([('check_internal', '=', True), ('collection_type', '=', 'operation')])
                 if internal:
