@@ -21,6 +21,7 @@ class CollectionTransaction(models.Model):
     origin_account_cuit = fields.Char(string='CUIT origen', tracking=True, default=False)
     origin_account_cvu = fields.Char(string='CVU origen', tracking=True)
     origin_account_cbu = fields.Char(string='CBU origen', tracking=True)
+    origen_name_account_extern = fields.Char(string='Cta Origen')
     related_customer = fields.Char(string='Cliente Relacionado', tracking=True)
     amount = fields.Float(string='Monto', tracking=True, required=True)
     date_available_amount = fields.Date('Fecha del monto disponible')
@@ -63,6 +64,12 @@ class CollectionTransaction(models.Model):
 
     customer_destination = fields.Many2one('res.partner', string='Cliente Destino', domain="[('check_origin_account','!=', True)]")
     destination_account = fields.Many2one('collection.services.commission', string='Cuenta Destino')
+
+    customer_origin = fields.Many2one('res.partner', string='Cliente Origen',
+                                           domain="[('check_origin_account','!=', True)]")
+
+    origin_type = fields.Selection([('externo', 'Externo'),
+            ('interno', 'Interno')], default="externo", string="Tipo de Origen")
 
     def write(self, values):
         return super().write(values)
@@ -145,6 +152,41 @@ class CollectionTransaction(models.Model):
 
         pass
 
+    @api.onchange('customer_origin','origin_type')
+    def empty_origin_fields(self):
+        self.sudo().write(
+            {'customer_origin': '' if self.origin_type == 'externo' else self.customer_origin,
+             'origin_account': '',
+             'origin_account_cuit': '',
+             'origin_account_cbu': '',
+             'origin_account_cvu': '',
+             'alias_origen': '',
+            })
+
+    @api.onchange('service')
+    def get_service_destination_account_data(self):
+        if self.service:
+            self.sudo().write(
+                {
+                    'name_destination_account': self.service.name_account,
+                    'cuit_destination_account': self.service.cuit,
+                    'cbu_destination_account': self.service.cbu,
+                    'cvu_destination_account': self.service.cvu,
+                    'alias_destination_account': self.service.alias,
+                }
+            )
+        else:
+            self.sudo().write(
+                {
+                    'cuit_destination_account': '',
+                    'cbu_destination_account': '',
+                    'cvu_destination_account': '',
+                    'alias_destination_account': '',
+                    'name_destination_account': '',
+                }
+            )
+
+
     @api.onchange('destination_account')
     def get_destination_account_data(self):
         if self.destination_account:
@@ -183,10 +225,10 @@ class CollectionTransaction(models.Model):
         if self.origin_account and self.collection_trans_type == 'movimiento_recaudacion':
             self.sudo().write(
                 {
-                    'cuit_destination_account': self.origin_account.cuit,
-                    'cbu_destination_account': self.origin_account.cbu,
-                    'cvu_destination_account': self.origin_account.cvu,
-                    'alias_destination_account': self.origin_account.alias,
+                    'origin_account_cuit': self.origin_account.cuit,
+                    'origin_account_cbu': self.origin_account.cbu,
+                    'origin_account_cvu': self.origin_account.cvu,
+                    'alias_origen': self.origin_account.alias,
                     'destination_account': False,
                     'customer_destination': False,
                 }
@@ -205,27 +247,34 @@ class CollectionTransaction(models.Model):
                     'name_destination_account': '',
                 }
             )
-        else:
-            self.sudo().write(
-                {
-                    'cuit_destination_account': '',
-                    'cbu_destination_account': '',
-                    'cvu_destination_account': '',
-                    'alias_destination_account': '',
-                    'name_destination_account': '',
-                    'origin_account_cuit': '',
-                    'origin_account_cbu': '',
-                    'origin_account_cvu': '',
-                    'alias_origen': '',
-                }
-            )
+        # else:
+        #     self.sudo().write(
+        #         {
+        #             'cuit_destination_account': '',
+        #             'cbu_destination_account': '',
+        #             'cvu_destination_account': '',
+        #             'alias_destination_account': '',
+        #             'name_destination_account': '',
+        #             'origin_account_cuit': '',
+        #             'origin_account_cbu': '',
+        #             'origin_account_cvu': '',
+        #             'alias_origen': '',
+        #         }
+        #     )
 
     @api.onchange('transaction_name')
     def get_last_client(self):
         user_id = self.env.uid
         last_client = self.env['collection.transaction'].sudo().search([('create_uid', '=', user_id)], limit=1, order='id desc')
         if last_client and not self.transaction_name:
-            self.sudo().write({'customer': last_client.customer.id, 'service': last_client.service.id})
+            self.sudo().write({'customer': last_client.customer.id,
+                               'service': last_client.service.id,
+                               'name_destination_account': last_client.service.name_account,
+                               'cuit_destination_account': last_client.service.cuit,
+                               'cbu_destination_account': last_client.service.cbu,
+                               'cvu_destination_account': last_client.service.cvu,
+                               'alias_destination_account': last_client.service.alias
+                               })
 
     @api.onchange('amount')
     def withdrawal_amount(self):
@@ -250,13 +299,23 @@ class CollectionTransaction(models.Model):
                     'name_destination_account': '',
                     'destination_account': '',
                     'internal_notes': self.customer.comment,
-                    'origin_account_cuit': '',
-                    'origin_account_cbu': '',
-                    'origin_account_cvu': '',
-                    'alias_origen': '',
-                    'origin_account': '',
                 }
             )
+        if not self.service:
+            self.sudo().write({
+             'cbu_destination_account': '',
+             'cvu_destination_account': '',
+             'alias_destination_account': '',
+             'name_destination_account': '',
+             'destination_account': '',
+             'internal_notes': self.customer.comment,
+             'origin_account_cuit': '',
+             'origin_account_cbu': '',
+             'origin_account_cvu': '',
+             'alias_origen': '',
+             'origin_account': '',
+             'customer_origin': '',
+            })
 
     @api.model
     def create(self, vals):
