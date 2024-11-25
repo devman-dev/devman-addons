@@ -59,18 +59,12 @@ class CollectionTransaction(models.Model):
     withdrawal_operations = fields.Many2many('product.template', domain=[('collection_type', '=', 'operation')])
     alert_withdrawal = fields.Boolean()
     internal_notes = fields.Text()
-
     origin_account = fields.Many2one('collection.services.commission', string='Cuenta Origen')
-
     customer_destination = fields.Many2one('res.partner', string='Cliente Destino', domain="[('check_origin_account','!=', True)]")
     destination_account = fields.Many2one('collection.services.commission', string='Cuenta Destino')
-
-    customer_origin = fields.Many2one('res.partner', string='Cliente Origen',
-                                           domain="[('check_origin_account','!=', True)]")
-
-    origin_type = fields.Selection([('externo', 'Externo'),
-            ('interno', 'Interno')], default="externo", string="Tipo de Origen")
-
+    customer_origin = fields.Many2one('res.partner', string='Cliente Origen', domain="[('check_origin_account','!=', True)]")
+    origin_type = fields.Selection([('externo', 'Externo'), ('interno', 'Interno')], default='externo', string='Tipo de Origen')
+    binary_domain = fields.Binary(default=[])
     def write(self, values):
         return super().write(values)
         for rec in self:
@@ -86,7 +80,7 @@ class CollectionTransaction(models.Model):
             rec_commission = self.env['collection.transaction'].search(domain)
             if rec_commission:
                 rec_commission.unlink()
-                
+
             if rec.collection_trans_type == 'movimiento_recaudacion':
                 self.recalculate_customer_balance_unlink()
             elif rec.collection_trans_type == 'retiro' or rec.collection_trans_type == 'movimiento_interno':
@@ -152,16 +146,18 @@ class CollectionTransaction(models.Model):
 
         pass
 
-    @api.onchange('customer_origin','origin_type')
+    @api.onchange('customer_origin', 'origin_type')
     def empty_origin_fields(self):
         self.sudo().write(
-            {'customer_origin': '' if self.origin_type == 'externo' else self.customer_origin,
-             'origin_account': '',
-             'origin_account_cuit': '',
-             'origin_account_cbu': '',
-             'origin_account_cvu': '',
-             'alias_origen': '',
-            })
+            {
+                'customer_origin': '' if self.origin_type == 'externo' else self.customer_origin,
+                'origin_account': '',
+                'origin_account_cuit': '',
+                'origin_account_cbu': '',
+                'origin_account_cvu': '',
+                'alias_origen': '',
+            }
+        )
 
     @api.onchange('service')
     def get_service_destination_account_data(self):
@@ -175,7 +171,6 @@ class CollectionTransaction(models.Model):
                     'name_destination_account': '',
                 }
             )
-
 
     @api.onchange('destination_account')
     def get_destination_account_data(self):
@@ -257,14 +252,17 @@ class CollectionTransaction(models.Model):
         user_id = self.env.uid
         last_client = self.env['collection.transaction'].sudo().search([('create_uid', '=', user_id)], limit=1, order='id desc')
         if last_client and not self.transaction_name:
-            self.sudo().write({'customer': last_client.customer.id,
-                               'service': last_client.service.id,
-                               'name_destination_account': last_client.service.name_account,
-                               'cuit_destination_account': last_client.service.cuit,
-                               'cbu_destination_account': last_client.service.cbu,
-                               'cvu_destination_account': last_client.service.cvu,
-                               'alias_destination_account': last_client.service.alias
-                               })
+            self.sudo().write(
+                {
+                    'customer': last_client.customer.id,
+                    'service': last_client.service.id,
+                    'name_destination_account': last_client.service.name_account,
+                    'cuit_destination_account': last_client.service.cuit,
+                    'cbu_destination_account': last_client.service.cbu,
+                    'cvu_destination_account': last_client.service.cvu,
+                    'alias_destination_account': last_client.service.alias,
+                }
+            )
 
     @api.onchange('amount')
     def withdrawal_amount(self):
@@ -292,20 +290,22 @@ class CollectionTransaction(models.Model):
                 }
             )
         if not self.service:
-            self.sudo().write({
-             'cbu_destination_account': '',
-             'cvu_destination_account': '',
-             'alias_destination_account': '',
-             'name_destination_account': '',
-             'destination_account': '',
-             'internal_notes': self.customer.comment,
-             'origin_account_cuit': '',
-             'origin_account_cbu': '',
-             'origin_account_cvu': '',
-             'alias_origen': '',
-             'origin_account': '',
-             'customer_origin': '',
-            })
+            self.sudo().write(
+                {
+                    'cbu_destination_account': '',
+                    'cvu_destination_account': '',
+                    'alias_destination_account': '',
+                    'name_destination_account': '',
+                    'destination_account': '',
+                    'internal_notes': self.customer.comment,
+                    'origin_account_cuit': '',
+                    'origin_account_cbu': '',
+                    'origin_account_cvu': '',
+                    'alias_origen': '',
+                    'origin_account': '',
+                    'customer_origin': '',
+                }
+            )
 
     @api.model
     def create(self, vals):
@@ -340,12 +340,12 @@ class CollectionTransaction(models.Model):
             if not vals['collection_trans_type'] == 'retiro' and not vals['collection_trans_type'] == 'movimiento_interno':
                 self.env['collection.transaction'].sudo().create(dict_transac)
 
+
+        vals['binary_domain'] = []
         res = super(CollectionTransaction, self).create(vals)
-
         message = ('Se ha creado la siguiente transaccion: %s.') % (str(vals['transaction_name']))
-
         res.message_post(body=message)
-
+        
         return res
 
     @api.constrains('customer')
@@ -540,10 +540,13 @@ class CollectionTransaction(models.Model):
 
             elif rec.collection_trans_type == 'retiro':
                 extraction = rec.operation.search([('check_withdrawal', '=', True), ('collection_type', '=', 'operation')])
+                services = rec.service.search([('services','=', rec.service.services.id)])
                 if extraction:
                     rec.withdrawal_operations = extraction.ids
                 else:
                     rec.withdrawal_operations = extraction
+                if services:
+                    rec.binary_domain = services.ids
             elif rec.collection_trans_type == 'movimiento_interno':
                 internal = rec.operation.search([('check_internal', '=', True), ('collection_type', '=', 'operation')])
                 if internal:
