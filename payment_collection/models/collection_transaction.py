@@ -63,7 +63,7 @@ class CollectionTransaction(models.Model):
     origin_account_table = fields.Many2many('collection.services.commission')
 
     def write(self, values):
-        return super().write(values) # PARA STG
+        # return super().write(values) # PARA STG
         for rec in self:
             if 'amount' in values:
                 if 'collection_trans_type' in values:
@@ -103,16 +103,18 @@ class CollectionTransaction(models.Model):
         return super().write(values)
 
     def unlink(self):
-        return super().unlink() # PARA STG
-        
+        # return super().unlink() # PARA STG
         for rec in self.sorted(key=lambda r: r.amount >= 0):
-            if rec.amount < 0 and rec.collection_trans_type == 'movimiento_recaudacion':
-                continue
+            if rec.amount < 0 and rec.collection_trans_type == 'movimiento_recaudacion' and not self.env.context.get('force_unlink', False):
+                raise UserError(
+                    'No se pueden eliminar comisiones.\nAyuda: Si elimina una transacción de recaudación, su comisión tambien se eliminará.'
+                )
+
             domain = [('transaction_name', '=', rec.transaction_name), ('customer', '=', rec.customer.id), ('amount', '<', 0), ('id', '!=', rec.id)]
             rec_commission = self.env['collection.transaction'].search(domain)
 
             if rec_commission and rec_commission.id not in self.ids:
-                rec_commission.unlink()
+                rec_commission.with_context(force_unlink=True).unlink()
 
         self.recalculate_customer_balance_unlink()
 
@@ -159,7 +161,9 @@ class CollectionTransaction(models.Model):
 
     def recalculate_customer_balance_unlink(self):
         for rec in self:
-            rec_customer = self.env['collection.transaction'].search([('customer', '=', rec.customer.id), ('id', 'not in', self.ids), ('amount', '>', 0)])
+            rec_customer = self.env['collection.transaction'].search(
+                [('customer', '=', rec.customer.id), ('id', 'not in', self.ids), ('amount', '>', 0)]
+            )
             rec_dashboard = self.env['collection.dashboard.customer'].search([('customer', '=', rec.customer.id)])
             rec_service_id = rec.service.id
             agent_domain = [
@@ -191,7 +195,11 @@ class CollectionTransaction(models.Model):
                     total_balance = rec_dashboard.collection_balance + amount
                     real_balance_app = rec_dashboard.customer_real_balance + rec_amount_app
                     rec_dashboard.sudo().write(
-                        {'collection_balance': total_balance, 'customer_real_balance': real_balance_app, 'customer_available_balance': available_balance}
+                        {
+                            'collection_balance': total_balance,
+                            'customer_real_balance': real_balance_app,
+                            'customer_available_balance': available_balance,
+                        }
                     )
 
     @api.constrains('amount')
@@ -211,11 +219,11 @@ class CollectionTransaction(models.Model):
                     'origin_account_cbu': '',
                     'origin_account_cvu': '',
                     'alias_origen': '',
-                    'destination_account': ''
+                    'destination_account': '',
                 }
             )
         elif self.collection_trans_type == 'retiro':
-             self.sudo().write(
+            self.sudo().write(
                 {
                     'destination_account': '',
                     'cuit_destination_account': '',
