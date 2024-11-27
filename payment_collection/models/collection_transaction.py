@@ -396,6 +396,7 @@ class CollectionTransaction(models.Model):
         for rec in self:
             if rec.collection_trans_type == 'movimiento_interno' or rec.count == 1:
                 return
+            total_result = False
             today_date = dt.datetime.now().date()
             days_ago = dt.timedelta(days=2)
             domain_balance = [
@@ -430,9 +431,12 @@ class CollectionTransaction(models.Model):
                 if 'commission_app_amount' in values:
                     commission_app_amount_list.append(values['commission_app_amount'])
                 real_balance_list.append(values['amount'])
+
                 if rec.collection_trans_type == 'retiro':
                     if values['amount'] > rec.amount:
-                        total_result = values['amount'] - rec.amount
+
+                        total_result = (values['amount'] - rec.amount) * -1
+
                     elif values['amount'] < rec.amount:
                         total_result = rec.amount - values['amount']
 
@@ -478,16 +482,30 @@ class CollectionTransaction(models.Model):
                         commission = rec.amount - ((rec.amount * rec.commission) / 100)
                         total_collection_balance = dashboard_customer.collection_balance + commission
                 else:
-                    if not withdrawal_balance:
-                        total_collection_balance = dashboard_customer.collection_balance - withdrawal_total_balance
+                    if total_result:
+                        if not withdrawal_balance:
+                            total_collection_balance = dashboard_customer.collection_balance - total_result
+                            total_available_balance = dashboard_customer.customer_available_balance - total_result
+                        else:
+                            total_collection_balance = dashboard_customer.collection_balance - withdrawal_balance
+                            total_available_balance = dashboard_customer.customer_available_balance - withdrawal_balance
+
+                if total_result:
+                    if available_balance == 0:
+                        if not withdrawal_balance:
+                            total_available_balance = dashboard_customer.customer_available_balance - total_result
+                        else:
+                            total_available_balance = dashboard_customer.customer_available_balance - withdrawal_balance
                     else:
-                        total_collection_balance = dashboard_customer.collection_balance - withdrawal_balance
+                        total_available_balance = available_balance - withdrawal_total_balance
+
+
                 dashboard_customer.sudo().write(
                     {
                         'customer': rec.customer.id,
                         'last_operation_date': datetime.now(),
                         'customer_real_balance': real_balance - commission_app_amount,
-                        'customer_available_balance': available_balance - withdrawal_total_balance,
+                        'customer_available_balance': total_available_balance,
                         'commission_balance': commission_balance,
                         'collection_balance': total_collection_balance,
                         'commission_app_amount': commission_app_amount,
