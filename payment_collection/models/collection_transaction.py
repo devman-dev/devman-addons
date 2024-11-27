@@ -270,7 +270,7 @@ class CollectionTransaction(models.Model):
                 }
             )
 
-    @api.depends('customer')
+    @api.depends('customer','amount')
     def get_total_balance_customer(self):
         for rec in self:
             customer = (
@@ -463,8 +463,8 @@ class CollectionTransaction(models.Model):
                     commission_balance = 0
 
             dashboard_customer = self.env['collection.dashboard.customer'].search([('customer', '=', rec.customer.id)], limit=1, order='id desc')
-
             if dashboard_customer:
+                dashboard_customer.customer_available_balance = 0
                 if rec.collection_trans_type == 'movimiento_recaudacion':
                     if values:
                         if 'amount' in values:
@@ -489,6 +489,9 @@ class CollectionTransaction(models.Model):
                         else:
                             total_collection_balance = dashboard_customer.collection_balance - withdrawal_balance
                             total_available_balance = dashboard_customer.customer_available_balance - withdrawal_balance
+                    else:
+                        total_collection_balance = dashboard_customer.collection_balance - withdrawal_balance
+                        
 
                 if total_result:
                     if available_balance == 0:
@@ -498,6 +501,11 @@ class CollectionTransaction(models.Model):
                             total_available_balance = dashboard_customer.customer_available_balance - withdrawal_balance
                     else:
                         total_available_balance = available_balance - withdrawal_total_balance
+                else:
+                    if not withdrawal_balance:
+                        total_available_balance = dashboard_customer.customer_available_balance - withdrawal_total_balance
+                    else:
+                        total_available_balance = dashboard_customer.customer_available_balance - withdrawal_balance
 
 
                 dashboard_customer.sudo().write(
