@@ -413,14 +413,12 @@ class CollectionTransaction(models.Model):
             avaiable_withdrawal_ids = self.env['collection.transaction'].sudo().search(domain_withdrawal)
 
             available_balance_list = [a.amount for a in available_balance_ids]
-            available_withdrawal_list = [a.amount for a in avaiable_withdrawal_ids if a.id != rec.id]
+            available_withdrawal_list = [a.amount for a in avaiable_withdrawal_ids if a.id == rec.id]
             available_withdrawal_total_list = [a.amount for a in avaiable_withdrawal_ids]
             real_balance_list = [c.amount if c.count != 1 else 0 for c in customer]
             commission_app_rate_list = [c.commission_app_rate for c in customer]
             if values:
-                commission_app_amount_list = [
-                    c.commission_app_amount if c.amount < 0 and c.transaction_name != rec.transaction_name else 0 for c in customer
-                ]
+                commission_app_amount_list = [c.commission_app_amount for c in customer]
                 commission_balance_list = [
                     c.amount
                     for c in customer
@@ -454,7 +452,10 @@ class CollectionTransaction(models.Model):
 
             if dashboard_customer:
                 if rec.collection_trans_type == 'movimiento_recaudacion':
-                    commission = rec.amount - ((rec.amount * rec.commission) / 100)
+                    if 'amount' in values:
+                        commission = values['amount'] - ((values['amount'] * rec.commission) / 100)
+                    else:
+                        commission = rec.amount - ((rec.amount * rec.commission) / 100)
                     total_collection_balance = dashboard_customer.collection_balance + commission
                 else:
                     if not withdrawal_balance:
