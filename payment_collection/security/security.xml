@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <data noupdate="0">
+    <data noupdate="1">
         <record id="payment_collection.payment_collection_categ" model="ir.module.category">
             <field name="name">PagoFlex</field>
             <field name="description">Nivel de acceso para el módulo PagoFlex</field>

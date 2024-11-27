@@ -5,7 +5,7 @@ from odoo.exceptions import ValidationError
 
 class CollectionServicesCommission(models.Model):
     _name = 'collection.services.commission'
-
+    _rec_name = 'name_account'
 
     customer = fields.Many2one('res.partner', string='Cliente', required=True, domain="[('check_origin_account','!=', True)]")
     services = fields.Many2one('product.template', string='Servicio', required=True, domain=[('collection_type', '=', 'service')])
@@ -22,22 +22,20 @@ class CollectionServicesCommission(models.Model):
     name_account = fields.Char('Nombre Cuenta')
     cuit = fields.Char('CUIT')
 
-
     @api.depends('services')
     @api.depends_context('show_account_name')
     def _compute_display_name(self):
         for record in self:
             if self.env.context.get('show_servicio_name', False):
                 # Mostrar el nombre del servicio
-                name = record.services.display_name or "Sin Servicio"
+                name = record.services.display_name or 'Sin Servicio'
             elif self.env.context.get('show_account_name', False):
                 # Mostrar el nombre de la cuenta
-                name = record.name_account or "Sin Nombre de Cuenta"
+                name = record.name_account or 'Sin Nombre de Cuenta'
             else:
                 # Nombre por defecto
-                name = record.services.display_name or "Registro Sin Nombre"
+                name = record.services.display_name or 'Registro Sin Nombre'
             record.display_name = name
-
 
     @api.onchange('services')
     def get_commission(self):

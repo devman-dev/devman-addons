@@ -7,6 +7,7 @@
         <field name="arch" type="xml">
             <tree string="Comisión de servicios de cobranza">
                 <field name="customer" />
+                <field name="name_account" />
                 <field name="services" />
                 <field name="commission" />
                 <field name="agent_services_commission" widget="many2many_tags" />
@@ -55,6 +56,7 @@
         <field name="arch" type="xml">
             <search string="">
                 <field name="customer" />
+                <field name="name_account" />
                 <field name="services" />
                 <field name="agent_services_commission" />
                 <group>

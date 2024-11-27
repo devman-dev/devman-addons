@@ -52,7 +52,7 @@
                                 domain="[('services.collection_type', '=', 'service'), ('customer', '=', customer)]"
                                 context="{'show_servicio_name': True}"
                                 options="{'no_create': True, 'no_create_edit': True,'no_quick_create': True}" />
-                            <field name="commission" invisible="collection_trans_type == 'retiro'" />
+                            <field name="commission" invisible="collection_trans_type != 'movimiento_recaudacion'" />
                             <field name="operation" domain="[('id', 'in', withdrawal_operations)]"
                                 options="{'no_create': True, 'no_create_edit': True,'no_quick_create': True}" />
                             <field name="withdrawal_operations" invisible="1" />
