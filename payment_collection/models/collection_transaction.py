@@ -178,6 +178,8 @@ class CollectionTransaction(models.Model):
                 rec_dashboard.sudo().unlink()
             elif rec_customer and rec_dashboard:
                 if rec.collection_trans_type == 'movimiento_recaudacion':
+                    if rec.amount < 0:
+                        continue
                     rec_amount = rec.amount - ((rec.amount * rec.commission) / 100)
                     rec_amount_app = rec.amount - ((rec.amount * rec.commission_app_rate) / 100)
                     available_balance = rec_dashboard.customer_available_balance
@@ -428,6 +430,14 @@ class CollectionTransaction(models.Model):
                 if 'commission_app_amount' in values:
                     commission_app_amount_list.append(values['commission_app_amount'])
                 real_balance_list.append(values['amount'])
+                if rec.collection_trans_type == 'retiro':
+                    if values['amount'] > rec.amount:
+                        total_result = values['amount'] - rec.amount
+                    elif values['amount'] < rec.amount:
+                        total_result = rec.amount - values['amount']
+
+                    available_withdrawal_total_list.append(total_result * -1)
+
             else:
                 commission_balance_list = [c.amount for c in customer if c.amount < 0 and c.collection_trans_type == 'movimiento_recaudacion']
                 commission_app_amount_list = [c.commission_app_amount for c in customer]
@@ -452,11 +462,21 @@ class CollectionTransaction(models.Model):
 
             if dashboard_customer:
                 if rec.collection_trans_type == 'movimiento_recaudacion':
-                    if 'amount' in values:
-                        commission = values['amount'] - ((values['amount'] * rec.commission) / 100)
+                    if values:
+                        if 'amount' in values:
+                            commission = rec.amount - ((rec.amount * rec.commission) / 100)
+
+                            dashboard_customer.collection_balance -= commission
+
+                            commission = values['amount'] - ((values['amount'] * rec.commission) / 100)
+
+                            total_collection_balance = dashboard_customer.collection_balance + commission
+
+                        else:
+                            commission = rec.amount - ((rec.amount * rec.commission) / 100)
                     else:
                         commission = rec.amount - ((rec.amount * rec.commission) / 100)
-                    total_collection_balance = dashboard_customer.collection_balance + commission
+                        total_collection_balance = dashboard_customer.collection_balance + commission
                 else:
                     if not withdrawal_balance:
                         total_collection_balance = dashboard_customer.collection_balance - withdrawal_total_balance
