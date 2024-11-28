@@ -8,9 +8,9 @@ import requests
 
 class GetCustomerMovement():
     def get_customer_movement_transaccion(self, datos):
-        client_name = datos['nombre_cliente']
+        id = datos['partner_id']
 
-        client = request.env['res.partner'].sudo().search([('name', '=', client_name)])
+        client = request.env['res.partner'].sudo().search([('id', '=', id)])
         client_id = client.id
 
         get_movement = request.env['collection.transaction'].sudo().search([('customer', '=', client_id),('collection_trans_type','!=','movimiento_interno')])
@@ -23,7 +23,7 @@ class GetCustomerMovement():
                              }
             movement_list.append(movement_dict)
 
-        customer_balance = {'client_name': client_name,
-                            'movimientos':movement_list
+        customer_balance = {'client_id': client_id,
+                            'movimientos': movement_list
                             }
         return customer_balance
