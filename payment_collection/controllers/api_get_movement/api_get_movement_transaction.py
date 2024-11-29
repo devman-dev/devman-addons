@@ -8,7 +8,7 @@ import requests
 
 class GetCustomerMovement():
     def get_customer_movement_transaccion(self, datos):
-        client_name = datos['nombre_cliente']
+        client_name = datos['partner_id']
 
         client = request.env['res.partner'].sudo().search([('name', '=', client_name)])
         client_id = client.id

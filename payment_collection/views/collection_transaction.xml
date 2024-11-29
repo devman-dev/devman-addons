@@ -52,7 +52,8 @@
                                 domain="[('services.collection_type', '=', 'service'), ('customer', '=', customer)]"
                                 context="{'show_servicio_name': True}"
                                 options="{'no_create': True, 'no_create_edit': True,'no_quick_create': True}" />
-                            <field name="commission" invisible="collection_trans_type != 'movimiento_recaudacion'" />
+                            <field name="commission"
+                                invisible="collection_trans_type != 'movimiento_recaudacion'" />
                             <field name="operation" domain="[('id', 'in', withdrawal_operations)]"
                                 options="{'no_create': True, 'no_create_edit': True,'no_quick_create': True}" />
                             <field name="withdrawal_operations" invisible="1" />
@@ -114,36 +115,41 @@
                         <group invisible="collection_trans_type != 'retiro'">
 
                             <field name="origin_account"
-                                   domain="[('id','in',origin_account_table)]"
-                                   context="{'show_account_name': True}"
-                                   options="{'no_create': True, 'no_create_edit': True, 'no_quick_create': True}"
+                                domain="[('id','in',origin_account_table)]"
+                                context="{'show_account_name': True}"
+                                options="{'no_create': True, 'no_create_edit': True, 'no_quick_create': True}"
                             />
-                            <field name="origin_account_cuit" readonly="1" force_save="1"/>
+                            <field name="origin_account_cuit" readonly="1" force_save="1" />
                             <field name="origin_account_cvu" readonly="1" force_save="1" />
                             <field name="origin_account_cbu" readonly="1" force_save="1" />
                             <field name="alias_origen" readonly="1" force_save="1" />
 
                             <separator />
 
-                             <field name="origin_type"
-                                    string="Tipo de Destino"
-                                    help="Seleccione Interno si el cliente pertenece a PagoFlex"
-                                    widget="radio" options="{'horizontal': True}" />
-                            <field name="customer_destination" invisible="origin_type == 'externo'" options="{'no_create': True, 'no_create_edit': True, 'no_quick_create': True}"/>
+                            <field name="origin_type"
+                                string="Tipo de Destino"
+                                help="Seleccione Interno si el cliente pertenece a PagoFlex"
+                                widget="radio" options="{'horizontal': True}" />
+                            <field name="customer_destination" invisible="origin_type == 'externo'"
+                                options="{'no_create': True, 'no_create_edit': True, 'no_quick_create': True}" />
 
                             <field name="destination_account"
-                                   domain="[('customer','=',customer_destination)]"
-                                   context="{'show_account_name': True}"
-                                   options="{'no_create': True, 'no_create_edit': True,'no_quick_create': True}"
-                                   invisible="origin_type == 'externo'"/>
+                                domain="[('customer','=',customer_destination)]"
+                                context="{'show_account_name': True}"
+                                options="{'no_create': True, 'no_create_edit': True,'no_quick_create': True}"
+                                invisible="origin_type == 'externo'" />
 
-                            <field name="name_destination_account" invisible="origin_type == 'interno'"/>
+                            <field name="name_destination_account"
+                                invisible="origin_type == 'interno'" />
 
-                            <field name="cuit_destination_account" readonly="origin_type == 'interno'" force_save="1"/>
-                            <field name="cbu_destination_account" readonly="origin_type == 'interno'" force_save="1"/>
-                            <field name="cvu_destination_account" readonly="origin_type == 'interno'" force_save="1"/>
-                            <field name="alias_destination_account" readonly="origin_type == 'interno'" force_save="1"/>
-
+                            <field name="cuit_destination_account"
+                                readonly="origin_type == 'interno'" force_save="1" />
+                            <field name="cbu_destination_account"
+                                readonly="origin_type == 'interno'" force_save="1" />
+                            <field name="cvu_destination_account"
+                                readonly="origin_type == 'interno'" force_save="1" />
+                            <field name="alias_destination_account"
+                                readonly="origin_type == 'interno'" force_save="1" />
 
 
                             <field name="commission_app_rate" readonly="1" force_save="1" />
@@ -156,26 +162,39 @@
                         <group invisible="collection_trans_type != 'movimiento_interno'">
                             <field name="origin_account" domain="[('customer','=',customer)]"
                                 context="{'show_account_name': True}"
-                                options="{'no_create': True, 'no_create_edit': True,'no_quick_create': True}" />
-                            <field name="origin_account_cuit"  readonly="1" force_save="1"/>
-                            <field name="origin_account_cvu"  readonly="1" force_save="1" />
-                            <field name="origin_account_cbu"  readonly="1" force_save="1" />
-                            <field name="alias_origen"  readonly="1" force_save="1" />
+                                options="{'no_create': True, 'no_create_edit': True,'no_quick_create': True}"
+                                required="collection_trans_type == 'movimiento_interno'" />
+                            <field name="origin_account_cuit" readonly="1" force_save="1" />
+                            <field name="origin_account_cvu" readonly="1" force_save="1" />
+                            <field name="origin_account_cbu" readonly="1" force_save="1" />
+                            <field name="alias_origen" readonly="1" force_save="1" />
 
                             <separator />
 
-                            <field name="customer_destination" options="{'no_create': True, 'no_create_edit': True, 'no_quick_create': True}"/>
+                            <field name="customer_destination"
+                                options="{'no_create': True, 'no_create_edit': True, 'no_quick_create': True}"
+                                required="collection_trans_type == 'movimiento_interno'" />
 
                             <field name="destination_account"
-                                   domain="[('customer','=',customer_destination)]"
-                                   context="{'show_account_name': True}"
-                                   options="{'no_create': True, 'no_create_edit': True,'no_quick_create': True}"/>
-                            <field name="cuit_destination_account"  readonly="1" force_save="1"/>
-                            <field name="cbu_destination_account"  readonly="1" force_save="1"/>
-                            <field name="cvu_destination_account"  readonly="1" force_save="1"/>
-                            <field name="alias_destination_account"  readonly="1" force_save="1"/>
-
-
+                                domain="[('customer','=',customer_destination)]"
+                                context="{'show_account_name': True}"
+                                options="{'no_create': True, 'no_create_edit': True,'no_quick_create': True}"
+                                required="collection_trans_type == 'movimiento_interno'" />
+                            <field name="collection_trans_type_dest" widget="radio"
+                                invisible="customer_destination == False"
+                                options="{'horizontal': True}" />
+                            <field name="service_dest"
+                                required="collection_trans_type == 'movimiento_interno', customer_destination != False"
+                                invisible="customer_destination == False"
+                                domain="[('services.collection_type', '=', 'service'), ('customer', '=', customer_destination)]"
+                                context="{'show_servicio_name': True}"
+                                options="{'no_create': True, 'no_create_edit': True,'no_quick_create': True}" />
+                            <field name="commission_dest"
+                                invisible="customer_destination == False or collection_trans_type_dest == 'retiro'" />
+                            <field name="cuit_destination_account" readonly="1" force_save="1" />
+                            <field name="cbu_destination_account" readonly="1" force_save="1" />
+                            <field name="cvu_destination_account" readonly="1" force_save="1" />
+                            <field name="alias_destination_account" readonly="1" force_save="1" />
                             <field name="commission_app_rate" readonly="1" force_save="1" />
                             <field name="commission_app_amount" readonly="1" force_save="1" />
                             <field name="transaction_state" />
@@ -192,7 +211,7 @@
                             widget="html" />
                         <field name="count" invisible="1" />
                         <field name="alert_withdrawal" invisible="1" />
-                        <field name="origin_account_table" invisible="1"/>
+                        <field name="origin_account_table" invisible="1" />
                     </group>
                 </sheet>
                 <!-- Chatter -->
