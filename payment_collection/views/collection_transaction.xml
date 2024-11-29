@@ -7,7 +7,8 @@
         <field name="arch" type="xml">
             <tree string="Transacción de cobro" js_class="button_print_transaction"
                 decoration-danger="collection_trans_type == 'retiro'"
-                decoration-info="collection_trans_type == 'movimiento_interno'">
+                decoration-info="collection_trans_type == 'movimiento_interno'"
+                duplicate="0" >
                 <field name="collection_trans_type" string="Tipo T." />
                 <field name="date" />
                 <field name="customer" />
@@ -26,9 +27,10 @@
                 <field name="alias_destination_account" />
                 <field name="name_destination_account" />
                 <field name="transaction_state" widget="badge"
-                    decoration-danger="transaction_state == 'falta_ejecutar'"
-                    decoration-warning="transaction_state == 'ejecutada_faltan_datos'"
-                    decoration-success="transaction_state == 'ejecutada_datos_completos'" />
+                    decoration-danger="transaction_state == 'rechazado'"
+                    decoration-warning="transaction_state == 'pendiente'"
+                    decoration-success="transaction_state == 'aprobado'"
+                    decoration-info="transaction_state == 'interno'"/>
             </tree>
         </field>
     </record>
@@ -37,7 +39,7 @@
         <field name="name">collection.transaction.view.form</field>
         <field name="model">collection.transaction</field>
         <field name="arch" type="xml">
-            <form string="Transacción de cobro">
+            <form string="Transacción de cobro" duplicate="0">
                 <sheet>
                     <h1>
                         <field name="transaction_name" readonly="True" />

@@ -24,6 +24,20 @@ class CustomListController extends ListController {
       console.error('Error en doAction:', error);
     }
   }
+
+  async onClickRecalAll() {
+    try {
+      const result = await this.rpc("/web/dataset/call_kw/collection.transaction/recalculate_total_recs",{
+        model: 'collection.transaction',
+        method: 'recalculate_total_recs',
+        args: [], // Argumentos específicos para el método Python
+        kwargs: {}, // Argumentos clave-valor, si es necesario
+      });
+      console.log('Resultado de la función:', result);
+    } catch (error) {
+      console.error('Error en la llamada RPC:', error);
+    }
+  }
 }
 
 registry.category('views').add('button_print_transaction', {
