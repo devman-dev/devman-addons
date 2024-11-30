@@ -436,6 +436,10 @@ class CollectionTransaction(models.Model):
 
     @api.onchange('amount', 'service')
     def calculate_commission_app_amount(self):
+        if self.collection_trans_type == 'movimiento_recaudacion':
+            self.commission = self.service.commission
+        else:
+            self.commission = 0
         self.commission_app_rate = self.service.commission_app_rate if self.service else 0
         if self.collection_trans_type != 'retiro':
             self.commission_app_amount = (self.commission_app_rate * self.amount) / 100
