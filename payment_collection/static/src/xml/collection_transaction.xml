@@ -5,9 +5,9 @@
         <button type="button" class="btn btn-primary" t-on-click.stop.prevent="() => this.onClickPrintTransaction()">
           Imprimir Reporte
         </button>
-        <button groups="payment_collection.groups_payment_collection_admin" type="button" class="btn btn-primary" t-on-click.stop.prevent="() => this.onClickRecalAll()">
+        <!-- <button groups="payment_collection.groups_payment_collection_admin" type="button" class="btn btn-primary" t-on-click.stop.prevent="() => this.onClickRecalAll()">
           Recalcular Todo
-        </button>
+        </button> -->
       </xpath>
     </t>
 </templates>

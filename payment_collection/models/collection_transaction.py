@@ -554,6 +554,8 @@ class CollectionTransaction(models.Model):
         for rec in self:
             if rec.collection_trans_type == 'movimiento_interno' or rec.count == 1:
                 return
+            
+            #* Obtenemos saldo disponible
             today_date = dt.datetime.now().date()
             days_ago = dt.timedelta(days=2)
             domain_balance = [
@@ -561,24 +563,16 @@ class CollectionTransaction(models.Model):
                 ('date', '<=', today_date - days_ago),
                 ('collection_trans_type', '!=', 'movimiento_interno'),
             ]
-            domain_withdrawal = [('customer', '=', rec.customer.id), ('collection_trans_type', '=', 'retiro')]
-            domain_customer = [('customer', '=', rec.customer.id), ('collection_trans_type', '!=', 'movimiento_interno')]
-
-            customer = self.env['collection.transaction'].sudo().search(domain_customer)
             available_balance_ids = self.env['collection.transaction'].sudo().search(domain_balance)
-            avaiable_withdrawal_ids = self.env['collection.transaction'].sudo().search(domain_withdrawal)
             available_balance_list = [a.amount for a in available_balance_ids]
-            available_withdrawal_list = [a.amount for a in avaiable_withdrawal_ids if a.id == rec.id]
-
-            available_withdrawal_list_2 = [a.amount for a in avaiable_withdrawal_ids if a.id != rec.id]
-
-            real_balance_list = [c.amount if c.count != 1 else 0 for c in customer]
-            commission_app_rate_list = [c.commission_app_rate for c in customer]
-            commission_balance_list = [c.amount for c in customer if c.amount < 0 and c.collection_trans_type == 'movimiento_recaudacion']
-            commission_app_amount_list = [c.commission_app_amount for c in customer]
-            no_commission_app_amount_list = [c.amount for c in customer if not c.is_commission]
-
-
+            
+            #* Obtenemos Retiros
+            domain_withdrawal = [('customer', '=', rec.customer.id), ('collection_trans_type', '=', 'retiro')]
+            withdrawal_ids = self.env['collection.transaction'].sudo().search(domain_withdrawal)
+            withdrawal_list = [a.amount for a in withdrawal_ids if a.id == rec.id]
+            withdrawal_list_2 = [a.amount for a in withdrawal_ids if a.id != rec.id]
+            
+            #* Obtenemos comisiones de retiros
             withdrawal_commission = self.env['collection.transaction'].sudo().search([('collection_trans_type','=', 'retiro'), ('id','!=', rec.id),('commission','>', '0')])
             withdrawal_commission_list = []
             for wc in withdrawal_commission:
@@ -586,56 +580,71 @@ class CollectionTransaction(models.Model):
                 if commi:
                     withdrawal_commission_list.append(commi.amount)
             withdrawal_commission_total = sum(withdrawal_commission_list)
+            
+            #* Obtenemos Recaudaciones y comisiones
+            domain_customer = [('customer', '=', rec.customer.id), ('collection_trans_type', '!=', 'movimiento_interno')]
+            customer = self.env['collection.transaction'].sudo().search(domain_customer)
 
-            if customer:
-                real_balance = sum(real_balance_list)
-                withdrawal_balance = sum(available_withdrawal_list) * -1
-                withdrawal_balance_2 = sum(available_withdrawal_list_2) * -1
-                available_balance = sum(available_balance_list)
-                commission_balance = sum(commission_balance_list)
-                if no_commission_app_amount_list:
-                    commission_app_rate = sum(commission_app_rate_list) / len(no_commission_app_amount_list)
-                else:
-                    commission_app_rate = sum(commission_app_rate_list)
-                commission_app_amount = sum(commission_app_amount_list)
+            total_customer_balance_list = [c.amount for c in customer if not c.is_commission]
+            commission_app_rate_list = [c.commission_app_rate for c in customer if not c.is_commission]
+            commission_balance_list = [c.amount for c in customer if c.is_commission and c.collection_trans_type == 'movimiento_recaudacion']
+            commission_app_amount_list = [c.commission_app_amount for c in customer if not c.is_commission]
+            no_commission_app_amount_list = [c.amount for c in customer if not c.is_commission]
+
+            #* Sumamos Totales
+            total_customer_balance = sum(total_customer_balance_list)
+            withdrawal_balance = sum(withdrawal_list) * -1
+            withdrawal_balance_2 = sum(withdrawal_list_2) * -1
+            available_balance = sum(available_balance_list)
+            commission_balance = sum(commission_balance_list)
+            if no_commission_app_amount_list:
+                commission_app_rate = sum(commission_app_rate_list) / len(no_commission_app_amount_list)
             else:
-                real_balance = rec.real_balance
-                available_balance = rec.available_balance
-                if rec.commission < 0:
-                    commission_balance = rec.commission
-                else:
-                    commission_balance = 0
+                commission_app_rate = sum(commission_app_rate_list)
+            commission_app_amount = sum(commission_app_amount_list)
+    
 
             dashboard_customer = self.env['collection.dashboard.customer'].sudo().search([('customer', '=', rec.customer.id)], limit=1, order='id desc')
             if dashboard_customer:
-                commission_retiro = 0
+                commission_wd = 0
                 dashboard_customer.customer_available_balance = 0
+                
                 if rec.collection_trans_type == 'movimiento_recaudacion':
-                    commission = rec.amount - ((rec.amount * rec.commission) / 100)
-                    total_collection_balance = dashboard_customer.collection_balance + commission
-                else:
+                    amount_without_commi = rec.amount - ((rec.amount * rec.commission) / 100)
+                    total_collection_balance = dashboard_customer.collection_balance + amount_without_commi
+                    customer_real_balance = total_customer_balance - commission_app_amount + withdrawal_commission_total
+                    dashboard_customer.sudo().write(
+                        {
+                            'customer': rec.customer.id,
+                            'last_operation_date': datetime.now(),
+                            'customer_real_balance': customer_real_balance,              # SALDO REAL APP
+                            'customer_available_balance': available_balance - withdrawal_balance - withdrawal_balance_2,    # SALDO DISPONIBLE CLIENTE
+                            'collection_balance': total_collection_balance,                                                 # SALDO TOTAL CLIENTE
+                            'commission_balance': commission_balance,
+                            'commission_app_amount': commission_app_amount,
+                            'commission_app_rate': commission_app_rate,
+                        }
+                    )
+                elif rec.collection_trans_type == 'retiro':
                     if rec.commission > 0:
-                        commission_retiro = ((rec.amount * rec.commission) / 100) * -1
-
+                        commission_wd = ((rec.amount * rec.commission) / 100) * -1
+                    commission_wd += withdrawal_commission_total
                     total_collection_balance = dashboard_customer.collection_balance - withdrawal_balance
-
-                commission_retiro += withdrawal_commission_total
-
-                dashboard_customer.sudo().write(
-                    {
-                        'customer': rec.customer.id,
-                        'last_operation_date': datetime.now(),
-                        'customer_real_balance': real_balance - commission_app_amount + commission_retiro,              # SALDO REAL APP
-                        'customer_available_balance': available_balance - withdrawal_balance - withdrawal_balance_2,    # SALDO DISPONIBLE CLIENTE
-                        'collection_balance': total_collection_balance,                                                 # SALDO TOTAL CLIENTE
-                        'commission_balance': commission_balance,
-                        'commission_app_amount': commission_app_amount,
-                        'commission_app_rate': commission_app_rate,
-                    }
-                )
+                    customer_real_balance = total_customer_balance - commission_app_amount + commission_wd
+                    dashboard_customer.sudo().write(
+                        {
+                            'customer': rec.customer.id,
+                            'last_operation_date': datetime.now(),
+                            'customer_real_balance': customer_real_balance,              # SALDO REAL APP
+                            'customer_available_balance': available_balance - withdrawal_balance - withdrawal_balance_2,    # SALDO DISPONIBLE CLIENTE
+                            'collection_balance': total_collection_balance,                                                 # SALDO TOTAL CLIENTE
+                            'commission_balance': commission_balance,
+                            'commission_app_amount': commission_app_amount,
+                            'commission_app_rate': commission_app_rate,
+                        }
+                    )
 
             else:
-                commi_app_amount = 0
                 commission_retiro = 0
                 if rec.commission > 0 and rec.collection_trans_type == 'retiro':
                     commission_retiro = ((rec.amount * rec.commission) / 100) * -1
@@ -648,20 +657,19 @@ class CollectionTransaction(models.Model):
 
                 elif rec.collection_trans_type == 'movimiento_recaudacion':
                     total_collection_balance = rec.amount - ((rec.amount * rec.commission) / 100)
-                    commi_app_amount = rec.commission_app_amount
 
-
+                customer_real_balance = total_customer_balance - commission_app_amount + commission_retiro
 
                 self.env['collection.dashboard.customer'].sudo().create(
                     {
                         'customer': rec.customer.id,
-                        'customer_real_balance': real_balance - commi_app_amount + commission_retiro,  #SALDO REAL APP
-                        'customer_available_balance': available_balance,                               #SALDO DISPONIBLE
+                        'customer_real_balance': customer_real_balance,  #SALDO REAL APP
+                        'customer_available_balance': available_balance, #SALDO DISPONIBLE
                         'last_operation_date': datetime.now(),
                         'commission_balance': commission_balance,
-                        'collection_balance': total_collection_balance,                                #SALDO TOTAL CLIENTE
-                        'commission_app_amount': rec.commission_app_amount,
-                        'commission_app_rate': rec.commission_app_rate,
+                        'collection_balance': total_collection_balance,  #SALDO TOTAL CLIENTE
+                        'commission_app_amount': commission_app_amount,
+                        'commission_app_rate': commission_app_rate,
                     }
                 )
 
