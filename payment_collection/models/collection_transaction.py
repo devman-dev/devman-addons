@@ -561,7 +561,8 @@ class CollectionTransaction(models.Model):
             domain_balance = [
                 ('customer', '=', rec.customer.id),
                 ('date', '<=', today_date - days_ago),
-                ('collection_trans_type', '!=', 'movimiento_interno'),
+                ('collection_trans_type', '==', 'movimiento_recaudacion'),
+                ('amount', '>', 0)
             ]
             available_balance_ids = self.env['collection.transaction'].sudo().search(domain_balance)
             available_balance_list = [a.amount for a in available_balance_ids]
@@ -697,7 +698,7 @@ class CollectionTransaction(models.Model):
             else:
                 rec.sudo().write({'available_balance': 0})
 
-    @api.onchange('amount', 'date', 'customer')
+    @api.onchange('amount')
     def _calculate_amount_withdrawal(self):
         for rec in self:
             if rec.customer and rec.collection_trans_type == 'retiro':
