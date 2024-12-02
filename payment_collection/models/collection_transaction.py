@@ -251,6 +251,17 @@ class CollectionTransaction(models.Model):
             total_available = self.env['collection.transaction'].sudo().search([('customer', '=', rec.id),('date', '<=', today_date - days_ago),('collection_trans_type', '!=', 'movimiento_interno'),])
             total_recaudation = self.env['collection.transaction'].sudo().search([('customer', '=', rec.id), ('collection_trans_type', '=', 'movimiento_recaudacion')])
             total_withdrawal = self.env['collection.transaction'].sudo().search([('customer', '=', rec.id), ('collection_trans_type', '=', 'retiro')])
+
+
+            withdrawal_commission = self.env['collection.transaction'].sudo().search([('collection_trans_type','=', 'retiro'),('commission','>', '0')])
+            withdrawal_commission_list = []
+            for wc in withdrawal_commission:
+                commi = self.env['collection.transaction'].sudo().search([('transaction_name','=', wc.transaction_name),('id','!=', wc.id)])
+                if commi:
+                    withdrawal_commission_list.append(commi.amount)
+            withdrawal_commission_total = sum(withdrawal_commission_list)
+
+
             dashboard = self.env['collection.dashboard.customer'].sudo().search([('customer', '=', rec.id)])
             if not total_recaudation and not total_withdrawal:
                 continue
@@ -275,9 +286,9 @@ class CollectionTransaction(models.Model):
             total_commi_amount = sum([c.amount for c in total_recaudation if c.amount < 0])
             dashboard.sudo().write(
                 {
-                    'customer_real_balance': (total_amount_recau + (total_commi_amount * -1)) - total_amount_app,
-                    'customer_available_balance': total_amount_available,
-                    'collection_balance': total_amount_recau,
+                    'customer_real_balance': (total_amount_recau + (total_commi_amount * -1)) - total_amount_app + total_amount_withdr,
+                    'customer_available_balance': total_amount_available + total_amount_withdr,
+                    'collection_balance': total_amount_recau - withdrawal_commission_total,
                     'commission_balance': total_commi_amount,
                     'commission_app_rate': total_app_rate,
                     'commission_app_amount': total_amount_app,
