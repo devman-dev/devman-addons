@@ -3,16 +3,17 @@ import datetime
 
 class CollectionDashboardCustomer(models.Model):
     _name = 'collection.dashboard.customer'
+    _inherit = ['mail.thread', 'mail.activity.mixin']
     
-    
-    customer = fields.Many2one('res.partner', string='Cliente', domain="[('check_origin_account','!=', True)]")
-    customer_real_balance = fields.Float(string='Saldo Real App')
-    customer_available_balance = fields.Float(string='Saldo Disponible')
-    collection_balance = fields.Float(string='Saldo Total Cliente')
-    last_operation_date = fields.Date(string='Fecha de ultima operación')
-    commission_balance = fields.Float(string='Saldo de Comisión')
-    commission_app_rate = fields.Float(string='Comi. App (%)')
-    commission_app_amount = fields.Float(string='Monto App')
+    customer = fields.Many2one('res.partner', string='Cliente', domain="[('check_origin_account','!=', True)]", tracking=True)
+    customer_real_balance = fields.Float(string='Saldo Real App', tracking=True)
+    customer_available_balance = fields.Float(string='Saldo Disponible', tracking=True)
+    collection_balance = fields.Float(string='Saldo Total Cliente', tracking=True)
+    last_operation_date = fields.Date(string='Fecha de ultima operación', tracking=True)
+    commission_balance = fields.Float(string='Saldo de Comisión', tracking=True)
+    commission_app_rate = fields.Float(string='Comi. App (%)', tracking=True)
+    commission_app_amount = fields.Float(string='Monto App', tracking=True)
+    manual_data = fields.Boolean(string='Data Manual', default=True, tracking=True)
     
     @api.model
     def update_available_balance(self):

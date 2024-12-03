@@ -18,6 +18,37 @@
         </field>
     </record>
 
+
+    <record id="collection_dashboard_customer_view_form" model="ir.ui.view">
+        <field name="name">collection.dashboard.customer.view.form</field>
+        <field name="model">collection.dashboard.customer</field>
+        <field name="arch" type="xml">
+            <form string="Dashboard de Cobro de cliente">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="customer" required="1"/>
+                            <field name="customer_real_balance"/>
+                            <field name="customer_available_balance"/>
+                            <field name="collection_balance"/>
+                        </group>
+                        <group>
+                            <field name="last_operation_date"/>
+                            <field name="manual_data" invisible="1"/>
+                        </group>
+                    </group>
+                </sheet>
+                <!-- Chatter -->
+                <div class="oe_chatter">
+                    <field name="message_follower_ids" groups="base.group_user" />
+                    <field name="activity_ids" />
+                    <field name="message_ids" />
+                </div>
+            </form>
+        </field>
+    </record>
+
+
     <record id="collection_dashboard_customer_view_search" model="ir.ui.view">
         <field name="name">collection.dashboard.customer.view.search</field>
         <field name="model">collection.dashboard.customer</field>
@@ -34,7 +65,7 @@
     <record id="collection_dashboard_customer_action" model="ir.actions.act_window">
         <field name="name">Dashboard</field>
         <field name="res_model">collection.dashboard.customer</field>
-        <field name="view_mode">tree</field>
-        <field name="view_id" ref="collection_dashboard_customer_view_tree"></field>
+        <field name="view_mode">tree,form</field>
+<!--        <field name="view_id" ref="collection_dashboard_customer_view_tree"></field>-->
     </record>
 </odoo>
