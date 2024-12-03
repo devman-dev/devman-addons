@@ -25,10 +25,10 @@ access_to_commi_trans_wiz_admin,access.commi.trans.wiz,model_commi_trans_wiz,gro
 access_to_commi_trans_wiz_user,access.commi.trans.wiz,model_commi_trans_wiz,groups_payment_collection_user,1,1,1,1
 access_to_commi_trans_wiz_comi,access.commi.trans.wiz,model_commi_trans_wiz,groups_payment_collection_comi,1,1,1,1
 
-access_to_recalculate.button_wiz_admin,access.recalculate.button.wiz,model_recalculate_button_wiz,groups_payment_collection_admin,1,1,1,1
-access_to_recalculate.button.wiz_user,access.recalculate.button.wiz,model_recalculate_button_wiz,groups_payment_collection_user,0,0,0,0
-access_to_recalculate.button.wiz_comi,access.recalculate.button.wiz,model_recalculate_button_wiz,groups_payment_collection_comi,0,0,0,0
+access_to_recalculate_button_wiz_admin,access.recalculate.button.wiz,model_recalculate_button_wiz,groups_payment_collection_admin,1,1,1,1
+access_to_recalculate_button_wiz_user,access.recalculate.button.wiz,model_recalculate_button_wiz,groups_payment_collection_user,0,0,0,0
+access_to_recalculate_button_wiz_comi,access.recalculate.button.wiz,model_recalculate_button_wiz,groups_payment_collection_comi,0,0,0,0
 
-access_to_recalculate.table_admin,access.recalculate.table,model_recalculate_table,groups_payment_collection_admin,1,1,1,1
-access_to_recalculate.table_user,access.recalculate.table,model_recalculate_table,groups_payment_collection_user,0,0,0,0
-access_to_recalculate.table_comi,access.recalculate.table,model_recalculate_table,groups_payment_collection_comi,0,0,0,0
+access_to_recalculate_table_admin,access.recalculate.table,model_recalculate_table,groups_payment_collection_admin,1,1,1,1
+access_to_recalculate_table_user,access.recalculate.table,model_recalculate_table,groups_payment_collection_user,0,0,0,0
+access_to_recalculate_table_comi,access.recalculate.table,model_recalculate_table,groups_payment_collection_comi,0,0,0,0
