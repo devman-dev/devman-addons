@@ -99,12 +99,12 @@ class CollectionTransaction(models.Model):
                     commission_agent = self.env['collection.transaction.commission'].search(domain)
                     for agent_service in commission_agent:
                         commission_amount = (agent_service.commission_rate * values['amount']) / 100
+
                         if commission_amount > 0 and rec.count == 0:
-                            result = agent_service.payment_amount - agent_service.payment_rest
                             agent_service.sudo().write(
                                 {
                                     'operation_amount': values['amount'],
-                                    'payment_rest': result,
+                                    'payment_rest': commission_amount,
                                     'commission_amount': commission_amount,
                                     'payment_state': 'debt',
                                 }
