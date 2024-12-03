@@ -9,7 +9,7 @@ access_to_collection_transaction_commission_comi,access.collection.transaction.c
 access_to_collection_transaction_admin,access.collection.transaction,model_collection_transaction,payment_collection.groups_payment_collection_admin,1,1,1,1
 access_to_collection_transaction_user,access.collection.transaction,model_collection_transaction,payment_collection.groups_payment_collection_user,1,0,0,0
 
-access_to_collection_dashboard_admin,access.collection.dashboard,model_collection_dashboard_customer,groups_payment_collection_admin,1,0,0,0
+access_to_collection_dashboard_admin,access.collection.dashboard,model_collection_dashboard_customer,groups_payment_collection_admin,1,1,1,1
 access_to_collection_dashboard_user,access.collection.dashboard,model_collection_dashboard_customer,groups_payment_collection_user,1,0,0,0
 
 access_to_payment_wiz_admin,access.payment.wiz,model_payment_wiz,groups_payment_collection_admin,1,1,1,1
@@ -24,3 +24,11 @@ access_to_report_agent_wiz_comi,access.report.agent.wiz,model_report_agent_wiz,g
 access_to_commi_trans_wiz_admin,access.commi.trans.wiz,model_commi_trans_wiz,groups_payment_collection_admin,1,1,1,1
 access_to_commi_trans_wiz_user,access.commi.trans.wiz,model_commi_trans_wiz,groups_payment_collection_user,1,1,1,1
 access_to_commi_trans_wiz_comi,access.commi.trans.wiz,model_commi_trans_wiz,groups_payment_collection_comi,1,1,1,1
+
+access_to_recalculate.button_wiz_admin,access.recalculate.button.wiz,model_recalculate_button_wiz,groups_payment_collection_admin,1,1,1,1
+access_to_recalculate.button.wiz_user,access.recalculate.button.wiz,model_recalculate_button_wiz,groups_payment_collection_user,0,0,0,0
+access_to_recalculate.button.wiz_comi,access.recalculate.button.wiz,model_recalculate_button_wiz,groups_payment_collection_comi,0,0,0,0
+
+access_to_recalculate.table_admin,access.recalculate.table,model_recalculate_table,groups_payment_collection_admin,1,1,1,1
+access_to_recalculate.table_user,access.recalculate.table,model_recalculate_table,groups_payment_collection_user,0,0,0,0
+access_to_recalculate.table_comi,access.recalculate.table,model_recalculate_table,groups_payment_collection_comi,0,0,0,0
