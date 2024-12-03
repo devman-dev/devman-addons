@@ -8,7 +8,12 @@
             <tree string="Transacción de cobro" js_class="button_print_transaction"
                 decoration-danger="collection_trans_type == 'retiro'"
                 decoration-info="collection_trans_type == 'movimiento_interno'"
-                duplicate="0" >
+                duplicate="0">
+<!--                <header>-->
+<!--                    <button groups="payment_collection.groups_payment_collection_admin" type="object"-->
+<!--                            name="recalculate_total_recs" class="btn btn-primary"-->
+<!--                            string="Recalcular Todo"/>-->
+<!--                </header>-->
                 <field name="collection_trans_type" string="Tipo T." />
                 <field name="date" />
                 <field name="customer" />
