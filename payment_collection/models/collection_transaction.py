@@ -745,7 +745,7 @@ class CollectionTransaction(models.Model):
                 }
             )
 
-    @api.onchange('collection_trans_type')
+    @api.onchange('collection_trans_type','service')
     def set_default_operation(self):
         for rec in self:
             if rec.collection_trans_type == 'movimiento_recaudacion':
@@ -776,6 +776,11 @@ class CollectionTransaction(models.Model):
                     rec.withdrawal_operations = internal.ids
                 else:
                     rec.withdrawal_operations = internal
+
+    @api.onchange('collection_trans_type')
+    def set_empty_fields(self):
+        for rec in self:
+            pass
 
     @api.model
     def open_commi_trans_wiz(self):
