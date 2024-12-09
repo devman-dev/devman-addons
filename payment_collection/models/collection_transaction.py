@@ -633,6 +633,7 @@ class CollectionTransaction(models.Model):
                 elif rec.commission == 0 and rec.collection_trans_type == 'retiro':
                     total_collection_balance = rec.amount
                     customer_available_balance = rec.amount
+                    total_customer_real_balance = rec.amount 
 
                 elif rec.collection_trans_type == 'movimiento_recaudacion':
                     total_collection_balance = rec.amount - ((rec.amount * rec.commission) / 100)
