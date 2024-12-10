@@ -168,7 +168,9 @@ class CollectionTransaction(models.Model):
                 else:
                     dict_transac['commission'] = vals['commission']
                     dict_transac['amount'] = ((vals['commission'] / 100) * vals['amount']) * -1
-                self.env['collection.transaction'].sudo().create(dict_transac)
+
+                if vals['commission'] > 0:
+                    self.env['collection.transaction'].sudo().create(dict_transac)
 
             if vals['collection_trans_type'] == 'retiro' and not self.env.context.get('ignore_acr', False) and vals['commission'] != 0:
                 dict_with = {
@@ -751,7 +753,7 @@ class CollectionTransaction(models.Model):
                 self.alert_withdrawal = False
             elif rec.collection_trans_type == 'retiro':
                 extraction = rec.operation.search([('check_withdrawal', '=', True), ('collection_type', '=', 'operation')])
-                services = rec.service.search([('services', '=', rec.service.services.id)])
+                services = rec.service.search([('services', '=', rec.service.services.id),('name_account', '!=', False)])
                 if extraction:
                     rec.withdrawal_operations = extraction.ids
                 else:
