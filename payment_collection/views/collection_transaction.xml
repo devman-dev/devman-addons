@@ -23,7 +23,7 @@
                 <field name="operation" />
                 <field name="description" />
                 <field name="amount" sum="Total" />
-                <field name="available_balance" invisible="1" optional="hide" />
+                <!-- <field name="available_balance" optional="hide" /> -->
                 <field name="origin_account_cuit" />
                 <field name="origin_account_cvu" />
                 <field name="origin_account_cbu" />
