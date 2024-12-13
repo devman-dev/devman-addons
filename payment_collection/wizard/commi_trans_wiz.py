@@ -25,10 +25,11 @@ class CommiTransWiz(models.TransientModel):
         dashboard_customer = self.env['collection.dashboard.customer'].search([('customer', '=', self.customer.id)], limit=1)
         dashboard_customer.update_available_balance()
         domain_2 = [('date', '>=', start_date), ('date', '<=', end_date),('customer', '=', customer.id)]
-        filtered_records = self.env['collection.transaction'].search(domain_2)
+        filtered_records = self.env['collection.transaction'].search(domain_2, order='date asc, id desc')
         if filtered_records:
             filtered_records[0].available_balance = dashboard_customer.customer_available_balance
             filtered_records[0].previous_month = self.previous_balance
+
 
             return self.env.ref('payment_collection.action_report_collection_transaction').report_action(filtered_records)
         else:

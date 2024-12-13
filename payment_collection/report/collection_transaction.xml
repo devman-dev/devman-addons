@@ -24,7 +24,7 @@
                                 <th class="border" style="text-align: left;">Cliente</th>
                                 <th class="border" style="text-align: left;">Servicio</th>
                                 <th class="border" style="text-align: left;">Operación</th>
-                                <th class="border" style="text-align: left;">CUIT</th>
+                                <th class="border" style="text-align: left; width:100px;">CUIT</th>
                                 <th class="border" style="text-align: left;">Descripción</th>
                                 <th class="border" style="text-align: right;">Imp. Operación</th>
                                 <th class="border" style="text-align: right; padding:0;">Comi(%)</th>
@@ -64,7 +64,7 @@
                                                 <span t-field="o.customer.name" />
                                             </td>
                                             <td class="border">
-                                                <span t-field="o.service.name" />
+                                                <span t-field="o.service.services.name" />
                                             </td>
                                             <td class="border">
                                                 <span t-field="o.operation.name" />
@@ -135,7 +135,7 @@
                                                 <span t-field="o.customer.name" />
                                             </td>
                                             <td class="border">
-                                                <span t-field="o.service.name" />
+                                                <span t-field="o.service.services.name" />
                                             </td>
                                             <td class="border">
                                                 <span t-field="o.operation.name" />
