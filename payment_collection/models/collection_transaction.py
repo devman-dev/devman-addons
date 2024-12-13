@@ -277,7 +277,10 @@ class CollectionTransaction(models.Model):
             total_amount_available = sum([c.amount for c in total_available])
             total_amount_app = sum([c.commission_app_amount for c in total_recaudation])
             total_amount_recau_no_commi = [c.amount for c in total_recaudation if c.amount > 0]
-            total_app_rate = sum([c.commission_app_rate for c in total_recaudation]) / len(total_amount_recau_no_commi)
+            if not len(total_amount_recau_no_commi) == 0:
+                total_app_rate = sum([c.commission_app_rate for c in total_recaudation]) / len(total_amount_recau_no_commi)
+            else:
+                total_app_rate = sum([c.commission_app_rate for c in total_recaudation])
             total_commi_amount = sum([c.amount for c in total_recaudation if c.amount < 0])
 
             # dashboard.sudo().write(
@@ -306,7 +309,7 @@ class CollectionTransaction(models.Model):
     def recalculate_customer_balance_unlink(self):
         for rec in self:
             rec_customer = self.env['collection.transaction'].search([('customer', '=', rec.customer.id), ('id', 'not in', self.ids), ('amount', '>', 0)])
-            rec_dashboard = self.env['collection.dashboard.customer'].search([('customer', '=', rec.customer.id), ('manual_data', '=', False)])
+            rec_dashboard = self.env['collection.dashboard.customer'].search([('customer', '=', rec.customer.id)])
             rec_service_id = rec.service.id
             agent_domain = [
                 ('transaction_service', '=', rec_service_id),
@@ -316,9 +319,9 @@ class CollectionTransaction(models.Model):
             rec_agent_trans = self.env['collection.transaction.commission'].search(agent_domain)
             for agent in rec_agent_trans:
                 agent.unlink()
-            if not rec_customer:
+            if not rec_customer and not rec_dashboard.manual_data:
                 rec_dashboard.sudo().unlink()
-            elif rec_customer and rec_dashboard:
+            elif rec_dashboard:
                 if rec.collection_trans_type == 'movimiento_recaudacion':
                     if rec.amount < 0:
                         continue
