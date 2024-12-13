@@ -17,4 +17,22 @@ body {
 
 .available_balance {
   color: rgb(88, 88, 88);
+  font-size: 14px;
+  margin: 5px;
+}
+
+.btn-new-account {
+  display: flex;
+  justify-content: left;
+  align-items: center;
+  width: 100%;
+  text-align: left;
+}
+
+.fa-plus {
+  font-size: 30px
+}
+
+.add-new-account:hover{
+  text-decoration: none;
 }
