@@ -6,6 +6,7 @@ from odoo.exceptions import ValidationError
 class CollectionServicesCommission(models.Model):
     _name = 'collection.services.commission'
     _rec_name = 'name_account'
+    _order = 'customer asc'
 
     customer = fields.Many2one('res.partner', string='Cliente', required=True, domain="[('check_origin_account','!=', True)]")
     services = fields.Many2one('product.template', string='Servicio', required=True, domain=[('collection_type', '=', 'service')])
