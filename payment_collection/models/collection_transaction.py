@@ -240,10 +240,13 @@ class CollectionTransaction(models.Model):
     def recalculate_total_recs(self):
         dict_list = []
         group = self.env.ref('payment_collection.groups_payment_collection_admin')
-        if not group.id in self.env.user.groups_id.ids:
+        if group.id not in self.env.user.groups_id.ids:
             raise UserError('Esta función solo puede ser ejecutada por usuarios con permiso de administrador.')
         all_recs = self.env['res.partner'].sudo().search([('check_origin_account', '=', False)])
         for rec in all_recs:
+            exists = self.env['collection.transaction'].search([('customer', '=', rec.id)])
+            if not exists:
+                continue
             today_date = dt.datetime.now().date()
             days_ago = dt.timedelta(days=2)
             total_available = (
@@ -253,14 +256,30 @@ class CollectionTransaction(models.Model):
                     [
                         ('customer', '=', rec.id),
                         ('date', '<=', today_date - days_ago),
-                        ('collection_trans_type', '!=', 'movimiento_interno'),
+                        ('collection_trans_type', '=', 'movimiento_recaudacion'),
+                        '|',
+                        ('operation.name', 'not ilike', 'SALDO INICIAL'),
+                        ('service.services.name', 'not ilike', 'SALDO INICIAL'),
                     ]
                 )
             )
-            total_recaudation = self.env['collection.transaction'].sudo().search([('customer', '=', rec.id), ('collection_trans_type', '=', 'movimiento_recaudacion')])
+            total_recaudation = (
+                self.env['collection.transaction']
+                .sudo()
+                .search(
+                    [
+                        ('customer', '=', rec.id),
+                        ('is_commission', '=', False),
+                        ('collection_trans_type', '=', 'movimiento_recaudacion'),
+                        '|',
+                        ('operation.name', 'not ilike', 'SALDO INICIAL'),
+                        ('service.services.name', 'not ilike', 'SALDO INICIAL'),
+                    ]
+                )
+            )
             total_withdrawal = self.env['collection.transaction'].sudo().search([('customer', '=', rec.id), ('collection_trans_type', '=', 'retiro')])
 
-            withdrawal_commission = self.env['collection.transaction'].sudo().search([('collection_trans_type', '=', 'retiro'), ('commission', '>', '0')])
+            withdrawal_commission = self.env['collection.transaction'].sudo().search([('customer', '=', rec.id), ('collection_trans_type', '=', 'retiro'), ('commission', '>', '0')])
             withdrawal_commission_list = []
             for wc in withdrawal_commission:
                 commi = self.env['collection.transaction'].sudo().search([('transaction_name', '=', wc.transaction_name), ('id', '!=', wc.id)])
@@ -269,7 +288,7 @@ class CollectionTransaction(models.Model):
             withdrawal_commission_total = sum(withdrawal_commission_list)
 
             dashboard = self.env['collection.dashboard.customer'].sudo().search([('customer', '=', rec.id)])
-            if not total_recaudation and not total_withdrawal:
+            if not total_recaudation and not total_withdrawal and not total_available:
                 continue
 
             total_amount_recau = sum([c.amount for c in total_recaudation])
@@ -281,14 +300,14 @@ class CollectionTransaction(models.Model):
                 total_app_rate = sum([c.commission_app_rate for c in total_recaudation]) / len(total_amount_recau_no_commi)
             else:
                 total_app_rate = sum([c.commission_app_rate for c in total_recaudation])
-            total_commi_amount = sum([c.amount for c in total_recaudation if c.amount < 0])
+            total_commi_amount = sum([c.amount for c in total_recaudation if c.is_commission])
 
             # dashboard.sudo().write(
             dict_dashboard = {
                 'customer': rec.id,
                 'customer_real_balance': (total_amount_recau + (total_commi_amount * -1)) - total_amount_app + total_amount_withdr,
                 'customer_available_balance': total_amount_available + total_amount_withdr,
-                'collection_balance': total_amount_recau - withdrawal_commission_total,
+                'collection_balance': total_amount_recau - withdrawal_commission_total + total_amount_withdr,
                 'commission_balance': total_commi_amount,
                 'commission_app_rate': total_app_rate,
                 'commission_app_amount': total_amount_app,
@@ -638,7 +657,7 @@ class CollectionTransaction(models.Model):
                 elif rec.commission == 0 and rec.collection_trans_type == 'retiro':
                     total_collection_balance = rec.amount
                     customer_available_balance = rec.amount
-                    total_customer_real_balance = rec.amount 
+                    total_customer_real_balance = rec.amount
 
                 elif rec.collection_trans_type == 'movimiento_recaudacion':
                     total_collection_balance = rec.amount - ((rec.amount * rec.commission) / 100)
@@ -727,6 +746,7 @@ class CollectionTransaction(models.Model):
         for rec in self:
             if rec.collection_trans_type == 'retiro' or rec.collection_trans_type == 'movimiento_interno':
                 rec.commission = 0
+                rec.commission_app_amount = 0
             else:
                 rec.commission = rec.service.commission
 
@@ -756,7 +776,7 @@ class CollectionTransaction(models.Model):
                 self.alert_withdrawal = False
             elif rec.collection_trans_type == 'retiro':
                 extraction = rec.operation.search([('check_withdrawal', '=', True), ('collection_type', '=', 'operation')])
-                services = rec.service.search([('services', '=', rec.service.services.id),('name_account', '!=', False)])
+                services = rec.service.search([('services', '=', rec.service.services.id), ('name_account', '!=', False)])
                 if extraction:
                     rec.withdrawal_operations = extraction.ids
                 else:
@@ -815,24 +835,15 @@ class CollectionTransaction(models.Model):
     def intern(self):
         self.transaction_state = 'interno'
 
-
     def print_report_xls(self):
         list_dict_total = []
         if self.nombre:
             for rec in self.totales_ids:
                 print(rec)
-                dict_totales_id = {'moneda': rec.moneda,
-                                   'capital': rec.capital,
-                                   'intereses': rec.intereses,
-                                   'gastos': rec.gastos,
-                                   'impuestos': rec.impuestos,
-                                   'cuota_total': rec.cuota_total
-                                   }
+                dict_totales_id = {'moneda': rec.moneda, 'capital': rec.capital, 'intereses': rec.intereses, 'gastos': rec.gastos, 'impuestos': rec.impuestos, 'cuota_total': rec.cuota_total}
                 list_dict_total.append(dict_totales_id)
 
             list_dict_dif = []
             data = {}
 
             return self.env.ref('loans_scoring.report_prestamo_bancario_xlsx_id').report_action(self, data)
-
-

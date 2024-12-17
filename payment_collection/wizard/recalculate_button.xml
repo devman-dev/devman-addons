@@ -10,21 +10,25 @@
                     <group>
                         <field name="all_customer_dash">
                             <tree string="Dashboard de Cobro de cliente">
-                                <field name="customer"/>
-                                <field name="customer_real_balance"/>
-                                <field name="customer_available_balance"/>
-                                <field name="collection_balance"/>
-                                <field name="commission_balance" invisible="1" optional="hide"/>
-                                <field name="last_operation_date"/>
-                                <field name="commission_app_rate"  invisible="1" optional="hide"/>
-                                <field name="commission_app_amount"  invisible="1" optional="hide"/>
+                                <control>
+                                    <create name="add_line_control" invisible="1" />
+                                </control>
+                                <field name="customer" />
+                                <field name="customer_real_balance" />
+                                <field name="customer_available_balance" />
+                                <field name="collection_balance" />
+                                <field name="commission_balance" invisible="1" optional="hide" />
+                                <field name="last_operation_date" />
+                                <field name="commission_app_rate" invisible="1" optional="hide" />
+                                <field name="commission_app_amount" invisible="1" optional="hide" />
                             </tree>
                         </field>
                     </group>
 
                     <footer>
-                        <button name="imputar" string="Imputar" class="btn btn-primary" type="object" confirm="¿Desea Imputar estos resultados en el dashboard?"/>
-                        <button special="cancel" string="Descartar" class="btn btn-secondary"/>
+                        <button name="imputar" string="Imputar" class="btn btn-primary"
+                            type="object" confirm="¿Desea Imputar estos resultados en el dashboard?" />
+                        <button special="cancel" string="Descartar" class="btn btn-secondary" />
                     </footer>
                 </sheet>
             </form>
