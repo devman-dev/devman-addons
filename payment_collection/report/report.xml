@@ -25,4 +25,20 @@
         <field name="binding_type">report</field>
     </record>
 
+    <!-- REPORTE XLSX RECAUDACION DE PAGOS -->
+
+<!--    <record id="report_prestamo_bancario_xlsx_id" model="ir.actions.report">-->
+<!--        <field name="name">Imprimir Prestamo Bancario xlsx</field>-->
+<!--        <field name="model">loans</field>-->
+<!--        <field name="report_type">xlsx</field>-->
+<!--        <field name="report_name">payment_collection.report_collection_transaction_xlsx</field>-->
+<!--        <field name="report_file">payment_collection.report_collection_transaction_xlsx</field>-->
+<!--        <field name="binding_model_id" ref="model_loans"/>-->
+<!--        <field name="binding_type">report</field>-->
+<!--    </record>-->
+<!--    <record id="report_prestamo_bancario_xlsx_id" model="ir.actions.report">-->
+<!--         <field name="binding_model_id" eval="False"/>-->
+<!--    </record>-->
+
+
 </odoo>
