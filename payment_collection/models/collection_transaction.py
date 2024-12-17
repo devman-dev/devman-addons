@@ -802,3 +802,37 @@ class CollectionTransaction(models.Model):
             'type': 'ir.actions.act_window',
             'target': 'new',
         }
+
+    def approved(self):
+        self.transaction_state = 'aprobado'
+
+    def pending(self):
+        self.transaction_state = 'pendiente'
+
+    def refused(self):
+        self.transaction_state = 'rechazado'
+
+    def intern(self):
+        self.transaction_state = 'interno'
+
+
+    def print_report_xls(self):
+        list_dict_total = []
+        if self.nombre:
+            for rec in self.totales_ids:
+                print(rec)
+                dict_totales_id = {'moneda': rec.moneda,
+                                   'capital': rec.capital,
+                                   'intereses': rec.intereses,
+                                   'gastos': rec.gastos,
+                                   'impuestos': rec.impuestos,
+                                   'cuota_total': rec.cuota_total
+                                   }
+                list_dict_total.append(dict_totales_id)
+
+            list_dict_dif = []
+            data = {}
+
+            return self.env.ref('loans_scoring.report_prestamo_bancario_xlsx_id').report_action(self, data)
+
+

@@ -22,7 +22,7 @@
                                 <th class="border" style="text-align: left;">Fecha</th>
                                 <th class="border" style="text-align: left;">Nro T</th>
                                 <th class="border" style="text-align: left;">Cliente</th>
-                                <th class="border" style="text-align: left;">Servicio</th>
+                                <th class="border" style="text-align: left; width:150px;">Servicio</th>
                                 <th class="border" style="text-align: left;">Operación</th>
                                 <th class="border" style="text-align: left; width:100px;">CUIT</th>
                                 <th class="border" style="text-align: left;">Descripción</th>
