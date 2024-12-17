@@ -1,5 +1,4 @@
-from odoo import fields, models, api, _
-
+from odoo import models
 
 class ReportPrestamoBancarioXlsx(models.AbstractModel):
     _name = 'report.payment_collection.report_collection_transaction_xlsx'
@@ -7,7 +6,7 @@ class ReportPrestamoBancarioXlsx(models.AbstractModel):
 
     def generate_xlsx_report(self, workbook, data, partners):
         data = data
-        nombre_sheet = data['nombre']
+        nombre_sheet = 'Recaudación de Pagos'
         sheet = workbook.add_worksheet(nombre_sheet)
         bold = workbook.add_format({'bold': True, 'align': 'left'})
         bold_center = workbook.add_format({'bold': True, 'align': 'center'})
@@ -31,12 +30,26 @@ class ReportPrestamoBancarioXlsx(models.AbstractModel):
         row = 0
         col = 0
         sheet.write(row, col, 'Fecha:', bold)
-        sheet.write(row, col + 1, data['fecha'])
-        sheet.write(row + 1, col, 'Nombre:', bold)
-        sheet.write(row + 1, col + 1, data['nombre'])
-        sheet.write(row + 2, col, 'Cliente:', bold)
-        sheet.write(row + 2, col + 1, data['cliente'])
-        sheet.write(row, col + 4, 'Tipo de Metodo:', bold)
-        sheet.write(row, col + 5, data['tipo_metodo'])
-        sheet.write(row + 1, col + 4, 'Tipo de Tasa de Interes:', bold)
-        sheet.write(row + 1, col + 5, data['tipo_tasa_interes'])
+        sheet.write(row, col + 1, 'Nro T:', bold)
+        sheet.write(row, col + 2, 'Cliente:', bold)
+        sheet.write(row, col + 3, 'Servicio:', bold)
+        sheet.write(row, col + 4, 'Operación:', bold)
+        sheet.write(row, col + 5, 'CUIT:', bold)
+        sheet.write(row, col + 6, 'Descripción:', bold)
+        sheet.write(row, col + 7, 'Imp. Operación:', bold)
+        sheet.write(row, col + 8, 'Comi(%):', bold)
+        sheet.write(row, col + 9, 'Imp. Comisión:', bold)
+
+        row = 1
+        for rec in partners:
+            sheet.write(row, col, rec.date.strftime('%d/%m/%Y'))
+            sheet.write(row, col + 1, rec.transaction_name )
+            sheet.write(row, col + 2, rec.customer.name )
+            sheet.write(row, col + 3, rec.service.services.name )
+            sheet.write(row, col + 4, rec.operation.name )
+            sheet.write(row, col + 5, rec.origin_account_cuit )
+            sheet.write(row, col + 6, rec.description )
+            sheet.write(row, col + 7, rec.amount )
+            sheet.write(row, col + 8, rec.commission )
+            sheet.write(row, col + 9, (rec.commission * rec.amount) / 100 )
+            row += 1
