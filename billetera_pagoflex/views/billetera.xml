@@ -21,16 +21,15 @@
                     <div class="subcontainer_div">
                         <div>
                             <p class="available_balance">Saldo Disponible:</p>
-                            <h4>$
-                            <t
-                                t-out="('{:,.2f}'.format(available_balance)).replace(',', 'X').replace('.', ',').replace('X', '.')" />
-                            </h4>
+                            <h3>$ <t
+                                    t-out="('{:,.2f}'.format(available_balance)).replace(',', 'X').replace('.', ',').replace('X', '.')" />
+                            </h3>
 
                         </div>
                         <div
                             data-name="Submit Button">
                             <div style="width: 200px;" class="s_website_form_label" />
-                            <a href="/wallet/transfer/accounts" >
+                            <a href="/wallet/transfer/accounts">
                                 <button type="button" class="btn btn-primary mt-4">
                                     <i class="fa fa-money" aria-hidden="true"></i>
                                     <span style="margin-left: 5px;">Transferir </span>
@@ -46,24 +45,32 @@
     <!-- Transferencia -->
     <template id="web_form_template_transfer" name="Billetera">
         <t t-call="website.layout">
-            <div class="container">
-                <div class="s_website_form_rows row s_col_no_bgcolor">
-                    <div
-                        class="form-group col-12 s_website_form_field s_website_form_required"
-                        data-type="char" data-name="Field">
-                        <a href="/wallet/transfer/accounts/new_account">
-                            <button type="submit" class="btn btn-primary">
-                                <i class="fa fa-money" aria-hidden="true"></i>
-                                <span style="margin-left: 5px;">
-                                    <i class="fa fa-plus" aria-hidden="true"></i> Nueva Cuenta </span>
-                                <p>Con CBU,CVU o alias.</p>
-                            </button>
-                        </a>
-                    </div>
-                    <div class="form-group col-12 s_website_form_submit"
-                        data-name="Submit Button">
-                        <div style="width: 200px;" class="s_website_form_label" />
-                    </div>
+            <link rel="stylesheet" type="text/css"
+                href="/billetera_pagoflex/static/src/css/style.css" />
+
+            <div class="container_div">
+                <div class="subcontainer_div">
+                    <h5 sytle="margin: 5px 12px 0px 15px;
+                    font-size: 18px;">
+                        Elegí a
+                        qué cuenta
+                        transferir
+                    </h5>
+                    <a href="/wallet/transfer/accounts/new_account" class="add-new-account">
+                        <button type="submit" class="btn btn-primary btn-new-account">
+                            <div>
+                                <i class="fa fa-plus" aria-hidden="true"></i>
+                            </div>
+                            <div style="margin-left: 20px;">
+                                <p style="margin-bottom: 0; font-size: 20px;">Nueva
+                                    Cuenta</p>
+                                <p
+                                    style="font-size: 14px; color: rgb(195 195 195); margin-bottom: 0;">Con
+                                    CBU,CVU o
+                                    alias.</p>
+                            </div>
+                        </button>
+                    </a>
                 </div>
             </div>
         </t>
@@ -73,16 +80,18 @@
     <!-- Añadir CBU, CVU o alias -->
     <template id="web_form_template_transfer_new_account" name="Billetera">
         <t t-call="website.layout">
+            <link rel="stylesheet" type="text/css"
+                href="/billetera_pagoflex/static/src/css/style.css" />
             <div class="container">
                 <form action="/wallet/transfer/accounts/new_account/search"
                     enctype="multipart/form-data" class="o_mark_required"
                     data-mark="*" data-model_name="" data-success-page="">
                     <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()" />
-                    <div class="s_website_form_rows row s_col_no_bgcolor">
-                        <div class="form-group col-12 s_website_form_field s_website_form_required"
+                    <div>
+                        <div
                             data-type="char" data-name="Field">
-                            <div class="row s_col_no_resize s_col_no_bgcolor">
-                                <div class="col-sm">
+                            <div>
+                                <div>
                                     <p>Ingresá el CBU, CVU o alias</p>
                                     <input id="name" type="text"
                                         class="form-control s_website_form_input" name="name"
