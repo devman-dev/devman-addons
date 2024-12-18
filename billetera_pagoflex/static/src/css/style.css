@@ -30,9 +30,99 @@ body {
 }
 
 .fa-plus {
-  font-size: 30px
+  font-size: 30px;
 }
 
-.add-new-account:hover{
+.add-new-account:hover {
   text-decoration: none;
+}
+
+.ul-accounts {
+  list-style: none;
+  width: 100%;
+  padding-left: 0;
+}
+
+.list-accounts {
+  margin-bottom: 10px;
+  padding: 10px 0;
+  border-radius: 15px;
+  margin-top: 10px;
+}
+
+.list-accounts p {
+  font-size: 14px;
+  color: rgb(155, 155, 155);
+  margin-bottom: 0;
+  margin-left: 10px;
+  margin-top: 2px;
+}
+
+.list-accounts h6 {
+  margin: 0;
+  margin-left: 10px;
+}
+
+.list-accounts:hover {
+  background-color: #c2f8c5;
+  cursor: pointer;
+}
+
+.ul-accounts hr {
+  margin: 0;
+}
+
+.ul-accounts a {
+  text-decoration: none;
+}
+
+.transfer-input::-webkit-inner-spin-button, 
+.transfer-input::-webkit-outer-spin-button { 
+    -webkit-appearance: none; 
+    margin: 0; 
+}
+.transfer-input:focus{
+  border-color: #007bff;
+  box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+}
+
+.transfer-input {
+  width: 100%;
+  padding: 10px 10px 10px 30px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-size: 18px;
+  box-shadow: none;
+  outline: none;
+  -moz-appearance: textfield;
+}
+
+.transfer-btn {
+  margin: 0 auto;
+}
+
+.transfer-amount-container {
+  font-family: Arial, sans-serif;
+  margin: 20px;
+}
+
+label {
+  display: block;
+  font-size: 14px;
+  margin-bottom: 5px;
+}
+
+.input-wrapper {
+  position: relative;
+  width: 100%;
+  max-width: 300px;
+}
+
+.currency-symbol {
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 18px;
+  color: #333;
 }
