@@ -256,10 +256,8 @@ class CollectionTransaction(models.Model):
                     [
                         ('customer', '=', rec.id),
                         ('date', '<=', today_date - days_ago),
-                        ('collection_trans_type', '=', 'movimiento_recaudacion'),
-                        '|',
-                        ('operation.name', 'not ilike', 'SALDO INICIAL'),
-                        ('service.services.name', 'not ilike', 'SALDO INICIAL'),
+                        ('collection_trans_type', '=', 'movimiento_recaudacion')
+                    
                     ]
                 )
             )
@@ -274,6 +272,17 @@ class CollectionTransaction(models.Model):
                         '|',
                         ('operation.name', 'not ilike', 'SALDO INICIAL'),
                         ('service.services.name', 'not ilike', 'SALDO INICIAL'),
+                    ]
+                )
+            )
+            total_recaudation_initial = (
+                self.env['collection.transaction']
+                .sudo()
+                .search(
+                    [
+                        ('customer', '=', rec.id),
+                        ('is_commission', '=', False),
+                        ('collection_trans_type', '=', 'movimiento_recaudacion'),
                     ]
                 )
             )
@@ -292,6 +301,7 @@ class CollectionTransaction(models.Model):
                 continue
 
             total_amount_recau = sum([c.amount for c in total_recaudation])
+            total_amount_recau_initial = sum([c.amount for c in total_recaudation_initial])
             total_amount_withdr = sum([c.amount for c in total_withdrawal])
             total_amount_available = sum([c.amount for c in total_available])
             total_amount_app = sum([c.commission_app_amount for c in total_recaudation])
@@ -307,7 +317,7 @@ class CollectionTransaction(models.Model):
                 'customer': rec.id,
                 'customer_real_balance': (total_amount_recau + (total_commi_amount * -1)) - total_amount_app + total_amount_withdr,
                 'customer_available_balance': total_amount_available + total_amount_withdr,
-                'collection_balance': total_amount_recau - withdrawal_commission_total + total_amount_withdr,
+                'collection_balance': total_amount_recau_initial - withdrawal_commission_total + total_amount_withdr,
                 'commission_balance': total_commi_amount,
                 'commission_app_rate': total_app_rate,
                 'commission_app_amount': total_amount_app,
