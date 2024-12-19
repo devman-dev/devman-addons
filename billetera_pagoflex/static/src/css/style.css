@@ -126,3 +126,18 @@ label {
   font-size: 18px;
   color: #333;
 }
+
+.data-confirm-account {
+margin: 10px 0;
+}
+
+.data-confirm-account p{
+margin: 5px 0;
+}
+
+.confirm-data {
+display:flex;
+justify-content: right;
+align-item: right;
+gap: 5px;
+}
