@@ -12,8 +12,22 @@ class WebFormWalletController(Controller):
 
     @route('/wallet/transfer/accounts', auth='user', website=True, methods=['GET'])
     def web_form_transfer(self, **kwargs):
-        data = requests.get('http://localhost:8017/bank/get_data')
-        response = data.json()
+        response = [
+            {
+                'id': '1',
+                'cbu': '1234567890112345678901',
+                'cvu': '1234567890112345678901',
+                'alias': 'alias.demo',
+                'name_account': 'Datos Demostracion',
+            },
+            {
+                'id': '2',
+                'cbu': '1234567890112345678901',
+                'cvu': '1234567890112345678901',
+                'alias': 'alias.demo2',
+                'name_account': 'Datos Demostracion2',
+            },
+        ]
         return request.render('billetera_pagoflex.web_form_template_transfer', {'list_accounts': response})
 
     @route('/wallet/transfer/accounts/new_account', auth='user', website=True, methods=['GET'])
