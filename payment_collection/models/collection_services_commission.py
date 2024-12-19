@@ -32,7 +32,7 @@ class CollectionServicesCommission(models.Model):
                 name = record.services.display_name or 'Sin Servicio'
             elif self.env.context.get('show_account_name', False):
                 # Mostrar el nombre de la cuenta
-                name = record.name_account or 'Sin Nombre de Cuenta'
+                name = f'{record.name_account} - {record.customer.name}' or 'Sin Nombre de Cuenta'
             else:
                 # Nombre por defecto
                 name = record.services.display_name or 'Registro Sin Nombre'
