@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<templates xml:space="preserve">
+    <t t-name="billetera_pagoflex.Wallet" owl="1">
+        <div class="container">
+            <div class="bg-primary mx-auto mt-5 mb-2 rounded-3 w-50 p-3" style="--bs-bg-opacity: .5;">
+                <div>
+                    <p>Saldo Disponible:</p>
+                    <h3 style="white-space: nowrap;">
+                        $<t t-out="state.available_balance" />
+                    </h3>
+                </div>
+            </div>
+            <div data-name="Submit Button" class="mx-auto mb-4 w-50 d-flex justify-content-start">
+                <a href="/wallet/transfer/accounts">
+                    <button type="button" class="btn btn-primary">
+                        <i class="fa fa-money" aria-hidden="true"></i>
+                        <span style="margin-left: 5px;">Transferir </span>
+                    </button>
+                </a>
+            </div>
+        </div>
+    </t>
+</templates>

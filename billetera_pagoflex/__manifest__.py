@@ -14,5 +14,9 @@
     'demo': [''],
     'auto_install': False,
     'application': False,
-    'assets': {},
+    'assets': {
+        'web.assets_frontend': [
+            'billetera_pagoflex/static/src/components/**/*',
+        ]
+    },
 }

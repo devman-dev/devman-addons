@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<templates xml:space="preserve">
+    <t t-name="billetera_pagoflex.Transfer_accounts" owl="1">
+        <div class="container">
+            <div class="subcontainer_div">
+                <h5 sytle="margin: 5px 12px 0px 15px;
+                    font-size: 18px;">
+                        Elegí a
+                        qué cuenta
+                        transferir
+                </h5>
+                <a href="/wallet/transfer/accounts/new_account" class="add-new-account">
+                    <button type="submit" class="btn btn-primary btn-new-account">
+                        <div>
+                            <i class="fa fa-plus" aria-hidden="true"></i>
+                        </div>
+                        <div style="margin-left: 20px;">
+                            <p style="margin-bottom: 0; font-size: 20px;">Nueva
+                                    Cuenta</p>
+                            <p style="font-size: 14px; color: rgb(195 195 195); margin-bottom: 0;">Con
+                                    CBU,CVU o
+                                    alias.</p>
+                        </div>
+                    </button>
+                </a>
+
+            </div>
+        </div>
+        <div class="container">
+            <ul class="ul-accounts">
+                <!-- <t t-foreach="list_accounts" t-as="account">
+                    <a t-att-href="'/wallet/transfer/account/%s' % account['id']">
+                        <li class="list-accounts">
+                            <h6>
+                                <t t-esc="account['name_account']" />
+                            </h6>
+                            <p>
+                                <t t-esc="account['alias']" />
+                            </p>
+                        </li>
+                        <hr />
+                    </a>
+                </t> -->
+            </ul>
+        </div>
+    </t>
+</templates>

@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<templates xml:space="preserve">
+    <t t-name="billetera_pagoflex.Transfer_new_account" owl="1">
+    <div class="container_div">
+                <form action="/wallet/transfer/accounts/confirm_account"
+                    enctype="multipart/form-data" class="o_mark_required"
+                    data-mark="*" data-model_name="" data-success-page="">
+                    <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()" />
+                    <div>
+                        <div
+                            data-type="char" data-name="Field">
+                            <div>
+                                <div>
+                                    <p>Ingresá el CBU, CVU o alias</p>
+                                    <input id="name" type="text"
+                                        class="form-control s_website_form_input" name="name"
+                                        placeholder="Ingresá el CBU, CVU o alias"
+                                        required="1" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group col-12 s_website_form_submit mt-3"
+                            data-name="Submit Button">
+                            <div style="width: 200px;" class="s_website_form_label" />
+                            <button type="submit" class="btn btn-primary">Continuar</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+    </t>
+</templates>
