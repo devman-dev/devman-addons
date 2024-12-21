@@ -833,6 +833,31 @@ class CollectionTransaction(models.Model):
             'target': 'new',
         }
 
+
+    def open_bank_momevement_month_wiz(self):
+        list_names =[]
+        client_services = self.env['collection.services.commission'].sudo().search([])
+
+
+        for rec in client_services:
+            if not rec.name_account in list_names:
+                list_names.append(rec.name_account)
+
+        empty = self.env['list.name.account'].sudo().search([])
+        empty.unlink()
+        for name in list_names:
+            self.env['list.name.account'].sudo().create({'name': name})
+
+
+        return {
+            'name': 'Reporte de movimientos bancarios mensuales',
+            'view_type': 'form',
+            'view_mode': 'form',
+            'res_model': 'bank.movements.month.wiz',
+            'type': 'ir.actions.act_window',
+            'target': 'new',
+        }
+
     def approved(self):
         self.transaction_state = 'aprobado'
 

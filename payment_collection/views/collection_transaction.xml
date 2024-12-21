@@ -11,6 +11,9 @@
                 duplicate="0">
                 <header>
                     <button groups="payment_collection.groups_payment_collection_admin"
+                        type="object" name="open_bank_momevement_month_wiz" class="btn btn-primary"
+                        string="Imp. mov. bancarios" />
+                    <button groups="payment_collection.groups_payment_collection_admin"
                         type="object"
                         name="recalculate_total_recs" class="btn btn-primary"
                         string="Recalcular Todo" />
@@ -26,6 +29,7 @@
                     <button groups="payment_collection.groups_payment_collection_admin"
                         type="object" name="intern" class="btn btn-info"
                         string="Interno" />
+
                 </header>
                 <field name="collection_trans_type" string="Tipo T." />
                 <field name="date" />

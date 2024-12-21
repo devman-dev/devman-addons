@@ -27,6 +27,7 @@
         'wizard/payment_wiz.xml',
         'wizard/report_agent_wiz.xml',
         'wizard/commi_trans_wiz.xml',
+        'wizard/bank_movements_month.xml',
         'wizard/recalculate_button.xml',
     ],
     'demo': [''],
