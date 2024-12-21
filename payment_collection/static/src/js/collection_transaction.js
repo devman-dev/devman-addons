@@ -25,6 +25,20 @@ class CustomListController extends ListController {
     }
   }
 
+   async onClickPrintTransactionBank() {
+    try {
+      await this.action.doAction({
+        name: 'Reporte de Movimientos bancarios',
+        res_model: 'bank.movements.month.wiz',
+        type: 'ir.actions.act_window',
+        target: 'new',
+        views: [[false, 'form']],
+      });
+    } catch (error) {
+      console.error('Error en doAction:', error);
+    }
+  }
+
   async onClickRecalAll() {
     try {
       const result = await this.rpc("/web/dataset/call_kw/collection.transaction/recalculate_total_recs",{

@@ -35,5 +35,21 @@
         <field name="binding_model_id" ref="model_collection_transaction" />
         <field name="binding_type">report</field>
     </record>
+    <record id="report_collection_transaction_xlsx_id" model="ir.actions.report">
+         <field name="binding_model_id" eval="False"/>
+    </record>
+
+    <record id="report_bank_movement_month_xlsx_id" model="ir.actions.report">
+        <field name="name">Imprimir Movimientos Bancarios</field>
+        <field name="model">collection.transaction</field>
+        <field name="report_type">xlsx</field>
+        <field name="report_name">payment_collection.report_bank_movement_month_xlsx</field>
+        <field name="report_file">payment_collection.report_bank_movement_month_xlsx</field>
+        <field name="binding_model_id" ref="model_collection_transaction" />
+        <field name="binding_type">report</field>
+    </record>
+    <record id="report_bank_movement_month_xlsx_id" model="ir.actions.report">
+         <field name="binding_model_id" eval="False"/>
+    </record>
 
 </odoo>
