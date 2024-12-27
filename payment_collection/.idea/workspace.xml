@@ -4,7 +4,14 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="fa0620f9-6870-412f-87b2-f0e5edef2b0f" name="Changes" comment="" />
+    <list default="true" id="fa0620f9-6870-412f-87b2-f0e5edef2b0f" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/collection_transaction.py" beforeDir="false" afterPath="$PROJECT_DIR$/models/collection_transaction.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/report/report_bank_movements_month.py" beforeDir="false" afterPath="$PROJECT_DIR$/report/report_bank_movements_month.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/static/src/js/collection_transaction.js" beforeDir="false" afterPath="$PROJECT_DIR$/static/src/js/collection_transaction.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/static/src/xml/collection_transaction.xml" beforeDir="false" afterPath="$PROJECT_DIR$/static/src/xml/collection_transaction.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/views/collection_transaction.xml" beforeDir="false" afterPath="$PROJECT_DIR$/views/collection_transaction.xml" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -88,7 +95,7 @@
                   <entry key="branch">
                     <value>
                       <list>
-                        <option value="origin/17.0" />
+                        <option value="17.0_dev_mati_m" />
                       </list>
                     </value>
                   </entry>
@@ -104,14 +111,9 @@
     <breakpoint-manager>
       <breakpoints>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/wizard/commi_trans_wiz.py</url>
-          <line>16</line>
-          <option name="timeStamp" value="2" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/wizard/commi_trans_wiz.py</url>
-          <line>17</line>
-          <option name="timeStamp" value="3" />
+          <url>file://$PROJECT_DIR$/wizard/bank_movements_month.py</url>
+          <line>14</line>
+          <option name="timeStamp" value="5" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
