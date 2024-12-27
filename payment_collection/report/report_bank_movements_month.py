@@ -14,18 +14,14 @@ class ReportBankMovementMonthXlsx(models.AbstractModel):
         percent_fmt = workbook.add_format({'num_format': '0.00%'})
 
         sheet.set_column('A:A', 16)
-        sheet.set_column('B:B', 14)
-        sheet.set_column('C:C', 14)
-        sheet.set_column('D:D', 22)
+        sheet.set_column('B:B', 18)
+        sheet.set_column('C:C', 18)
+        sheet.set_column('D:D', 13)
         sheet.set_column('E:E', 22)
-        sheet.set_column('F:F', 14)
-        sheet.set_column('G:G', 16)
-        sheet.set_column('H:H', 16)
-        sheet.set_column('I:I', 14)
-        sheet.set_column('J:J', 14)
-        sheet.set_column('K:K', 18)
-        sheet.set_column('L:L', 10)
-        sheet.set_column('M:M', 8)
+        sheet.set_column('F:F', 18)
+        sheet.set_column('G:G', 18)
+        sheet.set_column('H:H', 18)
+        sheet.set_column('I:I', 18)
 
         row = 0
         col = 0
