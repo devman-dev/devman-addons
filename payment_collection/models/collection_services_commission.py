@@ -66,3 +66,15 @@ class CollectionServicesCommission(models.Model):
             for reg in rec.agent_services_commission:
                 if reg.commission_rate == 0:
                     reg.unlink()
+                    
+      # Sobrescribir el método copy
+    def copy(self, default=None):
+        default = dict(default or {})
+        # Llamar al método copy original
+        new_record = super(CollectionServicesCommission, self).copy(default)
+        
+        # Copiar los registros One2many relacionados
+        for agent_service in self.agent_services_commission:
+            agent_service.copy({'collection_services_commission_id': new_record.id})
+        
+        return new_record
