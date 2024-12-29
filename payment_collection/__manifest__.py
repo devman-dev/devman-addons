@@ -24,6 +24,7 @@
         'views/product_template.xml',
         'views/res_partner.xml',
         'views/menuitems.xml',
+        'views/bank_statement_views.xml',
         'wizard/payment_wiz.xml',
         'wizard/report_agent_wiz.xml',
         'wizard/commi_trans_wiz.xml',
