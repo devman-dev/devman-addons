@@ -1,19 +1,28 @@
 <odoo>
+    <record id="bank_statement_action" model="ir.actions.act_window">
+        <field name="name">Extracto de cuenta</field>
+        <field name="res_model">bank.statement</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
     <record id="view_bank_statement_tree" model="ir.ui.view">
         <field name="name">bank.statement.tree</field>
         <field name="model">bank.statement</field>
         <field name="arch" type="xml">
             <tree>
-                <field name="date"/>
-                <field name="amount"/>
-                <field name="titular"/>
-                <field name="cuit"/>
-                <field name="bank"/>
-                <field name="cvu"/>
-                <field name="cbu"/>
-                <field name="alias"/>
-                <field name="id_coelsa"/>
-                <field name="reference"/>
+                <button string="Conciliar" class="btn btn-primary" name="open_wiz" type="object" invisible="is_concilied" />
+                <field name="date" />
+                <field name="amount" />
+                <field name="titular" />
+                <field name="cuit" />
+                <field name="bank" />
+                <field name="cvu" />
+                <field name="cbu" />
+                <field name="alias" />
+                <field name="id_coelsa" />
+                <field name="reference" />
+                <field name="is_concilied" />
+                <field name="concilied_id" widget="many2one" />
             </tree>
         </field>
     </record>
@@ -25,16 +34,22 @@
             <form>
                 <sheet>
                     <group>
-                        <field name="date"/>
-                        <field name="amount"/>
-                        <field name="titular"/>
-                        <field name="cuit"/>
-                        <field name="bank"/>
-                        <field name="cvu"/>
-                        <field name="cbu"/>
-                        <field name="alias"/>
-                        <field name="id_coelsa"/>
-                        <field name="reference"/>
+                        <group>
+                            <field name="date" />
+                            <field name="amount" />
+                            <field name="titular" />
+                            <field name="cuit" />
+                            <field name="bank" />
+                            <field name="is_concilied" readonly="True"/>
+                            <field name="concilied_id" widget="many2one" readonly="True"/>
+                        </group>
+                        <group>
+                            <field name="cvu" />
+                            <field name="cbu" />
+                            <field name="alias" />
+                            <field name="id_coelsa" />
+                            <field name="reference" />
+                        </group>
                     </group>
                 </sheet>
             </form>

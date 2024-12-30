@@ -35,6 +35,13 @@
         parent="collection_transaction_menu"
         sequence="2"
     />
+    <menuitem
+        id="bank_statement_menu"
+        name="Extracto de cuenta"
+        action="bank_statement_action"
+        parent="collection_transaction_menu"
+        sequence="2"
+    />
 
     <menuitem
         id="collection_configuration_menu"

@@ -41,3 +41,11 @@ access_to_list_name_account_admin,access.list.name.account,model_list_name_accou
 access_to_list_name_account_user,access.list.name.account,model_list_name_account,groups_payment_collection_user,0,0,0,0
 access_to_list_name_account_comi,access.list.name.account,model_list_name_account,groups_payment_collection_comi,0,0,0,0
 
+access_to_bank_statement_admin,access.bank.statement,model_bank_statement,groups_payment_collection_admin,1,1,1,1
+access_to_bank_statement_user,access.bank.statement,model_bank_statement,groups_payment_collection_user,0,0,0,0
+access_to_bank_statement_comi,access.bank.statement,model_bank_statement,groups_payment_collection_comi,0,0,0,0
+
+access_to_conciliation_wiz_admin,access.conciliation.wiz,model_conciliation_wiz,groups_payment_collection_admin,1,1,1,1
+access_to_conciliation_wiz_user,access.conciliation.wiz,model_conciliation_wiz,groups_payment_collection_user,0,0,0,0
+access_to_conciliation_wiz_comi,access.conciliation.wiz,model_conciliation_wiz,groups_payment_collection_comi,0,0,0,0
+
