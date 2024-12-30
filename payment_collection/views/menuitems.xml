@@ -35,6 +35,13 @@
         parent="collection_transaction_menu"
         sequence="2"
     />
+    <menuitem
+        id="bank_statement_menu"
+        name="Extracto de cuenta"
+        action="bank_statement_action"
+        parent="collection_transaction_menu"
+        sequence="2"
+    />
 
     <menuitem
         id="collection_configuration_menu"
@@ -64,6 +71,12 @@
         id="res_partner_menu"
         name="Clientes"
         action="contacts.action_contacts"
+        parent="collection_configuration_menu"
+        sequence="4" />
+    <menuitem
+        id="account_bank_pagoflex_menu"
+        name="Cuentas Bancarias"
+        action="account_bank_pagoflex_action"
         parent="collection_configuration_menu"
         sequence="4" />
 </odoo>
