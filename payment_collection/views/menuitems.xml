@@ -73,4 +73,10 @@
         action="contacts.action_contacts"
         parent="collection_configuration_menu"
         sequence="4" />
+    <menuitem
+        id="account_bank_pagoflex_menu"
+        name="Cuentas Bancarias"
+        action="account_bank_pagoflex_action"
+        parent="collection_configuration_menu"
+        sequence="4" />
 </odoo>

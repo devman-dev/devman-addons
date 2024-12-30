@@ -7,7 +7,7 @@
     'website': '',
     'license': 'LGPL-3',
     'category': 'account',
-    'depends': ['base', 'contacts', 'stock','report_xlsx'],
+    'depends': ['base', 'contacts', 'stock', 'report_xlsx'],
     'data': [
         'security/security.xml',
         'security/ir.model.access.csv',
@@ -24,6 +24,7 @@
         'views/product_template.xml',
         'views/res_partner.xml',
         'views/bank_statement_views.xml',
+        'views/account_bank_pagoflex.xml',
         'views/menuitems.xml',
         'wizard/payment_wiz.xml',
         'wizard/report_agent_wiz.xml',

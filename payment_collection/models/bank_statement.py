@@ -20,7 +20,10 @@ class BankStatement(models.Model):
     concilied_id = fields.Many2one('collection.transaction', string='Conciliado con')
 
     def open_wiz(self):
-        condi = [('date', '=', self.date), ('customer.name', 'ilike', f'%{self.titular}%'), ('is_commission', '=', False), ('is_concilied', '=', False),('amount','=',self.amount)]
+        condi = [('date', '=', self.date),('is_commission', '=', False), ('is_concilied', '=', False),('amount','=',self.amount)]
+        if not self.env.context.get('without_titular', False):
+            condi.append(('customer.name', 'ilike', f'%{self.titular}%'))
+            
         records = self.env['collection.transaction'].sudo().search(condi)
         return {
             'name': 'Conciliación de Transacciones',
