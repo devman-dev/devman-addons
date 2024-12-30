@@ -10,9 +10,10 @@
                 decoration-info="collection_trans_type == 'movimiento_interno'"
                 duplicate="0">
                 <header>
-<!--                    <button groups="payment_collection.groups_payment_collection_admin"-->
-<!--                        type="object" name="open_bank_momevement_month_wiz" class="btn btn-primary"-->
-<!--                        string="Imp. mov. bancarios" />-->
+                    <!--                    <button groups="payment_collection.groups_payment_collection_admin"-->
+                    <!--                        type="object" name="open_bank_momevement_month_wiz" class="btn
+                    btn-primary"-->
+                    <!--                        string="Imp. mov. bancarios" />-->
                     <button groups="payment_collection.groups_payment_collection_admin"
                         type="object"
                         name="recalculate_total_recs" class="btn btn-primary"
@@ -54,6 +55,8 @@
                     decoration-warning="transaction_state == 'pendiente'"
                     decoration-success="transaction_state == 'aprobado'"
                     decoration-info="transaction_state == 'interno'" />
+                <field name="is_concilied" />
+                <field name="concilied_id" widget="many2one" />
             </tree>
         </field>
     </record>
@@ -93,6 +96,8 @@
                                 groups="payment_collection.groups_payment_collection_admin" />
                             <field name="date_available_amount" readonly="1" force_save="1" />
                             <field name="is_commission" invisible="1" />
+                            <field name="is_concilied" readonly="1" force_save="1" />
+                            <field name="concilied_id" widget="many2one" readonly="1" force_save="1" />
                         </group>
 
 

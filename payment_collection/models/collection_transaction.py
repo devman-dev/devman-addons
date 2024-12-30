@@ -70,6 +70,8 @@ class CollectionTransaction(models.Model):
     service_dest = fields.Many2one('collection.services.commission', string='Servicio', tracking=True)
     commission_dest = fields.Float(string='Comisión (%)')
     is_commission = fields.Boolean(string='Es comisión')
+    is_concilied = fields.Boolean(string='Conciliado', defualt=False)
+    concilied_id = fields.Many2one('bank.statement', string='Conciliado con')
 
     def write(self, values):
         for rec in self:
@@ -501,7 +503,8 @@ class CollectionTransaction(models.Model):
     def get_last_client(self):
         user_id = self.env.uid
         last_client = self.env['collection.transaction'].sudo().search([('create_uid', '=', user_id)], limit=1, order='id desc')
-        if last_client and not self.transaction_name:
+        conciliation_wiz = self.env.context.get('conciliation_wiz', False)
+        if last_client and not self.transaction_name and not conciliation_wiz:
             self.sudo().write(
                 {
                     'customer': last_client.customer.id,
