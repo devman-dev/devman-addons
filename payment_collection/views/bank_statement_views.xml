@@ -17,6 +17,7 @@
                 <field name="titular" />
                 <field name="cuit" />
                 <field name="bank" />
+                <field name="destination_bank" />
                 <field name="cvu" />
                 <field name="cbu" />
                 <field name="alias" />
@@ -41,6 +42,7 @@
                             <field name="titular" />
                             <field name="cuit" />
                             <field name="bank" />
+                            <field name="destination_bank" />
                             <field name="is_concilied" readonly="True"/>
                             <field name="concilied_id" widget="many2one" readonly="True"/>
                         </group>

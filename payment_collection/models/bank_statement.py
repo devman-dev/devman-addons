@@ -6,18 +6,19 @@ class BankStatement(models.Model):
     _description = 'Bank Statement'
     _rec_name = 'titular'
 
-    date = fields.Date(string='Fecha de Transacción', required=True)
-    amount = fields.Float(string='Monto', required=True)
-    titular = fields.Char(string='Titular', required=True)
-    cuit = fields.Char(string='CUIT', required=True)
-    bank = fields.Char(string='Banco', required=True)
-    cvu = fields.Char(string='CVU', required=True)
-    cbu = fields.Char(string='CBU', required=True)
+    date = fields.Date(string='Fecha de Transacción', required=False)
+    amount = fields.Float(string='Monto', required=False)
+    titular = fields.Char(string='Titular', required=False)
+    cuit = fields.Char(string='CUIT', required=False)
+    bank = fields.Char(string='Banco Origen', required=False)
+    cvu = fields.Char(string='CVU', required=False)
+    cbu = fields.Char(string='CBU', required=False)
     alias = fields.Char(string='Alias', required=False)
     id_coelsa = fields.Char(string='Coelsa ID', required=False)
     reference = fields.Char(string='Referencia', help='Referencia adicional para la declaración.')
     is_concilied = fields.Boolean(string='Conciliado', defualt=False)
     concilied_id = fields.Many2one('collection.transaction', string='Conciliado con')
+    destination_bank = fields.Char(string='Banco Destino', required=False)
 
     def open_wiz(self):
         condi = [('date', '=', self.date),('is_commission', '=', False), ('is_concilied', '=', False),('amount','=',self.amount)]
@@ -25,6 +26,7 @@ class BankStatement(models.Model):
             condi.append(('customer.name', 'ilike', f'%{self.titular}%'))
             
         records = self.env['collection.transaction'].sudo().search(condi)
+        
         return {
             'name': 'Conciliación de Transacciones',
             'type': 'ir.actions.act_window',
@@ -37,5 +39,9 @@ class BankStatement(models.Model):
                 'date': self.date,
                 'amount': self.amount,
                 'titular': self.titular,
+                'destination_bank':self.destination_bank,
+                'bank':self.bank,
+                'cbu':self.cbu,    
+                
             },
         }
