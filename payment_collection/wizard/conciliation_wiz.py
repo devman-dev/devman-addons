@@ -13,6 +13,11 @@ class ConciliationWiz(models.TransientModel):
         date = self.env.context.get('date', False)
         amount = self.env.context.get('amount', False)
         titular = self.env.context.get('titular', False)
+        
+        destination_bank = self.env.context.get('destination_bank', False)
+        bank = self.env.context.get('bank', False)
+        cbu = self.env.context.get('cbu', False)
+        
         if not self.collection_transaction_ids:
             customer = self.env['res.partner'].search([('name', 'ilike', f'%{titular}%')], limit=1)
             return {
@@ -27,7 +32,8 @@ class ConciliationWiz(models.TransientModel):
                     'default_date': date,
                     'default_amount': amount,
                     'default_customer': customer.id,
-                    'conciliation_wiz': True
+                    'conciliation_wiz': True,
+                    'default_description': str(destination_bank) + " - " + str(bank) + " - " + str(cbu),                    
                 },
             }
         else:
