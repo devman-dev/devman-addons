@@ -36,8 +36,10 @@ class ConciliationWiz(models.TransientModel):
                     'conciliation_wiz': True,
                     'default_description': str(destination_bank) + " - " + str(bank) + " - " + str(cbu),
                     'default_collection_trans_type': 'retiro' if destination_bank else 'movimiento_recaudacion', 
-                    'default_name_destination_account': destination_bank if destination_bank else 'd',
-                    'default_cbu_destination_account': cbu if destination_bank else '1',
+                    'default_name_destination_account': destination_bank if destination_bank else '',
+                    'default_cbu_destination_account': cbu if destination_bank else '',
+                    'default_origin_name_account_extern': destination_bank if not destination_bank else '',
+                    'default_origin_account_cbu': cbu if not destination_bank else '',
                               
                 },
             }
