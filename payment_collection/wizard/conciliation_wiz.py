@@ -40,6 +40,7 @@ class ConciliationWiz(models.TransientModel):
                     'default_cbu_destination_account': cbu if destination_bank else '',
                     'default_origen_name_account_extern': destination_bank if not destination_bank else '',
                     'default_origin_account_cbu': cbu if not destination_bank else '',
+
                               
                 },
             }
