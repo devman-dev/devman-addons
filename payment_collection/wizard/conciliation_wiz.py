@@ -18,7 +18,7 @@ class ConciliationWiz(models.TransientModel):
         bank = self.env.context.get('bank', False)
         cbu = self.env.context.get('cbu', False)
         
-        
+
         if not self.collection_transaction_ids:
             customer = self.env['res.partner'].search([('name', 'ilike', f'%{titular}%')], limit=1)
             return {
@@ -36,6 +36,7 @@ class ConciliationWiz(models.TransientModel):
                     'conciliation_wiz': True,
                     'default_description': str(destination_bank) + " - " + str(bank) + " - " + str(cbu),
                     'default_collection_trans_type': 'retiro' if destination_bank else 'movimiento_recaudacion' 
+                              
                 },
             }
         else:
