@@ -774,6 +774,9 @@ class CollectionTransaction(models.Model):
 
     @api.onchange('origin_account')
     def get_origin_account_data(self):
+        conciliation_wiz = self.env.context.get('conciliation_wiz', False)
+        if conciliation_wiz:
+            return
         for rec in self:
             self.sudo().write(
                 {
@@ -818,6 +821,9 @@ class CollectionTransaction(models.Model):
 
     @api.onchange('collection_trans_type')
     def set_empty_fields(self):
+        conciliation_wiz = self.env.context.get('conciliation_wiz', False)
+        if conciliation_wiz:
+            return
         for rec in self:
             rec.write(
                 {
