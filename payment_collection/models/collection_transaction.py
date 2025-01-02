@@ -443,6 +443,9 @@ class CollectionTransaction(models.Model):
 
     @api.onchange('customer_origin', 'origin_type')
     def empty_origin_fields(self):
+        conciliation_wiz = self.env.context.get('conciliation_wiz', False)
+        if conciliation_wiz:
+            return
         if self.collection_trans_type == 'movimiento_recaudacion':
             self.sudo().write(
                 {
@@ -467,6 +470,9 @@ class CollectionTransaction(models.Model):
 
     @api.onchange('destination_account')
     def get_destination_account_data(self):
+        conciliation_wiz = self.env.context.get('conciliation_wiz', False)
+        if conciliation_wiz:
+            return
         if self.destination_account:
             self.sudo().write(
                 {
@@ -532,6 +538,9 @@ class CollectionTransaction(models.Model):
     @api.onchange('customer')
     def get_last_app_commission(self):
         # TRAEMOS DATOS DEL CLIENTE DESDE RES PARTNER.
+        conciliation_wiz = self.env.context.get('conciliation_wiz', False)
+        if conciliation_wiz:
+            return
         if self.customer:
             self.sudo().write(
                 {
