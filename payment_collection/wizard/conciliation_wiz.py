@@ -35,7 +35,9 @@ class ConciliationWiz(models.TransientModel):
                     'default_customer': customer.id,
                     'conciliation_wiz': True,
                     'default_description': str(destination_bank) + " - " + str(bank) + " - " + str(cbu),
-                    'default_collection_trans_type': 'retiro' if destination_bank else 'movimiento_recaudacion' 
+                    'default_collection_trans_type': 'retiro' if destination_bank else 'movimiento_recaudacion', 
+                    'default_name_destination_account': destination_bank if destination_bank else 'd',
+                    'default_cbu_destination_account': cbu if destination_bank else '1',
                               
                 },
             }
