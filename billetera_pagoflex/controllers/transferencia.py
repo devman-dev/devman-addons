@@ -6,7 +6,9 @@ import json
 class WebFormWalletController(Controller):
     @route('/wallet', auth='user', website=True)
     def web_form_wallet(self, **kwargs):
-        return request.render('billetera_pagoflex.web_form_template_wallet')
+        customer = request.env['collection.dashboard.customer'].sudo().search([('customer', '=', request.env.user.partner_id.id)])
+        available_balance = customer.customer_available_balance if customer else 0.00
+        return request.render('billetera_pagoflex.web_form_template_wallet', {'available_balance': available_balance})
 
     @route('/wallet/transfer/accounts', auth='user', website=True, methods=['GET'])
     def web_form_transfer(self, **kwargs):

@@ -2,12 +2,15 @@
 <templates xml:space="preserve">
     <t t-name="payment_collection.ListButtons_Transaction" t-inherit="web.ListView.Buttons" t-inherit-mode="primary">
       <xpath expr="//div[hasclass('o_list_buttons')]" position="inside">
-        <button type="button" class="btn btn-primary" t-on-click.stop.prevent="() => this.onClickPrintTransaction()">
-          Imprimir Reporte
+        <button type="button" class="btn btn-primary my-1" t-on-click.stop.prevent="() => this.onClickPrintTransaction()">
+          Imp. Mov. de Cliente
         </button>
         <!-- <button groups="payment_collection.groups_payment_collection_admin" type="button" class="btn btn-primary" t-on-click.stop.prevent="() => this.onClickRecalAll()">
           Recalcular Todo
         </button> -->
+        <button type="button" class="btn btn-primary my-1" t-on-click.stop.prevent="() => this.onClickPrintTransactionBank()">
+          Imp. Mov. Bancarios
+        </button>
       </xpath>
     </t>
 </templates>

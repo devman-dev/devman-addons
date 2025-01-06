@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="conciliation_wiz_view_form" model="ir.ui.view">
+        <field name="name">conciliation.wiz.view.form</field>
+        <field name="model">conciliation.wiz</field>
+        <field name="arch" type="xml">
+            <form string="Conciliación">
+                <sheet>
+                    <field name="collection_transaction_ids" invisible="not collection_transaction_ids">
+                        <tree>
+                            <control>
+                                <create name="add_line_control" invisible="1" />
+                            </control>
+                            <field name="collection_trans_type" string="Tipo T." />
+                            <field name="date" />
+                            <field name="customer" />
+                            <field name="transaction_name" />
+                            <field name="service" />
+                            <field name="commission" />
+                            <field name="operation" />
+                            <field name="description" />
+                            <field name="amount" sum="Total" />
+                            <field name="origin_account_cuit" />
+                            <field name="origin_account_cvu" />
+                            <field name="origin_account_cbu" />
+                            <field name="related_customer" />
+                            <field name="cbu_destination_account" />
+                            <field name="alias_destination_account" />
+                            <field name="name_destination_account" />
+                        </tree>
+                    </field>
+                    <h5 invisible="collection_transaction_ids">No se encontraron coincidencias</h5>
+                </sheet>
+                <footer>
+                    <button name="confirm" string="Crear Conciliación" class="btn btn-primary"
+                        type="object"
+                        invisible="collection_transaction_ids" />
+                    <button name="confirm" string="Confirmar" class="btn btn-primary"
+                        type="object"
+                        invisible="not collection_transaction_ids" />
+                    <button special="cancel" string="Descartar" class="btn btn-secondary" />
+                </footer>
+            </form>
+        </field>
+    </record>
+
+</odoo>

@@ -10,6 +10,10 @@
                 decoration-info="collection_trans_type == 'movimiento_interno'"
                 duplicate="0">
                 <header>
+                    <!--                    <button groups="payment_collection.groups_payment_collection_admin"-->
+                    <!--                        type="object" name="open_bank_momevement_month_wiz" class="btn
+                    btn-primary"-->
+                    <!--                        string="Imp. mov. bancarios" />-->
                     <button groups="payment_collection.groups_payment_collection_admin"
                         type="object"
                         name="recalculate_total_recs" class="btn btn-primary"
@@ -26,6 +30,10 @@
                     <button groups="payment_collection.groups_payment_collection_admin"
                         type="object" name="intern" class="btn btn-info"
                         string="Interno" />
+                    <button groups="payment_collection.groups_payment_collection_admin"
+                        type="object" name="show_destination_name" class="btn btn-secondary"
+                        string="Cron" />
+
                 </header>
                 <field name="collection_trans_type" string="Tipo T." />
                 <field name="date" />
@@ -36,20 +44,25 @@
                 <field name="operation" />
                 <field name="description" />
                 <field name="amount" sum="Total" />
-                <field name="commission_app_amount" sum="Total APP" />
+                <field name="origin_account" />
+                <field name="commission_app_amount" sum="Total APP" optional="hide" />
                 <!-- <field name="available_balance" optional="hide" /> -->
                 <field name="origin_account_cuit" />
-                <field name="origin_account_cvu" />
-                <field name="origin_account_cbu" />
-                <field name="related_customer" />
-                <field name="cbu_destination_account" />
-                <field name="alias_destination_account" />
-                <field name="name_destination_account" />
+                <field name="origin_account_cvu" optional="hide" />
+                <field name="origin_account_cbu" optional="hide" />
+                <field name="related_customer" optional="hide" />
+                <field name="cbu_destination_account" optional="hide" />
+                <field name="alias_destination_account" optional="hide" />
+                <field name="destination_name" force_save="1" />
                 <field name="transaction_state" widget="badge"
                     decoration-danger="transaction_state == 'rechazado'"
                     decoration-warning="transaction_state == 'pendiente'"
                     decoration-success="transaction_state == 'aprobado'"
                     decoration-info="transaction_state == 'interno'" />
+                <button type="object" name="break_conciliation" string="Romper Conciliación"
+                    invisible="not is_concilied" confirm="¿Estas seguro de romper la conciliación?" />
+                <field name="is_concilied" />
+                <field name="concilied_id" widget="many2one" />
             </tree>
         </field>
     </record>
@@ -89,6 +102,10 @@
                                 groups="payment_collection.groups_payment_collection_admin" />
                             <field name="date_available_amount" readonly="1" force_save="1" />
                             <field name="is_commission" invisible="1" />
+                            <field name="destination_name" force_save="1" invisible="1" />
+                            <field name="is_concilied" readonly="1" force_save="1" />
+                            <field name="concilied_id" widget="many2one" readonly="1" force_save="1"
+                                domain="[('is_concilied','=',False)]" />
                         </group>
 
 
@@ -252,6 +269,7 @@
         <field name="arch" type="xml">
             <search string="Buscador">
                 <field name="customer" />
+                <field name="amount" string="Monto" />
                 <field name="transaction_name" />
                 <field name="service" />
                 <field name="operation" />

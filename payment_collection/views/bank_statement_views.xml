@@ -1,0 +1,68 @@
+<odoo>
+    <record id="bank_statement_action" model="ir.actions.act_window">
+        <field name="name">Extracto de cuenta</field>
+        <field name="res_model">bank.statement</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <record id="view_bank_statement_tree" model="ir.ui.view">
+        <field name="name">bank.statement.tree</field>
+        <field name="model">bank.statement</field>
+        <field name="arch" type="xml">
+            <tree>
+                <button string="Conc." class="btn btn-primary" name="open_wiz" type="object" invisible="is_concilied" />
+                <button string="Conc.S/T" class="btn btn-info" name="open_wiz" context="{'without_titular': True}" type="object" invisible="is_concilied" />
+                <field name="date" />
+                <field name="amount" />
+                <field name="titular" />
+                <field name="cuit" />
+                <field name="bank" />
+                <field name="destination_bank" />
+                <field name="cvu" />
+                <field name="cbu" />
+                <field name="alias" />
+                <field name="id_coelsa" />
+                <field name="reference" />
+                <button type="object" name="break_conciliation" string="Romper Conciliación"
+                    invisible="not is_concilied" confirm="¿Estas seguro de romper la conciliación?" />
+                <field name="is_concilied" />
+                <field name="concilied_id" widget="many2one" />
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_bank_statement_form" model="ir.ui.view">
+        <field name="name">bank.statement.form</field>
+        <field name="model">bank.statement</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="date" />
+                            <field name="amount" />
+                            <field name="titular" />
+                            <field name="cuit" />
+                            <field name="bank" />
+                            <field name="destination_bank" />
+                            <field name="is_concilied" readonly="1"/>
+                            <field name="concilied_id" widget="many2one" readonly="1"/>
+                        </group>
+                        <group>
+                            <field name="cvu" />
+                            <field name="cbu" />
+                            <field name="alias" />
+                            <field name="id_coelsa" />
+                            <field name="reference" />
+                        </group>
+                    </group>
+                </sheet>
+                 <div class="oe_chatter">
+                    <field name="message_follower_ids" groups="base.group_user" />
+                    <field name="activity_ids" />
+                    <field name="message_ids" />
+                </div>
+            </form>
+        </field>
+    </record>
+</odoo>
