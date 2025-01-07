@@ -106,7 +106,7 @@
                 background-color: #f8f9fa;
                 }
             </style>
-            <div class="container">
+            <div class="container mb-5">
                 <div class="d-grid mx-auto mt-5 mb-4 rounded-3 col-12 col-md-6 p-4 bg-white" style="--bs-bg-opacity: .9;">
                     <div>
                         <h4 class="fw-bold text-center mb-3">Añadir una nueva cuenta</h4>
@@ -166,7 +166,7 @@
                 background-color: #f8f9fa;
                 }
             </style>
-            <div class="container mt-5">
+            <div class="container my-5">
                 <div class="row justify-content-center">
                     <div class="col-12 col-md-8 col-lg-6">
                         <form action="/wallet/transfer/accounts/confirm_account" enctype="multipart/form-data" class="o_mark_required p-4 shadow bg-white rounded">
