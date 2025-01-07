@@ -8,88 +8,151 @@
     </record>
 
     <!-- Billetera -->
-    <template id="web_form_template_wallet" name="Billetera">
+    <template id="web_template_wallet" name="Billetera">
         <t t-call="website.layout">
-            <link rel="stylesheet" type="text/css"
-                href="/billetera_pagoflex/static/src/css/style.css" />
-            <div class="main-container">
+            <style>
+                body {
+                background-color: #f8f9fa;
+                }
 
-                <input type="hidden" name="csrf_token"
-                    t-att-value="request.csrf_token()" />
+                .wallet-card {
+                background-color: white;
+                border-radius: 0.5rem;
+                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+                padding: 1.5rem;
+                }
 
-                <div class="container_div">
-                    <div class="subcontainer_div">
-                        <div>
-                            <p class="available_balance">Saldo Disponible:</p>
-                            <h3>$ <t
-                                    t-out="('{:,.2f}'.format(available_balance)).replace(',', 'X').replace('.', ',').replace('X', '.')" />
-                            </h3>
+                .wallet-section {
+                margin-top: 2rem;
+                margin-bottom: 2rem;
+                }
 
+                .btn-outline-secondary {
+                text-align: center;
+                }
+
+            </style>
+            <div class="container">
+                <div class="wallet-card mx-auto mt-4 col-12 col-md-6 text-center">
+                    <p class="text-muted mb-1" style="font-size: 14px;">Saldo Disponible:</p>
+                    <h3 class="mb-0 text-primary"> $                        <t t-out="('{:,.2f}'.format(available_balance)).replace(',', 'X').replace('.', ',').replace('X', '.')" />
+                    </h3>
+                </div>
+
+                <div class="d-flex justify-content-center wallet-section">
+                    <a href="/wallet/transfer/accounts" class="btn btn-primary">
+                        <i class="fa fa-money" aria-hidden="true"></i>
+                        <span class="ms-2">Transferir</span>
+                    </a>
+                </div>
+                <owl-component name="billetera_pagoflex.Wallet_filters"/>
+
+                <div class="wallet-card mx-auto col-12 col-md-6 wallet-section">
+                    <h5 class="w-100 mb-3">Ultimos Movimientos</h5>
+                    <t t-foreach="transactions" t-as="transaction">
+                        <div class="card my-3">
+                            <div class="card-body">
+                                <!-- Monto de la transacción -->
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <h5 class="card-title mb-0">$<t t-out="('{:,.2f}'.format(transaction.amount)).replace(',', 'X').replace('.', ',').replace('X', '.')" />
+                                    </h5>
+                                    <span class="text-muted" style="font-size: 0.9rem;">
+                                        <t t-out="transaction.date.strftime('%d/%m/%Y')" />
+                                    </span>
+                                </div>
+
+                                <!-- Tipo de transacción -->
+                                <div class="mt-2">
+                                    <t t-if="transaction.is_commission">
+                                        <span class="badge bg-warning p-2">Comisión</span>
+                                    </t>
+                                    <t t-elif="transaction.collection_trans_type == 'retiro'">
+                                        <span class="badge bg-danger p-2">Retiro</span>
+                                    </t>
+                                    <t t-elif="transaction.collection_trans_type == 'movimiento_recaudacion'">
+                                        <span class="badge bg-success p-2">Acreditación</span>
+                                    </t>
+                                    <span class="float-end">
+                                        <t t-if="transaction.transaction_state == 'pendiente'">
+                                            <span class=" p-2 position-relative">Pendiente <span class="position-absolute top-50 start-0 translate-middle p-1 bg-warning border border-light rounded-circle" />
+                                            </span>
+                                        </t>
+                                        <t t-elif="transaction.transaction_state == 'rechazado'">
+                                            <span class=" p-2 position-relative">Rechazado <span class="position-absolute top-50 start-0 translate-middle p-1 bg-danger border border-light rounded-circle" />
+                                            </span>
+                                        </t>
+                                        <t t-elif="transaction.transaction_state == 'aprobado'">
+                                            <span class=" p-2 position-relative">Aprobado <span class="position-absolute top-50 start-0 translate-middle p-1 bg-success border border-light rounded-circle" />
+                                            </span>
+                                        </t>
+                                    </span>
+                                </div>
+                            </div>
                         </div>
-                        <div
-                            data-name="Submit Button">
-                            <div style="width: 200px;" class="s_website_form_label" />
-                            <a href="/wallet/transfer/accounts">
-                                <button type="button" class="btn btn-primary mt-4">
-                                    <i class="fa fa-money" aria-hidden="true"></i>
-                                    <span style="margin-left: 5px;">Transferir </span>
-                                </button>
-                            </a>
-                        </div>
-                    </div>
+                    </t>
+                    <a href="#" class="btn btn-link float-end p-0">Ver más</a>
                 </div>
             </div>
+
         </t>
     </template>
+
 
     <!-- Transferencia -->
     <template id="web_form_template_transfer" name="Billetera">
         <t t-call="website.layout">
-            <link rel="stylesheet" type="text/css"
-                href="/billetera_pagoflex/static/src/css/style.css" />
-
-            <div class="container_div">
-                <div class="subcontainer_div">
-                    <h5 sytle="margin: 5px 12px 0px 15px;
-                    font-size: 18px;">
-                        Elegí a
-                        qué cuenta
-                        transferir
-                    </h5>
-                    <a href="/wallet/transfer/accounts/new_account" class="add-new-account">
-                        <button type="submit" class="btn btn-primary btn-new-account">
-                            <div>
-                                <i class="fa fa-plus" aria-hidden="true"></i>
-                            </div>
-                            <div style="margin-left: 20px;">
-                                <p style="margin-bottom: 0; font-size: 20px;">Nueva
-                                    Cuenta</p>
-                                <p
-                                    style="font-size: 14px; color: rgb(195 195 195); margin-bottom: 0;">Con
-                                    CBU,CVU o
-                                    alias.</p>
-                            </div>
-                        </button>
-                    </a>
-
-                </div>
-            </div>
-            <div class="container_div">
-                <ul class="ul-accounts">
-                    <t t-foreach="list_accounts" t-as="account">
-                        <a t-att-href="'/wallet/transfer/account/%s' % account['id']">
-                            <li class="list-accounts">
-                                <h6>
-                                    <t t-esc="account['name_account']" />
-                                </h6>
-                                <p>
-                                    <t t-esc="account['alias']" />
-                                </p>
-                            </li>
-                            <hr />
+            <style>
+                body {
+                background-color: #f8f9fa;
+                }
+            </style>
+            <div class="container">
+                <div class="d-grid mx-auto mt-5 mb-4 rounded-3 col-12 col-md-6 p-4 bg-white" style="--bs-bg-opacity: .9;">
+                    <div>
+                        <h4 class="fw-bold text-center mb-3">Añadir una nueva cuenta</h4>
+                        <p class="text-black-50 text-center mb-4" style="font-size: 14px;">
+                            Agrega una cuenta con CBU, CVU o alias para realizar transferencias.
+                        </p>
+                    </div>
+                    <div class="d-grid gap-3">
+                        <a href="/wallet/transfer/accounts/new_account" class="btn btn-primary w-100 d-flex align-items-center justify-content-center">
+                            <i class="fa fa-plus me-3" style="font-size: 24px;"></i>
+                            <span style="font-size: 18px;">Nueva Cuenta</span>
                         </a>
+                    </div>
+                </div>
+
+                <div class="d-grid mx-auto mt-4 rounded-3 col-12 col-md-6 p-4 bg-white">
+                    <div class="row">
+                        <h5 class="fw-bold text-black-50">Cuentas Guardadas</h5>
+                        <hr class="mt-2 mb-4" />
+                    </div>
+                    <ul class="list-unstyled">
+                        <t t-foreach="list_accounts" t-as="account">
+                            <li class="mb-3">
+                                <a t-att-href="'/wallet/transfer/account/%s' % account['id']" class="text-decoration-none">
+                                    <div class="d-flex justify-content-between align-items-center p-3 bg-light rounded-3">
+                                        <div>
+                                            <h6 class="mb-0 fw-bold text-primary">
+                                                <t t-esc="account['name_account']" />
+                                            </h6>
+                                            <small class="text-muted">
+                                                <t t-esc="account['alias']" />
+                                            </small>
+                                        </div>
+                                        <i class="fa fa-chevron-right text-muted"></i>
+                                    </div>
+                                </a>
+                            </li>
+                        </t>
+                    </ul>
+
+                    <t t-if="not list_accounts">
+                        <div class="text-center mt-4">
+                            <p class="text-muted">No tienes cuentas guardadas todavía.</p>
+                        </div>
                     </t>
-                </ul>
+                </div>
             </div>
         </t>
     </template>
@@ -98,33 +161,28 @@
     <!-- Añadir CBU, CVU o alias -->
     <template id="web_form_template_transfer_new_account" name="Billetera">
         <t t-call="website.layout">
-            <link rel="stylesheet" type="text/css"
-                href="/billetera_pagoflex/static/src/css/style.css" />
-            <div class="container_div">
-                <form action="/wallet/transfer/accounts/confirm_account"
-                    enctype="multipart/form-data" class="o_mark_required"
-                    data-mark="*" data-model_name="" data-success-page="">
-                    <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()" />
-                    <div>
-                        <div
-                            data-type="char" data-name="Field">
-                            <div>
-                                <div>
-                                    <p>Ingresá el CBU, CVU o alias</p>
-                                    <input id="name" type="text"
-                                        class="form-control s_website_form_input" name="name"
-                                        placeholder="Ingresá el CBU, CVU o alias"
-                                        required="1" />
-                                </div>
+            <style>
+                body {
+                background-color: #f8f9fa;
+                }
+            </style>
+            <div class="container mt-5">
+                <div class="row justify-content-center">
+                    <div class="col-12 col-md-8 col-lg-6">
+                        <form action="/wallet/transfer/accounts/confirm_account" enctype="multipart/form-data" class="o_mark_required p-4 shadow bg-white rounded">
+                            <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()" />
+                            <h5 class="mb-3 text-primary text-center">Añadir Nueva Cuenta</h5>
+                            <div data-type="char" data-name="Field">
+                                <label for="name" class="form-label text-secondary">Ingresá el CBU,
+                                    CVU o alias</label>
+                                <input id="name" type="text" class="form-control s_website_form_input" name="name" placeholder="Ingresá el CBU, CVU o alias" required="1" />
                             </div>
-                        </div>
-                        <div class="form-group col-12 s_website_form_submit mt-3"
-                            data-name="Submit Button">
-                            <div style="width: 200px;" class="s_website_form_label" />
-                            <button type="submit" class="btn btn-primary">Continuar</button>
-                        </div>
+                            <div class="form-group s_website_form_submit mt-4 text-center">
+                                <button type="submit" class="btn btn-primary w-100">Continuar</button>
+                            </div>
+                        </form>
                     </div>
-                </form>
+                </div>
             </div>
         </t>
     </template>
@@ -132,36 +190,39 @@
     <!-- Validar cuenta-->
     <template id="web_form_template_transfer_confirm_account" name="Billetera">
         <t t-call="website.layout">
-            <link rel="stylesheet" type="text/css"
-                href="/billetera_pagoflex/static/src/css/style.css" />
-            <div class="container_div">
-                <form
-                    enctype="multipart/form-data" class="o_mark_required"
-                    data-mark="*" data-model_name="" data-success-page="">
-                    <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()" />
-                    <div>
-                        <div style="margin: 10px 0;">
-                             <h6>¿Esta es la cuenta a la que querés transferir?</h6>
-                        </div>
-                        <hr/>
-                        <div class="data-confirm-account">
-                             <p><b><t t-out="account['name_account']"/></b></p>
-                             <p style="color: rgb(195 195 195);">CUIT: <t t-out="account['cuit']"/></p>
-                             <hr/>
-                        </div>
-
-                        <div class="form-group col-12 s_website_form_submit confirm-data"
-                            data-name="Submit Button">
-                            <div style="width: 200px;" class="s_website_form_label" />
-                            <a href="/wallet/transfer/accounts/new_account">
-                                <button class="btn btn-secondary" type="button">No, volver</button>
-                            </a>
-                            <a t-att-href="'/wallet/transfer/account/%s' % account['id']">
-                                <button type="button" class="btn btn-primary">Sí, continuar</button>
-                            </a>
-                        </div>
+            <style>
+                body {
+                background-color: #f8f9fa;
+                }
+            </style>
+            <div class="container mt-5">
+                <div class="row justify-content-center">
+                    <div class="col-12 col-md-8 col-lg-6">
+                        <form enctype="multipart/form-data" class="o_mark_required p-4 shadow bg-white rounded">
+                            <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()" />
+                            <h5 class="mb-3 text-primary text-center">Confirmar Cuenta</h5>
+                            <div class="mb-3">
+                                <h6 class="text-secondary">¿Esta es la cuenta a la que querés
+                                    transferir?</h6>
+                            </div>
+                            <hr />
+                            <div class="data-confirm-account mb-3">
+                                <p class="mb-1">
+                                    <strong>
+                                        <t t-out="account['name_account']" />
+                                    </strong>
+                                </p>
+                                <p class="text-muted mb-1">CUIT: <t t-out="account['cuit']" />
+                                </p>
+                            </div>
+                            <hr />
+                            <div class="d-flex justify-content-between">
+                                <a href="/wallet/transfer/accounts/new_account" class="btn btn-secondary">No, volver</a>
+                                <a t-att-href="'/wallet/transfer/account/%s' % account['id']" class="btn btn-primary">Sí, continuar</a>
+                            </div>
+                        </form>
                     </div>
-                </form>
+                </div>
             </div>
         </t>
     </template>
@@ -170,74 +231,134 @@
     <!-- Transferir a cuenta-->
     <template id="transfer_account_template" name="Billetera">
         <t t-call="website.layout">
-            <link rel="stylesheet" type="text/css"
-                href="/billetera_pagoflex/static/src/css/style.css" />
-            <div class="container_div">
-                <form>
-                    <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()" />
-                    <div>
-                        <div class="transfer-amount-container">
-                            <label for="transfer-amount">Monto a transferir</label>
-                            <div class="input-wrapper">
-                                <span class="currency-symbol">$</span>
-                                <input
-                                    type="number"
-                                    id="transfer-amount"
-                                    placeholder="0.00"
-                                    min="0"
-                                    step="0.01"
-                                    required="1"
-                                    class="transfer-input"
-                                />
+            <style>
+                body {
+                background-color: #f8f9fa;
+                }
+
+                .transfer-input::-webkit-inner-spin-button,
+                .transfer-input::-webkit-outer-spin-button {
+                -webkit-appearance: none;
+                margin: 0;
+                }
+
+                .transfer-input:focus {
+                border-color: none;
+                box-shadow: none;
+                }
+
+                .transfer-input {
+                width: 100%;
+                padding: 10px 10px 10px 10px;
+                border: none;
+                border-radius: 5px;
+                font-size: 24px;
+                box-shadow: none;
+                outline: none;
+                -moz-appearance: textfield;
+                }
+
+                .transfer-amount-container label {
+                font-size: 18px;
+                font-weight: 600;
+                margin-bottom: 5px;
+                }
+
+                .form-group {
+                margin-top: 20px;
+                }
+
+                .input-group-text {
+                border: none;
+                background: none;
+                font-size: 24px;
+                padding-left: 0;
+                margin-right: 5px;
+                z-index: 1;
+                }
+
+                .input-group .form-control {
+                border-radius: 5px;
+                }
+
+                .transfer-amount-container {
+                display: flex;
+                align-items: center;
+                font-size: 24px;
+                }
+
+                .input-group {
+                display: flex;
+                width: 100%;
+                }
+            </style>
+
+            <div class="container mt-5">
+                <div class="row justify-content-center">
+                    <div class="col-12 col-md-8 col-lg-6">
+                        <form>
+                            <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()" />
+                            <div class="bg-white p-4 shadow rounded">
+                                <div class="transfer-amount-container mb-4">
+                                    <label for="transfer-amount">Monto a transferir</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">$</span>
+                                        <input type="number" id="transfer-amount" placeholder="0.00" min="0" step="0.01" required="1" class="transfer-input form-control" />
+                                    </div>
+                                </div>
+                                <div class="d-flex justify-content-between">
+                                    <a href="/wallet/transfer/account/revision" class="btn btn-secondary">Cancelar</a>
+                                    <a t-att-href="'/wallet/transfer/account/revision/%s' % account['id']" class="btn btn-primary">Continuar</a>
+                                </div>
                             </div>
-                        </div>
-                        <div class="form-group col-12 s_website_form_submit"
-                            data-name="Submit Button">
-                            <div style="width: 200px;" class="s_website_form_label"/>
-                            <a t-att-href="'/wallet/transfer/account/revision/%s' % account['id']">
-                                <button class="btn btn-primary transfer-btn" type="button">Continuar</button>
-                            </a>
-                        </div>
+                        </form>
                     </div>
-                </form>
+                </div>
             </div>
         </t>
     </template>
 
-      <!-- Revision de datos -->
+    <!-- Revision de datos -->
     <template id="web_form_template_transfer_account_revision" name="Billetera">
         <t t-call="website.layout">
-            <link rel="stylesheet" type="text/css"
-                href="/billetera_pagoflex/static/src/css/style.css" />
-            <div class="container_div">
-                <form action="/wallet/transfer/sended"
-                    enctype="multipart/form-data" class="o_mark_required"
-                    data-mark="*" data-model_name="" data-success-page="">
-                    <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()" />
-                    <div>
-                        <div style="margin: 10px 0;">
-                             <h6>Revisá si esta todo bien</h6>
-                        </div>
-                        <hr/>
-                        <div class="data-confirm-account">
-                             <p>Vas a transferir:</p>
-                             <h4>$ <t t-out="amount"/></h4>
-                             <hr/>
-                        </div>
-                        <div class="data-confirm-account">
-                            <p>Para:</p>
-                             <h6><t t-out="account['name_account']"/></h6>
-                             <p style="color: rgb(195 195 195);">Alias: <t t-out="account['alias']"/></p>
-                             <hr/>
-                        </div>
 
-                        <div class="form-group col-12 s_website_form_submit confirm-data"
-                            data-name="Submit Button">
-                            <div style="width: 200px;" class="s_website_form_label"/>
-                                <button type="submit" class="btn btn-primary">Transferir</button>
-                        </div>
+            <style>
+                body {
+                background-color: #f8f9fa;
+                }
+            </style>
+
+            <div class="container mt-5">
+                <div class="row justify-content-center">
+                    <div class="col-12 col-sm-10 col-md-8 col-lg-6">
+                        <form action="/wallet/transfer/sended" enctype="multipart/form-data" class="o_mark_required" data-mark="*" data-model_name="" data-success-page="">
+                            <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()" />
+                            <div class="bg-white p-4 shadow rounded">
+                                <h6 class="text-center mb-4">Revisá si está todo bien</h6>
+                                <hr />
+                                <div class="mb-4">
+                                    <p class="text-center">Vas a transferir:</p>
+                                    <h4 class="text-center">$                                        <t t-out="amount" />
+                                    </h4>
+                                    <hr />
+                                </div>
+                                <div class="mb-4">
+                                    <p class="text-center">Para:</p>
+                                    <h6 class="text-center">
+                                        <t t-out="account['name_account']" />
+                                    </h6>
+                                    <p class="text-center text-muted">Alias: <t t-out="account['alias']" />
+                                    </p>
+                                    <hr />
+                                </div>
+
+                                <div class="form-group col-12 s_website_form_submit confirm-data text-center">
+                                    <button type="submit" class="btn btn-primary w-100">Transferir</button>
+                                </div>
+                            </div>
+                        </form>
                     </div>
-                </form>
+                </div>
             </div>
         </t>
     </template>
@@ -245,31 +366,35 @@
 
     <template id="web_form_template_transfer_sended" name="Billetera">
         <t t-call="website.layout">
-            <link rel="stylesheet" type="text/css"
-                href="/billetera_pagoflex/static/src/css/style.css" />
-            <div class="container_div">
-                <form action="/wallet"
-                    enctype="multipart/form-data" class="o_mark_required"
-                    data-mark="*" data-model_name="" data-success-page="">
-                    <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()" />
-                    <div>
-                        <div style="margin: 15px 0; text-align: center;">
-                             <h4>Transferencia enviada <i class="fa fa-check-circle-o" aria-hidden="true"></i></h4>
-                        </div>
 
-                        <div class="form-group col-12 s_website_form_submit confirm-data"
-                            data-name="Submit Button">
-                            <div style="width: 200px;" class="s_website_form_label"/>
-                                <button type="submit" class="btn btn-primary">Ir al inicio</button>
-                        </div>
+            <style>
+                body {
+                background-color: #f8f9fa;
+                }
+            </style>
+
+            <div class="container mt-5">
+                <div class="row justify-content-center">
+                    <div class="col-12 col-sm-10 col-md-8 col-lg-6">
+                        <form action="/wallet" enctype="multipart/form-data" class="o_mark_required" data-mark="*" data-model_name="" data-success-page="">
+                            <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()" />
+                            <div class="bg-white p-4 shadow rounded text-center">
+                                <div style="margin: 15px 0;">
+                                    <h4>Transferencia enviada <i class="fa fa-check-circle-o" aria-hidden="true"></i>
+                                    </h4>
+                                </div>
+
+                                <div class="form-group col-12 s_website_form_submit confirm-data">
+                                    <button type="submit" class="btn btn-primary w-100">Ir al inicio</button>
+                                </div>
+                            </div>
+                        </form>
                     </div>
-                </form>
+                </div>
             </div>
+
         </t>
     </template>
-
-
-
 
 
 </odoo>
