@@ -8,7 +8,10 @@ class WebFormWalletController(Controller):
     def web_form_wallet(self, **kwargs):
         customer = request.env['collection.dashboard.customer'].sudo().search([('customer', '=', request.env.user.partner_id.id)])
         available_balance = customer.customer_available_balance if customer else 0.00
-        return request.render('billetera_pagoflex.web_form_template_wallet', {'available_balance': available_balance})
+        transactions = (
+            request.env['collection.transaction'].sudo().search([('customer', '=', request.env.user.partner_id.id), ('collection_trans_type', '!=', 'movimiento_interno')], order='id desc', limit=10)
+        )
+        return request.render('billetera_pagoflex.web_template_wallet', {'available_balance': available_balance, 'transactions': transactions})
 
     @route('/wallet/transfer/accounts', auth='user', website=True, methods=['GET'])
     def web_form_transfer(self, **kwargs):
@@ -34,20 +37,10 @@ class WebFormWalletController(Controller):
     def web_form_transfer_new_account(self, **kwargs):
         return request.render('billetera_pagoflex.web_form_template_transfer_new_account')
 
-
     @route('/wallet/transfer/accounts/confirm_account', auth='user', website=True, methods=['GET'])
     def web_form_transfer_confirm_account(self, **kwargs):
-        account = {
-            'id': '2',
-            'cbu': '1234567890112345678901',
-            'cvu': '1234567890112345678901',
-            'alias': 'alias.demo2',
-            'name_account': 'Datos Demostracion2',
-            'cuit': '12345678901'
-        }
-        return request.render('billetera_pagoflex.web_form_template_transfer_confirm_account',{'account':account})
-
-
+        account = {'id': '2', 'cbu': '1234567890112345678901', 'cvu': '1234567890112345678901', 'alias': 'alias.demo2', 'name_account': 'Datos Demostracion2', 'cuit': '12345678901'}
+        return request.render('billetera_pagoflex.web_form_template_transfer_confirm_account', {'account': account})
 
     @route('/wallet/transfer/accounts/new_account/search', auth='user', website=True, methods=['GET'])
     def web_form_transfer_new_account_search(self, **kwargs):
@@ -86,20 +79,9 @@ class WebFormWalletController(Controller):
 
     @route('/wallet/transfer/account/revision/<int:account_id>', auth='user', website=True)
     def revision_account(self, account_id, **kwargs):
-
-        account = {
-            'id': '2',
-            'cbu': '1234567890112345678901',
-            'cvu': '1234567890112345678901',
-            'alias': 'alias.demo2',
-            'name_account': 'Datos Demostracion2',
-            'cuit': '12345678901'
-        }
-        return request.render('billetera_pagoflex.web_form_template_transfer_account_revision', {'account': account,'amount': 100})
-
+        account = {'id': '2', 'cbu': '1234567890112345678901', 'cvu': '1234567890112345678901', 'alias': 'alias.demo2', 'name_account': 'Datos Demostracion2', 'cuit': '12345678901'}
+        return request.render('billetera_pagoflex.web_form_template_transfer_account_revision', {'account': account, 'amount': 100})
 
     @route('/wallet/transfer/sended', auth='user', website=True)
     def transfer_sended(self, **kwargs):
         return request.render('billetera_pagoflex.web_form_template_transfer_sended')
-
-

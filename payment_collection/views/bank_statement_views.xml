@@ -23,6 +23,8 @@
                 <field name="alias" />
                 <field name="id_coelsa" />
                 <field name="reference" />
+                <button type="object" name="break_conciliation" string="Romper Conciliación"
+                    invisible="not is_concilied" confirm="¿Estas seguro de romper la conciliación?" />
                 <field name="is_concilied" />
                 <field name="concilied_id" widget="many2one" />
             </tree>
@@ -43,8 +45,8 @@
                             <field name="cuit" />
                             <field name="bank" />
                             <field name="destination_bank" />
-                            <field name="is_concilied" readonly="True"/>
-                            <field name="concilied_id" widget="many2one" readonly="True"/>
+                            <field name="is_concilied" readonly="1"/>
+                            <field name="concilied_id" widget="many2one" readonly="1"/>
                         </group>
                         <group>
                             <field name="cvu" />
@@ -55,6 +57,11 @@
                         </group>
                     </group>
                 </sheet>
+                 <div class="oe_chatter">
+                    <field name="message_follower_ids" groups="base.group_user" />
+                    <field name="activity_ids" />
+                    <field name="message_ids" />
+                </div>
             </form>
         </field>
     </record>
