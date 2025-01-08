@@ -10,6 +10,7 @@
     'depends': ['payment_collection', 'website'],
     'data': [
         'views/billetera.xml',
+        'views/movimientos.xml',
     ],
     'auto_install': False,
     'application': False,
