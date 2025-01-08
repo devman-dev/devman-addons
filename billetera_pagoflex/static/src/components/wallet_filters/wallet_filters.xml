@@ -13,38 +13,29 @@
                 </div>
             </div>
             <div class="mt-3">
-                <t t-if="state.state == 'pendiente'">
-                    <p>Mostrando transacciones pendientes</p>
-                </t>
-                <t t-if="state.state == 'rechazado'">
-                    <p>Mostrando transacciones rechazadas</p>
-                </t>
                 <div>
-                    <t t-foreach="state.transactions" t-as="transaction" t-key="transaction.id">
+                    <t t-foreach="state.transactions_filter" t-as="transaction" t-key="transaction.id">
                         <div class="card my-3">
                             <div class="card-body">
-                                <!-- Monto de la transacción -->
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <h5 class="card-title mb-0">$
-                                        <t t-out="transaction.amount.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })" />
-                                    </h5>
-                                    <span class="text-muted" style="font-size: 0.9rem;">
-                                        <t t-out="new Date(transaction.date + 'T00:00:00').toLocaleDateString('es-AR')" />
-                                    </span>
-                                </div>
+                                <div class="row align-items-center text-start text-md-start">
+                                    <div class="col-6 col-md-3 text-md-start mb-2 mb-md-0">
+                                        <span style="font-size: 18px; font-weight: bold;">$
+                                            <t t-out="transaction.amount.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })" />
+                                        </span>
 
-                                <!-- Tipo de transacción -->
-                                <div class="mt-2">
-                                    <t t-if="transaction.is_commission">
-                                        <span class="badge bg-warning p-2">Comisión</span>
-                                    </t>
-                                    <t t-elif="transaction.collection_trans_type == 'retiro'">
-                                        <span class="badge bg-danger p-2">Retiro</span>
-                                    </t>
-                                    <t t-elif="transaction.collection_trans_type == 'movimiento_recaudacion'">
-                                        <span class="badge bg-success p-2">Acreditación</span>
-                                    </t>
-                                    <span class="float-end">
+                                    </div>
+                                    <div class="col-6 col-md-3 text-end text-md-center mb-2 mb-md-0">
+                                        <t t-if="transaction.is_commission">
+                                            <span class="badge bg-warning p-2">Comisión</span>
+                                        </t>
+                                        <t t-elif="transaction.collection_trans_type == 'retiro'">
+                                            <span class="badge bg-danger p-2">Retiro</span>
+                                        </t>
+                                        <t t-elif="transaction.collection_trans_type == 'movimiento_recaudacion'">
+                                            <span class="badge bg-success p-2">Acreditación</span>
+                                        </t>
+                                    </div>
+                                    <div class="col-6 col-md-3 text-md-center mb-2 mb-md-0">
                                         <t t-if="transaction.transaction_state == 'pendiente'">
                                             <span class=" p-2 position-relative">Pendiente <span class="position-absolute top-50 start-0 translate-middle p-1 bg-warning border border-light rounded-circle" />
                                             </span>
@@ -57,14 +48,72 @@
                                             <span class=" p-2 position-relative">Aprobado <span class="position-absolute top-50 start-0 translate-middle p-1 bg-success border border-light rounded-circle" />
                                             </span>
                                         </t>
-                                    </span>
+                                    </div>
+                                    <div class="col-6 col-md-3 text-end text-muted" style="font-size: 0.9rem;">
+                                        <t t-out="new Date(transaction.date + 'T00:00:00').toLocaleDateString('es-AR')" />
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </t>
-                    <a href="#" class="btn btn-link float-end p-0">Ver más</a>
+                    <a t-att-href="'/wallet/movements/' + state.state_filter + '/1'" class="btn btn-link float-end p-0">Ver más</a>
                 </div>
             </div>
+        </div>
+        <div class="wallet-card mx-auto col-12 col-md-6 wallet-section">
+            <div class="row">
+                <div class="col-6">
+                    <button class="btn btn-outline-secondary w-100" t-on-click="onShowTransactionsApproved">Aprobados</button>
+                </div>
+                <div class="col-6">
+                    <button class="btn btn-outline-secondary w-100" t-on-click="onShowTransactionsAll">Todos</button>
+                </div>
+            </div>
+            <div class="mt-3">
+                <t t-foreach="state.transactions_filter2" t-as="transaction2" t-key="transaction2.id">
+                    <div class="card my-3">
+                        <div class="card-body">
+                            <div class="row align-items-center text-start text-md-start">
+                                <div class="col-6 col-md-3 text-md-start mb-2 mb-md-0">
+                                    <span style="font-size: 18px; font-weight: bold;">$
+                                        <t t-out="transaction2.amount.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })" />
+                                    </span>
+
+                                </div>
+                                <div class="col-6 col-md-3 text-end text-md-center mb-2 mb-md-0">
+                                    <t t-if="transaction2.is_commission">
+                                        <span class="badge bg-warning p-2">Comisión</span>
+                                    </t>
+                                    <t t-elif="transaction2.collection_trans_type == 'retiro'">
+                                        <span class="badge bg-danger p-2">Retiro</span>
+                                    </t>
+                                    <t t-elif="transaction2.collection_trans_type == 'movimiento_recaudacion'">
+                                        <span class="badge bg-success p-2">Acreditación</span>
+                                    </t>
+                                </div>
+                                <div class="col-6 col-md-3 text-md-center mb-2 mb-md-0">
+                                    <t t-if="transaction2.transaction_state == 'pendiente'">
+                                        <span class=" p-2 position-relative">Pendiente <span class="position-absolute top-50 start-0 translate-middle p-1 bg-warning border border-light rounded-circle" />
+                                        </span>
+                                    </t>
+                                    <t t-elif="transaction2.transaction_state == 'rechazado'">
+                                        <span class=" p-2 position-relative">Rechazado <span class="position-absolute top-50 start-0 translate-middle p-1 bg-danger border border-light rounded-circle" />
+                                        </span>
+                                    </t>
+                                    <t t-elif="transaction2.transaction_state == 'aprobado'">
+                                        <span class=" p-2 position-relative">Aprobado <span class="position-absolute top-50 start-0 translate-middle p-1 bg-success border border-light rounded-circle" />
+                                        </span>
+                                    </t>
+                                </div>
+                                <div class="col-6 col-md-3 text-end text-muted" style="font-size: 0.9rem;">
+                                    <t t-out="new Date(transaction2.date + 'T00:00:00').toLocaleDateString('es-AR')" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </t>
+            </div>
+            <a t-att-href="'/wallet/movements/' + state.state_filter2 + '/1'" class="btn btn-link float-end p-0">Ver más</a>
         </div>
     </t>
 </templates>
