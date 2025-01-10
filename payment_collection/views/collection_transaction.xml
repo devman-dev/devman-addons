@@ -30,9 +30,9 @@
                     <button groups="payment_collection.groups_payment_collection_admin"
                         type="object" name="intern" class="btn btn-info"
                         string="Interno" />
-                    <button groups="payment_collection.groups_payment_collection_admin"
+                    <!-- <button groups="payment_collection.groups_payment_collection_admin"
                         type="object" name="show_destination_name" class="btn btn-secondary"
-                        string="Cron" />
+                        string="Cron" /> -->
 
                 </header>
                 <field name="collection_trans_type" string="Tipo T." />
@@ -94,7 +94,7 @@
                             <field name="date" />
                             <field name="related_customer"
                                 invisible="collection_trans_type == 'retiro'" />
-                            <field name="amount" />
+                            <field name="amount"/>
                             <separator />
                             <field name="available_balance" readonly="1" force_save="1" />
                             <field name="total_balance_customer" readonly="1" force_save="1" />
@@ -245,7 +245,7 @@
                             invisible="alert_withdrawal != True">
                             AVISO! Estas retirando mas de lo disponible.
                         </div>
-                        <field name="description" placeholder="Descripción..." />
+                        <field name="description" />
                         <field name="internal_notes" placeholder="Notas Internas del Cliente..."
                             widget="html" />
                         <field name="count" invisible="1" />
