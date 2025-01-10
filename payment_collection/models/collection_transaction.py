@@ -73,7 +73,6 @@ class CollectionTransaction(models.Model):
     is_concilied = fields.Boolean(string='Conciliado', defualt=False, tracking=True)
     concilied_id = fields.Many2one('bank.statement', string='Conciliado con', tracking=True)
     destination_name = fields.Char(string='Cuenta Destino', compute='_get_destination_name', store=True)
-    amount_formatted = fields.Float()
     
     def show_destination_name(self):
         all_rec = self.env['collection.transaction'].search([])

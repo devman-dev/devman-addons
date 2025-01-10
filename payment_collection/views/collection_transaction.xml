@@ -94,7 +94,6 @@
                             <field name="date" />
                             <field name="related_customer" invisible="collection_trans_type == 'retiro'" />
                             <field name="amount"/>
-                            <field name="amount_formatted" widget="MyWidget"/>
                             <separator />
                             <field name="available_balance" readonly="1" force_save="1" />
                             <field name="total_balance_customer" readonly="1" force_save="1" />
