@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<templates id="float_formatter_template" xml:space="preserve">
+
+    <t t-name="collection_payment.MyWidget" owl="1">
+
+        <span t-if="props.readonly" t-esc="props.value"/>
+
+        <input t-else="" t-att-value="props.value" t-att-placeholder="props.placeholder" class="o_input"/>
+
+    </t>
+
+</templates>
