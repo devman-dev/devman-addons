@@ -23,7 +23,7 @@ class CollectionTransaction(models.Model):
     origin_account_cbu = fields.Char(string='CBU origen', tracking=True)
     origen_name_account_extern = fields.Char(string='Cuenta Origen')
     related_customer = fields.Char(string='Cliente Relacionado', tracking=True)
-    amount = fields.Float(string='Monto', tracking=True, required=True)
+    amount = fields.Float(string='Monto', tracking=True, required=True,)
     date_available_amount = fields.Date('Fecha del monto disponible')
     real_balance = fields.Float(string='Saldo Real App', compute='compute_real_balance_costumer')
     available_balance = fields.Float(string='Saldo Disponible Cliente', tracking=True, compute='compute_available_balance')
@@ -73,7 +73,8 @@ class CollectionTransaction(models.Model):
     is_concilied = fields.Boolean(string='Conciliado', defualt=False, tracking=True)
     concilied_id = fields.Many2one('bank.statement', string='Conciliado con', tracking=True)
     destination_name = fields.Char(string='Cuenta Destino', compute='_get_destination_name', store=True)
-
+    amount_formatted = fields.Float()
+    
     def show_destination_name(self):
         all_rec = self.env['collection.transaction'].search([])
         for rec in all_rec:
