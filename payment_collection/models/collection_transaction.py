@@ -567,17 +567,21 @@ class CollectionTransaction(models.Model):
                 }
             )
 
-    @api.onchange('amount', 'service')
+    @api.onchange('amount')
     def calculate_commission_app_amount(self):
-        if self.collection_trans_type == 'movimiento_recaudacion':
-            self.commission = self.service.commission
-        elif self.collection_trans_type == 'movimiento_interno':
-            self.commission = 0
         self.commission_app_rate = self.service.commission_app_rate if self.service else 0
         if self.collection_trans_type != 'retiro':
             self.commission_app_amount = (self.commission_app_rate * self.amount) / 100
         elif self.collection_trans_type == 'retiro':
             self.amount = self.amount * -1 if self.amount > 0 else self.amount
+    
+    @api.onchange('service')
+    def get_service_commission(self):
+        if self.collection_trans_type == 'movimiento_recaudacion':
+            self.commission = self.service.commission
+        elif self.collection_trans_type == 'movimiento_interno':
+            self.commission = 0
+            
 
     @api.onchange('customer')
     def get_last_app_commission(self):
