@@ -13,7 +13,7 @@
                 <button string="Conc." class="btn btn-primary" name="open_wiz" type="object" invisible="is_concilied" />
                 <button string="Conc.S/T" class="btn btn-info" name="open_wiz" context="{'without_titular': True}" type="object" invisible="is_concilied" />
                 <field name="date" />
-                <field name="amount" />
+                <field name="amount" sum="Monto Total"/>
                 <field name="titular" />
                 <field name="cuit" />
                 <field name="bank" />

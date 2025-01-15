@@ -14,7 +14,7 @@ class CollectionTransaction(models.Model):
     customer = fields.Many2one('res.partner', string='Cliente', required=True, tracking=True, domain="[('check_origin_account','!=', True)]")
     transaction_name = fields.Char(string='N° Transacción', tracking=True)
     service = fields.Many2one('collection.services.commission', string='Servicio', tracking=True)
-    commission = fields.Float(string='Comisión (%)')
+    commission = fields.Float(string='Comisión (%)', digits=(16, 3))
     operation = fields.Many2one('product.template', relation='operation', string='Operación', tracking=True)
     date = fields.Date(string='Fecha', tracking=True, default=datetime.now())
     description = fields.Text(string='Descripción', tracking=True)
@@ -32,7 +32,7 @@ class CollectionTransaction(models.Model):
     cbu_destination_account = fields.Char(string='CBU Destino', tracking=True, default=False)
     cvu_destination_account = fields.Char(string='CVU Destino', tracking=True, default=False)
     name_destination_account = fields.Char(string='Cuenta Destino', tracking=True)
-    commission_app_rate = fields.Float(string='Comisión de la App', tracking=True)
+    commission_app_rate = fields.Float(string='Comisión de la App (%)', tracking=True, digits=(16, 3))
     commission_app_amount = fields.Float(string='Monto de la App', tracking=True)
     previous_month = fields.Float('Mes Anterior', compute='compute_previous_month')
     count = fields.Integer('', default=0)
@@ -73,7 +73,8 @@ class CollectionTransaction(models.Model):
     is_concilied = fields.Boolean(string='Conciliado', defualt=False, tracking=True)
     concilied_id = fields.Many2one('bank.statement', string='Conciliado con', tracking=True)
     destination_name = fields.Char(string='Cuenta Destino', compute='_get_destination_name', store=True)
-    
+    account_bank = fields.Many2one('account.bank.pagoflex', string='Cuenta Banco')
+    categories = fields.Many2many('collection.category',string='Etiquetas')
     def show_destination_name(self):
         all_rec = self.env['collection.transaction'].search([])
         for rec in all_rec:

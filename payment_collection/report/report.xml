@@ -1,6 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
 
+    <!-- Paper Format-->
+    <record id="paperformat_landscape" model="report.paperformat">
+        <field name="name">Landscape Paperformat</field>
+        <field name="default" eval="False"/>
+        <field name="format">A4</field>
+        <field name="orientation">Landscape</field>
+        <field name="margin_top">20</field>
+        <field name="margin_bottom">20</field>
+        <field name="margin_left">20</field>
+        <field name="margin_right">20</field>
+    </record>
 
     <record id="action_report_collection_transaction" model="ir.actions.report">
         <field name="name">Recaudación de Pagos Reporte</field>
@@ -11,6 +22,7 @@
         <field name="print_report_name">'%s' % object.transaction_name</field>
         <field name="binding_model_id" ref="model_collection_transaction" />
         <field name="binding_type">report</field>
+        <field name="paperformat_id" ref="payment_collection.paperformat_landscape"/>
     </record>
 
     <record id="action_report_collection_transaction_commission" model="ir.actions.report">
@@ -36,7 +48,7 @@
         <field name="binding_type">report</field>
     </record>
     <record id="report_collection_transaction_xlsx_id" model="ir.actions.report">
-         <field name="binding_model_id" eval="False"/>
+        <field name="binding_model_id" eval="False"/>
     </record>
 
     <record id="report_bank_movement_month_xlsx_id" model="ir.actions.report">
@@ -49,7 +61,7 @@
         <field name="binding_type">report</field>
     </record>
     <record id="report_bank_movement_month_xlsx_id" model="ir.actions.report">
-         <field name="binding_model_id" eval="False"/>
+        <field name="binding_model_id" eval="False"/>
     </record>
 
 </odoo>
