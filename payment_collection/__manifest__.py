@@ -19,6 +19,7 @@
         'views/agent_commission_service.xml',
         'views/collection_services_commission.xml',
         'views/collection_transaction_commission.xml',
+        'views/collection_category.xml',
         'views/collection_transaction.xml',
         'views/collection_dashboard_customer.xml',
         'views/product_template.xml',

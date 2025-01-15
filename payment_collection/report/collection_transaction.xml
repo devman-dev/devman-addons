@@ -15,13 +15,13 @@
                         border: 2px solid black;
                         }
                     </style>
+                    <h5>Cliente: <t t-out="docs[0].customer.name"/></h5>
                     <table class="table"
                         style="width: 100%; border:none; font-size: 13px;">
                         <thead class="border" style="background-color: #8dd0f0;">
                             <tr class="border">
                                 <th class="border" style="text-align: left;">Fecha</th>
                                 <th class="border" style="text-align: left;">Nro T</th>
-                                <th class="border" style="text-align: left;">Cliente</th>
                                 <th class="border" style="text-align: left; width:150px;">Servicio</th>
                                 <th class="border" style="text-align: left;">Operación</th>
                                 <th class="border" style="text-align: left; width:100px;">CUIT</th>
@@ -61,9 +61,6 @@
                                                 <span t-field="o.transaction_name" />
                                             </td>
                                             <td class="border">
-                                                <span t-field="o.customer.name" />
-                                            </td>
-                                            <td class="border">
                                                 <span t-field="o.service.services.name" />
                                             </td>
                                             <td class="border">
@@ -84,7 +81,7 @@
                                             <td class="border" style="text-align: right;">
                                                 <t t-if="o.amount > 0">
                                                     <span t-field="o.commission"
-                                                        t-options="{'widget': 'float', 'precision': 2}" />
+                                                        t-options="{'widget': 'float', 'precision': 3}" />
                                                 </t>
                                                 <t t-else="">
                                                     <span>0</span>
@@ -132,9 +129,6 @@
                                                 <span t-field="o.transaction_name" />
                                             </td>
                                             <td class="border">
-                                                <span t-field="o.customer.name" />
-                                            </td>
-                                            <td class="border">
                                                 <span t-field="o.service.services.name" />
                                             </td>
                                             <td class="border">
@@ -155,7 +149,7 @@
                                             <td class="border" style="text-align: right;">
                                                 <t t-if="o.amount > 0">
                                                     <span t-field="o.commission"
-                                                        t-options="{'widget': 'float', 'precision': 2}" />
+                                                        t-options="{'widget': 'float', 'precision': 3}" />
                                                 </t>
                                                 <t t-else="">
                                                     <span>0</span>

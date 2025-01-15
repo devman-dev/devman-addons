@@ -10,12 +10,12 @@ class CollectionServicesCommission(models.Model):
 
     customer = fields.Many2one('res.partner', string='Cliente', required=True, domain="[('check_origin_account','!=', True)]")
     services = fields.Many2one('product.template', string='Servicio', required=True, domain=[('collection_type', '=', 'service')])
-    commission = fields.Float(string='Comisión', required=True)
+    commission = fields.Float(string='Comisión', required=True, digits=(16, 3))
     agent_services_commission = fields.One2many(
         'agent.commission.service', 'collection_services_commission_id', string='Comisión de servicios de agente', required=True
     )
     name = fields.Char()
-    commission_app_rate = fields.Float(string='Comisión de la App', tracking=True)
+    commission_app_rate = fields.Float(string='Comisión de la App', tracking=True, digits=(16, 3))
 
     cbu = fields.Char('CBU')
     cvu = fields.Char('CVU')

@@ -6,8 +6,7 @@
 
         <span t-if="props.readonly" t-esc="props.value"/>
 
-        <input t-else="" t-att-value="props.value" t-att-placeholder="props.placeholder" class="o_input"/>
-
+        <input t-else="" t-att-value="props.record.data.amount" t-on-input="formatNumber" t-att-placeholder="props.placeholder"/>
     </t>
 
 </templates>
