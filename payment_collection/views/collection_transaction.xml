@@ -163,6 +163,38 @@
                             <field name="previous_month" invisible="1" />
                         </group>
 
+                        <!-- Cheque -->
+<!--                        <group invisible="collection_trans_type != 'cheque'">-->
+<!--                            <field name="destination_account" domain="[('customer','=', customer)]" options="{'no_create': True, 'no_create_edit': True,'no_quick_create': True}" context="{'show_account_name': True}" />-->
+<!--                            <field name="cuit_destination_account" readonly="1" force_save="1" />-->
+<!--                            <field name="cbu_destination_account" readonly="1" force_save="1" />-->
+<!--                            <field name="cvu_destination_account" readonly="1" force_save="1" />-->
+<!--                            <field name="alias_destination_account" readonly="1" force_save="1" />-->
+
+<!--                            <field name="check_number"/>-->
+<!--                            <field name="check_date"/>-->
+<!--                            <field name="check_deposit_date"/>-->
+<!--                            <field name="check_endorsement"/>-->
+<!--                            <field name="check_bank"/>-->
+<!--                            <separator />-->
+
+<!--                            <field name="origin_type" help="Seleccione Interno si el cliente pertenece a PagoFlex" widget="radio" options="{'horizontal': True}" />-->
+
+<!--                            <field name="customer_origin" options="{'no_create': True, 'no_create_edit': True,'no_quick_create': True}" invisible="origin_type == 'externo'" />-->
+<!--                            <field name="origin_account" domain="[('customer','=',customer_origin)]" context="{'show_account_name': True}" options="{'no_create': True, 'no_create_edit': True,'no_quick_create': True}" invisible="origin_type == 'externo'" />-->
+<!--                            <field name="origen_name_account_extern" invisible="origin_type == 'interno'" />-->
+<!--                            <field name="origin_account_cuit" readonly="origin_type == 'interno'" />-->
+<!--                            <field name="origin_account_cvu" readonly="origin_type == 'interno'" force_save="1" />-->
+<!--                            <field name="origin_account_cbu" readonly="origin_type == 'interno'" force_save="1" />-->
+<!--                            <field name="alias_origen" readonly="origin_type == 'interno'" force_save="1" />-->
+
+
+<!--                            <field name="commission_app_rate" readonly="1" force_save="1" />-->
+<!--                            <field name="commission_app_amount" readonly="1" force_save="1" />-->
+<!--                            <field name="transaction_state" />-->
+<!--                            <field name="previous_month" invisible="1" />-->
+<!--                        </group>-->
+
                         <div id="alertWithdrawal" role="alert" class="alert alert-danger" style="height: 40px; width: 90%; margin-bottom: 20px;" invisible="alert_withdrawal != True">
                             AVISO! Estas retirando mas de lo disponible.
                         </div>

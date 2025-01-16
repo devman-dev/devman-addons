@@ -75,6 +75,14 @@ class CollectionTransaction(models.Model):
     destination_name = fields.Char(string='Cuenta Destino', compute='_get_destination_name', store=True)
     account_bank = fields.Many2one('account.bank.pagoflex', string='Cuenta Banco')
     categories = fields.Many2many('collection.category',string='Etiquetas')
+    check_number = fields.Char(string='Nro del cheque')
+    check_date = fields.Date(string='Fecha del cheque')
+    check_deposit_date = fields.Date(string='Fecha de depósito')
+    check_endorsement = fields.Char(string='Endoso')
+    check_bank = fields.Many2one('account.bank.pagoflex', string='Banco del cheque')
+    
+    
+    
     def show_destination_name(self):
         all_rec = self.env['collection.transaction'].search([])
         for rec in all_rec:
@@ -216,6 +224,7 @@ class CollectionTransaction(models.Model):
                     'cbu_destination_account': 0,
                     'is_commission': True,
                     'count': 1,
+                    'account_bank': vals_list['account_bank'],
                 }
                 if 'commission' not in vals_list:
                     commission_search = self.env['collection.services.commission'].sudo().search([('id', '=', vals_list['service'])], limit=1)
