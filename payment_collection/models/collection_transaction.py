@@ -49,7 +49,7 @@ class CollectionTransaction(models.Model):
         default='aprobado',
     )
     collection_trans_type = fields.Selection(
-        [('movimiento_recaudacion', 'Acreditación'), ('retiro', 'Mov. Retiro'), ('movimiento_interno', 'Mov. Interno'),('cheque','Cheque')],
+        [('movimiento_recaudacion', 'Acreditación'), ('retiro', 'Mov. Retiro'), ('movimiento_interno', 'Mov. Interno')],
         default='movimiento_recaudacion',
         string='Tipo de Transacción',
     )
@@ -224,6 +224,7 @@ class CollectionTransaction(models.Model):
                     'cbu_destination_account': 0,
                     'is_commission': True,
                     'count': 1,
+                    'account_bank': vals_list['account_bank'],
                 }
                 if 'commission' not in vals_list:
                     commission_search = self.env['collection.services.commission'].sudo().search([('id', '=', vals_list['service'])], limit=1)
