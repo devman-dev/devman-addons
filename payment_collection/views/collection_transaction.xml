@@ -206,12 +206,12 @@
     </record>
 
 
-    <!-- <record id="collection_transaction_action" model="ir.actions.act_window">
+    <record id="collection_transaction_action" model="ir.actions.act_window">
         <field name="name">Recaudación de Pagos</field>
         <field name="res_model">collection.transaction</field>
         <field name="view_mode">tree,form</field>
-        <field name="context">{"search_default_account_bank":1}</field>
-    </record> -->
+        <!-- <field name="context">{"search_default_account_bank":1}</field> -->
+    </record>
 
 
 </odoo>
