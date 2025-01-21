@@ -172,7 +172,7 @@
                     </table>
                     <p style="margin-top: 50px; color: #757575;">El saldo disponible
                         correspondientes a los movimientos anteriores a las 48hs es: <span
-                            t-field="docs[0].available_balance" /></p>
+                            t-field="docs[0].available_balance" t-options="{'widget': 'float', 'precision': 2}" /></p>
                 </div>
             </t>
         </t>

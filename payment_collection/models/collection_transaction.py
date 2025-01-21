@@ -323,7 +323,7 @@ class CollectionTransaction(models.Model):
                 .search(
                     [
                         ('customer', '=', rec.id),
-                        ('is_commission', '=', False),
+                        # ('is_commission', '=', False),
                         ('collection_trans_type', '=', 'movimiento_recaudacion'),
                         '|',
                         ('operation.name', 'not ilike', 'SALDO INICIAL'),
@@ -337,8 +337,9 @@ class CollectionTransaction(models.Model):
                 .search(
                     [
                         ('customer', '=', rec.id),
-                        ('is_commission', '=', False),
+                        # ('is_commission', '=', False),
                         ('collection_trans_type', '=', 'movimiento_recaudacion'),
+                        
                     ]
                 )
             )
@@ -367,13 +368,20 @@ class CollectionTransaction(models.Model):
             else:
                 total_app_rate = sum([c.commission_app_rate for c in total_recaudation])
             total_commi_amount = sum([c.amount for c in total_recaudation if c.is_commission])
-
+            
+            #Saldo App
+            result_customer_real_balance = total_amount_recau - total_amount_app + total_amount_withdr
+            #Saldo Disponible
+            result_customer_available_balance = total_amount_available + total_amount_withdr
+            #Saldo Total Cliente
+            result_collection_balance = total_amount_recau_initial - withdrawal_commission_total + total_amount_withdr
+            
             # dashboard.sudo().write(
             dict_dashboard = {
                 'customer': rec.id,
-                'customer_real_balance': (total_amount_recau + (total_commi_amount * -1)) - total_amount_app + total_amount_withdr,
-                'customer_available_balance': total_amount_available + total_amount_withdr,
-                'collection_balance': total_amount_recau_initial - withdrawal_commission_total + total_amount_withdr,
+                'customer_real_balance': result_customer_real_balance,
+                'customer_available_balance': result_customer_available_balance,
+                'collection_balance': result_collection_balance,
                 'commission_balance': total_commi_amount,
                 'commission_app_rate': total_app_rate,
                 'commission_app_amount': total_amount_app,
