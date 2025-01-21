@@ -224,7 +224,7 @@ class CollectionTransaction(models.Model):
                     'cbu_destination_account': 0,
                     'is_commission': True,
                     'count': 1,
-                    'account_bank': vals_list['account_bank'],
+                 
                 }
                 if 'commission' not in vals_list:
                     commission_search = self.env['collection.services.commission'].sudo().search([('id', '=', vals_list['service'])], limit=1)
