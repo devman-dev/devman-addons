@@ -11,7 +11,7 @@ class CollectionDashboardCustomer(models.Model):
     collection_balance = fields.Float(string='Saldo Total Cliente', tracking=True)
     last_operation_date = fields.Date(string='Fecha de ultima operación', tracking=True)
     commission_balance = fields.Float(string='Saldo de Comisión', tracking=True)
-    commission_app_rate = fields.Float(string='Comi. App (%)', tracking=True)
+    commission_app_rate = fields.Float(string='Comi. App (%)', tracking=True, digits=(16, 3))
     commission_app_amount = fields.Float(string='Monto App', tracking=True)
     manual_data = fields.Boolean(string='Data Manual', default=True, tracking=True)
     

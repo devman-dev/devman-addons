@@ -16,7 +16,7 @@ class CollectionTransactionCommission(models.Model):
     transaction_service = fields.Many2one('collection.services.commission', string='Servicio de Transacción', tracking=True,)
     transaction_operation = fields.Many2one('product.template', relation='operation', string='Operación de Transacción', tracking=True,)
     agent = fields.Many2one('res.partner', string='Agente', tracking=True, domain="[('check_origin_account','!=', True)]")
-    commission_rate = fields.Float(string='Tasa de comisión', tracking=True,)
+    commission_rate = fields.Float(string='Tasa de comisión (%)', tracking=True,digits=(16, 3))
     operation_amount = fields.Float(string='Monto de Operación', tracking=True,)
     commission_amount = fields.Float(string='Monto de Comisión', tracking=True,)
     payment_state = fields.Selection([('debt', 'Deuda'), ('pay', 'Pagado'), ('partial_payment', 'Pago Parcial')], default='debt', string='Estado', tracking=True,)

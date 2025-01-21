@@ -14,7 +14,7 @@ class CollectionTransaction(models.Model):
     customer = fields.Many2one('res.partner', string='Cliente', required=True, tracking=True, domain="[('check_origin_account','!=', True)]")
     transaction_name = fields.Char(string='N° Transacción', tracking=True)
     service = fields.Many2one('collection.services.commission', string='Servicio', tracking=True)
-    commission = fields.Float(string='Comisión (%)')
+    commission = fields.Float(string='Comisión (%)', digits=(16, 3))
     operation = fields.Many2one('product.template', relation='operation', string='Operación', tracking=True)
     date = fields.Date(string='Fecha', tracking=True, default=datetime.now())
     description = fields.Text(string='Descripción', tracking=True)
@@ -23,7 +23,7 @@ class CollectionTransaction(models.Model):
     origin_account_cbu = fields.Char(string='CBU origen', tracking=True)
     origen_name_account_extern = fields.Char(string='Cuenta Origen')
     related_customer = fields.Char(string='Cliente Relacionado', tracking=True)
-    amount = fields.Float(string='Monto', tracking=True, required=True)
+    amount = fields.Float(string='Monto', tracking=True, required=True,)
     date_available_amount = fields.Date('Fecha del monto disponible')
     real_balance = fields.Float(string='Saldo Real App', compute='compute_real_balance_costumer')
     available_balance = fields.Float(string='Saldo Disponible Cliente', tracking=True, compute='compute_available_balance')
@@ -32,7 +32,7 @@ class CollectionTransaction(models.Model):
     cbu_destination_account = fields.Char(string='CBU Destino', tracking=True, default=False)
     cvu_destination_account = fields.Char(string='CVU Destino', tracking=True, default=False)
     name_destination_account = fields.Char(string='Cuenta Destino', tracking=True)
-    commission_app_rate = fields.Float(string='Comisión de la App', tracking=True)
+    commission_app_rate = fields.Float(string='Comisión de la App (%)', tracking=True, digits=(16, 3))
     commission_app_amount = fields.Float(string='Monto de la App', tracking=True)
     previous_month = fields.Float('Mes Anterior', compute='compute_previous_month')
     count = fields.Integer('', default=0)
@@ -73,7 +73,16 @@ class CollectionTransaction(models.Model):
     is_concilied = fields.Boolean(string='Conciliado', defualt=False, tracking=True)
     concilied_id = fields.Many2one('bank.statement', string='Conciliado con', tracking=True)
     destination_name = fields.Char(string='Cuenta Destino', compute='_get_destination_name', store=True)
-
+    account_bank = fields.Many2one('account.bank.pagoflex', string='Cuenta Banco')
+    categories = fields.Many2many('collection.category',string='Etiquetas')
+    check_number = fields.Char(string='Nro del cheque')
+    check_date = fields.Date(string='Fecha del cheque')
+    check_deposit_date = fields.Date(string='Fecha de depósito')
+    check_endorsement = fields.Char(string='Endoso')
+    check_bank = fields.Many2one('account.bank.pagoflex', string='Banco del cheque')
+    
+    
+    
     def show_destination_name(self):
         all_rec = self.env['collection.transaction'].search([])
         for rec in all_rec:
@@ -215,6 +224,7 @@ class CollectionTransaction(models.Model):
                     'cbu_destination_account': 0,
                     'is_commission': True,
                     'count': 1,
+                    'account_bank': vals_list['account_bank'],
                 }
                 if 'commission' not in vals_list:
                     commission_search = self.env['collection.services.commission'].sudo().search([('id', '=', vals_list['service'])], limit=1)
@@ -313,7 +323,7 @@ class CollectionTransaction(models.Model):
                 .search(
                     [
                         ('customer', '=', rec.id),
-                        ('is_commission', '=', False),
+                        # ('is_commission', '=', False),
                         ('collection_trans_type', '=', 'movimiento_recaudacion'),
                         '|',
                         ('operation.name', 'not ilike', 'SALDO INICIAL'),
@@ -327,8 +337,9 @@ class CollectionTransaction(models.Model):
                 .search(
                     [
                         ('customer', '=', rec.id),
-                        ('is_commission', '=', False),
+                        # ('is_commission', '=', False),
                         ('collection_trans_type', '=', 'movimiento_recaudacion'),
+                        
                     ]
                 )
             )
@@ -357,13 +368,20 @@ class CollectionTransaction(models.Model):
             else:
                 total_app_rate = sum([c.commission_app_rate for c in total_recaudation])
             total_commi_amount = sum([c.amount for c in total_recaudation if c.is_commission])
-
+            
+            #Saldo App
+            result_customer_real_balance = total_amount_recau - total_amount_app + total_amount_withdr
+            #Saldo Disponible
+            result_customer_available_balance = total_amount_available + total_amount_withdr
+            #Saldo Total Cliente
+            result_collection_balance = total_amount_recau_initial - withdrawal_commission_total + total_amount_withdr
+            
             # dashboard.sudo().write(
             dict_dashboard = {
                 'customer': rec.id,
-                'customer_real_balance': (total_amount_recau + (total_commi_amount * -1)) - total_amount_app + total_amount_withdr,
-                'customer_available_balance': total_amount_available + total_amount_withdr,
-                'collection_balance': total_amount_recau_initial - withdrawal_commission_total + total_amount_withdr,
+                'customer_real_balance': result_customer_real_balance,
+                'customer_available_balance': result_customer_available_balance,
+                'collection_balance': result_collection_balance,
                 'commission_balance': total_commi_amount,
                 'commission_app_rate': total_app_rate,
                 'commission_app_amount': total_amount_app,

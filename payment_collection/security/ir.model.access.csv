@@ -52,3 +52,7 @@ access_to_conciliation_wiz_comi,access.conciliation.wiz,model_conciliation_wiz,g
 access_to_account_bank_pagoflex,access.account.bank.pagoflex,model_account_bank_pagoflex,groups_payment_collection_admin,1,1,1,1
 access_to_account_bank_pagoflex_user,access.account.bank.pagoflex,model_account_bank_pagoflex,groups_payment_collection_user,0,0,0,0
 access_to_account_bank_pagoflex_comi,access.account.bank.pagoflex,model_account_bank_pagoflex,groups_payment_collection_comi,0,0,0,0
+
+access_to_collection_category,access.collection.category,model_collection_category,groups_payment_collection_admin,1,1,1,1
+access_to_collection_category_user,access.collection.category,model_collection_category,groups_payment_collection_user,0,0,0,0
+access_to_collection_category_comi,access.collection.category,model_collection_category,groups_payment_collection_comi,0,0,0,0

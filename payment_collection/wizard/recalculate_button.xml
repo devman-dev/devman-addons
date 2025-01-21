@@ -7,23 +7,21 @@
         <field name="arch" type="xml">
             <form string="Recalculo de Totales del Dashboard">
                 <sheet>
-                    <group>
-                        <field name="all_customer_dash">
-                            <tree string="Dashboard de Cobro de cliente">
-                                <control>
-                                    <create name="add_line_control" invisible="1" />
-                                </control>
-                                <field name="customer" />
-                                <field name="customer_real_balance" />
-                                <field name="customer_available_balance" />
-                                <field name="collection_balance" />
-                                <field name="commission_balance" invisible="1" optional="hide" />
-                                <field name="last_operation_date" />
-                                <field name="commission_app_rate" invisible="1" optional="hide" />
-                                <field name="commission_app_amount" invisible="1" optional="hide" />
-                            </tree>
-                        </field>
-                    </group>
+                    <field name="all_customer_dash">
+                        <tree string="Dashboard de Cobro de cliente">
+                            <control>
+                                <create name="add_line_control" invisible="1" />
+                            </control>
+                            <field name="customer" />
+                            <field name="customer_real_balance" />
+                            <field name="customer_available_balance" />
+                            <field name="collection_balance" />
+                            <field name="commission_balance" optional="hide" />
+                            <field name="last_operation_date" />
+                            <field name="commission_app_rate" optional="hide" />
+                            <field name="commission_app_amount" optional="hide" />
+                        </tree>
+                    </field>
 
                     <footer>
                         <button name="imputar" string="Imputar" class="btn btn-primary"
