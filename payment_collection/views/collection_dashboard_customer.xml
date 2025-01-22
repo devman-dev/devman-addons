@@ -8,7 +8,7 @@
             <tree string="Dashboard de Cobro de cliente" js_class="button_update_dashboard">
                 <field name="customer" />
                 <field name="customer_real_balance" sum="Total Saldo Real"/>
-                <field name="customer_available_balance" sum="Total Saldo Disponible"/>
+                <!-- <field name="customer_available_balance" sum="Total Saldo Disponible"/> -->
                 <field name="collection_balance" sum="Total Saldo de pagos" />
                 <field name="commission_balance" sum="Total Saldo de comisión" optional="hide"/>
                 <field name="last_operation_date" />
@@ -29,7 +29,7 @@
                         <group>
                             <field name="customer" required="1"/>
                             <field name="customer_real_balance"/>
-                            <field name="customer_available_balance"/>
+                            <!-- <field name="customer_available_balance"/> -->
                             <field name="collection_balance"/>
                         </group>
                         <group>

@@ -14,7 +14,7 @@
                             </control>
                             <field name="customer" />
                             <field name="customer_real_balance" />
-                            <field name="customer_available_balance" />
+                            <!-- <field name="customer_available_balance" /> -->
                             <field name="collection_balance" />
                             <field name="commission_balance" optional="hide" />
                             <field name="last_operation_date" />
