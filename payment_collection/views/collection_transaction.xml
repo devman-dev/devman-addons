@@ -69,7 +69,7 @@
                             <field name="related_customer" invisible="collection_trans_type == 'retiro'" />
                             <field name="amount"/>
                             <separator />
-                            <field name="available_balance" readonly="1" force_save="1" />
+                            <!-- <field name="available_balance" readonly="1" force_save="1" /> -->
                             <field name="total_balance_customer" readonly="1" force_save="1" />
                             <field name="real_balance" readonly="1" force_save="1" groups="payment_collection.groups_payment_collection_admin" />
                             <field name="date_available_amount" readonly="1" force_save="1" />

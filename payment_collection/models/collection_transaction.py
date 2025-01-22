@@ -175,6 +175,14 @@ class CollectionTransaction(models.Model):
                     rec_commission = self.env['collection.transaction'].search([('transaction_name', '=', rec.transaction_name), ('customer', '=', rec.customer.id), ('is_commission', '=', True)])
                     if rec_commission:
                         rec_commission.with_context(force_unlink=True).unlink()
+            if 'date' in vals:
+                if rec.env.context.get('no_write', False):
+                    continue
+                rec_commission = self.env['collection.transaction'].search([('transaction_name', '=', rec.transaction_name),('is_commission', '=', True)])
+                if rec_commission:
+                    rec_commission.with_context(no_write=True).date = vals['date']
+                    
+
         return super().write(vals)
 
     def unlink(self):
