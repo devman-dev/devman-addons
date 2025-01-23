@@ -16,7 +16,7 @@
                     <button groups="payment_collection.groups_payment_collection_admin" type="object" name="pending" class="btn btn-warning" string="Pendiente" />
                     <button groups="payment_collection.groups_payment_collection_admin" type="object" name="refused" class="btn btn-danger" string="Rechazado" />
                     <button groups="payment_collection.groups_payment_collection_admin" type="object" name="intern" class="btn btn-info" string="Interno" />
-                    <!-- <button groups="payment_collection.groups_payment_collection_admin" type="object" name="show_destination_name" class="btn btn-secondary" string="Cron" /> -->
+                    <button groups="payment_collection.groups_payment_collection_admin" type="object" name="show_destination_name" class="btn btn-secondary" string="Cron" />
 
                 </header>
                 <field name="collection_trans_type" string="Tipo T." />
@@ -28,7 +28,7 @@
                 <field name="operation" />
                 <field name="description" />
                 <field name="amount" sum="Total" />
-                <field name="origin_account" />
+                <field name="origin_name" />
                 <field name="commission_app_amount" sum="Total APP" optional="hide" />
                 <!-- <field name="available_balance" optional="hide" /> -->
                 <field name="origin_account_cuit" />

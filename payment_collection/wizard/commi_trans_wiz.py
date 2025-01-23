@@ -29,7 +29,9 @@ class CommiTransWiz(models.TransientModel):
         if filtered_records:
             filtered_records[0].available_balance = dashboard_customer.customer_available_balance
             filtered_records[0].previous_month = self.previous_balance
-
+            filtered_records[0].start_date = start_date
+            filtered_records[0].end_date = end_date
+            
 
             return self.env.ref('payment_collection.action_report_collection_transaction').report_action(filtered_records)
         else:
