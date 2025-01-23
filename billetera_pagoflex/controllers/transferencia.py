@@ -7,7 +7,7 @@ class WebFormWalletController(Controller):
     @route('/wallet', auth='user', website=True)
     def web_form_wallet(self, **kwargs):
         customer = request.env['collection.dashboard.customer'].sudo().search([('customer', '=', request.env.user.partner_id.id)])
-        available_balance = customer.customer_available_balance if customer else 0.00
+        available_balance = customer.collection_balance if customer else 0.00
         transactions = (
             request.env['collection.transaction'].sudo().search([('customer', '=', request.env.user.partner_id.id), ('collection_trans_type', '!=', 'movimiento_interno')], order='id desc', limit=10)
         )

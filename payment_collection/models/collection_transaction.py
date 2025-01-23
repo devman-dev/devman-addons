@@ -80,13 +80,29 @@ class CollectionTransaction(models.Model):
     check_deposit_date = fields.Date(string='Fecha de depósito')
     check_endorsement = fields.Char(string='Endoso')
     check_bank = fields.Many2one('account.bank.pagoflex', string='Banco del cheque')
+    origin_name = fields.Char(string='Cuenta Origen', compute='_get_origin_name', store=True)
     
+    # Campos para el reporte
+    start_date = fields.Date(string='Fecha inicio para el reporte')
+    end_date = fields.Date(string='Fecha fin para el reporte')
     
     
     def show_destination_name(self):
         all_rec = self.env['collection.transaction'].search([])
         for rec in all_rec:
             rec._get_destination_name()
+            rec._get_origin_name()
+            
+    @api.depends('transaction_name','origin_account','origen_name_account_extern','origin_name')
+    def _get_origin_name(self):
+        for rec in self:
+            if rec.collection_trans_type == 'movimiento_recaudacion':
+                if rec.origin_type == 'externo':
+                    rec.origin_name = rec.origen_name_account_extern
+                else:
+                    rec.origin_name = rec.origin_account.name_account
+            elif rec.collection_trans_type == 'retiro' or rec.collection_trans_type == 'movimiento_interno':
+                rec.origin_name = rec.origin_account.name_account
 
     @api.depends('transaction_name', 'destination_account', 'destination_name')
     def _get_destination_name(self):
