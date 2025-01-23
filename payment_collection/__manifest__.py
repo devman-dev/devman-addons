@@ -7,7 +7,7 @@
     'website': '',
     'license': 'LGPL-3',
     'category': 'account',
-    'depends': ['base', 'contacts', 'stock', 'report_xlsx'],
+    'depends': ['base', 'contacts', 'stock', 'report_xlsx', 'survey'],
     'data': [
         'security/security.xml',
         'security/ir.model.access.csv',

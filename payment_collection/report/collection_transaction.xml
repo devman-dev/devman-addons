@@ -7,17 +7,50 @@
                 <div class="page">
                     <style>
                         table, thead, tbody, tfoot, tr, td, th {
-                        border: none;
-                        border-collapse: collapse;
+                            border: none;
+                            border-collapse: collapse;
+                            padding: 0;
+                            margin: 0;
                         }
+                        table {
+                            border-spacing: 0;
+                        }
+
 
                         .border {
                         border: 2px solid black;
                         }
                     </style>
-                    <h5>Cliente: <t t-out="docs[0].customer.name"/></h5>
-                    <table class="table"
-                        style="width: 100%; border:none; font-size: 13px;">
+                    <img src="/payment_collection/static/description/icon.png"
+                        style="width: 100px;float: left;" />
+                    <div style="float: left; margin-left: 20px;">
+                        <p> 
+                            PagoFlex SA<br />
+                            CUIT 30-71870008-2<br />
+                            WhatsApp +54 9 11 7064-3301 
+                        </p>
+
+                    </div>
+                    <div style="float: right; margin-right: 20px;">
+                        <p> Av. Gaona 3707 piso 4 Flores<br /> Caba - Bs As.
+                            Argentina <br />
+                            <a href="https://maps.app.goo.gl/U3bfGzSkFfaCUcpH9">
+                            https://maps.app.goo.gl/U3bfGzSkFfaCUcpH9
+                            </a><br />
+                        </p>
+                    </div>
+                    <div style="clear: both;"></div>
+                    <br/>
+                    <div style="float: left;">
+                        <span>Cliente: <t t-out="docs[0].customer.name" /></span>
+                    </div>
+                    <div style="float: right; text-align: left; margin-right: 20px;">
+                        <span style="margin-right: 40px;">Extracto de cta. CVU XXXXXX</span>
+                        <span>Fecha desde <t t-esc="docs[0].start_date" /> hasta <t t-esc="docs[0].end_date" /></span>
+                    </div>
+                    <div style="clear: both;"></div>
+
+                    <table class="table" style="width: 100%; border:none; font-size: 13px;">
                         <thead class="border" style="background-color: #8dd0f0;">
                             <tr class="border">
                                 <th class="border" style="text-align: left;">Fecha</th>
@@ -33,7 +66,7 @@
                         </thead>
                         <tbody style="font-size: 10px;">
                             <tr style="border: none;">
-                                <td style="border: none;" colspan="5"></td>
+                                <td style="border: none;" colspan="4"></td>
                                 <td style="border: none; background-color: #8dd0f0;" colspan="2">
                                     <span>Saldo Anterior:</span>
                                 </td>
@@ -172,7 +205,8 @@
                     </table>
                     <!-- <p style="margin-top: 50px; color: #757575;">El saldo disponible
                         correspondientes a los movimientos anteriores a las 48hs es: <span
-                            t-field="docs[0].available_balance" t-options="{'widget': 'float', 'precision': 2}" /></p> -->
+                    t-field="docs[0].available_balance" t-options="{'widget': 'float', 'precision':
+                    2}" /></p> -->
                 </div>
             </t>
         </t>
