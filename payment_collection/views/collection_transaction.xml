@@ -59,7 +59,7 @@
                         <group>
                             <field name="collection_trans_type" widget="radio" options="{'horizontal': True}" />
                             <field name="customer" options="{'no_create': True, 'no_create_edit': True,'no_quick_create': True}" />
-                            <field name="account_bank"/>
+                            <!-- <field name="account_bank"/> -->
                             <field name="service" required="1" domain="[('services.collection_type', '=', 'service'), ('customer', '=', customer)]" context="{'show_servicio_name': True}" options="{'no_create': True, 'no_create_edit': True,'no_quick_create': True}" />
                             <field name="categories" widget="many2many_tags"/>
                             <field name="commission" invisible="collection_trans_type == 'movimiento_interno'" />

@@ -1,0 +1,11 @@
+<odoo>
+    <report
+        id="survey_report_xlsx"
+        model="survey.survey"
+        string="Survey Report"
+        report_type="xlsx"
+        name="survey_xlsx.survey_report_xlsx"
+        file="survey_report"
+        attachment_use="False"
+    />
+</odoo>

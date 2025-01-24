@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <data>
+    <record id="action_survey_export_xlsx" model="ir.actions.act_window">
+      <field name="name">Exportar a XLSX</field>
+      <field name="res_model">survey.export.xlsx</field>
+      <field name="view_mode">form</field>
+      <field name="target">new</field>
+    </record>
+  </data>
+</odoo>
