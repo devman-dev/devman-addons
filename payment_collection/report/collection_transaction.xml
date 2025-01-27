@@ -45,8 +45,15 @@
                         <span>Cliente: <t t-out="docs[0].customer.name" /></span>
                     </div>
                     <div style="float: right; text-align: left; margin-right: 20px;">
-                        <span style="margin-right: 40px;">Extracto de cta. CVU XXXXXX</span>
-                        <span>Fecha desde <t t-esc="docs[0].start_date" /> hasta <t t-esc="docs[0].end_date" /></span>
+                        <span style="margin-right: 150px;">Extracto de cta. CVU XXXXXX</span>
+                       <span>
+                            Fecha desde <t t-esc="docs[0].start_date.strftime('%d/%m/%Y')" class="mx-2" /> 
+                            hasta <t t-esc="docs[0].end_date.strftime('%d/%m/%Y')" class="mx-2" />
+                        </span>
+                       <span style="margin-left: 60px;">
+                            Fecha Impresión: <t t-esc="docs[0].print_date.strftime('%d/%m/%Y')" /> 
+                        </span>
+
                     </div>
                     <div style="clear: both;"></div>
 

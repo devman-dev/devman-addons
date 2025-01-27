@@ -3,7 +3,7 @@ from odoo.exceptions import UserError
 
 import base64
 import io
-from openpyxl import load_workbook
+import pandas as pd
 
 class BankMoveImported(models.Model):
     _name = 'bank.move.imported'
@@ -88,12 +88,9 @@ class BankMoveImported(models.Model):
                     rec.withdrawal_operations = internal
     
     def execute_bank_file(self):
-        file = base64.b64decode(self.file)
-        excel_file = io.BytesIO(file)
-        wb = load_workbook(filename=excel_file, data_only=True)
-        sheet = wb.active
-        data = []
-        for row in sheet.iter_rows(values_only=True):
-            data.append(row)
-
-        raise UserError(data) 
+        file_content = base64.b64decode(self.file)
+        excel_file = io.BytesIO(file_content)
+        
+        excel_data = pd.read_excel(excel_file)
+        print("Prueba")
+        

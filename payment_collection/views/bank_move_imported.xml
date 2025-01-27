@@ -27,7 +27,7 @@
 
                         </group>
                         <group>
-                            <field name="file" colspan="2"/>
+                            <field name="file"/>
                             <field name="commission" />
                             <field name="operation_id"
                                 domain="[('id', 'in', withdrawal_operations)]"
