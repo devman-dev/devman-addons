@@ -5,7 +5,10 @@
         <field name="name">collection.dashboard.customer.view.tree</field>
         <field name="model">collection.dashboard.customer</field>
         <field name="arch" type="xml">
-            <tree string="Dashboard de Cobro de cliente" js_class="button_update_dashboard">
+            <tree string="Dashboard de Cobro de cliente">
+                <header>
+                    <button groups="payment_collection.groups_payment_collection_admin" type="object" name="recalculate_total_recs" class="btn btn-primary" string="Recalcular Todo" />
+                </header>
                 <field name="customer" />
                 <field name="customer_real_balance" sum="Total Saldo Real"/>
                 <!-- <field name="customer_available_balance" sum="Total Saldo Disponible"/> -->
