@@ -67,6 +67,7 @@
                 <field name="operation_id" />
                 <field name="bank_commission_entry" />
                 <field name="bank_commission_egress" />
+                <field name="bank_id" />
             </tree>
         </field>
     </record>

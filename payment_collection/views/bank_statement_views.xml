@@ -16,6 +16,7 @@
                 <field name="amount" sum="Monto Total"/>
                 <field name="titular" />
                 <field name="cuit" />
+                <field name="destination_bank" />
                 <field name="bank" />
                 <field name="destination_bank" />
                 <field name="cvu" />
@@ -43,6 +44,7 @@
                             <field name="amount" />
                             <field name="titular" />
                             <field name="cuit" />
+                            <field name="bank_statement_id"/>
                             <field name="bank" />
                             <field name="destination_bank" />
                             <field name="is_concilied" readonly="1"/>
@@ -65,6 +67,18 @@
                     <field name="message_ids" />
                 </div>
             </form>
+        </field>
+    </record>
+
+    <record id="bank_statement_view_search" model="ir.ui.view">
+        <field name="name">bank.statement.view.search</field>
+        <field name="model">bank.statement</field>
+        <field name="arch" type="xml">
+            <search string="">
+                 <group expand="1" string="Group By">
+                    <filter name="bank_statement_id" string="Extracto del Banco" context="{'group_by': 'bank_statement_id'}"/>
+                </group>
+            </search>
         </field>
     </record>
 </odoo>
