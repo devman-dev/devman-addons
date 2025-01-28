@@ -173,7 +173,6 @@ class BankMoveImported(models.Model):
                 transaction_id.write({'concilied_id': statement_id.id})
             except Exception as e:
                 raise UserError('Error al crear los registros: %s' % e)
-            break
         self.env['bus.bus']._sendone(self.env.user.partner_id, 'simple_notification', {
             'type': 'success',
             'message': "Operación realizada con éxito",
