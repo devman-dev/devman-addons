@@ -12,6 +12,7 @@
                 </header>
                 <sheet>
                     <field name="withdrawal_operations" invisible="1" />
+                    <field name="app_commission" invisible="1" />
                     <group>
                         <group>
                             <field name="collection_trans_type" widget="radio"
@@ -22,9 +23,9 @@
                             <field name="bank_id" />
                             <field name="amount" />
                             <field name="origin_account" />
-                            <field name="bank_commission_entry" />
-                            <field name="bank_commission_egress" />
-
+                            <field name="origin_cuit" />
+                            <field name="origin_cvu" />
+                            
                         </group>
                         <group>
                             <field name="file"/>
@@ -32,12 +33,12 @@
                             <field name="operation_id"
                                 domain="[('id', 'in', withdrawal_operations)]"
                                 options="{'no_create': True, 'no_create_edit': True,'no_quick_create': True}" />
+                            <field name="bank_commission_entry" />
+                            <field name="bank_commission_egress" />
                             <field name="destination_account_id"
                                 domain="[('customer','=', customer_id)]"
                                 options="{'no_create': True, 'no_create_edit': True,'no_quick_create': True}"
                                 context="{'show_account_name': True}" />
-                            <field name="origin_cuit" />
-                            <field name="origin_cvu" />
                             <field name="cuit_destination_account" readonly="1" />
                             <field name="cbu_destination_account" readonly="1" />
                             <field name="cvu_destination_account" readonly="1" />
