@@ -54,6 +54,8 @@
                             <field name="alias" />
                             <field name="id_coelsa" />
                             <field name="reference" />
+                            <field name="bank_commission_entry" />
+                            <field name="bank_commission_egress" />
                         </group>
                     </group>
                 </sheet>
