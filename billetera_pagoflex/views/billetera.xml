@@ -39,7 +39,7 @@
                             <p class="text-muted mb-1" style="font-size: 14px;">Saldo Disponible:</p>
                             <h3 class="mb-0 text-primary">
                                 $       
-                                <t t-out="('{:,.2f}'.format(available_balance)).replace(',', 'X').replace('.', ',').replace('X', '.')" />
+                                <t t-out="('{:,.2f}'.format(customer_balance)).replace(',', 'X').replace('.', ',').replace('X', '.')" />
                             </h3>
                             <a href="/wallet/transfer/accounts" class="btn btn-primary mt-2">
                                 <i class="fa fa-money" aria-hidden="true"></i>

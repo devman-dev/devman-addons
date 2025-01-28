@@ -56,3 +56,7 @@ access_to_account_bank_pagoflex_comi,access.account.bank.pagoflex,model_account_
 access_to_collection_category,access.collection.category,model_collection_category,groups_payment_collection_admin,1,1,1,1
 access_to_collection_category_user,access.collection.category,model_collection_category,groups_payment_collection_user,0,0,0,0
 access_to_collection_category_comi,access.collection.category,model_collection_category,groups_payment_collection_comi,0,0,0,0
+
+access_to_bank_move_imported,access.bank.move.imported,model_bank_move_imported,groups_payment_collection_admin,1,1,1,1
+access_to_bank_move_imported_user,access.bank.move.imported,model_bank_move_imported,groups_payment_collection_user,0,0,0,0
+access_to_bank_move_imported_comi,access.bank.move.imported,model_bank_move_imported,groups_payment_collection_comi,0,0,0,0

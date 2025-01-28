@@ -7,11 +7,11 @@ class WebFormWalletController(Controller):
     @route('/wallet', auth='user', website=True)
     def web_form_wallet(self, **kwargs):
         customer = request.env['collection.dashboard.customer'].sudo().search([('customer', '=', request.env.user.partner_id.id)])
-        available_balance = customer.collection_balance if customer else 0.00
+        customer_balance = customer.collection_balance if customer else 0.00
         transactions = (
             request.env['collection.transaction'].sudo().search([('customer', '=', request.env.user.partner_id.id), ('collection_trans_type', '!=', 'movimiento_interno')], order='id desc', limit=10)
         )
-        return request.render('billetera_pagoflex.web_template_wallet', {'available_balance': available_balance, 'transactions': transactions})
+        return request.render('billetera_pagoflex.web_template_wallet', {'customer_balance': customer_balance, 'transactions': transactions})
 
     @route('/wallet/transfer/accounts', auth='user', website=True, methods=['GET'])
     def web_form_transfer(self, **kwargs):
@@ -103,6 +103,9 @@ class WebFormWalletController(Controller):
         transactions = all_transactions[start_index:end_index]
 
         total_pages = (total_items + items_per_page - 1) // items_per_page
+        
+        customer = request.env['collection.dashboard.customer'].sudo().search([('customer', '=', request.env.user.partner_id.id)])
+        customer_balance = customer.collection_balance if customer else 0.00
 
         return request.render(
             'billetera_pagoflex.web_template_movements',
@@ -111,5 +114,6 @@ class WebFormWalletController(Controller):
                 'current_page': page,
                 'total_pages': total_pages,
                 'mov_type': mov_type,
+                'customer_balance': customer_balance,
             },
         )

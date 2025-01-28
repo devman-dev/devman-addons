@@ -81,10 +81,18 @@
         parent="collection_configuration_menu"
         sequence="4" />
     
-        <menuitem
+    <menuitem
         id="category_pagoflex_menu"
         name="Etiquetas"
         action="collection_category_action"
         parent="collection_configuration_menu"
         sequence="4" />
+
+    <!-- Oculto para producción hasta terminar -->
+    <!-- <menuitem
+        id="bank_move_imported_pagoflex_menu"
+        name="Movimientos Bancarios Importados"
+        action="bank_move_imported_action"
+        parent="collection_transaction_menu"
+        sequence="4" /> -->
 </odoo>

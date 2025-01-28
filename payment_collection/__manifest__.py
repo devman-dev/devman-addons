@@ -26,6 +26,7 @@
         'views/res_partner.xml',
         'views/bank_statement_views.xml',
         'views/account_bank_pagoflex.xml',
+        'views/bank_move_imported.xml',
         'views/menuitems.xml',
         'wizard/payment_wiz.xml',
         'wizard/report_agent_wiz.xml',
