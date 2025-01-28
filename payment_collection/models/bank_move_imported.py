@@ -156,7 +156,8 @@ class BankMoveImported(models.Model):
                     'operation': self.operation_id.id,
                     'destination_account': self.destination_account_id.id,
                     'is_concilied': True,
-                    'count': 0
+                    'count': 0,
+                    'account_bank': self.bank_id.id,
                 })
                 
                 statement_id = bank_statement.create({
@@ -168,7 +169,8 @@ class BankMoveImported(models.Model):
                     'bank_commission_entry': self.bank_commission_entry,
                     'bank_commission_egress': self.bank_commission_egress,
                     'concilied_id': transaction_id.id,
-                    'is_concilied': True
+                    'is_concilied': True,
+                    'bank_statement_id': self.bank_id.id,
                 })
                 transaction_id.write({'concilied_id': statement_id.id})
             except Exception as e:

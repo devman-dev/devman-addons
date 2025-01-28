@@ -41,6 +41,7 @@
                 <button type="object" name="break_conciliation" string="Romper Conciliación" invisible="not is_concilied" confirm="¿Estas seguro de romper la conciliación?" />
                 <field name="is_concilied" />
                 <field name="concilied_id" widget="many2one" />
+                <field name="account_bank" optional="hide"/>
             </tree>
         </field>
     </record>

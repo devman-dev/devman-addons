@@ -22,7 +22,8 @@ class BankStatement(models.Model):
     destination_bank = fields.Char(string='Banco Destino', required=False, tracking=True)
     bank_commission_entry = fields.Float(string='Comisión del banco por ingreso')
     bank_commission_egress = fields.Float(string='Comisión del banco por egreso')
-
+    bank_statement_id = fields.Many2one('account.bank.pagoflex', string='Extracto del Banco', required=False, tracking=True)
+    
     def break_conciliation(self):
         for rec in self:
             if rec.concilied_id:

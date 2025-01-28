@@ -43,6 +43,7 @@
                             <field name="amount" />
                             <field name="titular" />
                             <field name="cuit" />
+                            <field name="bank_statement_id"/>
                             <field name="bank" />
                             <field name="destination_bank" />
                             <field name="is_concilied" readonly="1"/>
