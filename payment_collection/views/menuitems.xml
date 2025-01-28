@@ -89,10 +89,10 @@
         sequence="4" />
 
     <!-- Oculto para producción hasta terminar -->
-    <!-- <menuitem
+    <menuitem
         id="bank_move_imported_pagoflex_menu"
         name="Movimientos Bancarios Importados"
         action="bank_move_imported_action"
         parent="collection_transaction_menu"
-        sequence="4" /> -->
+        sequence="4" />
 </odoo>
