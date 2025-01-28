@@ -16,7 +16,7 @@
                 <field name="amount" sum="Monto Total"/>
                 <field name="titular" />
                 <field name="cuit" />
-                <field name="destination_bank" />
+                <field name="bank_statement_id" />
                 <field name="bank" />
                 <field name="destination_bank" />
                 <field name="cvu" />
