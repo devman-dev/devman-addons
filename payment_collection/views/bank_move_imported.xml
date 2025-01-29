@@ -8,7 +8,7 @@
             <form string="Movimientos Bancarios Importados">
                 <header>
                     <button string="Procesar" type="object" name="execute_bank_file"
-                        class="btn btn-primary" />
+                        class="btn btn-primary" confirm="Esta acción procesará el archivo bancario. Asegurate de que los datos sean correctos, ya que no se podrá deshacer. ¿Deseás continuar?" />
                 </header>
                 <sheet>
                     <field name="withdrawal_operations" invisible="1" />
