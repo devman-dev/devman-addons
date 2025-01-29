@@ -32,9 +32,9 @@ class CollectionDashboardCustomer(models.Model):
 
     def recalculate_total_recs(self, partner_id=False):
         dict_list = []
-        group = self.env.ref('payment_collection.groups_payment_collection_admin')
-        if group.id not in self.env.user.groups_id.ids:
-            raise UserError('Esta función solo puede ser ejecutada por usuarios con permiso de administrador.')
+        # group = self.env.ref('payment_collection.groups_payment_collection_admin')
+        # if group.id not in self.env.user.groups_id.ids:
+        #     raise UserError('Esta función solo puede ser ejecutada por usuarios con permiso de administrador.')
         if not partner_id:
             all_recs = self.env['res.partner'].sudo().search([('check_origin_account', '=', False)])
         else:
