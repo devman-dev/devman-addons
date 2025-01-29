@@ -17,10 +17,10 @@
                         <group>
                             <field name="collection_trans_type" widget="radio"
                                 options="{'horizontal': True}" />
-                            <field name="customer_id" />
-                            <field name="service_id" />
+                            <field name="customer_id" options="{'no_create': True, 'no_create_edit': True,'no_quick_create': True}" />
+                            <field name="service_id" domain="[('services.collection_type', '=', 'service'), ('customer', '=', customer_id)]" context="{'show_servicio_name': True}" options="{'no_create': True, 'no_create_edit': True,'no_quick_create': True}" />
                             <field name="date" />
-                            <field name="bank_id" />
+                            <field name="bank_id" options="{'no_create': True, 'no_create_edit': True,'no_quick_create': True}"/>
                             <field name="amount" />
                             <field name="origin_account" />
                             <field name="origin_cuit" />
