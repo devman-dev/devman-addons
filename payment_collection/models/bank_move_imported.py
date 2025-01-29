@@ -37,6 +37,10 @@ class BankMoveImported(models.Model):
     cbu_destination_account = fields.Char(string='CBU Destino', tracking=True, default=False)
     cvu_destination_account = fields.Char(string='CVU Destino', tracking=True, default=False)
     alias_destination_account = fields.Char(string='Alias Destino')
+    
+    @api.onchange('customer_id')
+    def _blank_service(self):
+        self.service_id = False
 
     @api.onchange('bank_commission_egress', 'bank_commission_entry')
     def check_bank_commission(self):
