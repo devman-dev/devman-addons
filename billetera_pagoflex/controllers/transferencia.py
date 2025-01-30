@@ -97,13 +97,28 @@ class WebFormWalletController(Controller):
         all_transactions = request.env['collection.transaction'].sudo().search(domain)
 
         total_items = len(all_transactions)
+        total_pages = (total_items + items_per_page - 1) // items_per_page
         start_index = (page - 1) * items_per_page
         end_index = start_index + items_per_page
-
         transactions = all_transactions[start_index:end_index]
 
-        total_pages = (total_items + items_per_page - 1) // items_per_page
-        
+        # Calcular las páginas visibles
+        visible_pages = []
+        if total_pages > 1:
+            visible_pages = [1]  # Siempre mostrar la primera página
+            if page > 4:
+                visible_pages.append('...')
+
+            for i in range(max(2, page - 2), min(total_pages, page + 3) + 1):
+                visible_pages.append(i)
+
+            if page < total_pages - 3:
+                visible_pages.append('...')
+            
+            if total_pages not in visible_pages:
+                visible_pages.append(total_pages)
+
+        # Obtener el balance del cliente
         customer = request.env['collection.dashboard.customer'].sudo().search([('customer', '=', request.env.user.partner_id.id)])
         customer_balance = customer.collection_balance if customer else 0.00
 
@@ -113,7 +128,9 @@ class WebFormWalletController(Controller):
                 'transactions': transactions,
                 'current_page': page,
                 'total_pages': total_pages,
+                'visible_pages': visible_pages,
                 'mov_type': mov_type,
                 'customer_balance': customer_balance,
             },
         )
+
