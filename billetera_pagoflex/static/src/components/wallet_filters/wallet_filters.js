@@ -27,7 +27,7 @@ export class Wallet_filters extends Component {
             const result = await this.env.services.orm.searchRead(
                 'collection.transaction',
                 [['customer.user_ids', 'in', this.user_id], ['transaction_state', '=', 'pendiente']],
-                ['amount', 'date', 'transaction_state', 'collection_trans_type','is_commission'], 10, 10
+                ['amount', 'date', 'transaction_state', 'collection_trans_type', 'is_commission'], { limit: 10 }
             );
 
             if (result.length > 0) {
@@ -46,7 +46,7 @@ export class Wallet_filters extends Component {
             const result = await this.env.services.orm.searchRead(
                 'collection.transaction',
                 [['customer.user_ids', 'in', this.user_id], ['transaction_state', '=', 'rechazado']],
-                ['amount', 'date', 'transaction_state', 'collection_trans_type','is_commission'], 10, 10
+                ['amount', 'date', 'transaction_state', 'collection_trans_type', 'is_commission'], { limit: 10 }
             );
 
             if (result.length > 0) {
@@ -65,11 +65,10 @@ export class Wallet_filters extends Component {
             const result = await this.env.services.orm.searchRead(
                 'collection.transaction',
                 [['customer.user_ids', 'in', this.user_id], ['transaction_state', '=', 'aprobado']],
-                ['amount', 'date', 'transaction_state', 'collection_trans_type','is_commission'], 10, 10
+                ['amount', 'date', 'transaction_state', 'collection_trans_type', 'is_commission'], { limit: 10 }
             );
 
             if (result.length > 0) {
-                console.log('Aprobados',result)
                 this.state.transactions_filter2 = result
             } else {
                 this.state.transactions_filter2 = [];
@@ -85,11 +84,10 @@ export class Wallet_filters extends Component {
             const result = await this.env.services.orm.searchRead(
                 'collection.transaction',
                 [['customer.user_ids', 'in', this.user_id]],
-                ['amount', 'date', 'transaction_state', 'collection_trans_type','is_commission'], 10, 10
+                ['amount', 'date', 'transaction_state', 'collection_trans_type', 'is_commission'], { limit: 10 }
             );
 
             if (result.length > 0) {
-                console.log('Todos',result)
                 this.state.transactions_filter2 = result
             } else {
                 this.state.transactions_filter2 = [];
