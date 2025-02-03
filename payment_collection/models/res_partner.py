@@ -1,6 +1,6 @@
 from odoo import fields, models, api
 import re
-
+from odoo.exceptions import UserError
 class ResPartnerInherit(models.Model):
     _inherit = 'res.partner'
 
@@ -15,6 +15,9 @@ class ResPartnerInherit(models.Model):
                 if rec.customer_code:
                     pattern = r"\[\d+\]"
                     base_name = re.sub(pattern, "", rec.name).strip()
+                    same_code = self.env['res.partner'].search([('customer_code', '=', rec.customer_code.upper()),('id', '!=', rec.id)])
+                    if same_code:
+                        raise UserError('El código de cliente ya existe en otro registro.')
                     
                     rec.with_context(pass_constrain=True).write({'name': f'{base_name} [{rec.customer_code.upper()}]'})  
                 else:
