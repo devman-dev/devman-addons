@@ -9,6 +9,7 @@
             <xpath expr="//group[1]" position="before">
                 <group>
                     <group>
+                        <field name="customer_code"/>
                         <field name="check_origin_account"/>
                     </group>
                 </group>
