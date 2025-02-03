@@ -23,7 +23,7 @@
         'views/collection_transaction.xml',
         'views/collection_dashboard_customer.xml',
         'views/product_template.xml',
-        'views/res_partner.xml',
+        # 'views/res_partner.xml',
         'views/bank_statement_views.xml',
         'views/account_bank_pagoflex.xml',
         'views/bank_move_imported.xml',
