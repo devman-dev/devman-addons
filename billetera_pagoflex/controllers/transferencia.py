@@ -6,8 +6,8 @@ import json
 class WebFormWalletController(Controller):
     @route('/wallet', auth='user', website=True)
     def web_form_wallet(self, **kwargs):
-        customer = request.env['collection.dashboard.customer'].sudo().search([('customer', '=', request.env.user.partner_id.id)])
-        customer_balance = customer.collection_balance if customer else 0.00
+        collection_balance = request.env['collection.dashboard.customer'].sudo().recalculate_total_recs(request.env.user.partner_id.id)
+        customer_balance = collection_balance if collection_balance else 0.00
         transactions = (
             request.env['collection.transaction'].sudo().search([('customer', '=', request.env.user.partner_id.id), ('collection_trans_type', '!=', 'movimiento_interno')], order='id desc', limit=10)
         )
@@ -71,7 +71,9 @@ class WebFormWalletController(Controller):
             'alias': 'alias.demo2',
             'name_account': 'Datos Demostracion2',
         }
-        return request.render('billetera_pagoflex.transfer_account_template', {'account': account})
+        collection_balance = request.env['collection.dashboard.customer'].sudo().recalculate_total_recs(request.env.user.partner_id.id)
+        customer_balance = collection_balance if collection_balance else 0.00
+        return request.render('billetera_pagoflex.transfer_account_template', {'account': account, 'customer_balance': customer_balance})
 
     @route('/wallet/transfer/account/revision/<int:account_id>', auth='user', website=True)
     def revision_account(self, account_id, **kwargs):

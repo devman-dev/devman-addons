@@ -86,8 +86,8 @@
                             Agrega una cuenta con CBU, CVU o alias para realizar transferencias.
                         </p>
                     </div>
-                    <div class="d-grid gap-3">
-                        <a href="/wallet/transfer/accounts/new_account" class="btn btn-primary w-100 d-flex align-items-center justify-content-center">
+                    <div class="d-grid gap-3 justify-content-center">
+                        <a href="/wallet/transfer/accounts/new_account" class="btn btn-primary w-100 p-2 d-flex align-items-center justify-content-center btn-sm rounded-pill" style="font-size: 15px;">
                             <i class="fa fa-plus me-3" style="font-size: 24px;"></i>
                             <span style="font-size: 18px;">Nueva Cuenta</span>
                         </a>
@@ -97,13 +97,13 @@
                 <div class="d-grid mx-auto mt-4 rounded-3 col-12 col-md-6 p-4 bg-white">
                     <div class="row">
                         <h5 class="fw-bold text-black-50">Cuentas Guardadas</h5>
-                        <hr class="mt-2 mb-4" />
+                        <hr />
                     </div>
                     <ul class="list-unstyled">
                         <t t-foreach="list_accounts" t-as="account">
-                            <li class="mb-3">
+                            <li class="mb-1">
                                 <a t-att-href="'/wallet/transfer/account/%s' % account['id']" class="text-decoration-none">
-                                    <div class="d-flex justify-content-between align-items-center p-3 bg-light rounded-3">
+                                    <div class="d-flex justify-content-between align-items-center rounded-3">
                                         <div>
                                             <h6 class="mb-0 fw-bold text-primary">
                                                 <t t-esc="account['name_account']" />
@@ -116,6 +116,7 @@
                                     </div>
                                 </a>
                             </li>
+                            <hr/>
                         </t>
                     </ul>
 
@@ -167,7 +168,7 @@
                 background-color: #f8f9fa;
                 }
             </style>
-            <div class="container mt-5">
+            <div class="container my-5">
                 <div class="row justify-content-center">
                     <div class="col-12 col-md-8 col-lg-6">
                         <form enctype="multipart/form-data" class="o_mark_required p-4 shadow bg-white rounded">
@@ -265,12 +266,13 @@
                 }
             </style>
 
-            <div class="container mt-5">
+            <div class="container my-5">
                 <div class="row justify-content-center">
                     <div class="col-12 col-md-8 col-lg-6">
                         <form>
                             <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()" />
                             <div class="bg-white p-4 shadow rounded">
+                                <p class="text-muted">$  <t t-out="('{:,.2f}'.format(customer_balance)).replace(',', 'X').replace('.', ',').replace('X', '.')" /> disponible</p>
                                 <div class="transfer-amount-container mb-4">
                                     <label for="transfer-amount">Monto a transferir</label>
                                     <div class="input-group">
@@ -279,7 +281,7 @@
                                     </div>
                                 </div>
                                 <div class="d-flex justify-content-between">
-                                    <a href="/wallet/transfer/account/revision" class="btn btn-secondary">Cancelar</a>
+                                    <a href="/wallet" class="btn btn-secondary">Cancelar</a>
                                     <a t-att-href="'/wallet/transfer/account/revision/%s' % account['id']" class="btn btn-primary">Continuar</a>
                                 </div>
                             </div>
@@ -300,7 +302,7 @@
                 }
             </style>
 
-            <div class="container mt-5">
+            <div class="container my-5">
                 <div class="row justify-content-center">
                     <div class="col-12 col-sm-10 col-md-8 col-lg-6">
                         <form action="/wallet/transfer/sended" enctype="multipart/form-data" class="o_mark_required" data-mark="*" data-model_name="" data-success-page="">
@@ -345,7 +347,7 @@
                 }
             </style>
 
-            <div class="container mt-5">
+            <div class="container my-5">
                 <div class="row justify-content-center">
                     <div class="col-12 col-sm-10 col-md-8 col-lg-6">
                         <form action="/wallet" enctype="multipart/form-data" class="o_mark_required" data-mark="*" data-model_name="" data-success-page="">

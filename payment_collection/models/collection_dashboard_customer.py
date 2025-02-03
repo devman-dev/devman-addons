@@ -43,6 +43,7 @@ class CollectionDashboardCustomer(models.Model):
         days_ago = dt.timedelta(days=2)
         
         
+        result_collection_balance = 0
         for rec in all_recs:
             # Si no existe el contacto en collection.transaction se va
             if not self.env['collection.transaction'].search([('customer', '=', rec.id)]):
