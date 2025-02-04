@@ -87,6 +87,11 @@ class CollectionTransaction(models.Model):
     end_date = fields.Date(string='Fecha fin para el reporte')
     print_date = fields.Date(string='Fecha de impresión')
     
+    def change_positive_comission(self):
+        all_comission = self.env['collection.transaction'].search([('is_commission', '=', True),('amount', '>', 0)])
+        for comission in all_comission:
+            comission.with_context(no_write=True).amount = comission.amount * -1
+    
     def print_report(self):
         start_date = min(self.mapped('date'))
         end_date = max(self.mapped('date'))
@@ -110,7 +115,6 @@ class CollectionTransaction(models.Model):
             
 
             return self.env.ref('payment_collection.action_report_collection_transaction').report_action(filtered_records)
-    
     
     def show_destination_name(self):
         all_rec = self.env['collection.transaction'].search([])
@@ -222,7 +226,15 @@ class CollectionTransaction(models.Model):
                 rec_commission = self.env['collection.transaction'].search([('transaction_name', '=', rec.transaction_name),('is_commission', '=', True)])
                 if rec_commission:
                     rec_commission.with_context(no_write=True).date = vals['date']
-                    
+            if 'service' in vals:
+                if rec.env.context.get('no_write', False):
+                    continue
+                rec_commission = self.env['collection.transaction'].search([('transaction_name', '=', rec.transaction_name), ('is_commission', '=', True)])
+                if rec_commission:
+                    if 'commission' in vals:
+                        rec_commission.with_context(no_write=True).commission = vals['commission']
+                        rec_commission.with_context(no_write=True).amount = ((vals['commission'] / 100) * rec.amount) * -1
+                    rec_commission.with_context(no_write=True).service = vals['service']
 
         return super().write(vals)
 
