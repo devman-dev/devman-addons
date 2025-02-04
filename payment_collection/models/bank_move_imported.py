@@ -37,6 +37,7 @@ class BankMoveImported(models.Model):
     cbu_destination_account = fields.Char(string='CBU Destino', tracking=True, default=False)
     cvu_destination_account = fields.Char(string='CVU Destino', tracking=True, default=False)
     alias_destination_account = fields.Char(string='Alias Destino')
+    extract_checkbox = fields.Boolean('Generar Extracto?', default=False)
     
     @api.onchange('customer_id')
     def _blank_service(self):
@@ -127,7 +128,7 @@ class BankMoveImported(models.Model):
         origin_account = False
         origin_cuit = False
         origin_cvu = False
-
+        filtered_amounts = list(filter(lambda x: not math.isnan(x), amounts))
         if self.origin_account:
             origin_account_letter = self.origin_account.upper()
             l_index_origin_account = letters.index(origin_account_letter)
@@ -147,7 +148,7 @@ class BankMoveImported(models.Model):
             origin_cvu = excel_data[col_origin_name].tolist()
 
         count = 0
-        for amount in amounts:
+        for amount in filtered_amounts:
             if origin_account and origin_cuit and origin_cvu:
                 if not isinstance(origin_cvu[count], str) and not isinstance(origin_account[count], str) and not isinstance(origin_cuit[count], str):
                     if math.isnan(origin_cvu[count]) and math.isnan(origin_account[count]) and math.isnan(origin_cuit[count]):
@@ -191,36 +192,11 @@ class BankMoveImported(models.Model):
                         'account_bank': self.bank_id.id,
                     }
                 )
-
-                statement_id = bank_statement.create(
-                    {
-                        'date': self.date,
-                        'amount': amount,
-                        'titular': origin_account[count] if origin_account else False,
-                        'cuit': origin_cuit[count].replace('"', '') if origin_cuit else False,
-                        'cvu': origin_cvu[count].replace('"', '') if origin_cvu else False,
-                        'bank_commission_entry': self.bank_commission_entry,
-                        'bank_commission_egress': self.bank_commission_egress,
-                        'concilied_id': transaction_id.id,
-                        'is_concilied': True,
-                        'bank_statement_id': self.bank_id.id,
-                    }
-                )
-                transaction_id.write({'concilied_id': statement_id.id})
-                commission = 0
-                if self.bank_commission_entry:
-                    commission = amount * self.bank_commission_entry / 100
-                    comment = 'Comisión del Banco por Ingreso'
-
-                if self.bank_commission_egress:
-                    commission = amount * self.bank_commission_egress / 100
-                    comment = 'Comisión del Banco por Egreso'
-
-                if commission:
-                    bank_statement.create(
+                if self.extract_checkbox:
+                    statement_id = bank_statement.create(
                         {
                             'date': self.date,
-                            'amount': abs(commission) * -1,
+                            'amount': amount,
                             'titular': origin_account[count] if origin_account else False,
                             'cuit': origin_cuit[count].replace('"', '') if origin_cuit else False,
                             'cvu': origin_cvu[count].replace('"', '') if origin_cvu else False,
@@ -229,9 +205,35 @@ class BankMoveImported(models.Model):
                             'concilied_id': transaction_id.id,
                             'is_concilied': True,
                             'bank_statement_id': self.bank_id.id,
-                            'reference': comment,
                         }
                     )
+                    transaction_id.write({'concilied_id': statement_id.id})
+                    commission = 0
+                    
+                    if self.bank_commission_entry:
+                        commission = amount * self.bank_commission_entry / 100
+                        comment = 'Comisión del Banco por Ingreso'
+
+                    if self.bank_commission_egress:
+                        commission = amount * self.bank_commission_egress / 100
+                        comment = 'Comisión del Banco por Egreso'
+
+                    if commission:
+                        bank_statement.create(
+                            {
+                                'date': self.date,
+                                'amount': abs(commission) * -1,
+                                'titular': origin_account[count] if origin_account else False,
+                                'cuit': origin_cuit[count].replace('"', '') if origin_cuit else False,
+                                'cvu': origin_cvu[count].replace('"', '') if origin_cvu else False,
+                                'bank_commission_entry': self.bank_commission_entry,
+                                'bank_commission_egress': self.bank_commission_egress,
+                                'concilied_id': transaction_id.id,
+                                'is_concilied': True,
+                                'bank_statement_id': self.bank_id.id,
+                                'reference': comment,
+                            }
+                        )
                 count += 1
             except Exception as e:
                 raise UserError('Error al crear los registros: %s' % e)
