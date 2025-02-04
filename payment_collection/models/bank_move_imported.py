@@ -148,24 +148,25 @@ class BankMoveImported(models.Model):
 
         count = 0
         for amount in amounts:
-            if not isinstance(origin_cvu[count], str) and not isinstance(origin_account[count], str) and not isinstance(origin_cuit[count], str):
-                if math.isnan(origin_cvu[count]) and math.isnan(origin_account[count]) and math.isnan(origin_cuit[count]):
-                    count += 1
-                    break
+            if origin_account and origin_cuit and origin_cvu:
+                if not isinstance(origin_cvu[count], str) and not isinstance(origin_account[count], str) and not isinstance(origin_cuit[count], str):
+                    if math.isnan(origin_cvu[count]) and math.isnan(origin_account[count]) and math.isnan(origin_cuit[count]):
+                        count += 1
+                        break
             try:
-                customer_exits = collection_transaction.search(
-                    [
-                        ('customer', '=', self.customer_id.id),
-                        ('collection_trans_type', '=', self.collection_trans_type),
-                        ('origin_account_cvu', '=', origin_cvu[count].replace('"', '') if origin_cvu else False),
-                        ('origin_account_cuit', '=', origin_cuit[count].replace('"', '') if origin_cuit else False),
-                        ('origen_name_account_extern', '=', origin_account[count] if origin_account else False),
-                        ('amount', '=', amount),
-                    ]
-                )
-                if customer_exits:
-                    count += 1
-                    continue
+                # customer_exits = collection_transaction.search(
+                #     [
+                #         ('customer', '=', self.customer_id.id),
+                #         ('collection_trans_type', '=', self.collection_trans_type),
+                #         ('origin_account_cvu', '=', origin_cvu[count].replace('"', '') if origin_cvu else False),
+                #         ('origin_account_cuit', '=', origin_cuit[count].replace('"', '') if origin_cuit else False),
+                #         ('origen_name_account_extern', '=', origin_account[count] if origin_account else False),
+                #         ('amount', '=', amount),
+                #     ]
+                # )
+                # if customer_exits:
+                #     count += 1
+                #     continue
 
                 if self.collection_trans_type == 'retiro':
                     amount = abs(amount) * -1
