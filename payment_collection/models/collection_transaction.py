@@ -87,6 +87,30 @@ class CollectionTransaction(models.Model):
     end_date = fields.Date(string='Fecha fin para el reporte')
     print_date = fields.Date(string='Fecha de impresión')
     
+    def print_report(self):
+        start_date = min(self.mapped('date'))
+        end_date = max(self.mapped('date'))
+        customer = self.customer
+
+        domain = [('date', '<', start_date), ('customer', '=', customer.id),('collection_trans_type', '!=', 'movimiento_interno')]
+        previous_months = self.env['collection.transaction'].search(domain)
+
+        previous_balance = sum([pm.amount for pm in previous_months])
+        dashboard_customer = self.env['collection.dashboard.customer'].search([('customer', '=', self.customer.id)], limit=1)
+        dashboard_customer.update_available_balance()
+        filtered_records = self
+        if filtered_records:
+            filtered_records[0].sudo().write({
+                'previous_month': previous_balance, 
+                'available_balance': dashboard_customer.customer_available_balance,
+                'start_date': start_date, 
+                'end_date': end_date,
+                'print_date': datetime.now(),
+            })
+            
+
+            return self.env.ref('payment_collection.action_report_collection_transaction').report_action(filtered_records)
+    
     
     def show_destination_name(self):
         all_rec = self.env['collection.transaction'].search([])
