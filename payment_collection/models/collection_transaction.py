@@ -282,10 +282,10 @@ class CollectionTransaction(models.Model):
                 if 'commission' not in vals_list:
                     commission_search = self.env['collection.services.commission'].sudo().search([('id', '=', vals_list['service'])], limit=1)
                     dict_with['commission'] = commission_search.commission
-                    dict_with['amount'] = ((dict_with['commission'] / 100) * vals_list['amount']) * -1
+                    dict_with['amount'] = ((dict_with['commission'] / 100) * vals_list['amount'])
                 else:
                     dict_with['commission'] = vals_list['commission']
-                    dict_with['amount'] = ((vals_list['commission'] / 100) * vals_list['amount']) * -1
+                    dict_with['amount'] = ((vals_list['commission'] / 100) * vals_list['amount'])
                 self.env['collection.transaction'].sudo().create(dict_with)
 
         res = super(CollectionTransaction, self).create(vals_list)
