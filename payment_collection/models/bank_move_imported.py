@@ -12,7 +12,7 @@ class BankMoveImported(models.Model):
     _rec_name = 'customer_id'
 
     customer_id = fields.Many2one('res.partner', string='Cliente', required=True)
-    date = fields.Date(string='Fecha', required=True)
+    date = fields.Date(string='Fecha')
     bank_id = fields.Many2one('account.bank.pagoflex', string='Banco', required=True)
     file = fields.Binary(string='Archivo', required=True)
     comment = fields.Text(string='Comentario')
@@ -38,6 +38,7 @@ class BankMoveImported(models.Model):
     cvu_destination_account = fields.Char(string='CVU Destino', tracking=True, default=False)
     alias_destination_account = fields.Char(string='Alias Destino')
     extract_checkbox = fields.Boolean('Generar Extracto?', default=False)
+    date_column = fields.Char(string='Columna Fecha', required=True)
     
     @api.onchange('customer_id')
     def _blank_service(self):
@@ -128,7 +129,7 @@ class BankMoveImported(models.Model):
         origin_account = False
         origin_cuit = False
         origin_cvu = False
-        filtered_amounts = list(filter(lambda x: not math.isnan(x), amounts))
+
         if self.origin_account:
             origin_account_letter = self.origin_account.upper()
             l_index_origin_account = letters.index(origin_account_letter)
@@ -147,8 +148,16 @@ class BankMoveImported(models.Model):
             col_origin_name = excel_data.columns[l_index_origin]
             origin_cvu = excel_data[col_origin_name].tolist()
 
+        date_letter = self.date_column.upper()
+        l_index_date = letters.index(date_letter)
+        col_date_name = excel_data.columns[l_index_date]
+        dates = excel_data[col_date_name].tolist()
+        
         count = 0
-        for amount in filtered_amounts:
+        for amount in amounts:
+            if math.isnan(amount):
+                count += 1
+                continue
             if origin_account and origin_cuit and origin_cvu:
                 if not isinstance(origin_cvu[count], str) and not isinstance(origin_account[count], str) and not isinstance(origin_cuit[count], str):
                     if math.isnan(origin_cvu[count]) and math.isnan(origin_account[count]) and math.isnan(origin_cuit[count]):
@@ -176,7 +185,7 @@ class BankMoveImported(models.Model):
                     {
                         'collection_trans_type': self.collection_trans_type,
                         'customer': self.customer_id.id,
-                        'date': self.date,
+                        'date': dates[count],
                         'amount': amount,
                         'origin_account_cuit': origin_cuit[count].replace('"', '') if origin_cuit else False,
                         'origin_account_cvu': origin_cvu[count].replace('"', '') if origin_cvu else False,
@@ -187,7 +196,6 @@ class BankMoveImported(models.Model):
                         'commission_app_rate': self.app_commission,
                         'operation': self.operation_id.id,
                         'destination_account': self.destination_account_id.id,
-                        'is_concilied': True,
                         'count': 0,
                         'account_bank': self.bank_id.id,
                     }
@@ -207,7 +215,7 @@ class BankMoveImported(models.Model):
                             'bank_statement_id': self.bank_id.id,
                         }
                     )
-                    transaction_id.write({'concilied_id': statement_id.id})
+                    transaction_id.write({'concilied_id': statement_id.id, 'is_concilied': True})
                     commission = 0
                     
                     if self.bank_commission_entry:
