@@ -27,7 +27,7 @@
                             <field name="origin_account" />
                             <field name="origin_cuit" />
                             <field name="origin_cvu" />
-                            
+                            <field name="comment" placeholder="Escribe tu comentario..." />
                         </group>
                         <group>
                             <field name="file"/>
@@ -47,7 +47,6 @@
                             <field name="alias_destination_account" readonly="1" />
 
                         </group>
-                        <field name="comment" placeholder="Escribe tu comentario..." />
 
                     </group>
                 </sheet>
@@ -62,6 +61,7 @@
             <tree string="Movimientos Bancarios Importados">
                 <field name="collection_trans_type" />
                 <field name="customer_id" />
+                <field name="comment" />
                 <field name="date" />
                 <field name="bank_id" />
                 <field name="commission" />

@@ -134,7 +134,7 @@ class BankMoveImported(models.Model):
             origin_account_letter = self.origin_account.upper()
             l_index_origin_account = letters.index(origin_account_letter)
             col_origin_account_name = excel_data.columns[l_index_origin_account]
-            origin_account = excel_data[col_origin_account_name].tolist()
+            oigirn_account = excel_data[col_origin_account_name].tolist()
 
         if self.origin_cuit:
             origin_cuit_letter = self.origin_cuit.upper()
@@ -164,19 +164,20 @@ class BankMoveImported(models.Model):
                         count += 1
                         break
             try:
-                # customer_exits = collection_transaction.search(
-                #     [
-                #         ('customer', '=', self.customer_id.id),
-                #         ('collection_trans_type', '=', self.collection_trans_type),
-                #         ('origin_account_cvu', '=', origin_cvu[count].replace('"', '') if origin_cvu else False),
-                #         ('origin_account_cuit', '=', origin_cuit[count].replace('"', '') if origin_cuit else False),
-                #         ('origen_name_account_extern', '=', origin_account[count] if origin_account else False),
-                #         ('amount', '=', amount),
-                #     ]
-                # )
-                # if customer_exits:
-                #     count += 1
-                #     continue
+                customer_exits = collection_transaction.search(
+                    [
+                        ('customer', '=', self.customer_id.id),
+                        ('collection_trans_type', '=', self.collection_trans_type),
+                        ('origin_account_cvu', '=', origin_cvu[count].replace('"', '') if origin_cvu else False),
+                        ('origin_account_cuit', '=', origin_cuit[count].replace('"', '') if origin_cuit else False),
+                        ('origen_name_account_extern', '=', origin_account[count] if origin_account else False),
+                        ('amount', '=', amount),
+                        ('date', '=', dates[count]),
+                    ]
+                )
+                if customer_exits:
+                    count += 1
+                    continue
 
                 if self.collection_trans_type == 'retiro':
                     amount = abs(amount) * -1
