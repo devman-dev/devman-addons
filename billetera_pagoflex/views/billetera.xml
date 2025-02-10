@@ -19,7 +19,6 @@
                 background-color: white;
                 border-radius: 0.5rem;
                 box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-                padding: 1.5rem;
                 }
 
                 .wallet-section {
@@ -32,38 +31,62 @@
                 }
 
             </style>
-            <div class="container">
-                <div class="wallet-card mx-auto mt-4 col-12 col-md-6">
-                    <div class="d-flex align-items-start justify-content-center">
-                        <div class="text-center me-4">
-                            <p class="text-muted mb-1" style="font-size: 14px;">Saldo Disponible:</p>
-                            <h3 class="mb-0 text-primary">
-                                $       
-                                <t t-out="('{:,.2f}'.format(customer_balance)).replace(',', 'X').replace('.', ',').replace('X', '.')" />
-                            </h3>
-                            <a href="/wallet/transfer/accounts" class="btn btn-primary mt-2">
-                                <i class="fa fa-money" aria-hidden="true"></i>
-                                <span class="ms-2">Transferir</span>
-                            </a>
+            <div class="container border">
+                <div class="row align-items-start pt-4">
+                    <div class="col-5 ">
+                        <div class="px-2">
+                            <div class="row">
+                                <div class="col-12 wallet-card p-2 my-2 d-flex align-items-center">
+                                    <span>Bienvenido Pepito</span>
+                                </div>
+                                <div class="col-12 wallet-card p-2 my-2 ">
+                                    <div class="row">
+                                        <div class="col-6 text-center d-flex justify-content-around align-items-center">
+                                            <div>
+                                                <p class="text-muted mb-1" style="font-size: 14px;">Saldo Disponible:</p>
+                                                <h3 class="mb-0 text-primary">
+                                                    $       
+                                                    <t t-out="('{:,.2f}'.format(customer_balance)).replace(',', 'X').replace('.', ',').replace('X', '.')"/>
+                                                </h3>    
+                                            </div>
+                                        </div>    
+                                        <div class="col-6 d-flex justify-content-around align-items-center">
+                                            <div class="form-check-group">
+                                                <div class="form-check mb-2">
+                                                    <label class="form-check-label" for="currency_pesos">Pesos</label>
+                                                    <input class="form-check-input" type="radio" name="currency" id="currency_pesos" value="pesos" t-att-checked="'checked'"/>
+                                                </div>
+                                                <div class="form-check mb-2">
+                                                    <label class="form-check-label" for="currency_dolar">Dólar</label>
+                                                    <input class="form-check-input" type="radio" name="currency" id="currency_dolar" value="dolar" t-att-checked=""/>
+                                                </div>
+                                                <div class="form-check">
+                                                    <label class="form-check-label" for="currency_qr">QR</label>
+                                                    <input class="form-check-input" type="radio" name="currency" id="currency_qr" value="qr" t-att-checked=""/>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-12 p-2 my-2 d-flex justify-content-around align-items-center">
+                                            <a href="/wallet/transfer/accounts" class="btn btn-primary mt-2">
+                                                <i class="fa fa-money" aria-hidden="true"/>
+                                                <span class="ms-2">Ingresar</span>
+                                            </a>
+                                            <a href="/wallet/transfer/accounts" class="btn btn-primary mt-2">
+                                                <i class="fa fa-exchange" aria-hidden="true"/>
+                                                <span class="ms-2">Transferir</span>
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>    
                         </div>
-
-                        <div class="form-check-group">
-                            <div class="form-check mb-2">
-                                <label class="form-check-label" for="currency_pesos">Pesos</label>
-                                <input class="form-check-input" type="radio" name="currency" id="currency_pesos" value="pesos" t-att-checked="'checked'" />
-                            </div>
-                            <div class="form-check mb-2">
-                                <label class="form-check-label" for="currency_dolar">Dólar</label>
-                                <input class="form-check-input" type="radio" name="currency" id="currency_dolar" value="dolar" t-att-checked="" />
-                            </div>
-                            <div class="form-check">
-                                <label class="form-check-label" for="currency_qr">QR</label>
-                                <input class="form-check-input" type="radio" name="currency" id="currency_qr" value="qr" t-att-checked="" />
-                            </div>
+                    </div>
+                    <div class="col-7 px-2">
+                        <div class="wallet-card py-2 px-4">
+                            <owl-component class="" name="billetera_pagoflex.Wallet_filters"/>        
                         </div>
                     </div>
                 </div>
-                <owl-component name="billetera_pagoflex.Wallet_filters" />
             </div>
 
         </t>
