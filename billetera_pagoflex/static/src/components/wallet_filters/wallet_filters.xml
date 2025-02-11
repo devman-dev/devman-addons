@@ -12,19 +12,22 @@
                     <button class="btn btn-outline-secondary btn-sm rounded-pill" style="font-size: 15px;" t-on-click="onShowTransactionsPending">Pendientes</button>
                 </div>
             </div>
+            <hr />
             <div class="row">
                 <div>
                     <t t-if="state.transactions_filter2.length == 0">
+                        <hr />
                         <div class="text-center">
                             <p class="text-muted mb-1" style="font-size: 14px;">No hay movimientos</p>
                         </div>
+                        <hr />
                     </t>
                     <t t-foreach="state.transactions_filter2" t-as="transaction" t-key="transaction.id">
                         <div class="my-3">
-                            <div>
-                                <div class="row align-items-center text-start text-md-start">
-                                    
-                                    <div class="col-4 text-end text-md-center mb-2 mb-md-0">
+                            <div class="row align-items-center text-start text-md-start">
+                                
+                                <div class="col-4 mb-2 mb-md-0 d-flex justify-content-around align-items-center flex-wrap">
+                                    <div class="p-2">
                                         <t t-if="transaction.is_commission">
                                             <span class="badge bg-warning p-2">Comisión</span>
                                         </t>
@@ -35,35 +38,34 @@
                                             <span class="badge bg-success p-2">Acreditación</span>
                                         </t>
                                     </div>
-                                    
-                                    <div class="col-4 text-md-center mb-2 mb-md-0">
+                                    <div class="" style="min-width: 100px;">
                                         <t t-if="transaction.transaction_state == 'pendiente'">
-                                            <span class=" p-2 position-relative">Pendiente <span class="position-absolute top-50 start-0 translate-middle p-1 bg-warning border border-light rounded-circle" />
+                                            <span class=" p-2 position-relative">
+                                                Pendiente <span class="position-absolute top-50 start-0 translate-middle p-1 bg-warning border border-light rounded-circle" />
                                             </span>
                                         </t>
                                         <t t-elif="transaction.transaction_state == 'rechazado'">
-                                            <span class=" p-2 position-relative">Rechazado <span class="position-absolute top-50 start-0 translate-middle p-1 bg-danger border border-light rounded-circle" />
+                                            <span class=" p-2 position-relative">
+                                                Rechazado <span class="position-absolute top-50 start-0 translate-middle p-1 bg-danger border border-light rounded-circle" />
                                             </span>
                                         </t>
                                         <t t-elif="transaction.transaction_state == 'aprobado'">
-                                            <span class=" p-2 position-relative">Aprobado <span class="position-absolute top-50 start-0 translate-middle p-1 bg-success border border-light rounded-circle" />
+                                            <span class=" p-2 position-relative">
+                                                Aprobado <span class="position-absolute top-50 start-0 translate-middle p-1 bg-success border border-light rounded-circle" />
                                             </span>
                                         </t>
                                     </div>
-
-                                    <div class="col-4 text-md-start mb-2 mb-md-0 d-flex flex-column align-items-end">
-                                        <span style="font-size: 14px; font-weight: bold;">$
-                                            <t t-out="transaction.amount.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })" />
-                                        </span>
-                                        <span style="font-size: 12px;">
-                                           <t t-out="new Date(transaction.date + 'T00:00:00').toLocaleDateString('es-AR')" /> 
-                                        </span>
-                                    </div>
-                                    
-                                    <!-- <div class="col-6 col-md-3 text-end text-muted" style="font-size: 0.9rem;">
-                                        <t t-out="new Date(transaction.date + 'T00:00:00').toLocaleDateString('es-AR')" />
-                                    </div> -->
                                 </div>
+
+                                <div class="col-8 text-md-start mb-2 mb-md-0 d-flex flex-column align-items-end">
+                                    <span style="font-size: 14px; font-weight: bold;">$
+                                        <t t-out="transaction.amount.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })" />
+                                    </span>
+                                    <span style="font-size: 12px;">
+                                        <t t-out="new Date(transaction.date + 'T00:00:00').toLocaleDateString('es-AR')" /> 
+                                    </span>
+                                </div>
+                                
                             </div>
                         </div>
                     </t>

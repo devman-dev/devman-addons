@@ -31,23 +31,22 @@
                 }
 
             </style>
-            <div class="container border">
+            <div class="container">
                 <div class="row align-items-start pt-4">
                     <div class="col-5 ">
                         <div class="px-2">
                             <div class="row">
                                 <div class="col-12 wallet-card p-2 my-2 d-flex align-items-center">
-                                    <span>Bienvenido Pepito</span>
+                                    <span>Bienvenido Keytex</span>
                                 </div>
                                 <div class="col-12 wallet-card p-2 my-2 ">
                                     <div class="row">
                                         <div class="col-6 text-center d-flex justify-content-around align-items-center">
                                             <div>
                                                 <p class="text-muted mb-1" style="font-size: 14px;">Saldo Disponible:</p>
-                                                <h3 class="mb-0 text-primary">
-                                                    $       
-                                                    <t t-out="('{:,.2f}'.format(customer_balance)).replace(',', 'X').replace('.', ',').replace('X', '.')"/>
-                                                </h3>    
+                                                <h4 class="mb-0 text-primary">
+                                                    $ <t t-out="('{:,.2f}'.format(customer_balance)).replace(',', 'X').replace('.', ',').replace('X', '.')"/>
+                                                </h4>    
                                             </div>
                                         </div>    
                                         <div class="col-6 d-flex justify-content-around align-items-center">
@@ -81,7 +80,7 @@
                             </div>    
                         </div>
                     </div>
-                    <div class="col-7 px-2">
+                    <div class="col-7 p-2">
                         <div class="wallet-card py-2 px-4">
                             <owl-component class="" name="billetera_pagoflex.Wallet_filters"/>        
                         </div>
