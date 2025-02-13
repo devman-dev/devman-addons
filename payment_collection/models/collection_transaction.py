@@ -26,8 +26,8 @@ class CollectionTransaction(models.Model):
     amount = fields.Float(string='Monto', tracking=True, required=True,)
     date_available_amount = fields.Date('Fecha del monto disponible')
     real_balance = fields.Float(string='Saldo Real App', compute='compute_real_balance_costumer')
-    available_balance = fields.Float(string='Saldo Disponible Cliente', tracking=True, compute='compute_available_balance')
-    total_balance_customer = fields.Float(string='Saldo Total Cliente', compute='get_total_balance_customer', tracking=True)
+    available_balance = fields.Float(string='Saldo Disponible Cliente', compute='compute_available_balance')
+    total_balance_customer = fields.Float(string='Saldo Total Cliente', compute='get_total_balance_customer')
     cuit_destination_account = fields.Char('CUIT Destino')
     cbu_destination_account = fields.Char(string='CBU Destino', tracking=True, default=False)
     cvu_destination_account = fields.Char(string='CVU Destino', tracking=True, default=False)
@@ -224,12 +224,44 @@ class CollectionTransaction(models.Model):
                 if rec.env.context.get('no_write', False):
                     continue
                 rec_commission = self.env['collection.transaction'].search([('transaction_name', '=', rec.transaction_name),('is_commission', '=', True)])
+                agents = self.env['collection.transaction.commission'].search([('transaction_name', '=', rec.transaction_name), ('customer', '=', rec.customer.id)])
+                if agents:
+                    for agent in agents:
+                        agent.date = vals['date']
                 if rec_commission:
                     rec_commission.with_context(no_write=True).date = vals['date']
             if 'service' in vals:
                 if rec.env.context.get('no_write', False):
                     continue
                 rec_commission = self.env['collection.transaction'].search([('transaction_name', '=', rec.transaction_name), ('is_commission', '=', True)])
+                agents = self.env['collection.transaction.commission'].search([('transaction_name', '=', rec.transaction_name), ('customer', '=', rec.customer.id)])
+                service = self.env['collection.services.commission'].search([('id', '=', vals['service'])])
+                amount = rec.amount if not 'amount' in vals else vals['amount']
+                if agents:
+                    for agent in agents:
+                        if agent.agent.id not in service.agent_services_commission.agent.ids:
+                            agent.unlink()
+                            continue
+                        agent.transaction_service = vals['service']
+                else:
+                    if service.agent_services_commission:
+                        for agent_service in service.agent_services_commission:
+                            commission_amount = (agent_service.commission_rate * amount) / 100
+                            if commission_amount > 0 and rec.count == 0:
+                                rec.env['collection.transaction.commission'].sudo().create(
+                                    {
+                                        'date': rec.date,
+                                        'transaction_name': rec.transaction_name,
+                                        'operation_amount': amount,
+                                        'payment_rest': commission_amount,
+                                        'customer': rec.customer.id,
+                                        'transaction_service': vals['service'],
+                                        'transaction_operation': rec.operation.id,
+                                        'agent': agent_service.agent.id,
+                                        'commission_rate': agent_service.commission_rate,
+                                        'commission_amount': commission_amount,
+                                    }
+                                )
                 if rec_commission:
                     if 'commission' in vals:
                         rec_commission.with_context(no_write=True).commission = vals['commission']
