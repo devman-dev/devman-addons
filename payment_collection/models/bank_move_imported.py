@@ -170,20 +170,20 @@ class BankMoveImported(models.Model):
                     parsed_date = datetime.strptime(raw_date, "%d/%m/%Y %H:%M:%S").date()
                 except ValueError:
                     parsed_date = datetime.strptime(raw_date, "%d/%m/%Y").date()
-                customer_exits = collection_transaction.search(
-                    [
-                        ('customer', '=', self.customer_id.id),
-                        ('collection_trans_type', '=', self.collection_trans_type),
-                        ('origin_account_cvu', '=', origin_cvu[count].replace('"', '') if origin_cvu else False),
-                        ('origin_account_cuit', '=', origin_cuit[count].replace('"', '') if origin_cuit else False),
-                        ('origen_name_account_extern', '=', origin_account[count] if origin_account else False),
-                        ('amount', '=', amount),
-                        ('date', '=', parsed_date.strftime("%Y-%m-%d")),
-                    ]
-                )
-                if customer_exits:
-                    count += 1
-                    continue
+                # customer_exits = collection_transaction.search(
+                #     [
+                #         ('customer', '=', self.customer_id.id),
+                #         ('collection_trans_type', '=', self.collection_trans_type),
+                #         ('origin_account_cvu', '=', origin_cvu[count].replace('"', '') if origin_cvu else False),
+                #         ('origin_account_cuit', '=', origin_cuit[count].replace('"', '') if origin_cuit else False),
+                #         ('origen_name_account_extern', '=', origin_account[count] if origin_account else False),
+                #         ('amount', '=', amount),
+                #         ('date', '=', parsed_date.strftime("%Y-%m-%d")),
+                #     ]
+                # )
+                # if customer_exits:
+                #     count += 1
+                #     continue
 
                 if self.collection_trans_type == 'retiro':
                     amount = abs(amount) * -1
