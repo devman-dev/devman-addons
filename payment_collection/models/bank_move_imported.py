@@ -1,14 +1,17 @@
 from odoo import fields, models, api
 from odoo.exceptions import UserError
 from datetime import datetime
+from dateutil import parser
 
 import base64
 import io
 import pandas as pd
 import math
 
+
 class BankMoveImported(models.Model):
     _name = 'bank.move.imported'
+    _inherit = ['mail.thread', 'mail.activity.mixin']
     _description = 'Bank Move Imported'
     _rec_name = 'customer_id'
 
@@ -40,7 +43,7 @@ class BankMoveImported(models.Model):
     alias_destination_account = fields.Char(string='Alias Destino')
     extract_checkbox = fields.Boolean('Generar Extracto?', default=False)
     date_column = fields.Char(string='Columna Fecha', required=True)
-    
+
     @api.onchange('customer_id')
     def _blank_service(self):
         self.service_id = False
@@ -87,15 +90,21 @@ class BankMoveImported(models.Model):
     def set_default_operation(self):
         for rec in self:
             if rec.collection_trans_type == 'movimiento_recaudacion':
-                accreditation = rec.operation_id.search([('check_accreditation', '=', True), ('collection_type', '=', 'operation')])
+                accreditation = rec.operation_id.search(
+                    [('check_accreditation', '=', True), ('collection_type', '=', 'operation')]
+                )
                 if accreditation:
                     rec.withdrawal_operations = accreditation.ids
                 else:
                     rec.withdrawal_operations = accreditation
 
             elif rec.collection_trans_type == 'retiro':
-                extraction = rec.operation_id.search([('check_withdrawal', '=', True), ('collection_type', '=', 'operation')])
-                services = rec.service_id.search([('services', '=', rec.service_id.services.id), ('name_account', '!=', False)])
+                extraction = rec.operation_id.search(
+                    [('check_withdrawal', '=', True), ('collection_type', '=', 'operation')]
+                )
+                services = rec.service_id.search(
+                    [('services', '=', rec.service_id.services.id), ('name_account', '!=', False)]
+                )
                 if extraction:
                     rec.withdrawal_operations = extraction.ids
                 else:
@@ -121,7 +130,34 @@ class BankMoveImported(models.Model):
         except Exception as e:
             raise UserError('Error al leer el archivo: %s' % e)
 
-        letters = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z']
+        letters = [
+            'A',
+            'B',
+            'C',
+            'D',
+            'E',
+            'F',
+            'G',
+            'H',
+            'I',
+            'J',
+            'K',
+            'L',
+            'M',
+            'N',
+            'O',
+            'P',
+            'Q',
+            'R',
+            'S',
+            'T',
+            'U',
+            'V',
+            'W',
+            'X',
+            'Y',
+            'Z',
+        ]
         letter = self.amount.upper()
         l_index = letters.index(letter)
         col_amount_name = excel_data.columns[l_index]
@@ -153,37 +189,34 @@ class BankMoveImported(models.Model):
         l_index_date = letters.index(date_letter)
         col_date_name = excel_data.columns[l_index_date]
         dates = excel_data[col_date_name].tolist()
-        
+
         count = 0
         for amount in amounts:
-            if math.isnan(amount) or not isinstance(dates[count], str):
+            if not pd.notna(amount) or not pd.notna(dates[count]):
                 count += 1
                 continue
+
             if origin_account and origin_cuit and origin_cvu:
-                if not isinstance(origin_cvu[count], str) and not isinstance(origin_account[count], str) and not isinstance(origin_cuit[count], str):
-                    if math.isnan(origin_cvu[count]) and math.isnan(origin_account[count]) and math.isnan(origin_cuit[count]):
+                if (
+                    not isinstance(origin_cvu[count], str)
+                    and not isinstance(origin_account[count], str)
+                    and not isinstance(origin_cuit[count], str)
+                ):
+                    if (
+                        math.isnan(origin_cvu[count])
+                        and math.isnan(origin_account[count])
+                        and math.isnan(origin_cuit[count])
+                    ):
                         count += 1
-                        break
+                        continue
             try:
-                raw_date = dates[count].strip()
                 try:
-                    parsed_date = datetime.strptime(raw_date, "%d/%m/%Y %H:%M:%S").date()
-                except ValueError:
-                    parsed_date = datetime.strptime(raw_date, "%d/%m/%Y").date()
-                # customer_exits = collection_transaction.search(
-                #     [
-                #         ('customer', '=', self.customer_id.id),
-                #         ('collection_trans_type', '=', self.collection_trans_type),
-                #         ('origin_account_cvu', '=', origin_cvu[count].replace('"', '') if origin_cvu else False),
-                #         ('origin_account_cuit', '=', origin_cuit[count].replace('"', '') if origin_cuit else False),
-                #         ('origen_name_account_extern', '=', origin_account[count] if origin_account else False),
-                #         ('amount', '=', amount),
-                #         ('date', '=', parsed_date.strftime("%Y-%m-%d")),
-                #     ]
-                # )
-                # if customer_exits:
-                #     count += 1
-                #     continue
+                    raw_date = str(dates[count]).strip()
+                    parsed_date = parser.parse(raw_date).date()
+
+                except Exception as e:
+                    print(f'Error al convertir la fecha: {raw_date}, Error: {e}')
+                    parsed_date = None
 
                 if self.collection_trans_type == 'retiro':
                     amount = abs(amount) * -1
@@ -192,10 +225,17 @@ class BankMoveImported(models.Model):
                     {
                         'collection_trans_type': self.collection_trans_type,
                         'customer': self.customer_id.id,
-                        'date': parsed_date.strftime("%Y-%m-%d"),
+                        'date': parsed_date.strftime('%Y-%m-%d'),
                         'amount': amount,
-                        'origin_account_cuit': origin_cuit[count].replace('"', '') if origin_cuit else False,
-                        'origin_account_cvu': origin_cvu[count].replace('"', '') if origin_cvu else False,
+                        'origin_account_cuit': (
+                            origin_cuit[count].replace(
+                                ''', '') if origin_cuit else False,
+                        'origin_account_cvu': origin_cvu[count].replace(''',
+                                '',
+                            )
+                            if origin_cvu
+                            else False
+                        ),
                         'origen_name_account_extern': origin_account[count] if origin_account else False,
                         'description': self.comment,
                         'service': self.service_id.id,
@@ -213,8 +253,15 @@ class BankMoveImported(models.Model):
                             'date': self.date,
                             'amount': amount,
                             'titular': origin_account[count] if origin_account else False,
-                            'cuit': origin_cuit[count].replace('"', '') if origin_cuit else False,
-                            'cvu': origin_cvu[count].replace('"', '') if origin_cvu else False,
+                            'cuit': (
+                                origin_cuit[count].replace(
+                                    ''', '') if origin_cuit else False,
+                            'cvu': origin_cvu[count].replace(''',
+                                    '',
+                                )
+                                if origin_cvu
+                                else False
+                            ),
                             'bank_commission_entry': self.bank_commission_entry,
                             'bank_commission_egress': self.bank_commission_egress,
                             'concilied_id': transaction_id.id,
@@ -224,7 +271,7 @@ class BankMoveImported(models.Model):
                     )
                     transaction_id.write({'concilied_id': statement_id.id, 'is_concilied': True})
                     commission = 0
-                    
+
                     if self.bank_commission_entry:
                         commission = amount * self.bank_commission_entry / 100
                         comment = 'Comisión del Banco por Ingreso'
@@ -239,8 +286,15 @@ class BankMoveImported(models.Model):
                                 'date': self.date,
                                 'amount': abs(commission) * -1,
                                 'titular': origin_account[count] if origin_account else False,
-                                'cuit': origin_cuit[count].replace('"', '') if origin_cuit else False,
-                                'cvu': origin_cvu[count].replace('"', '') if origin_cvu else False,
+                                'cuit': (
+                                    origin_cuit[count].replace(
+                                        ''', '') if origin_cuit else False,
+                                'cvu': origin_cvu[count].replace(''',
+                                        '',
+                                    )
+                                    if origin_cvu
+                                    else False
+                                ),
                                 'bank_commission_entry': self.bank_commission_entry,
                                 'bank_commission_egress': self.bank_commission_egress,
                                 'concilied_id': transaction_id.id,
@@ -260,3 +314,4 @@ class BankMoveImported(models.Model):
                 'message': 'Operación realizada con éxito',
             },
         )
+        self.message_post(body='Operación realizada con éxito')
