@@ -8,7 +8,8 @@
             <form string="Movimientos Bancarios Importados">
                 <header>
                     <button string="Procesar" type="object" name="execute_bank_file"
-                        class="btn btn-primary" confirm="Esta acción procesará el archivo bancario. Asegurate de que los datos sean correctos, ya que no se podrá deshacer. ¿Deseás continuar?" />
+                        class="btn btn-primary"
+                        confirm="Esta acción procesará el archivo bancario. Asegurate de que los datos sean correctos, ya que no se podrá deshacer. ¿Deseás continuar?" />
                 </header>
                 <sheet>
                     <field name="withdrawal_operations" invisible="1" />
@@ -17,11 +18,16 @@
                         <group>
                             <field name="collection_trans_type" widget="radio"
                                 options="{'horizontal': True}" />
-                            <field name="customer_id" options="{'no_create': True, 'no_create_edit': True,'no_quick_create': True}" />
-                            <field name="service_id" domain="[('services.collection_type', '=', 'service'), ('customer', '=', customer_id)]" context="{'show_servicio_name': True}" options="{'no_create': True, 'no_create_edit': True,'no_quick_create': True}" />
+                            <field name="customer_id"
+                                options="{'no_create': True, 'no_create_edit': True,'no_quick_create': True}" />
+                            <field name="service_id"
+                                domain="[('services.collection_type', '=', 'service'), ('customer', '=', customer_id)]"
+                                context="{'show_servicio_name': True}"
+                                options="{'no_create': True, 'no_create_edit': True,'no_quick_create': True}" />
                             <field name="date" />
                             <field name="extract_checkbox" />
-                            <field name="bank_id" options="{'no_create': True, 'no_create_edit': True,'no_quick_create': True}"/>
+                            <field name="bank_id"
+                                options="{'no_create': True, 'no_create_edit': True,'no_quick_create': True}" />
                             <field name="amount" />
                             <field name="date_column" />
                             <field name="origin_account" />
@@ -30,7 +36,7 @@
                             <field name="comment" placeholder="Escribe tu comentario..." />
                         </group>
                         <group>
-                            <field name="file"/>
+                            <field name="file" />
                             <field name="commission" />
                             <field name="operation_id"
                                 domain="[('id', 'in', withdrawal_operations)]"
@@ -50,6 +56,11 @@
 
                     </group>
                 </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids" groups="base.group_user" />
+                    <field name="activity_ids" />
+                    <field name="message_ids" />
+                </div>
             </form>
         </field>
     </record>
