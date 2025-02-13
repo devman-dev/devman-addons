@@ -1,5 +1,6 @@
 from odoo import fields, models, api
 from odoo.exceptions import UserError
+from datetime import datetime
 
 import base64
 import io
@@ -116,9 +117,9 @@ class BankMoveImported(models.Model):
         try:
             file_content = base64.b64decode(self.file)
             excel_file = io.BytesIO(file_content)
+            excel_data = pd.read_excel(excel_file)
         except Exception as e:
             raise UserError('Error al leer el archivo: %s' % e)
-        excel_data = pd.read_excel(excel_file)
 
         letters = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z']
         letter = self.amount.upper()
@@ -155,7 +156,7 @@ class BankMoveImported(models.Model):
         
         count = 0
         for amount in amounts:
-            if math.isnan(amount):
+            if math.isnan(amount) or not isinstance(dates[count], str):
                 count += 1
                 continue
             if origin_account and origin_cuit and origin_cvu:
@@ -164,6 +165,11 @@ class BankMoveImported(models.Model):
                         count += 1
                         break
             try:
+                raw_date = dates[count].strip()
+                try:
+                    parsed_date = datetime.strptime(raw_date, "%d/%m/%Y %H:%M:%S").date()
+                except ValueError:
+                    parsed_date = datetime.strptime(raw_date, "%d/%m/%Y").date()
                 customer_exits = collection_transaction.search(
                     [
                         ('customer', '=', self.customer_id.id),
@@ -172,7 +178,7 @@ class BankMoveImported(models.Model):
                         ('origin_account_cuit', '=', origin_cuit[count].replace('"', '') if origin_cuit else False),
                         ('origen_name_account_extern', '=', origin_account[count] if origin_account else False),
                         ('amount', '=', amount),
-                        ('date', '=', dates[count]),
+                        ('date', '=', parsed_date.strftime("%Y-%m-%d")),
                     ]
                 )
                 if customer_exits:
@@ -186,7 +192,7 @@ class BankMoveImported(models.Model):
                     {
                         'collection_trans_type': self.collection_trans_type,
                         'customer': self.customer_id.id,
-                        'date': dates[count],
+                        'date': parsed_date.strftime("%Y-%m-%d"),
                         'amount': amount,
                         'origin_account_cuit': origin_cuit[count].replace('"', '') if origin_cuit else False,
                         'origin_account_cvu': origin_cvu[count].replace('"', '') if origin_cvu else False,

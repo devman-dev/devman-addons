@@ -239,7 +239,7 @@ class CollectionTransaction(models.Model):
                 amount = rec.amount if not 'amount' in vals else vals['amount']
                 if agents:
                     for agent in agents:
-                        if agent.id not in service.agent_services_commission.ids:
+                        if agent.agent.id not in service.agent_services_commission.agent.ids:
                             agent.unlink()
                             continue
                         agent.transaction_service = vals['service']
