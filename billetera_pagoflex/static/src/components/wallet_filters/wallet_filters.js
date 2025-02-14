@@ -11,7 +11,7 @@ export class Wallet_filters extends Component {
             transactions_filter: [],
             transactions_filter2: [],
             state_filter: 'pending',
-            state_filter2: 'aprroved'
+            state_filter2: 'all',
         });
         this.user_id = session.user_id;
 
@@ -23,21 +23,22 @@ export class Wallet_filters extends Component {
 
     async onShowTransactionsPending() {
         try {
-            this.state.state_filter = 'pending';
+            this.state.state_filter2 = 'pending';
             const result = await this.env.services.orm.searchRead(
                 'collection.transaction',
                 [['customer.user_ids', 'in', this.user_id], ['transaction_state', '=', 'pendiente']],
-                ['amount', 'date', 'transaction_state', 'collection_trans_type', 'is_commission'], { limit: 10 }
+                ['amount', 'date', 'transaction_state', 'collection_trans_type', 'is_commission'],
+                { limit: 10 }
             );
 
             if (result.length > 0) {
-                this.state.transactions_filter = result
+                this.state.transactions_filter2 = result
             } else {
-                this.state.transactions_filter = [];
+                this.state.transactions_filter2 = [];
             }
         } catch (error) {
             console.error('ERROR!', error);
-            this.state.transactions_filter = [];
+            this.state.transactions_filter2 = [];
         }
     }
     async onShowTransactionsRefused() {

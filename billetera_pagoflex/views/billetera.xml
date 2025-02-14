@@ -19,7 +19,6 @@
                 background-color: white;
                 border-radius: 0.5rem;
                 box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-                padding: 1.5rem;
                 }
 
                 .wallet-section {
@@ -33,37 +32,60 @@
 
             </style>
             <div class="container">
-                <div class="wallet-card mx-auto mt-4 col-12 col-md-6">
-                    <div class="d-flex align-items-start justify-content-center">
-                        <div class="text-center me-4">
-                            <p class="text-muted mb-1" style="font-size: 14px;">Saldo Disponible:</p>
-                            <h3 class="mb-0 text-primary">
-                                $       
-                                <t t-out="('{:,.2f}'.format(customer_balance)).replace(',', 'X').replace('.', ',').replace('X', '.')" />
-                            </h3>
-                            <a href="/wallet/transfer/accounts" class="btn btn-primary mt-2">
-                                <i class="fa fa-money" aria-hidden="true"></i>
-                                <span class="ms-2">Transferir</span>
-                            </a>
+                <div class="row align-items-start pt-4">
+                    <div class="col-12 col-md-6 ">
+                        <div class="px-2">
+                            <div class="row">
+                                <div class="col-12 wallet-card p-2 my-2 d-flex align-items-center">
+                                    <span>Bienvenido <t t-out="user_name"/></span>
+                                </div>
+                                <div class="col-12 wallet-card p-2 my-2 ">
+                                    <div class="row">
+                                        <div class="col-6 text-center d-flex justify-content-around align-items-center">
+                                            <div>
+                                                <p class="text-muted mb-1" style="font-size: 14px;">Saldo Disponible:</p>
+                                                <h4 class="mb-0 text-primary">
+                                                    $ <t t-out="('{:,.2f}'.format(customer_balance)).replace(',', 'X').replace('.', ',').replace('X', '.')"/>
+                                                </h4>    
+                                            </div>
+                                        </div>    
+                                        <div class="col-6 d-flex justify-content-around align-items-center">
+                                            <div class="form-check-group">
+                                                <div class="form-check mb-2">
+                                                    <label class="form-check-label" for="currency_pesos">Pesos</label>
+                                                    <input class="form-check-input" type="radio" name="currency" id="currency_pesos" value="pesos" t-att-checked="'checked'"/>
+                                                </div>
+                                                <div class="form-check mb-2">
+                                                    <label class="form-check-label" for="currency_dolar">Dólar</label>
+                                                    <input class="form-check-input" type="radio" name="currency" id="currency_dolar" value="dolar" t-att-checked=""/>
+                                                </div>
+                                                <div class="form-check">
+                                                    <label class="form-check-label" for="currency_qr">QR</label>
+                                                    <input class="form-check-input" type="radio" name="currency" id="currency_qr" value="qr" t-att-checked=""/>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-12 p-2 my-2 d-flex justify-content-around align-items-center">
+                                            <a href="/wallet/transfer/accounts" class="btn btn-primary mt-2">
+                                                <i class="fa fa-money" aria-hidden="true"/>
+                                                <span class="ms-2">Ingresar</span>
+                                            </a>
+                                            <a href="/wallet/transfer/accounts" class="btn btn-primary mt-2">
+                                                <i class="fa fa-exchange" aria-hidden="true"/>
+                                                <span class="ms-2">Transferir</span>
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>    
                         </div>
-
-                        <div class="form-check-group">
-                            <div class="form-check mb-2">
-                                <label class="form-check-label" for="currency_pesos">Pesos</label>
-                                <input class="form-check-input" type="radio" name="currency" id="currency_pesos" value="pesos" t-att-checked="'checked'" />
-                            </div>
-                            <div class="form-check mb-2">
-                                <label class="form-check-label" for="currency_dolar">Dólar</label>
-                                <input class="form-check-input" type="radio" name="currency" id="currency_dolar" value="dolar" t-att-checked="" />
-                            </div>
-                            <div class="form-check">
-                                <label class="form-check-label" for="currency_qr">QR</label>
-                                <input class="form-check-input" type="radio" name="currency" id="currency_qr" value="qr" t-att-checked="" />
-                            </div>
+                    </div>
+                    <div class="col-12 col-md-6 p-2">
+                        <div class="wallet-card py-2 px-4">
+                            <owl-component class="" name="billetera_pagoflex.Wallet_filters"/>        
                         </div>
                     </div>
                 </div>
-                <owl-component name="billetera_pagoflex.Wallet_filters" />
             </div>
 
         </t>
@@ -221,7 +243,6 @@
                 }
 
                 .transfer-input {
-                width: 100%;
                 padding: 10px 10px 10px 10px;
                 border: none;
                 border-radius: 5px;
@@ -230,7 +251,7 @@
                 outline: none;
                 -moz-appearance: textfield;
                 }
-
+                
                 .transfer-amount-container label {
                 font-size: 18px;
                 font-weight: 600;
@@ -244,9 +265,9 @@
                 .input-group-text {
                 border: none;
                 background: none;
-                font-size: 24px;
+                font-size: 18px;
                 padding-left: 0;
-                margin-right: 5px;
+                
                 z-index: 1;
                 }
 
@@ -270,15 +291,22 @@
                 <div class="row justify-content-center">
                     <div class="col-12 col-md-8 col-lg-6">
                         <form>
-                            <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()" />
-                            <div class="bg-white p-4 shadow rounded">
-                                <p class="text-muted">$  <t t-out="('{:,.2f}'.format(customer_balance)).replace(',', 'X').replace('.', ',').replace('X', '.')" /> disponible</p>
-                                <div class="transfer-amount-container mb-4">
-                                    <label for="transfer-amount">Monto a transferir</label>
-                                    <div class="input-group">
-                                        <span class="input-group-text">$</span>
-                                        <input type="number" id="transfer-amount" placeholder="0.00" min="0" step="0.01" required="1" class="transfer-input form-control" />
-                                    </div>
+                            <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                            <div class="row bg-white p-4 shadow rounded">
+                                <div class="col-12 d-flex align-items-center flex-wrap">
+                                    <span class="text-muted font-weight-bold">Saldo disponible:<span style="display: inline-block; width: 10px;"/> </span>
+                                    <h5 class="mb-0 text-primary">$  <t t-out="('{:,.2f}'.format(customer_balance)).replace(',', 'X').replace('.', ',').replace('X', '.')"/></h5>    
+                                </div>
+                                
+                                <div class="col-12 transfer-amount-container my-4">
+                                    <label for="transfer-amount" class="row ">
+                                        <div class="col-3 d-md-none"></div>
+                                        <span class="col-9 col-md-6 input-group-text text-muted">Monto a transferir</span>
+                                        <div class="col-2 d-md-none"></div>
+                                        <div class="col-8 col-md-6">
+                                            <span class="input-group-text d-flex justify-content-end" style="text-align: right;">$ <input class="transfer-input form-control" type="number" id="transfer-input transfer-amount" placeholder="0.00" min="0" step="0.01" required="1" style=""/></span>
+                                        </div>
+                                    </label>
                                 </div>
                                 <div class="d-flex justify-content-between">
                                     <a href="/wallet" class="btn btn-secondary">Cancelar</a>
@@ -326,8 +354,8 @@
                                     <hr />
                                 </div>
 
-                                <div class="form-group col-12 s_website_form_submit confirm-data text-center">
-                                    <button type="submit" class="btn btn-primary w-100">Transferir</button>
+                                <div class="form-group col-12 s_website_form_submit confirm-data d-flex justify-content-center">
+                                    <button type="submit" class="btn btn-primary w-50">Transferir</button>
                                 </div>
                             </div>
                         </form>
@@ -358,8 +386,8 @@
                                     </h4>
                                 </div>
 
-                                <div class="form-group col-12 s_website_form_submit confirm-data">
-                                    <button type="submit" class="btn btn-primary w-100">Ir al inicio</button>
+                                <div class="form-group col-12 s_website_form_submit confirm-data d-flex justify-content-center">
+                                    <button type="submit" class="btn btn-primary w-50">Ir al inicio</button>
                                 </div>
                             </div>
                         </form>
