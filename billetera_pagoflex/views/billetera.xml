@@ -11,8 +11,9 @@
     <template id="web_template_wallet" name="Billetera">
         <t t-call="website.layout">
             <style>
-                body {
-                background-color: #f8f9fa;
+                main {
+                background: linear-gradient(to top, #56FC81, #ffffff);
+                font-family: Helvetica, Arial, sans-serif;
                 }
 
                 .wallet-card {
@@ -29,65 +30,78 @@
                 .btn-outline-secondary {
                 text-align: center;
                 }
-
             </style>
-            <div class="container">
-                <div class="row align-items-start pt-4">
+            
+            <div class="container px-4 px-md-0">
+                <div class="row  pt-4 px-2 px-md-0">
                     <div class="col-12 col-md-6 ">
                         <div class="px-2">
-                            <div class="row">
-                                <div class="col-12 wallet-card p-2 my-2 d-flex align-items-center">
-                                    <span>Bienvenido <t t-out="user_name"/></span>
+                            <div class="row py-2">
+                                    <span class="text-center px-2">Hola <t t-out="user_name"/></span>
                                 </div>
-                                <div class="col-12 wallet-card p-2 my-2 ">
-                                    <div class="row">
-                                        <div class="col-6 text-center d-flex justify-content-around align-items-center">
-                                            <div>
-                                                <p class="text-muted mb-1" style="font-size: 14px;">Saldo Disponible:</p>
-                                                <h4 class="mb-0 text-primary">
-                                                    $ <t t-out="('{:,.2f}'.format(customer_balance)).replace(',', 'X').replace('.', ',').replace('X', '.')"/>
-                                                </h4>    
-                                            </div>
-                                        </div>    
-                                        <div class="col-6 d-flex justify-content-around align-items-center">
-                                            <div class="form-check-group">
-                                                <div class="form-check mb-2">
-                                                    <label class="form-check-label" for="currency_pesos">Pesos</label>
-                                                    <input class="form-check-input" type="radio" name="currency" id="currency_pesos" value="pesos" t-att-checked="'checked'"/>
-                                                </div>
-                                                <div class="form-check mb-2">
-                                                    <label class="form-check-label" for="currency_dolar">Dólar</label>
-                                                    <input class="form-check-input" type="radio" name="currency" id="currency_dolar" value="dolar" t-att-checked=""/>
-                                                </div>
-                                                <div class="form-check">
-                                                    <label class="form-check-label" for="currency_qr">QR</label>
-                                                    <input class="form-check-input" type="radio" name="currency" id="currency_qr" value="qr" t-att-checked=""/>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="col-12 p-2 my-2 d-flex justify-content-around align-items-center">
-                                            <a href="/wallet/transfer/accounts" class="btn btn-primary mt-2">
-                                                <i class="fa fa-money" aria-hidden="true"/>
-                                                <span class="ms-2">Ingresar</span>
-                                            </a>
-                                            <a href="/wallet/transfer/accounts" class="btn btn-primary mt-2">
-                                                <i class="fa fa-exchange" aria-hidden="true"/>
-                                                <span class="ms-2">Transferir</span>
-                                            </a>
-                                        </div>
-                                    </div>
+                            <div class="row" style="background-color:#56FC81; border-radius: 1rem;">
+                                <div class="col-12" >
+                                    <label class="d-flex align-items-center justify-content-between py-2" style="cursor: pointer;">
+                                        <i class="fa fa-eye" aria-hidden="true"></i>
+                                        <span class="" style="padding-left: 5rem;">Saldo Disponible</span>
+                                        <select class="px-3" id="currency_select" name="currency" style="background-color:#56FC81; border: #C6FDFF; outline: #C6FDFF;">
+                                            <option value="pesos" t-att-selected="'selected'">Pesos</option>
+                                            <option value="dolar" t-att-selected="">Dólar</option>
+                                            <option value="qr" t-att-selected="">QR</option>
+                                        </select>
+                                    </label>
                                 </div>
-                            </div>    
+                                <div class="col-12 text-center d-flex justify-content-around align-items-center py-3" style="">
+                                    <h4 class="mb-0 text-secundary">
+                                        $ <t t-out="('{:,.2f}'.format(customer_balance)).replace(',', 'X').replace('.', ',').replace('X', '.')"/>
+                                    </h4>    
+                                </div>
+                            </div>
+                            <div class="row p-4" style="font-size: 14px;">
+                                <div class="col-12 p-2 my-2 d-flex justify-content-around align-items-center">
+                                    <a href="/wallet/transfer/accounts" class="d-flex flex-column align-items-center justify-content-center" style="color: black;">
+                                        <i class="fa fa-long-arrow-up fa-lg" aria-hidden="true" style="display: flex; align-items: center; justify-content: center;background-color:#C6FDFF; border-radius: 50%; height: 45px; width: 45px;"></i>
+                                        <span class="">Ingresar</span>
+                                    </a>
+                                    <a href="/wallet/transfer/accounts" class="d-flex flex-column align-items-center justify-content-center" style="color: black;">
+                                        <i class="fa fa-long-arrow-down fa-lg" aria-hidden="true" style="display: flex; align-items: center; justify-content: center;background-color:#C6FDFF; border-radius: 50%; height: 45px; width: 45px;"></i>
+                                        <span class="">Sacar</span>
+                                    </a>
+                                    <a href="/wallet/transfer/accounts" class="d-flex flex-column align-items-center justify-content-center" style="color: black;">
+                                        <i class="fa fa-exchange fa-lg" aria-hidden="true" style="display: flex; align-items: center; justify-content: center;background-color:#C6FDFF; border-radius: 50%; height: 45px; width: 45px;"></i>
+                                        <span class="">Transferir</span>
+                                    </a>
+                                    <a href="/wallet/transfer/accounts" class="d-flex flex-column align-items-center justify-content-center" style="color: black;">
+                                        <i class="fa fa-user-o fa-lg" aria-hidden="true" style="display: flex; align-items: center; justify-content: center;background-color:#C6FDFF; border-radius: 50%; height: 45px; width: 45px;"></i>
+                                        <span class="">CVU</span>
+                                    </a>
+                                    <a href="/wallet/transfer/accounts" class="d-flex flex-column align-items-center justify-content-center" style="color: black;">
+                                        <i class="fa fa-qrcode fa-lg" aria-hidden="true" style="display: flex; align-items: center; justify-content: center;background-color:#C6FDFF; border-radius: 50%; height: 45px; width: 45px;"></i>
+                                        <span class="">QR</span>
+                                    </a>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                    <div class="col-12 col-md-6 p-2">
-                        <div class="wallet-card py-2 px-4">
-                            <owl-component class="" name="billetera_pagoflex.Wallet_filters"/>        
+                    <div class="col-12">
+                        <div class="row bg-white" style="border: 1px solid #56FC81; border-radius: 1rem;">
+                            <p class="col-6 text-right pt-3 m-0">Actividad</p>
+                            <a class="col-6 text-end pt-3 m-0" style="color: #02F1FB">Ver todo ></a>
+                            <div class="col-12 px-3 "><hr/></div>
+                            <div class="col-12 col-md-6 p-2">
+                                <div class="wallet-card py-2 px-4">
+                                    <owl-component class="" name="billetera_pagoflex.Wallet_filters"/>        
+                                </div>
+                            </div>
+                            <!--<form class="col-12 form-inline">-->
+                            <!--    <div class="form-group mx-sm-3 mb-2">-->
+                            <!--        <input type="text" class="form-control" placeholder="Buscar"/>-->
+                            <!--    </div>-->
+                            <!--</form>-->
                         </div>
-                    </div>
+                    </div>  
                 </div>
             </div>
-
         </t>
     </template>
 
