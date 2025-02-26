@@ -11,6 +11,7 @@
     'data': [
         'views/billetera.xml',
         'views/movimientos.xml',
+        'views/pedido_de_transferencia.xml',
     ],
     'auto_install': False,
     'application': False,

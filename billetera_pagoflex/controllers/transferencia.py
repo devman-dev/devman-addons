@@ -136,3 +136,8 @@ class WebFormWalletController(Controller):
             },
         )
 
+    @route('/wallet/transfer_request', auth='user', website=True)
+    def send_transfer_request(self,**kwargs):
+        return request.render('billetera_pagoflex.web_form_template_request_transfer')
+
+

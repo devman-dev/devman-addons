@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <!-- Transferencia Enviada -->
+    <template id="web_form_template_request_transfer" name="Pedido de transferencias">
+        <t t-call="website.layout">
+
+            <style>
+                body {
+                background-color: #f8f9fa;
+                }
+            </style>
+
+            <div class="container my-5">
+                <div class="row justify-content-center">
+                    <div class="col-12 col-sm-10 col-md-8 col-lg-6">
+                        <form action="/wallet" method="post" enctype="multipart/form-data"
+                              class="o_mark_required p-4 bg-white shadow rounded">
+                            <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+
+                            <button class="btn btn-secondary mb-3"
+                                    onclick="document.getElementById('transfer-form').classList.toggle('d-none')" type="button">
+                                Mostrar/Ocultar Formulario
+                            </button>
+
+                            <div id="transfer-form" class="d-none">
+                                <div class="mb-3">
+                                    <label for="fecha" class="form-label">Fecha</label>
+                                    <input type="date" id="fecha" name="fecha" class="form-control"
+                                           t-att-value="time.strftime('%Y-%m-%d')" required="True"/>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="alias" class="form-label">Alias</label>
+                                    <input type="text" id="alias" name="alias" class="form-control"
+                                           placeholder="Ingrese el alias" required="True"/>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="cvu" class="form-label">CVU</label>
+                                    <input type="text" id="cvu" name="cvu" class="form-control"
+                                           placeholder="Ingrese el CVU"
+                                           required="True"/>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="cbu" class="form-label">CBU</label>
+                                    <input type="text" id="cbu" name="cbu" class="form-control"
+                                           placeholder="Ingrese el CBU"
+                                           required="True"/>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="monto" class="form-label">Monto</label>
+                                    <input type="number" id="monto" name="monto" class="form-control"
+                                           placeholder="Ingrese el monto" required="True"/>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="comentario" class="form-label">Comentario</label>
+                                    <textarea id="comentario" name="comentario" class="form-control" rows="3"
+                                              placeholder="Agregue un comentario"></textarea>
+                                </div>
+
+                                <div class="text-center">
+                                    <button type="submit" class="btn btn-primary">Enviar Transferencia</button>
+                                </div>
+
+                            </div>
+                        </form>
+                    </div>
+                    <div class="col-12 col-md-6 p-2">
+                        <div class="wallet-card px-4 bg-white shadow rounded">
+                            <owl-component class="" name="billetera_pagoflex.Wallet_filters"/>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </t>
+    </template>
+</odoo>

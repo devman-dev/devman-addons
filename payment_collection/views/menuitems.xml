@@ -95,4 +95,12 @@
         action="bank_move_imported_action"
         parent="collection_transaction_menu"
         sequence="4" />
+
+    <menuitem
+        id="transfer_request_menu"
+        name="Pedidos de Transferencias"
+        action="transfer_request_action"
+        parent="collection_transaction_menu"
+        sequence="4" />
+
 </odoo>
