@@ -32,7 +32,7 @@
                 <field name="alias_destination_account" />
                 <field name="cbu_destination_account" />
                 <field name="cvu_destination_account" />
-                <field name="transfer_request_state" force_save="1" readonly="1" widget="badge" decoration-muted="transfer_request_state == 'nuevo'" decoration-warning="transfer_request_state == 'revisar'" decoration-success="transfer_request_state == 'pasado'" />
+                <field name="transfer_request_state" force_save="1" readonly="1" widget="badge" decoration-muted="transfer_request_state == 'nuevo'" decoration-warning="transfer_request_state == 'revisar'" decoration-success="transfer_request_state == 'pasado'" decoration-danger="transfer_request_state == 'cancelado'"/>
             </tree>
         </field>
     </record>

@@ -41,7 +41,7 @@ class TransferRequest(models.Model):
 
     account_bank = fields.Many2one('account.bank.pagoflex', string='Cuenta Banco')
 
-    transfer_request_state = fields.Selection([('nuevo', 'Nuevo'), ('pasado','Pasado'), ('revisar', 'Revisar')], default='nuevo', string='Estado')
+    transfer_request_state = fields.Selection([('nuevo', 'Nuevo'), ('pasado','Pasado'), ('revisar', 'Revisar'), ('cancelado','Cancelado'),], default='nuevo', string='Estado')
 
     withdrawal_operations = fields.Many2many('product.template', domain=[('collection_type', '=', 'operation')])
 
