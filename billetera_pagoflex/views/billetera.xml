@@ -74,6 +74,10 @@
                                                 <i class="fa fa-exchange" aria-hidden="true"/>
                                                 <span class="ms-2">Transferir</span>
                                             </a>
+                                            <a href="/wallet/transfer_request" class="btn btn-primary mt-2">
+                                                <i class="fa fa-arrow-circle-o-right" aria-hidden="true"/>
+                                                <span class="ms-2">Pedidos de Transferencias</span>
+                                            </a>
                                         </div>
                                     </div>
                                 </div>

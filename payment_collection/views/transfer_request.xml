@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="transfer_request_action" model="ir.actions.act_window">
+        <field name="name">Pedidos de Transferencias</field>
+        <field name="res_model">transfer.request</field>
+        <field name="view_mode">tree</field>
+    </record>
+
+    <record id="transfer_request_view_tree" model="ir.ui.view">
+        <field name="name">transfer.request.view.tree</field>
+        <field name="model">transfer.request</field>
+        <field name="arch" type="xml">
+            <tree string="Pedidos de Transferencias" editable="top" create="0">
+                <header>
+
+                    <button groups="payment_collection.groups_payment_collection_admin" type="object" name="transfer_movements_to_collection" class="btn btn-primary" string="Pasar Movimientos" />
+
+                </header>
+                <field name="date" />
+                <field name="customer" force_save="1" readonly="1"/>
+                <field name="service" />
+                <field name="commission" />
+                <field name="withdrawal_operations" column_invisible="True"/>
+                <field name="operation" domain="[('id', 'in', withdrawal_operations)]" options="{'no_create': True, 'no_create_edit': True,'no_quick_create': True}"/>
+                <field name="description" />
+                <field name="amount" force_save="1" readonly="1"/>
+                <field name="account_bank"/>
+                <field name="origin_account_table" column_invisible="True"/>
+                <field name="origin_account" domain="[('id','in',origin_account_table)]" context="{'show_account_name': True}" options="{'no_create': True, 'no_create_edit': True, 'no_quick_create': True}"/>
+                <field name="name_destination_account" />
+                <field name="alias_destination_account" />
+                <field name="cbu_destination_account" />
+                <field name="cvu_destination_account" />
+                <field name="transfer_request_state" force_save="1" readonly="1" widget="badge" decoration-muted="transfer_request_state == 'nuevo'" decoration-warning="transfer_request_state == 'revisar'" decoration-success="transfer_request_state == 'pasado'" decoration-danger="transfer_request_state == 'cancelado'"/>
+            </tree>
+        </field>
+    </record>
+
+</odoo>
