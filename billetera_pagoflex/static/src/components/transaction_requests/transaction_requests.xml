@@ -29,12 +29,34 @@
                                 <div class="col-4 mb-2 mb-md-0 d-flex justify-content-start align-items-center flex-wrap">
                                     <div class="p-2">
                                         <t t-if="transaction.transfer_request_state == 'revisar' or transaction.transfer_request_state == 'nuevo'">
-                                            <a t-att-href="'/wallet/transfer_request/cancel/' + transaction.id"><i class="fa fa-times" aria-hidden="true"></i></a>
+                                            <a href="#" class="cancel-transfer" t-att-data-href="'/wallet/transfer_request/cancel/' + transaction.id" data-bs-toggle="modal" data-bs-target="#confirmCancelModal">
+                                                <i class="fa fa-times" aria-hidden="true"></i>
+                                            </a>
                                         </t>
                                         <t t-else="">
-                                            <span style="margin-left:13px;">&#160;&#160;&#160;</span>
+                                            <span>&#160;&#160;&#160;</span>
                                         </t>
+                                    </div>
 
+                                    <!-- Modal de confirmación -->
+                                    <div class="modal fade" id="confirmCancelModal" tabindex="-1" aria-labelledby="confirmCancelLabel" aria-hidden="true">
+                                        <div class="modal-dialog">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title" id="confirmCancelLabel">Confirmar
+                                                        Cancelación</h5>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                </div>
+                                                <div class="modal-body">
+                                                    ¿Estás seguro de que querés cancelar
+                                                    esta solicitud de transferencia?
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                                                    <a id="confirmCancelBtn" t-att-href="'/wallet/transfer_request/cancel/' + transaction.id" class="btn btn-danger">Sí, Cancelar</a>
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
                                     <div class="" style="min-width: 100px; padding-left: 10px;">
                                          <t t-if="transaction.transfer_request_state == 'cancelado'">
