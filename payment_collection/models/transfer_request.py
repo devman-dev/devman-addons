@@ -82,7 +82,7 @@ class TransferRequest(models.Model):
                 'withdrawal_operations':rec.withdrawal_operations.ids,
                 'operation':rec.operation.id,
                 'description':rec.description,
-                'amount':rec.amount,
+                'amount':abs(rec.amount)*-1,
                 'account_bank':rec.account_bank.id,
                 'origin_account_table':rec.origin_account_table.ids,
                 'origin_account':rec.origin_account.id,
