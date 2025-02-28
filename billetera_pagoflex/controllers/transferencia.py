@@ -197,7 +197,7 @@ class WebFormWalletController(Controller):
                 'date': kwargs.get('fecha'),
                 'customer': request.env.user.partner_id.id,
                 'description': kwargs.get('comentario'),
-                'amount': kwargs.get('monto'),
+                'amount': abs(float(kwargs.get('monto'))) * -1,
                 'name_destination_account': kwargs.get('cuenta_destino'),
                 'alias_destination_account': kwargs.get('alias'),
                 'cbu_destination_account': kwargs.get('cbu'),
