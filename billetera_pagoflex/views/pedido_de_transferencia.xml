@@ -28,6 +28,11 @@
                                     <input type="date" id="fecha" name="fecha" class="form-control"
                                            t-att-value="time.strftime('%Y-%m-%d')" required="True"/>
                                 </div>
+                                <div class="mb-3">
+                                    <label for="cuenta_destino" class="form-label">Cuenta de Destino</label>
+                                    <input type="text" id="cuenta_destino" name="cuenta_destino" class="form-control"
+                                           placeholder="Ingrese la cuenta de destino." required="True"/>
+                                </div>
 
                                 <div class="mb-3">
                                     <label for="alias" class="form-label">Alias</label>
@@ -210,7 +215,7 @@
             <div class="container my-5">
                 <div class="row justify-content-center">
                     <div class="col-12 col-sm-10 col-md-8 col-lg-6">
-                        <form action="/wallet" enctype="multipart/form-data" class="o_mark_required" data-mark="*" data-model_name="" data-success-page="">
+                        <form action="/wallet/transfer_request" enctype="multipart/form-data" class="o_mark_required" data-mark="*" data-model_name="" data-success-page="">
                             <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()" />
                             <div class="bg-white p-4 shadow rounded text-center">
                                 <div style="margin: 15px 0;">
