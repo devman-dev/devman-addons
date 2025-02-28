@@ -1,8 +1,12 @@
 from odoo import fields, api, models
 from datetime import datetime
 
+from odoo.exceptions import ValidationError
+
+
 class TransferRequest(models.Model):
     _name = 'transfer.request'
+    _order = 'id desc'
 
 
     customer = fields.Many2one('res.partner', string='Cliente', required=True, tracking=True,
@@ -63,6 +67,10 @@ class TransferRequest(models.Model):
     def transfer_movements_to_collection(self):
         list_transfers = []
         for rec in self:
+            if not rec.service or not rec.operation or not rec.origin_account:
+                raise  ValidationError('No se puede pasar el pedido de transferencia, complete los campos faltantes.')
+
+
             if rec.transfer_request_state == 'nuevo':
                 dict_data = {
                 'count': 0,

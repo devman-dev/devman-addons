@@ -4,14 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="8b26ffb8-2f80-494f-89a4-5a607844cb0d" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/models/transfer_request.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/views/transfer_request.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/__manifest__.py" beforeDir="false" afterPath="$PROJECT_DIR$/__manifest__.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/models/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/models/__init__.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/security/ir.model.access.csv" beforeDir="false" afterPath="$PROJECT_DIR$/security/ir.model.access.csv" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/views/menuitems.xml" beforeDir="false" afterPath="$PROJECT_DIR$/views/menuitems.xml" afterDir="false" />
-    </list>
+    <list default="true" id="8b26ffb8-2f80-494f-89a4-5a607844cb0d" name="Changes" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
