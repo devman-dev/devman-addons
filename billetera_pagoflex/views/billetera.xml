@@ -83,21 +83,16 @@
                             </div>
                         </div>
                     </div>
-                    <div class="col-12">
+                    <div class="col-12 pb-5">
                         <div class="row bg-white" style="border: 1px solid #56FC81; border-radius: 1rem;">
                             <p class="col-6 text-right pt-3 m-0">Actividad</p>
                             <a class="col-6 text-end pt-3 m-0" style="color: #02F1FB">Ver todo ></a>
-                            <div class="col-12 px-3 "><hr/></div>
+                            <div class="col-12 px-3"><hr/></div>
                             <div class="col-12 col-md-6 p-2">
-                                <div class="wallet-card py-2 px-4">
+                                <div class="px-2">
                                     <owl-component class="" name="billetera_pagoflex.Wallet_filters"/>        
                                 </div>
                             </div>
-                            <!--<form class="col-12 form-inline">-->
-                            <!--    <div class="form-group mx-sm-3 mb-2">-->
-                            <!--        <input type="text" class="form-control" placeholder="Buscar"/>-->
-                            <!--    </div>-->
-                            <!--</form>-->
                         </div>
                     </div>  
                 </div>

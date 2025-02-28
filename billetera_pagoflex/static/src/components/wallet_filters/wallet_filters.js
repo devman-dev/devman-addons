@@ -8,7 +8,7 @@ export class Wallet_filters extends Component {
 
     setup() {
         this.state = useState({
-            transactions_filter: [],
+            transactions: [],
             transactions_filter2: [],
             state_filter: 'pending',
             state_filter2: 'all',
@@ -28,7 +28,7 @@ export class Wallet_filters extends Component {
                 'collection.transaction',
                 [['customer.user_ids', 'in', this.user_id], ['transaction_state', '=', 'pendiente']],
                 ['amount', 'date', 'transaction_state', 'collection_trans_type', 'is_commission'],
-                { limit: 10 }
+                { limit: 5 }
             );
 
             if (result.length > 0) {
@@ -66,7 +66,7 @@ export class Wallet_filters extends Component {
             const result = await this.env.services.orm.searchRead(
                 'collection.transaction',
                 [['customer.user_ids', 'in', this.user_id], ['transaction_state', '=', 'aprobado']],
-                ['amount', 'date', 'transaction_state', 'collection_trans_type', 'is_commission'], { limit: 10 }
+                ['amount', 'date', 'transaction_state', 'collection_trans_type', 'is_commission'], { limit: 5 }
             );
 
             if (result.length > 0) {
@@ -85,7 +85,8 @@ export class Wallet_filters extends Component {
             const result = await this.env.services.orm.searchRead(
                 'collection.transaction',
                 [['customer.user_ids', 'in', this.user_id]],
-                ['amount', 'date', 'transaction_state', 'collection_trans_type', 'is_commission'], { limit: 10 }
+                ['amount', 'date', 'transaction_state', 'collection_trans_type', 'is_commission'], 
+                { limit: 5 }
             );
 
             if (result.length > 0) {
