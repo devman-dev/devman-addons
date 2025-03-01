@@ -10,3 +10,4 @@ from . import bank_statement
 from . import account_bank_pagoflex
 from . import collection_category
 from . import bank_move_imported
+from . import transfer_request
