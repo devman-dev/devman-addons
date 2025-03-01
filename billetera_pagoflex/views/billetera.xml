@@ -86,7 +86,7 @@
                     <div class="col-12 pb-5">
                         <div class="row bg-white" style="border: 1px solid #56FC81; border-radius: 1rem;">
                             <p class="col-6 text-right pt-3 m-0">Actividad</p>
-                            <a class="col-6 text-end pt-3 m-0" style="color: #02F1FB">Ver todo ></a>
+                            <a t-att-href="'/wallet/movements/all/1'" class="col-6 text-end pt-3 m-0" style="color: #02F1FB">Ver todo ></a>
                             <div class="col-12 px-3"><hr/></div>
                             <div class="col-12 col-md-6 p-2">
                                 <div class="px-2">
