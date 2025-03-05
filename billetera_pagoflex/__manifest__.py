@@ -12,6 +12,7 @@
         'views/billetera.xml',
         'views/movimientos.xml',
         'views/pedido_de_transferencia.xml',
+        'views/transferencias.xml',
     ],
     'auto_install': False,
     'application': False,

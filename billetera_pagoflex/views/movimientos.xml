@@ -12,11 +12,12 @@
 
             <div class="container">
                 
-                <div class="row pt-3 pb-2">
+                <div class="d-flex justify-content-between pt-3 pb-2">
                     <a href="/wallet" class="col-1 text-dark">
                         <i class="fa fa-arrow-left" aria-hidden="true" style="font-size: 18px; margin-right: 10px;"/>
                     </a>    
-                    <p class="col-11 text-center m-0 p-0 pe-5">Actividad</p>
+                    <p>Actividad</p>
+                    <a class="text-end" t-att-href="'/wallet/export_excel?redirect_url=' + request.httprequest.url">Exportar Excel</a>
                 </div>
                 <div class="row pt-2 pb-2">
                     <!-- Barra de búsqueda -->
@@ -31,7 +32,7 @@
                         <i class="fa fa-sliders fa-lg" aria-hidden="true" style="display: flex; align-items: center; justify-content: center;background-color:#C6FDFF; border-radius: 50%; height: 40px; width: 40px;"/>
                     </div>
                 </div>
-                
+               
                 <div class="row bg-white mx-2 my-3 py-3" style="border: 1px solid #56FC81; border-radius: 1rem;">
                     <t t-if="not transactions">
                         <div class="text-center">

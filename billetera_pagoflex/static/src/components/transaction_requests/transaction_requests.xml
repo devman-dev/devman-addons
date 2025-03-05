@@ -2,17 +2,6 @@
 <templates xml:space="preserve">
     <t t-name="billetera_pagoflex.Wallet_transfer_request" owl="1">
         <div class="col-12">
-<!--            <div class="row py-2">-->
-<!--                <div class="col-6 d-flex justify-content-center">-->
-<!--                    &lt;!&ndash; Botón para Rechazados &ndash;&gt;-->
-<!--                    <button class="btn btn-outline-secondary btn-sm rounded-pill px-4" style="font-size: 15px;" t-on-click="onShowTransactionsAll">Todos</button>-->
-<!--                </div>-->
-<!--                <div class="col-6 d-flex justify-content-center">-->
-<!--                    &lt;!&ndash; Botón para Pendientes &ndash;&gt;-->
-<!--                    <button class="btn btn-outline-secondary btn-sm rounded-pill" style="font-size: 15px;" t-on-click="onShowTransactionsPending">Pendientes</button>-->
-<!--                </div>-->
-<!--            </div>-->
-<!--            <hr />-->
             <div class="row">
                 <div>
                     <t t-if="state.transactions_filter.length == 0">
@@ -25,12 +14,11 @@
                     <t t-foreach="state.transactions_filter" t-as="transaction" t-key="transaction.id">
                         <div class="my-3">
                             <div class="row align-items-center text-start text-md-start">
-
                                 <div class="col-4 mb-2 mb-md-0 d-flex justify-content-start align-items-center flex-wrap">
                                     <div class="p-2">
                                         <t t-if="transaction.transfer_request_state == 'revisar' or transaction.transfer_request_state == 'nuevo'">
                                             <a href="#" class="cancel-transfer" t-att-data-href="'/wallet/transfer_request/cancel/' + transaction.id" data-bs-toggle="modal" data-bs-target="#confirmCancelModal">
-                                                <i class="fa fa-times" aria-hidden="true"></i>
+                                                <i class="fa fa-times text-danger" aria-hidden="true"></i>
                                             </a>
                                         </t>
                                         <t t-else="">
@@ -52,15 +40,16 @@
                                                     esta solicitud de transferencia?
                                                 </div>
                                                 <div class="modal-footer">
-                                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                                                    <a id="confirmCancelBtn" t-att-href="'/wallet/transfer_request/cancel/' + transaction.id" class="btn btn-danger">Sí, Cancelar</a>
+                                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">No</button>
+                                                    <a id="confirmCancelBtn" t-att-href="'/wallet/transfer_request/cancel/' + transaction.id" class="btn btn-danger">Sí</a>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="" style="min-width: 100px; padding-left: 10px;">
-                                         <t t-if="transaction.transfer_request_state == 'cancelado'">
-                                            <span class=" p-2 position-relative">
+
+                                    <div class="" style="min-width: 100px; padding-left: 0px; font-size: 14px;">
+                                        <t t-if="transaction.transfer_request_state == 'cancelado'">
+                                            <span class="p-2 position-relative">
                                                 Cancelado <span class="position-absolute top-50 start-0 translate-middle p-1 bg-danger border border-light rounded-circle" />
                                             </span>
                                         </t>
@@ -82,11 +71,14 @@
                                     </div>
                                 </div>
                                 <div class="col-4 text-center">
-                                    <p class="p-2 m-0">
+                                    <p class="p-2 m-0" style="font-size: 14px;">
+                                        <span class="me-1">
+                                            <t t-out="transaction.alias_destination_account"/>
+                                        </span>
 
-                                        <span class="me-1"><t t-out="transaction.alias_destination_account"/></span>
-
-                                        <span class="ms-1"><t t-out="transaction.description"/></span>
+                                        <span class="ms-1">
+                                            <t t-out="transaction.description"/>
+                                        </span>
                                     </p>
                                 </div>
 
@@ -102,7 +94,8 @@
                             </div>
                         </div>
                     </t>
-                    <a t-att-href="'/wallet/tranfers_request/all/1'" class="btn btn-link float-end p-0">Ver movimientos <i class="fa fa-angle-right" aria-hidden="true" style="margin-left: 10px;"></i></a>
+                    <a t-att-href="'/wallet/tranfers_request/all/1'" class="btn btn-link float-end p-0">Ver movimientos <i class="fa fa-angle-right" aria-hidden="true" style="margin-left: 10px;"></i>
+                    </a>
                 </div>
             </div>
         </div>
