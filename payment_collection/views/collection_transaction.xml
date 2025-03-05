@@ -16,6 +16,8 @@
                     <button groups="payment_collection.groups_payment_collection_admin" type="object" name="refused" class="btn btn-danger" string="Rechazado" />
                     <button groups="payment_collection.groups_payment_collection_admin" type="object" name="intern" class="btn btn-info" string="Interno" /> 
                     <button groups="payment_collection.groups_payment_collection_admin" type="object" name="print_report" class="btn btn-secondary" string="Imprimir Reporte" />
+                    <button groups="payment_collection.groups_payment_collection_admin" type="object" name="open_filter_collection_movement_wiz" class="btn btn-secondary" string="Filtrar Movimientos" />
+
                     <!-- <button groups="payment_collection.groups_payment_collection_admin" type="object" name="change_positive_comission" class="btn btn-secondary" string="Cron Dev" /> -->
                 </header>
                 <field name="collection_trans_type" string="Tipo T." />

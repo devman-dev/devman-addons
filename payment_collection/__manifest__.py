@@ -35,6 +35,7 @@
         'wizard/bank_movements_month.xml',
         'wizard/recalculate_button.xml',
         'wizard/conciliation_wiz.xml',
+        'wizard/filter_collection_movement_wiz.xml',
     ],
     'demo': [''],
     'auto_install': False,

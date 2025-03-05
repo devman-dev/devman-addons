@@ -940,3 +940,14 @@ class CollectionTransaction(models.Model):
     #         data = {}
 
     #         return self.env.ref('loans_scoring.report_prestamo_bancario_xlsx_id').report_action(self, data)
+
+    @api.model
+    def open_filter_collection_movement_wiz(self, data):
+        return {
+            'name': 'Filtrar Movimientos',
+            'view_type': 'form',
+            'view_mode': 'form',
+            'res_model': 'filter.collection.movement',
+            'type': 'ir.actions.act_window',
+            'target': 'new',
+        }
