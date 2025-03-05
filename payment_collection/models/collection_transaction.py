@@ -86,6 +86,8 @@ class CollectionTransaction(models.Model):
     start_date = fields.Date(string='Fecha inicio para el reporte')
     end_date = fields.Date(string='Fecha fin para el reporte')
     print_date = fields.Date(string='Fecha de impresión')
+
+    
     
     def change_positive_comission(self):
         all_comission = self.env['collection.transaction'].search([('is_commission', '=', True),('amount', '>', 0)])

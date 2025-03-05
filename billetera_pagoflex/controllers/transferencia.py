@@ -1,7 +1,8 @@
-from odoo.http import request, Controller, route
+from odoo.http import request, Controller, route, content_disposition
 import requests
 import json
-
+import xlsxwriter
+from io import BytesIO
 
 class WebFormWalletController(Controller):
     @route('/wallet', auth='user', website=True)
@@ -9,9 +10,16 @@ class WebFormWalletController(Controller):
         collection_balance = request.env['collection.dashboard.customer'].sudo().recalculate_total_recs(request.env.user.partner_id.id)
         customer_balance = collection_balance if collection_balance else 0.00
         transactions = (
-            request.env['collection.transaction'].sudo().search([('customer', '=', request.env.user.partner_id.id), ('collection_trans_type', '!=', 'movimiento_interno')], order='id desc', limit=10)
+            request.env['collection.transaction']
+            .sudo()
+            .search(
+                [('customer', '=', request.env.user.partner_id.id), ('collection_trans_type', '!=', 'movimiento_interno')], order='id desc', limit=10
+            )
         )
-        return request.render('billetera_pagoflex.web_template_wallet', {'customer_balance': customer_balance, 'transactions': transactions, 'user_name': request.env.user.name})
+        return request.render(
+            'billetera_pagoflex.web_template_wallet',
+            {'customer_balance': customer_balance, 'transactions': transactions, 'user_name': request.env.user.name},
+        )
 
     @route('/wallet/transfer/accounts', auth='user', website=True, methods=['GET'])
     def web_form_transfer(self, **kwargs):
@@ -39,7 +47,14 @@ class WebFormWalletController(Controller):
 
     @route('/wallet/transfer/accounts/confirm_account', auth='user', website=True, methods=['GET'])
     def web_form_transfer_confirm_account(self, **kwargs):
-        account = {'id': '2', 'cbu': '1234567890112345678901', 'cvu': '1234567890112345678901', 'alias': 'alias.demo2', 'name_account': 'Datos Demostracion2', 'cuit': '12345678901'}
+        account = {
+            'id': '2',
+            'cbu': '1234567890112345678901',
+            'cvu': '1234567890112345678901',
+            'alias': 'alias.demo2',
+            'name_account': 'Datos Demostracion2',
+            'cuit': '12345678901',
+        }
         return request.render('billetera_pagoflex.web_form_template_transfer_confirm_account', {'account': account})
 
     @route('/bank/get_data', type='http', auth='public', methods=['GET'])
@@ -77,7 +92,14 @@ class WebFormWalletController(Controller):
 
     @route('/wallet/transfer/account/revision/<int:account_id>', auth='user', website=True)
     def revision_account(self, account_id, **kwargs):
-        account = {'id': '2', 'cbu': '1234567890112345678901', 'cvu': '1234567890112345678901', 'alias': 'alias.demo2', 'name_account': 'Datos Demostracion2', 'cuit': '12345678901'}
+        account = {
+            'id': '2',
+            'cbu': '1234567890112345678901',
+            'cvu': '1234567890112345678901',
+            'alias': 'alias.demo2',
+            'name_account': 'Datos Demostracion2',
+            'cuit': '12345678901',
+        }
         return request.render('billetera_pagoflex.web_form_template_transfer_account_revision', {'account': account, 'amount': 100})
 
     @route('/wallet/transfer/sended', auth='user', website=True)
@@ -116,7 +138,7 @@ class WebFormWalletController(Controller):
 
             if page < total_pages - 3:
                 visible_pages.append('...')
-            
+
             if total_pages not in visible_pages:
                 visible_pages.append(total_pages)
 
@@ -136,11 +158,9 @@ class WebFormWalletController(Controller):
             },
         )
 
-
     @route('/wallet/transfer_request', auth='user', website=True)
-    def send_transfer_request(self,**kwargs):
+    def send_transfer_request(self, **kwargs):
         return request.render('billetera_pagoflex.web_form_template_request_transfer')
-
 
     @route('/wallet/tranfers_request/<string:mov_type>/<int:page>', auth='user', website=True)
     def show_movements_request(self, mov_type, page=1, **kwargs):
@@ -178,8 +198,6 @@ class WebFormWalletController(Controller):
             if total_pages not in visible_pages:
                 visible_pages.append(total_pages)
 
-
-
         return request.render(
             'billetera_pagoflex.web_template_transfer_request',
             {
@@ -211,10 +229,9 @@ class WebFormWalletController(Controller):
 
         return request.render('billetera_pagoflex.web_form_template_transfer_request_sended', {'state_request': state_request})
 
-
     @route('/wallet/transfer_request/cancel/<int:id>', auth='user', website=True)
     def cancel_transfer_request(self, **kwargs):
-        domain = [('id','=', kwargs['id'])]
+        domain = [('id', '=', kwargs['id'])]
         trans_req = request.env['transfer.request'].sudo().search(domain)
         if trans_req:
             if trans_req.transfer_request_state != 'pasado':
@@ -222,10 +239,70 @@ class WebFormWalletController(Controller):
             else:
                 message = 'No se puede cancelar un pedido de transferencia aprobado.'
 
-
         return request.redirect('/wallet/transfer_request')
 
     @route('/wallet/export_excel', auth='user', website=True)
     def export_excel(self, **kwargs):
-        return self.env.ref('payment_collection.report_collection_transaction_xlsx_id').report_action(self)
-    
+        partner_id = request.env.user.partner_id.id
+        doc_ids = request.env['collection.transaction']
+        data = request.env['collection.transaction'].sudo().search([('customer', '=', partner_id), ('collection_trans_type', '!=', 'movimiento_interno')])
+
+        buffer = BytesIO()
+        workbook = xlsxwriter.Workbook(buffer)
+        sheet = workbook.add_worksheet('Recaudación de Pago')
+
+        bold = workbook.add_format({'bold': True, 'align': 'left'})
+        bold_center = workbook.add_format({'bold': True, 'align': 'center'})
+        number_format = workbook.add_format({'num_format': '#,##0.00'})
+        percent_fmt = workbook.add_format({'num_format': '0.00%'})
+
+        sheet.set_column('A:A', 16)
+        sheet.set_column('B:B', 14)
+        sheet.set_column('C:C', 14)
+        sheet.set_column('D:D', 22)
+        sheet.set_column('E:E', 22)
+        sheet.set_column('F:F', 14)
+        sheet.set_column('G:G', 16)
+        sheet.set_column('H:H', 16)
+        sheet.set_column('I:I', 14)
+        sheet.set_column('J:J', 14)
+        sheet.set_column('K:K', 18)
+        sheet.set_column('L:L', 10)
+        sheet.set_column('M:M', 8)
+
+        row = 0
+        col = 0
+        sheet.write(row, col, 'Fecha:', bold)
+        sheet.write(row, col + 1, 'Nro T:', bold)
+        sheet.write(row, col + 2, 'Cliente:', bold)
+        sheet.write(row, col + 3, 'Servicio:', bold)
+        sheet.write(row, col + 4, 'Operación:', bold)
+        sheet.write(row, col + 5, 'CUIT:', bold)
+        sheet.write(row, col + 6, 'Descripción:', bold)
+        sheet.write(row, col + 7, 'Imp. Operación:', bold)
+        sheet.write(row, col + 8, 'Comi(%):', bold)
+        sheet.write(row, col + 9, 'Imp. Comisión:', bold)
+
+        row = 1
+        for rec in data:
+            sheet.write(row, col, rec.date.strftime('%d/%m/%Y'))
+            sheet.write(row, col + 1, rec.transaction_name )
+            sheet.write(row, col + 2, rec.customer.name )
+            sheet.write(row, col + 3, rec.service.services.name )
+            sheet.write(row, col + 4, rec.operation.name )
+            sheet.write(row, col + 5, rec.origin_account_cuit )
+            sheet.write(row, col + 6, rec.description )
+            sheet.write(row, col + 7, rec.amount )
+            sheet.write(row, col + 8, rec.commission )
+            sheet.write(row, col + 9, (rec.commission * rec.amount) / 100 )
+            row += 1
+
+
+        workbook.close()
+        buffer.seek(0)
+
+        headers = [
+            ('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'),
+            ('Content-Disposition', content_disposition(f'{request.env.user.partner_id.name}.xlsx'))
+        ]
+        return request.make_response(buffer.getvalue(), headers=headers)

@@ -11,6 +11,7 @@
         <field name="model">account.bank.pagoflex</field>
         <field name="arch" type="xml">
             <tree string="">
+                <field name="bank_id" />
                 <field name="name" />
                 <field name="cuit" />
                 <field name="alias" />
@@ -27,6 +28,7 @@
             <form string="">
                 <sheet>
                     <group>
+                        <field name="bank_id" options="{'no_create': True, 'no_create_edit': True,'no_quick_create': True}"/>
                         <field name="name" />
                         <field name="cuit" />
                         <field name="alias" />

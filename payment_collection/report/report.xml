@@ -47,9 +47,9 @@
         <field name="binding_model_id" ref="model_collection_transaction" />
         <field name="binding_type">report</field>
     </record>
-    <record id="report_collection_transaction_xlsx_id" model="ir.actions.report">
+    <!-- <record id="report_collection_transaction_xlsx_id" model="ir.actions.report">
         <field name="binding_model_id" eval="False"/>
-    </record>
+    </record> -->
 
     <record id="report_bank_movement_month_xlsx_id" model="ir.actions.report">
         <field name="name">Imprimir Movimientos Bancarios</field>

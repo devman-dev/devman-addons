@@ -16,12 +16,55 @@ class CollectionServicesCommission(models.Model):
     )
     name = fields.Char()
     commission_app_rate = fields.Float(string='Comisión de la App', tracking=True, digits=(16, 3))
-
+    bank_id = fields.Many2one('res.bank', string='Banco', required=True)
     cbu = fields.Char('CBU')
     cvu = fields.Char('CVU')
     alias = fields.Char('Alias')
     name_account = fields.Char('Nombre Cuenta')
     cuit = fields.Char('CUIT')
+    bank_accounts = fields.Many2one('account.bank.pagoflex', string='Cuenta Bancaria', required=True)
+    bank_accounts_ids = fields.Many2many('account.bank.pagoflex',string='Cuentas Bancarias', relation="account_bank2")
+
+    @api.onchange('bank_id')
+    def _get_bank_accounts(self):
+        for rec in self:
+            if rec.bank_id:
+                accounts_ids = self.env['account.bank.pagoflex'].search([('bank_id', '=', rec.bank_id.id)])
+                rec.bank_accounts_ids = accounts_ids.ids
+            else:
+                rec.bank_accounts_ids = False
+
+    @api.onchange('bank_accounts')
+    def _get_bank_accounts_data(self):
+        for rec in self:
+            if rec.bank_accounts:
+                rec.cbu = rec.bank_accounts.cbu
+                rec.cvu = rec.bank_accounts.cvu
+                rec.alias = rec.bank_accounts.alias
+                rec.name_account = rec.bank_accounts.name
+                rec.cuit = rec.bank_accounts.cuit
+                domain = [('bank_accounts', '=', rec.bank_accounts.id)]
+                if rec.id:
+                    domain.append(('id', '!=', rec.id))
+
+                exist_another = self.env['collection.services.commission'].search(domain)
+                if len(exist_another) > 0:
+                    self.env['bus.bus']._sendone(
+                        self.env.user.partner_id,
+                        'simple_notification',
+                        {
+                            'type': 'warning',
+                            'message': 'Ya existe otro registro con esta cuenta bancaria.',
+                            'title': 'Advertencia',
+                            'sticky': False,
+                        },
+                    )
+            else:
+                rec.cbu = False
+                rec.cvu = False
+                rec.alias = False
+                rec.name_account = False
+                rec.cuit = False
 
     @api.depends('services')
     @api.depends_context('show_account_name')
@@ -66,15 +109,15 @@ class CollectionServicesCommission(models.Model):
             for reg in rec.agent_services_commission:
                 if reg.commission_rate == 0:
                     reg.unlink()
-                    
-      # Sobrescribir el método copy
+
+    # Sobrescribir el método copy
     def copy(self, default=None):
         default = dict(default or {})
         # Llamar al método copy original
         new_record = super(CollectionServicesCommission, self).copy(default)
-        
+
         # Copiar los registros One2many relacionados
         for agent_service in self.agent_services_commission:
             agent_service.copy({'collection_services_commission_id': new_record.id})
-        
+
         return new_record

@@ -7,6 +7,7 @@
         <field name="arch" type="xml">
             <tree string="Comisión de servicios de cobranza">
                 <field name="customer" />
+                <field name="bank_id" />
                 <field name="name_account" />
                 <field name="services" />
                 <field name="commission" />
@@ -24,6 +25,7 @@
                     <group>
                         <group>
                             <field name="customer" options="{'no_create': True, 'no_create_edit': True,'no_quick_create': True}"/>
+                            <field name="bank_id" options="{'no_create': True, 'no_create_edit': True,'no_quick_create': True}"/>
                             <field name="services" options="{'no_create': True, 'no_create_edit': True,'no_quick_create': True}"/>
                         </group>
                         <group>
@@ -38,6 +40,8 @@
                         </tree>
                     </field>
                     <group>
+                        <field name="bank_accounts" domain="[('id', 'in', bank_accounts_ids)]" options="{'no_create': True, 'no_create_edit': True,'no_quick_create': True}"/>
+                        <field name="bank_accounts_ids" invisible="1"/>
                         <field name="name_account"/>
                         <field name="cuit"/>
                         <field name="cbu"/>

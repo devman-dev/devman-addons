@@ -27,28 +27,49 @@
                                 </div>
                                 <div class="mb-3">
                                     <label for="cuenta_destino" class="form-label">Nombre Cuenta de Destino</label>
-                                    <input type="text" id="cuenta_destino" name="cuenta_destino" class="form-control" placeholder="Ingrese la cuenta de destino." required="True" />
+                                    <input type="text" id="cuenta_destino" name="cuenta_destino" class="form-control" placeholder="Ingrese la cuenta de destino." />
                                 </div>
 
                                 <div class="mb-3">
                                     <label for="alias" class="form-label">Alias</label>
-                                    <input type="text" id="alias" name="alias" class="form-control" placeholder="Ingrese el alias" required="True" />
+                                    <input type="text" id="alias" name="alias" class="form-control" placeholder="Ingrese el alias" />
                                 </div>
 
                                 <div class="mb-3">
                                     <label for="cvu" class="form-label">CBU/CVU</label>
-                                    <input type="text" id="cvu" name="cvu" class="form-control" placeholder="Ingrese el CVU" required="True" />
+                                    <input type="text" id="cvu" name="cvu" class="form-control" placeholder="Ingrese el CVU" />
                                 </div>
 
                                 <div class="mb-3">
                                     <label for="cbu" class="form-label">CUIT/CUIL</label>
-                                    <input type="text" id="cbu" name="cbu" class="form-control" placeholder="Ingrese el CBU" required="True" />
+                                    <input type="text" id="cbu" name="cbu" class="form-control" placeholder="Ingrese el CBU" />
                                 </div>
 
                                 <div class="mb-3">
                                     <label for="monto" class="form-label">Monto</label>
-                                    <input type="number" id="monto" name="monto" class="form-control" placeholder="Ingrese el monto" required="True" />
+                                    <input type="text" id="monto" name="monto" class="form-control" placeholder="Ingrese el monto" required="True" />
                                 </div>
+
+                                <script>
+                                    document.addEventListener("DOMContentLoaded", function () {
+                                        const montoInput = document.getElementById("monto");
+
+                                        montoInput.addEventListener("input", function () {
+                                            let value = montoInput.value.replace(/\./g, "").replace(/,/g, "."); // Quita los puntos y cambia la coma por punto para parsear bien
+                                            let number = parseFloat(value);
+
+                                            if (!isNaN(number)) {
+                                                montoInput.value = new Intl.NumberFormat("es-AR", {
+                                                    minimumFractionDigits: 2,
+                                                    maximumFractionDigits: 2
+                                                }).format(number);
+                                            } else {
+                                                montoInput.value = "";
+                                            }
+                                        });
+                                    });
+                                </script>
+
 
                                 <div class="mb-3">
                                     <label for="comentario" class="form-label">Descripción</label>
