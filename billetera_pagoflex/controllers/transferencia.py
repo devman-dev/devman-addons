@@ -84,7 +84,7 @@ class WebFormWalletController(Controller):
     def transfer_sended(self, **kwargs):
         return request.render('billetera_pagoflex.web_form_template_transfer_sended')
 
-    @route('/wallet/movements/<string:mov_type>/<int:page>', auth='user', website=True)
+    @route('/wallet/movements/<string:mov_type>/<int:page>', auth='user', website=True, methods=['GET'])
     def show_movements(self, mov_type, page=1, **kwargs):
         items_per_page = 10
 
@@ -136,13 +136,14 @@ class WebFormWalletController(Controller):
             },
         )
 
+
     @route('/wallet/transfer_request', auth='user', website=True)
     def send_transfer_request(self,**kwargs):
         return request.render('billetera_pagoflex.web_form_template_request_transfer')
 
 
     @route('/wallet/tranfers_request/<string:mov_type>/<int:page>', auth='user', website=True)
-    def show_movements(self, mov_type, page=1, **kwargs):
+    def show_movements_request(self, mov_type, page=1, **kwargs):
         items_per_page = 10
 
         domain = [('customer', '=', request.env.user.partner_id.id)]
@@ -222,5 +223,9 @@ class WebFormWalletController(Controller):
                 message = 'No se puede cancelar un pedido de transferencia aprobado.'
 
 
-        return request.render('billetera_pagoflex.web_form_template_request_transfer')
+        return request.redirect('/wallet/transfer_request')
 
+    @route('/wallet/export_excel', auth='user', website=True)
+    def export_excel(self, **kwargs):
+        return self.env.ref('payment_collection.report_collection_transaction_xlsx_id').report_action(self)
+    
