@@ -17,7 +17,7 @@
                         <i class="fa fa-arrow-left" aria-hidden="true" style="font-size: 18px; margin-right: 10px;"/>
                     </a>    
                     <p>Actividad</p>
-                    <a class="text-end" t-att-href="f'/wallet/export_excel/{id_service}/?redirect_url=' + request.httprequest.url">Exportar Excel</a>
+                    <a class="text-end" t-att-href="'/wallet/export_excel/' + str(id_service) + '/?redirect_url=' + request.httprequest.url">Exportar Excel</a>
                 </div>
                 <div class="row pt-2 pb-2">
                     <!-- Barra de búsqueda -->
