@@ -27,29 +27,45 @@ class ReportPrestamoBancarioXlsx(models.AbstractModel):
         sheet.set_column('L:L', 10)
         sheet.set_column('M:M', 8)
 
-        row = 0
+        sheet.write(0,0, 'Cliente: ', bold)
+        sheet.write(0, 1, partners[0].customer.name)
+
+        sheet.write(1, 0, 'Fecha desde: ', bold)
+        sheet.write(1, 1, partners[0].start_date.strftime('%d/%m/%Y'))
+
+        sheet.write(1, 2, 'Fecha hasta: ', bold)
+        sheet.write(1, 3, partners[0].end_date.strftime('%d/%m/%Y'))
+
+        sheet.write(1, 5, 'Saldo Anterior: ', bold)
+        sheet.write(1, 6, partners[0].previous_month)
+
+
+        row = 2
         col = 0
         sheet.write(row, col, 'Fecha:', bold)
         sheet.write(row, col + 1, 'Nro T:', bold)
-        sheet.write(row, col + 2, 'Cliente:', bold)
-        sheet.write(row, col + 3, 'Servicio:', bold)
-        sheet.write(row, col + 4, 'Operación:', bold)
-        sheet.write(row, col + 5, 'CUIT:', bold)
-        sheet.write(row, col + 6, 'Descripción:', bold)
-        sheet.write(row, col + 7, 'Imp. Operación:', bold)
-        sheet.write(row, col + 8, 'Comi(%):', bold)
-        sheet.write(row, col + 9, 'Imp. Comisión:', bold)
+        sheet.write(row, col + 2, 'Servicio:', bold)
+        sheet.write(row, col + 3, 'Operación:', bold)
+        sheet.write(row, col + 4, 'CUIT:', bold)
+        sheet.write(row, col + 5, 'Descripción:', bold)
+        sheet.write(row, col + 6, 'Imp. Operación:', bold)
+        sheet.write(row, col + 7, 'Comi(%):', bold)
+        sheet.write(row, col + 8, 'Imp. Comisión:', bold)
 
-        row = 1
+        row = 3
+        total_amount = 0
         for rec in partners:
             sheet.write(row, col, rec.date.strftime('%d/%m/%Y'))
             sheet.write(row, col + 1, rec.transaction_name )
-            sheet.write(row, col + 2, rec.customer.name )
-            sheet.write(row, col + 3, rec.service.services.name )
-            sheet.write(row, col + 4, rec.operation.name )
-            sheet.write(row, col + 5, rec.origin_account_cuit )
-            sheet.write(row, col + 6, rec.description )
-            sheet.write(row, col + 7, rec.amount )
-            sheet.write(row, col + 8, rec.commission )
-            sheet.write(row, col + 9, (rec.commission * rec.amount) / 100 )
+            sheet.write(row, col + 2, rec.service.services.name )
+            sheet.write(row, col + 3, rec.operation.name )
+            sheet.write(row, col + 4, rec.origin_account_cuit )
+            sheet.write(row, col + 5, rec.description )
+            sheet.write(row, col + 6, rec.amount )
+            sheet.write(row, col + 7, rec.commission )
+            sheet.write(row, col + 8, (rec.commission * rec.amount) / 100 )
             row += 1
+            total_amount += rec.amount
+
+        sheet.write(row, 5, 'Saldo Final: ', bold)
+        sheet.write(row, 6, total_amount)
