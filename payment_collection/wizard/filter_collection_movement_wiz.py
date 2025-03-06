@@ -1,5 +1,5 @@
-from odoo import fields, models
-from datetime import datetime
+from odoo import fields, models, api
+
 
 
 class FilterCollectionMovementWiz(models.TransientModel):
@@ -10,6 +10,7 @@ class FilterCollectionMovementWiz(models.TransientModel):
     service = fields.Many2one('collection.services.commission', string='Servicio', tracking=True)
     operation = fields.Many2one('product.template', relation='operation', string='Operación', tracking=True)
     bank = fields.Many2one('res.bank')
+    service_ids = fields.Many2many('collection.services.commission', string='Servicio', tracking=True)
 
 
     def show_collection(self):
@@ -43,5 +44,16 @@ class FilterCollectionMovementWiz(models.TransientModel):
         }
 
 
-
+    @api.onchange('customer_code')
+    def _get_bank_accounts(self):
+        for rec in self:
+            if rec.customer_code:
+                customer_code = rec.customer_code.zfill(5)
+                service_id = self.env['collection.services.commission'].search([('customer.customer_code', '=', customer_code)])
+                if not service_id:
+                    rec.service_ids = False
+                else:    
+                    rec.service_ids = service_id.ids
+            else:
+                rec.service_ids = False
 
