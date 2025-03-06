@@ -115,7 +115,7 @@
                                                 <t t-out="('{:,.2f}'.format(group[1])).replace(',', 'X').replace('.', ',').replace('X', '.')"/>
                                             </span>
                                         </h4>
-                                        <a t-att-href="f'/wallet/movements/all/{group[0]}/1'" class="col-6 text-end pt-3 m-0">Ver todo <i class="fa fa-angle-right" aria-hidden="true" style="margin-left: 10px;"></i>
+                                        <a t-att-href="f'/wallet/movements/all/' + str(group[0]) + '/1'" class="col-6 text-end pt-3 m-0">Ver todo <i class="fa fa-angle-right" aria-hidden="true" style="margin-left: 10px;"></i>
                                         </a>
                                     </div>
                                 </div>
