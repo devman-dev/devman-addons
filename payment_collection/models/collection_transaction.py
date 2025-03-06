@@ -86,6 +86,8 @@ class CollectionTransaction(models.Model):
     start_date = fields.Date(string='Fecha inicio para el reporte')
     end_date = fields.Date(string='Fecha fin para el reporte')
     print_date = fields.Date(string='Fecha de impresión')
+
+    
     
     def change_positive_comission(self):
         all_comission = self.env['collection.transaction'].search([('is_commission', '=', True),('amount', '>', 0)])
@@ -938,3 +940,14 @@ class CollectionTransaction(models.Model):
     #         data = {}
 
     #         return self.env.ref('loans_scoring.report_prestamo_bancario_xlsx_id').report_action(self, data)
+
+    @api.model
+    def open_filter_collection_movement_wiz(self, data):
+        return {
+            'name': 'Filtrar Movimientos',
+            'view_type': 'form',
+            'view_mode': 'form',
+            'res_model': 'filter.collection.movement',
+            'type': 'ir.actions.act_window',
+            'target': 'new',
+        }

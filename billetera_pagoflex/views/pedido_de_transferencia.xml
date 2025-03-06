@@ -27,28 +27,49 @@
                                 </div>
                                 <div class="mb-3">
                                     <label for="cuenta_destino" class="form-label">Nombre Cuenta de Destino</label>
-                                    <input type="text" id="cuenta_destino" name="cuenta_destino" class="form-control" placeholder="Ingrese la cuenta de destino." required="True" />
+                                    <input type="text" id="cuenta_destino" name="cuenta_destino" class="form-control" placeholder="Ingrese la cuenta de destino." />
                                 </div>
 
                                 <div class="mb-3">
                                     <label for="alias" class="form-label">Alias</label>
-                                    <input type="text" id="alias" name="alias" class="form-control" placeholder="Ingrese el alias" required="True" />
+                                    <input type="text" id="alias" name="alias" class="form-control" placeholder="Ingrese el alias" />
                                 </div>
 
                                 <div class="mb-3">
                                     <label for="cvu" class="form-label">CBU/CVU</label>
-                                    <input type="text" id="cvu" name="cvu" class="form-control" placeholder="Ingrese el CVU" required="True" />
+                                    <input type="text" id="cvu" name="cvu" class="form-control" placeholder="Ingrese el CVU" />
                                 </div>
 
                                 <div class="mb-3">
                                     <label for="cbu" class="form-label">CUIT/CUIL</label>
-                                    <input type="text" id="cbu" name="cbu" class="form-control" placeholder="Ingrese el CBU" required="True" />
+                                    <input type="text" id="cbu" name="cbu" class="form-control" placeholder="Ingrese el CBU" />
                                 </div>
 
                                 <div class="mb-3">
                                     <label for="monto" class="form-label">Monto</label>
-                                    <input type="number" id="monto" name="monto" class="form-control" placeholder="Ingrese el monto" required="True" />
+                                    <input type="text" id="monto" name="monto" class="form-control" placeholder="Ingrese el monto" required="True" />
                                 </div>
+
+                                <script>
+                                    document.addEventListener("DOMContentLoaded", function () {
+                                        const montoInput = document.getElementById("monto");
+
+                                        montoInput.addEventListener("input", function () {
+                                            let value = montoInput.value.replace(/\./g, "").replace(/,/g, "."); // Quita los puntos y cambia la coma por punto para parsear bien
+                                            let number = parseFloat(value);
+
+                                            if (!isNaN(number)) {
+                                                montoInput.value = new Intl.NumberFormat("es-AR", {
+                                                    minimumFractionDigits: 2,
+                                                    maximumFractionDigits: 2
+                                                }).format(number);
+                                            } else {
+                                                montoInput.value = "";
+                                            }
+                                        });
+                                    });
+                                </script>
+
 
                                 <div class="mb-3">
                                     <label for="comentario" class="form-label">Descripción</label>
@@ -117,9 +138,8 @@
                             <t t-foreach="transactions" t-as="transaction">
                                 <div class="my-3">
                                     <div class="row align-items-center text-start text-md-start">
-
-                                        <div class="col-4 mb-2 mb-md-0 d-flex justify-content-start align-items-center flex-wrap">
-                                            <div class="p-2">
+                                        <div class="col-6 mb-2 mb-md-0 d-flex justify-content-start align-items-center flex-wrap">
+                                            <div class="p-2 ps-0">
                                                 <t t-if="transaction.transfer_request_state == 'revisar' or transaction.transfer_request_state == 'nuevo'">
                                                     <a href="#" class="cancel-transfer" t-att-data-href="'/wallet/transfer_request/cancel/%s' % (transaction.id)" data-bs-toggle="modal" data-bs-target="#confirmCancelModal">
                                                         <i class="fa fa-times text-danger" aria-hidden="true"></i>
@@ -150,7 +170,7 @@
                                                     </div>
                                                 </div>
                                             </div>
-                                            <div class="" style="min-width: 100px; padding-left: 10px;">
+                                            <div class="" style="min-width: 100px; padding-left: 10px; font-size: 12px;">
                                                 <t t-if="transaction.transfer_request_state == 'cancelado'">
                                                     <span class="p-2 position-relative"> Cancelado <span class="position-absolute top-50 start-0 translate-middle p-1 bg-danger border border-light rounded-circle" />
                                                     </span>
@@ -169,7 +189,7 @@
                                                 </t>
                                             </div>
                                         </div>
-                                        <div class="col-4 text-center">
+                                        <div class="col-3 text-start" style="font-size: 12px;">
                                             <p class="p-2 m-0">
 
                                                 <span class="me-1">
@@ -182,8 +202,9 @@
                                             </p>
                                         </div>
 
-                                        <div class="col-4 text-md-start mb-2 mb-md-0 d-flex flex-column align-items-end">
-                                            <span style="font-size: 14px; font-weight: bold;">$                                                <t t-out="('{:,.2f}'.format(transaction.amount)).replace(',', 'X').replace('.', ',').replace('X', '.')" />
+                                        <div class="col-3 text-md-start mb-2 mb-md-0 d-flex flex-column align-items-end">
+                                            <span style="font-size: 12px; font-weight: bold;">$                       
+                                                <t t-out="('{:,.2f}'.format(transaction.amount)).replace(',', 'X').replace('.', ',').replace('X', '.')" />
                                             </span>
                                             <span style="font-size: 12px;">
                                                 <t t-out="transaction.date.strftime('%d/%m/%Y')" />

@@ -12,6 +12,21 @@ class CustomListController extends ListController {
     this.action = useService("action");
   }
 
+
+  async onClickFilter() {
+    try {
+      await this.action.doAction({
+        name: 'Filtrar',
+        res_model: 'filter.collection.movement',
+        type: 'ir.actions.act_window',
+        target: 'new',
+        views: [[false, 'form']],
+      });
+    } catch (error) {
+      console.error('Error en doAction:', error);
+    }
+  }
+
   async onClickPrintTransaction() {
     try {
       await this.action.doAction({

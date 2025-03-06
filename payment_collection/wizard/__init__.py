@@ -4,3 +4,4 @@ from . import commi_trans_wiz
 from . import recalculate_button
 from . import bank_movements_month
 from . import conciliation_wiz
+from . import filter_collection_movement_wiz

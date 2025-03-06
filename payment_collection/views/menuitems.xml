@@ -79,14 +79,22 @@
         name="Cuentas Bancarias"
         action="account_bank_pagoflex_action"
         parent="collection_configuration_menu"
-        sequence="4" />
+        sequence="5" />
     
+    <menuitem
+        id="banks_pagoflex_menu"
+        name="Bancos"
+        action="base.action_res_bank_form"
+        parent="collection_configuration_menu"
+        sequence="6" />
+        
     <menuitem
         id="category_pagoflex_menu"
         name="Etiquetas"
         action="collection_category_action"
         parent="collection_configuration_menu"
-        sequence="4" />
+        sequence="7" />
+    
 
     <!-- Oculto para producción hasta terminar -->
     <menuitem

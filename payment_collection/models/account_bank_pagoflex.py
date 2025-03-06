@@ -3,7 +3,7 @@ from odoo import fields, api, models
 class AccountBankPagoFlex(models.Model):
     _name = 'account.bank.pagoflex'
     
-    
+    bank_id = fields.Many2one('res.bank', string='Banco', required=True)
     name = fields.Char(string='Nombre', required=True)
     cuit = fields.Char(string='CUIT', required=True)
     alias = fields.Char(string='Alias', required=True)
