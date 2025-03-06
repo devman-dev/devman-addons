@@ -8,6 +8,15 @@
             <field name="padding">5</field>
             <field eval="False" name="company_id" />
         </record>
+
+
+        <record id="sequence_for_customer_id" model="ir.sequence">
+            <field name="name">Sequence for customer</field>
+            <field name="code">res.partner</field>
+            <field name="prefix"></field>
+            <field name="padding">5</field>
+            <field eval="False" name="company_id" />
+        </record>
     </data>
 
     <!-- Default Records -->

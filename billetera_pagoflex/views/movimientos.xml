@@ -17,7 +17,7 @@
                         <i class="fa fa-arrow-left" aria-hidden="true" style="font-size: 18px; margin-right: 10px;"/>
                     </a>    
                     <p>Actividad</p>
-                    <a class="text-end" t-att-href="'/wallet/export_excel?redirect_url=' + request.httprequest.url">Exportar Excel</a>
+                    <a class="text-end" t-att-href="f'/wallet/export_excel/{id_service}/?redirect_url=' + request.httprequest.url">Exportar Excel</a>
                 </div>
                 <div class="row pt-2 pb-2">
                     <!-- Barra de búsqueda -->
@@ -54,7 +54,7 @@
                             <span class="text-center text-muted small">Transferencia recibida </span>
                         </div>
                             
-                        <div class="col-4 ps-1 pe-2 mb-3 d-flex justify-content-end align-items-start">
+                        <div t-att-class="'col-4 ps-1 pe-2 mb-3 d-flex justify-content-end align-items-start ' + ('text-danger' if transaction.amount &lt; 0 else 'text-secondary')">
                             $ <t t-out="('{:,.2f}'.format(transaction.amount)).replace(',', 'X').replace('.', ',').replace('X', '.')"/>
                         </div>
                             <!--<div class="col-6 text-md-start mb-2 mb-md-0 d-flex flex-column align-items-end">-->

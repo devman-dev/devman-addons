@@ -9,10 +9,10 @@
                 <sheet>
                     <group>
                         <field name="customer_code"/>
-                        <field name="customer"/>
-                        <field name="service"/>
-                        <field name="operation"/>
-                        <field name="bank"/>
+                        <field name="customer" options="{'no_create': True, 'no_create_edit': True,'no_quick_create': True}"/>
+                        <field name="service" options="{'no_create': True, 'no_create_edit': True,'no_quick_create': True}"/>
+                        <field name="operation" options="{'no_create': True, 'no_create_edit': True,'no_quick_create': True}"/>
+                        <field name="bank" options="{'no_create': True, 'no_create_edit': True,'no_quick_create': True}"/>
                     </group>
                     <footer>
                         <button name="show_collection" string="Filtrar" class="btn btn-primary" type="object"/>

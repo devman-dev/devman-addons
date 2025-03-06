@@ -4,22 +4,28 @@ import json
 import xlsxwriter
 from io import BytesIO
 
+
 class WebFormWalletController(Controller):
+
     @route('/wallet', auth='user', website=True)
     def web_form_wallet(self, **kwargs):
         collection_balance = request.env['collection.dashboard.customer'].sudo().recalculate_total_recs(request.env.user.partner_id.id)
         customer_balance = collection_balance if collection_balance else 0.00
-        transactions = (
-            request.env['collection.transaction']
-            .sudo()
-            .search(
-                [('customer', '=', request.env.user.partner_id.id), ('collection_trans_type', '!=', 'movimiento_interno')], order='id desc', limit=10
-            )
-        )
-        return request.render(
-            'billetera_pagoflex.web_template_wallet',
-            {'customer_balance': customer_balance, 'transactions': transactions, 'user_name': request.env.user.name},
-        )
+
+        transactions = request.env['collection.transaction'].sudo().search([('customer', '=', request.env.user.partner_id.id), ('collection_trans_type', '!=', 'movimiento_interno')], order='id desc', limit=10)
+
+        grouped_transactions = {}
+        for transaction in transactions:
+            service = transaction.service.id if transaction.service else 'Sin Servicio'
+
+            if service not in grouped_transactions:
+                grouped_transactions[service] = []
+            grouped_transactions[service].append(transaction.amount)
+
+        for key in grouped_transactions.keys():
+            grouped_transactions[key] = sum(grouped_transactions[key])
+
+        return request.render('billetera_pagoflex.web_template_wallet', {'customer_balance': customer_balance, 'transactions': transactions, 'user_name': request.env.user.name, 'grouped_transactions': grouped_transactions})
 
     @route('/wallet/transfer/accounts', auth='user', website=True, methods=['GET'])
     def web_form_transfer(self, **kwargs):
@@ -106,17 +112,17 @@ class WebFormWalletController(Controller):
     def transfer_sended(self, **kwargs):
         return request.render('billetera_pagoflex.web_form_template_transfer_sended')
 
-    @route('/wallet/movements/<string:mov_type>/<int:page>', auth='user', website=True, methods=['GET'])
-    def show_movements(self, mov_type, page=1, **kwargs):
+    @route('/wallet/movements/<string:mov_type>/<int:id_service>/<int:page>', auth='user', website=True, methods=['GET'])
+    def show_movements(self, mov_type, id_service, page=1, **kwargs):
         items_per_page = 10
 
-        domain = [('customer', '=', request.env.user.partner_id.id)]
-        if mov_type == 'pending':
-            domain.append(('transaction_state', '=', 'pendiente'))
-        elif mov_type == 'refused':
-            domain.append(('transaction_state', '=', 'rechazado'))
-        elif mov_type == 'approved':
-            domain.append(('transaction_state', '=', 'aprobado'))
+        domain = [('customer', '=', request.env.user.partner_id.id), ('service', '=', id_service)]
+        # if mov_type == 'pending':
+        #     domain.append(('transaction_state', '=', 'pendiente'))
+        # elif mov_type == 'refused':
+        #     domain.append(('transaction_state', '=', 'rechazado'))
+        # elif mov_type == 'approved':
+        #     domain.append(('transaction_state', '=', 'aprobado'))
 
         all_transactions = request.env['collection.transaction'].sudo().search(domain)
 
@@ -155,6 +161,7 @@ class WebFormWalletController(Controller):
                 'visible_pages': visible_pages,
                 'mov_type': mov_type,
                 'customer_balance': customer_balance,
+                'id_service': id_service,
             },
         )
 
@@ -241,11 +248,11 @@ class WebFormWalletController(Controller):
 
         return request.redirect('/wallet/transfer_request')
 
-    @route('/wallet/export_excel', auth='user', website=True)
-    def export_excel(self, **kwargs):
+    @route('/wallet/export_excel/<int:id_service>', auth='user', website=True)
+    def export_excel(self, id_service,**kwargs):
         partner_id = request.env.user.partner_id.id
         doc_ids = request.env['collection.transaction']
-        data = request.env['collection.transaction'].sudo().search([('customer', '=', partner_id), ('collection_trans_type', '!=', 'movimiento_interno')])
+        data = request.env['collection.transaction'].sudo().search([('customer', '=', partner_id), ('collection_trans_type', '!=', 'movimiento_interno'),('service', '=', id_service)])
 
         buffer = BytesIO()
         workbook = xlsxwriter.Workbook(buffer)
@@ -286,23 +293,19 @@ class WebFormWalletController(Controller):
         row = 1
         for rec in data:
             sheet.write(row, col, rec.date.strftime('%d/%m/%Y'))
-            sheet.write(row, col + 1, rec.transaction_name )
-            sheet.write(row, col + 2, rec.customer.name )
-            sheet.write(row, col + 3, rec.service.services.name )
-            sheet.write(row, col + 4, rec.operation.name )
-            sheet.write(row, col + 5, rec.origin_account_cuit )
-            sheet.write(row, col + 6, rec.description )
-            sheet.write(row, col + 7, rec.amount )
-            sheet.write(row, col + 8, rec.commission )
-            sheet.write(row, col + 9, (rec.commission * rec.amount) / 100 )
+            sheet.write(row, col + 1, rec.transaction_name)
+            sheet.write(row, col + 2, rec.customer.name)
+            sheet.write(row, col + 3, rec.service.services.name)
+            sheet.write(row, col + 4, rec.operation.name)
+            sheet.write(row, col + 5, rec.origin_account_cuit)
+            sheet.write(row, col + 6, rec.description)
+            sheet.write(row, col + 7, rec.amount)
+            sheet.write(row, col + 8, rec.commission)
+            sheet.write(row, col + 9, (rec.commission * rec.amount) / 100)
             row += 1
-
 
         workbook.close()
         buffer.seek(0)
 
-        headers = [
-            ('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'),
-            ('Content-Disposition', content_disposition(f'{request.env.user.partner_id.name}.xlsx'))
-        ]
+        headers = [('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'), ('Content-Disposition', content_disposition(f'{request.env.user.partner_id.name}.xlsx'))]
         return request.make_response(buffer.getvalue(), headers=headers)

@@ -37,30 +37,89 @@
                     <div class="col-12 col-md-6 ">
                         <div class="px-2">
                             <div class="row py-2">
-                                <span class="text-center px-2">Hola <t t-out="user_name"/>
+                                <span class="text-center px-2">Hola, <t t-out="user_name"/>
                                 </span>
                             </div>
-                            <div class="row" style="background-color:#56FC81; border-radius: 1rem;">
-                                <div class="col-12">
-                                    <label class="d-flex align-items-center justify-content-between py-2" style="cursor: pointer;">
-                                        <i class="fa fa-eye" aria-hidden="true"></i>
-                                        <span class="" style="padding-left: 5rem;">Saldo Disponible</span>
-                                        <select class="px-3" id="currency_select" name="currency" style="background-color:#56FC81; border: #C6FDFF; outline: #C6FDFF;">
-                                            <option value="pesos" t-att-selected="'selected'">Pesos</option>
-                                            <option value="dolar" t-att-selected="">Dólar</option>
-                                            <option value="qr" t-att-selected="">QR</option>
-                                        </select>
-                                    </label>
+                            <!-- <div class="service-group">
+                                <h3>
+                                    <t t-if="group[0] != 'Sin Servicio'">
+                                        <t t-out="request.env['collection.services.commission'].browse(group[0]).name"/>
+                                    </t>
+                                    <t t-else="">
+                                            Sin Servicio
+                                    </t>
+                                </h3>
+                                <ul>
+                                    <t t-foreach="group[1]" t-as="transaction">
+                                        <li>
+                                            <t t-out="transaction.service.display_name"/>
+                                            - $<t t-out="transaction.amount"/>
+                                        </li>
+                                    </t>
+                                </ul>
+                            </div> -->
+                            <t t-foreach="grouped_transactions.items()" t-as="group">
+                                <div class="row my-2" style="background-color:#56FC81; border-radius: 1rem;">
+                                    <div class="col-12">
+                                        <label class="d-flex align-items-center justify-content-between py-2" style="cursor: pointer;">
+                                            <!-- <i class="fa fa-eye" aria-hidden="true"></i> -->
+                                            <span>
+                                                <t t-if="group[0] != 'Sin Servicio'">
+                                                    <t t-out="request.env['collection.services.commission'].browse(group[0]).display_name"/>
+                                                </t>
+                                            </span>
+                                            <div class="p-2">
+                                                <a href="#" class="btn-sm btn-primary" data-bs-toggle="modal" t-att-data-bs-target="'#watchDataModal_'+ str(group[0])">
+                                                    Ver Datos
+                                                </a>
+                                            </div>
+
+                                            <div class="modal fade" t-att-id="'watchDataModal_'+ str(group[0])" tabindex="-1" aria-labelledby="watchDataLabel" aria-hidden="true">
+                                                <div class="modal-dialog">
+                                                    <div class="modal-content">
+                                                        <div class="modal-header">
+                                                            <h5 class="modal-title" id="watchDataLabel">Datos de la cuenta</h5>
+                                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                        </div>
+                                                        <div class="modal-body">
+                                                            <p>
+                                                                <b>Nombre: </b>
+                                                                <t t-out="request.env['collection.services.commission'].browse(group[0]).name_account"/>
+                                                            </p>
+                                                            <p>
+                                                                <b>CUIT: </b>
+                                                                <t t-out="request.env['collection.services.commission'].browse(group[0]).cuit"/>
+                                                            </p>
+                                                            <p>
+                                                                <b>CBU: </b>
+                                                                <t t-out="request.env['collection.services.commission'].browse(group[0]).cbu"/>
+                                                            </p>
+                                                            <p>
+                                                                <b>CVU: </b>
+                                                                <t t-out="request.env['collection.services.commission'].browse(group[0]).cvu"/>
+                                                            </p>
+                                                            <p>
+                                                                <b>ALIAS: </b>
+                                                                <t t-out="request.env['collection.services.commission'].browse(group[0]).alias"/>
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </label>
+                                    </div>
+                                    <div class="col-12 text-center d-flex justify-content-around align-items-center py-3" style="">
+                                        <h4 class="mb-0 text-secundary">
+                                            $                                        
+                                            <span t-att-class="'mb-0 ' + ('text-danger' if group[1] &lt; 0 else 'text-secondary')">
+                                                <t t-out="('{:,.2f}'.format(group[1])).replace(',', 'X').replace('.', ',').replace('X', '.')"/>
+                                            </span>
+                                        </h4>
+                                        <a t-att-href="f'/wallet/movements/all/{group[0]}/1'" class="col-6 text-end pt-3 m-0">Ver todo <i class="fa fa-angle-right" aria-hidden="true" style="margin-left: 10px;"></i>
+                                        </a>
+                                    </div>
                                 </div>
-                                <div class="col-12 text-center d-flex justify-content-around align-items-center py-3" style="">
-                                    <h4 class="mb-0 text-secundary">
-                                        $                                        
-                                        <span t-att-class="'mb-0 ' + ('text-danger' if customer_balance &lt; 0 else 'text-secondary')">
-                                            <t t-out="('{:,.2f}'.format(customer_balance)).replace(',', 'X').replace('.', ',').replace('X', '.')"/>
-                                        </span>
-                                    </h4>
-                                </div>
-                            </div>
+                            </t>
                             <div class="row p-4" style="font-size: 14px;">
                                 <div class="col-12 p-2 my-2 d-flex justify-content-around align-items-center">
                                     <!-- <a href="/wallet/transfer/accounts" class="d-flex flex-column align-items-center justify-content-center" style="color: black;">
@@ -87,7 +146,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="col-12 pb-5">
+                    <!-- <div class="col-12 pb-5">
                         <div class="row bg-white" style="border: 1px solid #56FC81; border-radius: 1rem;">
                             <p class="col-6 text-right pt-3 m-0">Actividad</p>
                             <a href="/wallet/movements/all/1" class="col-6 text-end pt-3 m-0" style="color: #02F1FB">Ver todo <i class="fa fa-angle-right" aria-hidden="true" style="margin-left: 10px;"></i>
@@ -101,7 +160,7 @@
                                 </div>
                             </div>
                         </div>
-                    </div>
+                    </div> -->
                 </div>
             </div>
         </t>
