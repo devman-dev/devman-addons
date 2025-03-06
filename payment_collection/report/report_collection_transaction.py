@@ -11,6 +11,7 @@ class ReportPrestamoBancarioXlsx(models.AbstractModel):
         bold = workbook.add_format({'bold': True, 'align': 'left'})
         bold_center = workbook.add_format({'bold': True, 'align': 'center'})
         number_format = workbook.add_format({'num_format': '#,##0.00'})
+        # number_format = workbook.add_format({'num_format': '#.##0,00'})
         percent_fmt = workbook.add_format({'num_format': '0.00%'})
 
         sheet.set_column('A:A', 16)
@@ -56,16 +57,45 @@ class ReportPrestamoBancarioXlsx(models.AbstractModel):
         total_amount = 0
         for rec in partners:
             sheet.write(row, col, rec.date.strftime('%d/%m/%Y'))
-            sheet.write(row, col + 1, rec.transaction_name )
-            sheet.write(row, col + 2, rec.service.services.name )
-            sheet.write(row, col + 3, rec.operation.name )
-            sheet.write(row, col + 4, rec.origin_account_cuit )
-            sheet.write(row, col + 5, rec.description )
-            sheet.write(row, col + 6, rec.amount )
-            sheet.write(row, col + 7, rec.commission )
-            sheet.write(row, col + 8, (rec.commission * rec.amount) / 100 )
+            if rec.transaction_name:
+                sheet.write(row, col + 1, rec.transaction_name)
+            else:
+                sheet.write(row, col + 1, '')
+
+            if rec.service.services.name:
+                sheet.write(row, col + 2, rec.service.services.name)
+            else:
+                sheet.write(row, col + 2, '')
+
+            if rec.operation.name:
+                sheet.write(row, col + 3, rec.operation.name)
+            else:
+                sheet.write(row, col + 3, '')
+
+            if rec.origin_account_cuit:
+                sheet.write(row, col + 4, rec.origin_account_cuit)
+            else:
+                sheet.write(row, col + 4, '')
+
+            if rec.description:
+                sheet.write(row, col + 5, rec.description)
+            else:
+                sheet.write(row, col + 5, '')
+
+            if rec.amount:
+                sheet.write(row, col + 6, rec.amount, number_format)
+            else:
+                sheet.write(row, col + 6, '', number_format)
+
+            if rec.commission:
+                sheet.write(row, col + 7, rec.commission, percent_fmt)
+            else:
+                sheet.write(row, col + 7, '', percent_fmt)
+
+            sheet.write(row, col + 8, (rec.commission * rec.amount) / 100, number_format)
+
             row += 1
             total_amount += rec.amount
 
         sheet.write(row, 5, 'Saldo Final: ', bold)
-        sheet.write(row, 6, total_amount)
+        sheet.write(row, 6, total_amount, number_format)

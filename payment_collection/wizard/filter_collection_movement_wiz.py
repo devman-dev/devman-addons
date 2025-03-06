@@ -9,7 +9,7 @@ class FilterCollectionMovementWiz(models.TransientModel):
     customer = fields.Many2one('res.partner', string='Cliente', tracking=True, domain="[('check_origin_account','!=', True)]")
     service = fields.Many2one('collection.services.commission', string='Servicio', tracking=True)
     operation = fields.Many2one('product.template', relation='operation', string='Operación', tracking=True)
-    bank = fields.Many2one('res.bank')
+    bank = fields.Many2one('res.bank', string='Banco')
     service_ids = fields.Many2many('collection.services.commission', string='Servicio', tracking=True)
 
 
@@ -52,7 +52,7 @@ class FilterCollectionMovementWiz(models.TransientModel):
                 service_id = self.env['collection.services.commission'].search([('customer.customer_code', '=', customer_code)])
                 if not service_id:
                     rec.service_ids = False
-                else:    
+                else:
                     rec.service_ids = service_id.ids
             else:
                 rec.service_ids = False
