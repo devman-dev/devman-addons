@@ -3,7 +3,8 @@ import requests
 import json
 import xlsxwriter
 from io import BytesIO
-
+import logging
+_logger = logging.getLogger(__name__)
 
 class WebFormWalletController(Controller):
 
@@ -221,19 +222,22 @@ class WebFormWalletController(Controller):
     @route('/wallet/transfer_request/sended', auth='user', website=True)
     def send_transfer_request_sended(self, **kwargs):
         try:
+            amount = kwargs.get('monto','0').replace('.','').replace(',','.')
+            clean_amount = abs(float(amount))
             dict_data = {
                 'date': kwargs.get('fecha'),
                 'customer': request.env.user.partner_id.id,
                 'description': kwargs.get('comentario'),
-                'amount': abs(float(kwargs.get('monto'))),
+                'amount': clean_amount,
                 'name_destination_account': kwargs.get('cuenta_destino'),
                 'alias_destination_account': kwargs.get('alias'),
-                'cbu_destination_account': kwargs.get('cbu'),
                 'cvu_destination_account': kwargs.get('cvu'),
+                'cuit_destination_account': kwargs.get('cuit'),
             }
             request.env['transfer.request'].sudo().create(dict_data)
             state_request = True
-        except:
+        except Exception as e:
+            _logger.error(f'Error al crear la solicitud de transferencia: {e}')
             state_request = False
 
         return request.render('billetera_pagoflex.web_form_template_transfer_request_sended', {'state_request': state_request})

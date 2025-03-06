@@ -37,12 +37,12 @@
 
                                 <div class="mb-3">
                                     <label for="cvu" class="form-label">CBU/CVU</label>
-                                    <input type="text" id="cvu" name="cvu" class="form-control" placeholder="Ingrese el CVU" />
+                                    <input type="text" id="cvu" name="cvu" class="form-control" placeholder="Ingrese el CBU/CVU" />
                                 </div>
 
                                 <div class="mb-3">
-                                    <label for="cbu" class="form-label">CUIT/CUIL</label>
-                                    <input type="text" id="cbu" name="cbu" class="form-control" placeholder="Ingrese el CBU" />
+                                    <label for="cuit" class="form-label">CUIT/CUIL</label>
+                                    <input type="text" id="cuit" name="cuit" class="form-control" placeholder="Ingrese el CUIT/CUIL" />
                                 </div>
 
                                 <div class="mb-3">
@@ -54,8 +54,8 @@
                                     document.addEventListener("DOMContentLoaded", function () {
                                         const montoInput = document.getElementById("monto");
 
-                                        montoInput.addEventListener("input", function () {
-                                            let value = montoInput.value.replace(/\./g, "").replace(/,/g, "."); // Quita los puntos y cambia la coma por punto para parsear bien
+                                        montoInput.addEventListener("blur", function () {  // Se ejecuta al salir del input
+                                            let value = montoInput.value.replace(/\./g, "").replace(/,/g, "."); // Quita puntos y cambia coma por punto
                                             let number = parseFloat(value);
 
                                             if (!isNaN(number)) {
@@ -63,13 +63,10 @@
                                                     minimumFractionDigits: 2,
                                                     maximumFractionDigits: 2
                                                 }).format(number);
-                                            } else {
-                                                montoInput.value = "";
                                             }
                                         });
                                     });
                                 </script>
-
 
                                 <div class="mb-3">
                                     <label for="comentario" class="form-label">Descripción</label>
@@ -139,7 +136,7 @@
                                 <div class="my-3">
                                     <div class="row align-items-center text-start text-md-start">
                                         <div class="col-6 mb-2 mb-md-0 d-flex justify-content-start align-items-center flex-wrap">
-                                            <div class="p-2 ps-0">
+                                            <div class="px-2 ps-0">
                                                 <t t-if="transaction.transfer_request_state == 'revisar' or transaction.transfer_request_state == 'nuevo'">
                                                     <a href="#" class="cancel-transfer" t-att-data-href="'/wallet/transfer_request/cancel/%s' % (transaction.id)" data-bs-toggle="modal" data-bs-target="#confirmCancelModal">
                                                         <i class="fa fa-times text-danger" aria-hidden="true"></i>
@@ -172,37 +169,34 @@
                                             </div>
                                             <div class="" style="min-width: 100px; padding-left: 10px; font-size: 12px;">
                                                 <t t-if="transaction.transfer_request_state == 'cancelado'">
-                                                    <span class="p-2 position-relative"> Cancelado <span class="position-absolute top-50 start-0 translate-middle p-1 bg-danger border border-light rounded-circle" />
+                                                    <span class="ps-2 position-relative"> Cancelado <span class="position-absolute top-50 start-0 translate-middle p-1 bg-danger border border-light rounded-circle" />
                                                     </span>
                                                 </t>
                                                 <t t-if="transaction.transfer_request_state == 'revisar'">
-                                                    <span class="p-2 position-relative"> Revisando <span class="position-absolute top-50 start-0 translate-middle p-1 bg-warning border border-light rounded-circle" />
+                                                    <span class="ps-2 position-relative"> Revisando <span class="position-absolute top-50 start-0 translate-middle p-1 bg-warning border border-light rounded-circle" />
                                                     </span>
                                                 </t>
                                                 <t t-elif="transaction.transfer_request_state == 'nuevo'">
-                                                    <span class="p-2 position-relative"> Pendiente <span class="position-absolute top-50 start-0 translate-middle p-1 bg-info border border-light rounded-circle" />
+                                                    <span class="ps-2 position-relative"> Pendiente <span class="position-absolute top-50 start-0 translate-middle p-1 bg-info border border-light rounded-circle" />
                                                     </span>
                                                 </t>
                                                 <t t-elif="transaction.transfer_request_state == 'pasado'">
-                                                    <span class="p-2 position-relative"> Aprobado <span class="position-absolute top-50 start-0 translate-middle p-1 bg-success border border-light rounded-circle" />
+                                                    <span class="ps-2 position-relative"> Aprobado <span class="position-absolute top-50 start-0 translate-middle p-1 bg-success border border-light rounded-circle" />
                                                     </span>
                                                 </t>
+                                                <div class="text-start" style="font-size: 12px; margin-top: -2px;">
+                                                    <span class="me-1">
+                                                        <t t-out="transaction.alias_destination_account" />
+                                                    </span>
+                                                    <span class="ms-1">
+                                                        <t t-out="transaction.description" />
+                                                    </span>
+                                                </div>
                                             </div>
                                         </div>
-                                        <div class="col-3 text-start" style="font-size: 12px;">
-                                            <p class="p-2 m-0">
 
-                                                <span class="me-1">
-                                                    <t t-out="transaction.alias_destination_account" />
-                                                </span>
 
-                                                <span class="ms-1">
-                                                    <t t-out="transaction.description" />
-                                                </span>
-                                            </p>
-                                        </div>
-
-                                        <div class="col-3 text-md-start mb-2 mb-md-0 d-flex flex-column align-items-end">
+                                        <div class="col-6 text-md-start mb-2 mb-md-0 d-flex flex-column align-items-end">
                                             <span style="font-size: 12px; font-weight: bold;">$                       
                                                 <t t-out="('{:,.2f}'.format(transaction.amount)).replace(',', 'X').replace('.', ',').replace('X', '.')" />
                                             </span>
