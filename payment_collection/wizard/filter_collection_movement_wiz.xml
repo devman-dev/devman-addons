@@ -14,7 +14,7 @@
                         <field name="service" domain="[('id','in', service_ids)]" options="{'no_create': True, 'no_create_edit': True,'no_quick_create': True}"/>
                         <field name="operation" options="{'no_create': True, 'no_create_edit': True,'no_quick_create': True}"/>
                         <field name="bank" options="{'no_create': True, 'no_create_edit': True,'no_quick_create': True}"/>
-                        <field name="service_ids" invisible="0"/>
+                        <field name="service_ids" invisible="1"/>
                     </group>
                     <footer>
                         <button name="show_collection" string="Filtrar" class="btn btn-primary" type="object"/>
