@@ -16,8 +16,10 @@ class WebFormWalletController(Controller):
 
         grouped_transactions = {}
         for transaction in transactions:
-            service = transaction.service.id if transaction.service else 'Sin Servicio'
-
+            if transaction.service:
+                service = transaction.service.id
+            else:
+                continue
             if service not in grouped_transactions:
                 grouped_transactions[service] = []
             grouped_transactions[service].append(transaction.amount)
