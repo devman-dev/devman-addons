@@ -9,7 +9,7 @@
 
     <!-- Billetera -->
     <template id="web_template_wallet" name="Billetera">
-        <t t-call="website.layout">
+                <t t-call="website.layout">
             <style>
                 main {
                 background: linear-gradient(to top, #56FC81, #ffffff);
@@ -34,7 +34,7 @@
 
             <div class="container px-4 px-md-0">
                 <div class="row d-flex justify-content-center pt-4 px-2 px-md-0 ">
-                    <div class="col-12 col-md-4 ">
+                    <div class="col-12 col-lg-4  ">
                         <div class="px-2">
                             <div class="row py-2">
                                 <span class="text-center px-2">Hola, <t t-out="user_name"/>
@@ -63,14 +63,14 @@
                                     <div class="row py-3">
 <!--                                        <label class="d-flex align-items-center justify-content-between py-2" style="cursor: pointer;">-->
                                             <!-- <i class="fa fa-eye" aria-hidden="true"></i> -->
-                                            <div class="col-8">
+                                            <div class="col-9">
                                                 <span style="margin-left:10px;">
                                                 <t t-if="group[0] != 'Sin Servicio'">
                                                     <t t-out="request.env['collection.services.commission'].sudo().browse(group[0]).display_name"/>
                                                 </t>
                                                 </span>
                                             </div>
-                                            <div class="col-4 d-flex justify-content-end">
+                                            <div class="col-3 d-flex justify-content-end px-0">
                                                 <a href="#" class="btn-sm btn-primary" data-bs-toggle="modal" t-att-data-bs-target="'#watchDataModal_'+ str(group[0])">
                                                     Ver Datos
                                                 </a>
@@ -81,7 +81,7 @@
                                                     <div class="modal-content">
                                                         <div class="modal-header">
                                                             <h5 class="modal-title" id="watchDataLabel">Datos de la cuenta</h5>
-                                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"/>
                                                         </div>
                                                         <div class="modal-body">
                                                             <p>
@@ -111,7 +111,7 @@
 <!--                                        </label>-->
                                     </div>
                                     <div class="row py-3">
-                                        <div class="col-8">
+                                        <div class="col-9">
                                             <h4 class="mb-0 text-secundary" style="margin-left:10px;">
                                                 $
                                                 <span t-att-class="'mb-0 ' + ('text-danger' if group[1] &lt; 0 else 'text-secondary')">
@@ -119,8 +119,8 @@
                                                 </span>
                                             </h4>
                                         </div>
-                                        <div class="col-4 d-flex justify-content-end">
-                                            <a t-att-href="'/wallet/movements/all/' + str(group[0]) + '/1'">Ver todo <i class="fa fa-angle-right" aria-hidden="true"></i>
+                                        <div class="col-3 d-flex justify-content-end px-0">
+                                            <a t-att-href="'/wallet/movements/all/' + str(group[0]) + '/1'">Ver todo <i class="fa fa-angle-right" aria-hidden="true"/>
                                             </a>
                                         </div>
                                     </div>
@@ -138,7 +138,7 @@
                                         <span class="">Sacar</span>
                                     </a> -->
                                     <a href="/wallet/transfer_request" class="d-flex flex-column align-items-center justify-content-center" style="color: black;">
-                                        <i class="fa fa-exchange fa-lg" aria-hidden="true" style="display: flex; align-items: center; justify-content: center;background-color:#C6FDFF; border-radius: 50%; height: 45px; width: 45px;"></i>
+                                        <i class="fa fa-exchange fa-lg" aria-hidden="true" style="display: flex; align-items: center; justify-content: center;background-color:#C6FDFF; border-radius: 50%; height: 45px; width: 45px;"/>
                                         <span class="">Pedido de Transferencias</span>
                                     </a>
                                     <!-- <a href="/wallet/transfer/accounts" class="d-flex flex-column align-items-center justify-content-center" style="color: black;">
