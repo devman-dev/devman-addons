@@ -51,10 +51,13 @@ class FilterCollectionMovementWiz(models.TransientModel):
             if rec.customer_code:
                 customer_code = rec.customer_code.zfill(5)
                 service_id = self.env['collection.services.commission'].search([('customer.customer_code', '=', customer_code)])
+                customer_id = self.env['res.partner'].search([('customer_code', '=', customer_code)])
                 if not service_id:
                     rec.service_ids = False
                 else:
                     rec.service_ids = service_id.ids
+                if customer_id:
+                    rec.customer = customer_id.id
             else:
                 rec.service_ids = False
 
