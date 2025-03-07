@@ -5,49 +5,61 @@
         <t t-call="website.layout">
 
             <style>
-                body {
-                background-color: #f8f9fa;
+                main {
+                background: linear-gradient(to top, #56FC81, #ffffff);
+                font-family: Helvetica, Arial, sans-serif;
                 }
             </style>
-
-            <div class="container my-5">
+            <script>
+                function toggleForm() {
+                    var form = document.getElementById('transfer-form');
+                    var toggleText = document.getElementById('toggle-text');
+                    
+                    form.classList.toggle('d-none');
+                    
+                    if (form.classList.contains('d-none')) {
+                        toggleText.textContent = 'Mostrar formulario';
+                    } else {
+                        toggleText.textContent = 'Ocultar formulario';
+                    }
+                }
+            </script>
+            <div class="container my-5" id="web_form_template_request_transfer">
                 <div class="row justify-content-center">
                     <div class="col-12 col-sm-10 col-md-8 col-lg-6">
-                        <form action="/wallet/transfer_request/sended" method="post" enctype="multipart/form-data" class="o_mark_required p-4 bg-white shadow rounded">
-                            <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()" />
-
-                            <button class="btn btn-secondary mb-3" onclick="document.getElementById('transfer-form').classList.toggle('d-none')" type="button">
-                                Mostrar/Ocultar Formulario
+                        <form action="/wallet/transfer_request/sended" method="post" enctype="multipart/form-data" class="o_mark_required p-4 bg-white text-center mb-3" style="border: 1px solid #56FC81; border-radius: 1rem;">
+                            <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                            <button class="btn btn-secondary mb-3" onclick="toggleForm()" type="button">
+                                <span id="toggle-text">Mostrar formulario</span>
                             </button>
-
-                            <div id="transfer-form" class="d-none">
+                            <div id="transfer-form" class="d-none text-start">
                                 <div class="mb-3">
                                     <label for="fecha" class="form-label">Fecha</label>
-                                    <input type="date" id="fecha" name="fecha" class="form-control" t-att-value="time.strftime('%Y-%m-%d')" required="True" />
+                                    <input type="date" id="fecha" name="fecha" class="form-control" t-att-value="time.strftime('%Y-%m-%d')" required="True"/>
                                 </div>
                                 <div class="mb-3">
                                     <label for="cuenta_destino" class="form-label">Nombre Cuenta de Destino</label>
-                                    <input type="text" id="cuenta_destino" name="cuenta_destino" class="form-control" placeholder="Ingrese la cuenta de destino." />
+                                    <input type="text" id="cuenta_destino" name="cuenta_destino" class="form-control" placeholder="Ingrese la cuenta de destino."/>
                                 </div>
 
                                 <div class="mb-3">
                                     <label for="alias" class="form-label">Alias</label>
-                                    <input type="text" id="alias" name="alias" class="form-control" placeholder="Ingrese el alias" />
+                                    <input type="text" id="alias" name="alias" class="form-control" placeholder="Ingrese el alias"/>
                                 </div>
 
                                 <div class="mb-3">
                                     <label for="cvu" class="form-label">CBU/CVU</label>
-                                    <input type="text" id="cvu" name="cvu" class="form-control" placeholder="Ingrese el CBU/CVU" />
+                                    <input type="text" id="cvu" name="cvu" class="form-control" placeholder="Ingrese el CBU/CVU"/>
                                 </div>
 
                                 <div class="mb-3">
                                     <label for="cuit" class="form-label">CUIT/CUIL</label>
-                                    <input type="text" id="cuit" name="cuit" class="form-control" placeholder="Ingrese el CUIT/CUIL" />
+                                    <input type="text" id="cuit" name="cuit" class="form-control" placeholder="Ingrese el CUIT/CUIL"/>
                                 </div>
 
                                 <div class="mb-3">
                                     <label for="monto" class="form-label">Monto</label>
-                                    <input type="text" id="monto" name="monto" class="form-control" placeholder="Ingrese el monto" required="True" />
+                                    <input type="text" id="monto" name="monto" class="form-control" placeholder="Ingrese el monto" required="True"/>
                                 </div>
 
                                 <script>
@@ -70,7 +82,7 @@
 
                                 <div class="mb-3">
                                     <label for="comentario" class="form-label">Descripción</label>
-                                    <textarea id="comentario" name="comentario" class="form-control" rows="3" placeholder="Agregue una descripción"></textarea>
+                                    <textarea id="comentario" name="comentario" class="form-control" rows="3" placeholder="Agregue una descripción"/>
                                 </div>
 
                                 <div class="text-center">
@@ -83,7 +95,7 @@
                     </div>
                     <div class="col-12 col-md-6">
                         <div class="wallet-card px-4 bg-white shadow rounded">
-                            <owl-component class="" name="billetera_pagoflex.Wallet_transfer_request" />
+                            <owl-component class="" name="billetera_pagoflex.Wallet_transfer_request"/>
                         </div>
                     </div>
                 </div>
