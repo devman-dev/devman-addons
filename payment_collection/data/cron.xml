@@ -18,5 +18,6 @@
         <field name="numbercall">1</field>
         <field name="state">code</field>
         <field name="code">model.upload_customer_code()</field>
+        <field name="active">False</field>
     </record>
 </odoo>
