@@ -12,7 +12,7 @@
                         <field name="customer_code"/>
                         <field name="customer" options="{'no_create': True, 'no_create_edit': True,'no_quick_create': True}"/>
                         <field name="service" domain="[('id','in', service_ids)]" options="{'no_create': True, 'no_create_edit': True,'no_quick_create': True}"/>
-                        <field name="operation" options="{'no_create': True, 'no_create_edit': True,'no_quick_create': True}"/>
+                        <field name="operation" domain="[('collection_type','=','operation')]" options="{'no_create': True, 'no_create_edit': True,'no_quick_create': True}"/>
                         <field name="bank" options="{'no_create': True, 'no_create_edit': True,'no_quick_create': True}"/>
                         <field name="service_ids" invisible="1"/>
                     </group>
