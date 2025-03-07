@@ -11,7 +11,6 @@ class ReportPrestamoBancarioXlsx(models.AbstractModel):
         bold = workbook.add_format({'bold': True, 'align': 'left'})
         bold_center = workbook.add_format({'bold': True, 'align': 'center'})
         number_format = workbook.add_format({'num_format': '#,##0.00'})
-        # number_format = workbook.add_format({'num_format': '#.##0,00'})
         percent_fmt = workbook.add_format({'num_format': '0.00%'})
 
         sheet.set_column('A:A', 16)
@@ -88,7 +87,7 @@ class ReportPrestamoBancarioXlsx(models.AbstractModel):
                 sheet.write(row, col + 6, '', number_format)
 
             if rec.commission:
-                sheet.write(row, col + 7, rec.commission, percent_fmt)
+                sheet.write(row, col + 7, rec.commission / 100, percent_fmt)
             else:
                 sheet.write(row, col + 7, '', percent_fmt)
 
