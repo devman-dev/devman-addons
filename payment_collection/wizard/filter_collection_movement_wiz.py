@@ -21,7 +21,8 @@ class FilterCollectionMovementWiz(models.TransientModel):
         if self.customer:
             domain.append(('customer', '=', self.customer.id))
         if self.customer_code:
-            domain.append(('customer.customer_code', '=', self.customer_code))
+            customer_code = self.customer_code.zfill(5)
+            domain.append(('customer.customer_code', '=', customer_code))
         if self.service:
             domain.append(('service', '=', self.service.id))
         if self.operation:
@@ -57,3 +58,14 @@ class FilterCollectionMovementWiz(models.TransientModel):
             else:
                 rec.service_ids = False
 
+    @api.onchange('customer')
+    def _get_customer_service(self):
+        for rec in self:
+            if rec.customer:
+                service_id = self.env['collection.services.commission'].search([('customer', '=', rec.customer.id)])
+                if not service_id:
+                    rec.service_ids = False
+                else:
+                    rec.service_ids = service_id.ids
+            else:
+                rec.service_ids = False
