@@ -38,7 +38,7 @@ class ReportPrestamoBancarioXlsx(models.AbstractModel):
         sheet.write(1, 3, partners[0].end_date.strftime('%d/%m/%Y'))
 
         sheet.write(1, 5, 'Saldo Anterior: ', bold)
-        sheet.write(1, 6, partners[0].previous_month)
+        sheet.write(1, 6, partners[0].previous_month, number_format)
 
 
         row = 2
