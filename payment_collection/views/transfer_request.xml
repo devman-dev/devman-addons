@@ -13,7 +13,7 @@
         <field name="arch" type="xml">
             <tree string="Pedidos de Transferencias" create="0">
                 <header>
-                    <button groups="payment_collection.groups_payment_collection_admin" type="object" name="transfer_movements_to_collection" class="btn btn-primary" string="Pasar Movimientos" />
+                    <button groups="payment_collection.groups_payment_collection_admin" type="object" name="transfer_movements_to_collection" class="btn btn-primary" string="Pasar Movimientos"/>
                 </header>
                 <field name="date" />
                 <field name="customer" force_save="1" readonly="1"/>
@@ -41,7 +41,7 @@
         <field name="arch" type="xml">
             <form string="Pedidos de Transferecias">
                 <header>
-                    <button groups="payment_collection.groups_payment_collection_admin" type="object" name="transfer_movements_to_collection" class="btn btn-primary" string="Pasar Movimientos" />
+                    <button groups="payment_collection.groups_payment_collection_admin" type="object" name="transfer_movements_to_collection" class="btn btn-primary" string="Pasar Movimientos" invisible="transfer_request_state == 'pasado'" />
                 </header>
                 <sheet>
                     <group>
