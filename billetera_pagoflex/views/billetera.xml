@@ -65,7 +65,7 @@
                                             <!-- <i class="fa fa-eye" aria-hidden="true"></i> -->
                                             <span>
                                                 <t t-if="group[0] != 'Sin Servicio'">
-                                                    <t t-out="request.env['collection.services.commission'].browse(group[0]).display_name"/>
+                                                    <t t-out="request.env['collection.services.commission'].sudo().browse(group[0]).display_name"/>
                                                 </t>
                                             </span>
                                             <div class="p-2">
@@ -84,23 +84,23 @@
                                                         <div class="modal-body">
                                                             <p>
                                                                 <b>Nombre: </b>
-                                                                <t t-out="request.env['collection.services.commission'].browse(group[0]).name_account"/>
+                                                                <t t-out="request.env['collection.services.commission'].sudo().browse(group[0]).name_account"/>
                                                             </p>
                                                             <p>
                                                                 <b>CUIT: </b>
-                                                                <t t-out="request.env['collection.services.commission'].browse(group[0]).cuit"/>
+                                                                <t t-out="request.env['collection.services.commission'].sudo().browse(group[0]).cuit"/>
                                                             </p>
                                                             <p>
                                                                 <b>CBU: </b>
-                                                                <t t-out="request.env['collection.services.commission'].browse(group[0]).cbu"/>
+                                                                <t t-out="request.env['collection.services.commission'].sudo().browse(group[0]).cbu"/>
                                                             </p>
                                                             <p>
                                                                 <b>CVU: </b>
-                                                                <t t-out="request.env['collection.services.commission'].browse(group[0]).cvu"/>
+                                                                <t t-out="request.env['collection.services.commission'].sudo().browse(group[0]).cvu"/>
                                                             </p>
                                                             <p>
                                                                 <b>ALIAS: </b>
-                                                                <t t-out="request.env['collection.services.commission'].browse(group[0]).alias"/>
+                                                                <t t-out="request.env['collection.services.commission'].sudo().browse(group[0]).alias"/>
                                                             </p>
                                                         </div>
                                                     </div>

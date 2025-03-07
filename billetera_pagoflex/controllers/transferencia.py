@@ -257,7 +257,7 @@ class WebFormWalletController(Controller):
     @route('/wallet/export_excel/<int:id_service>', auth='user', website=True)
     def export_excel(self, id_service,**kwargs):
         partner_id = request.env.user.partner_id.id
-        doc_ids = request.env['collection.transaction']
+        doc_ids = request.env['collection.transaction'].sudo()
         data = request.env['collection.transaction'].sudo().search([('customer', '=', partner_id), ('collection_trans_type', '!=', 'movimiento_interno'),('service', '=', id_service)])
 
         buffer = BytesIO()
