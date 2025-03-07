@@ -315,3 +315,7 @@ class WebFormWalletController(Controller):
 
         headers = [('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'), ('Content-Disposition', content_disposition(f'{request.env.user.partner_id.name}.xlsx'))]
         return request.make_response(buffer.getvalue(), headers=headers)
+
+    @route('/my', auth='user', website=True)
+    def redirect_to_wallet(self, **kwargs):
+        return request.redirect('/wallet')
