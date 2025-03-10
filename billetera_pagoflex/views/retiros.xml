@@ -78,6 +78,8 @@
                     <div class="col-12 col-md-6">
                         <div class="wallet-card px-4 bg-white shadow rounded">
                             <owl-component class="" name="billetera_pagoflex.Wallet_transfer_request"/>
+                            <a t-att-href="'/wallet/tranfers_request/all/1?value=withdrawal'" class="btn btn-link float-end p-0 text-black">Ver movimientos <i class="fa fa-angle-right" aria-hidden="true" style="margin-left: 10px;"></i>
+                            </a>
                         </div>
                     </div>
                 </div>

@@ -218,6 +218,7 @@ class WebFormWalletController(Controller):
                 'total_pages': total_pages,
                 'visible_pages': visible_pages,
                 'mov_type': mov_type,
+                'withdrawal': True if kwargs.get('value') == 'withdrawal' else False
             },
         )
 
@@ -328,7 +329,6 @@ class WebFormWalletController(Controller):
     @route('/my', auth='user', website=True)
     def redirect_to_wallet(self, **kwargs):
         return request.redirect('/wallet')
-
 
 
     # RETIROS EFECTIVO

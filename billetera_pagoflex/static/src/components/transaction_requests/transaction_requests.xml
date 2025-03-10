@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <templates xml:space="preserve">
     <t t-name="billetera_pagoflex.Wallet_transfer_request" owl="1">
-        <div class="col-12">
+        <div class="col-12 ">
             <div class="row">
                 <div>
                     <t t-if="state.transactions_filter.length == 0">
@@ -13,8 +13,8 @@
                     </t>
                     <t t-foreach="state.transactions_filter" t-as="transaction" t-key="transaction.id">
                         <div class="my-3">
-                            <div class="row align-items-center text-start text-md-start">
-                                <div class="col-6 mb-2 mb-md-0 d-flex justify-content-start align-items-center flex-wrap">
+                            <div class="row align-items-center text-start">
+                                <div class="col-5 col-sm-5 d-flex align-items-center flex-wrap">
                                     <div class="px-2 ps-0">
                                         <t t-if="transaction.transfer_request_state == 'revisar' or transaction.transfer_request_state == 'nuevo'">
                                             <a href="#" class="cancel-transfer" t-att-data-href="'/wallet/transfer_request/cancel/' + transaction.id" data-bs-toggle="modal" data-bs-target="#confirmCancelModal">
@@ -37,7 +37,7 @@
                                                 </div>
                                                 <div class="modal-body">
                                                     ¿Estás seguro de que querés cancelar
-                                                    esta solicitud de transferencia?
+                                                    esta solicitud?
                                                 </div>
                                                 <div class="modal-footer">
                                                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">No</button>
@@ -47,7 +47,7 @@
                                         </div>
                                     </div>
 
-                                    <div class="" style="min-width: 100px; padding-left: 0px; font-size: 14px;">
+                                    <div class="" style="min-width: 100px; padding-left: 10px; font-size: 12px;">
                                         <t t-if="transaction.transfer_request_state == 'cancelado'">
                                             <span class="ps-2 position-relative">
                                                 Cancelado <span class="position-absolute top-50 start-0 translate-middle p-1 bg-danger border border-light rounded-circle" />
@@ -79,7 +79,20 @@
                                     </div>
                                 </div>
 
-                                <div class="col-6 text-md-start mb-2 mb-md-0 d-flex flex-column align-items-end">
+                                <div class="col-1 col-sm-1 text-center d-flex jusitfy-content-center">
+                                    <t t-if="transaction.transfer_type == 'retiro'">
+                                        <span class="p-1 rounded-pill bg-danger text-white ms-3" style="font-size: 8px;">
+                                            RETIRO
+                                        </span>
+                                    </t>
+                                    <t t-else="">
+                                        <span class="p-1 rounded-pill bg-warning" style="font-size: 8px;">
+                                            TRANSFERENCIA
+                                        </span>
+                                    </t>
+                                </div>
+
+                                <div class="col-6 col-sm-6 text-end d-flex flex-column align-items-end">
                                     <span style="font-size: 12px; font-weight: bold;">$
                                         <t t-out="transaction.amount.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })" />
                                     </span>
@@ -91,8 +104,7 @@
                             </div>
                         </div>
                     </t>
-                    <a t-att-href="'/wallet/tranfers_request/all/1'" class="btn btn-link float-end p-0">Ver movimientos <i class="fa fa-angle-right" aria-hidden="true" style="margin-left: 10px;"></i>
-                    </a>
+                   
                 </div>
             </div>
         </div>
