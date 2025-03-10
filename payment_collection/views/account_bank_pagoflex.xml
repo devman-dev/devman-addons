@@ -17,6 +17,7 @@
                 <field name="alias" />
                 <field name="cvu" />
                 <field name="cbu" />
+                <field name="commission_app"/>
             </tree>
         </field>
     </record>
@@ -34,6 +35,7 @@
                         <field name="alias" />
                         <field name="cvu" />
                         <field name="cbu" />
+                        <field name="commission_app"/>
                     </group>
                 </sheet>
             </form>
