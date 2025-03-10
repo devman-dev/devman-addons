@@ -28,6 +28,9 @@
                         </span>
                  </div>
             </xpath>
+            <field name="invoice_policy" position="attributes">
+                <attribute name="required">0</attribute>
+            </field>
         </field>
     </record>
 

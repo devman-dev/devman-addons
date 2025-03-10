@@ -16,13 +16,13 @@ class CollectionServicesCommission(models.Model):
     )
     name = fields.Char()
     commission_app_rate = fields.Float(string='Comisión de la App', tracking=True, digits=(16, 3))
-    bank_id = fields.Many2one('res.bank', string='Banco', required=True)
+    bank_id = fields.Many2one('res.bank', string='Banco')
     cbu = fields.Char('CBU')
     cvu = fields.Char('CVU')
     alias = fields.Char('Alias')
     name_account = fields.Char('Nombre Cuenta')
     cuit = fields.Char('CUIT')
-    bank_accounts = fields.Many2one('account.bank.pagoflex', string='Cuenta Bancaria', required=True)
+    bank_accounts = fields.Many2one('account.bank.pagoflex', string='Cuenta Bancaria')
     bank_accounts_ids = fields.Many2many('account.bank.pagoflex',string='Cuentas Bancarias', relation="account_bank2")
 
     @api.onchange('bank_id')
@@ -43,6 +43,7 @@ class CollectionServicesCommission(models.Model):
                 rec.alias = rec.bank_accounts.alias
                 rec.name_account = rec.bank_accounts.name
                 rec.cuit = rec.bank_accounts.cuit
+                rec.commission_app_rate = rec.bank_accounts.commission_app
                 domain = [('bank_accounts', '=', rec.bank_accounts.id)]
                 if rec.id:
                     domain.append(('id', '!=', rec.id))
