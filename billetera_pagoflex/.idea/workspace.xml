@@ -4,10 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="9bab0a7f-ffa5-4a8b-aa39-1fae9c6c5152" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/models/transfer_request.py" beforeDir="false" afterPath="$PROJECT_DIR$/models/transfer_request.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/views/transfer_request.xml" beforeDir="false" afterPath="$PROJECT_DIR$/views/transfer_request.xml" afterDir="false" />
-    </list>
+    <list default="true" id="1fd6497e-6ed2-44a6-b019-4d082773fbc4" name="Changes" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -35,9 +32,9 @@
 }</component>
   <component name="ProjectColorInfo">{
   &quot;customColor&quot;: &quot;&quot;,
-  &quot;associatedIndex&quot;: 3
+  &quot;associatedIndex&quot;: 5
 }</component>
-  <component name="ProjectId" id="2ttlqwYChQrO4T0iNkNk1RmTz1g" />
+  <component name="ProjectId" id="2ttleEXgVrFEXP6z9I2NEj1zYCv" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
@@ -52,7 +49,7 @@
 }</component>
   <component name="RunManager">
     <configuration name="odoo-bin" type="PythonConfigurationType" factoryName="Python" nameIsGenerated="true">
-      <module name="payment_collection" />
+      <module name="billetera_pagoflex" />
       <option name="ENV_FILES" value="" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -66,7 +63,7 @@
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <option name="SCRIPT_NAME" value="$PROJECT_DIR$/../../../odoo-bin" />
-      <option name="PARAMETERS" value="-d pago_flex_2 -u payment_collection" />
+      <option name="PARAMETERS" value="-d pago_flex_2 -u billetera_pagoflex" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
       <option name="MODULE_MODE" value="false" />
@@ -85,11 +82,11 @@
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="TaskManager">
     <task active="true" id="Default" summary="Default task">
-      <changelist id="9bab0a7f-ffa5-4a8b-aa39-1fae9c6c5152" name="Changes" comment="" />
-      <created>1741179445633</created>
+      <changelist id="1fd6497e-6ed2-44a6-b019-4d082773fbc4" name="Changes" comment="" />
+      <created>1741179344596</created>
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
-      <updated>1741179445633</updated>
+      <updated>1741179344596</updated>
     </task>
     <servers />
   </component>
@@ -115,21 +112,5 @@
         </entry>
       </map>
     </option>
-  </component>
-  <component name="XDebuggerManager">
-    <breakpoint-manager>
-      <breakpoints>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/wizard/filter_collection_movement_wiz.py</url>
-          <line>48</line>
-          <option name="timeStamp" value="5" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/wizard/filter_collection_movement_wiz.py</url>
-          <line>49</line>
-          <option name="timeStamp" value="6" />
-        </line-breakpoint>
-      </breakpoints>
-    </breakpoint-manager>
   </component>
 </project>

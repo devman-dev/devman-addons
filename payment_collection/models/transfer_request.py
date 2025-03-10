@@ -49,6 +49,8 @@ class TransferRequest(models.Model):
 
     withdrawal_operations = fields.Many2many('product.template', domain=[('collection_type', '=', 'operation')])
 
+    transfer_type = fields.Selection([('retiro', 'Retiro'), ('transferencia', 'Transferencia')], string='Tipo de Transferencia')
+
 
 
     @api.onchange('service')
@@ -75,27 +77,27 @@ class TransferRequest(models.Model):
                 dict_data = {
                 'count': 0,
                 'collection_trans_type':'retiro',
-                'date':rec.date,
-                'customer':rec.customer.id,
-                'service':rec.service.id,
-                'commission':rec.commission,
-                'withdrawal_operations':rec.withdrawal_operations.ids,
-                'operation':rec.operation.id,
-                'description':rec.description,
-                'amount':abs(rec.amount)*-1,
-                'account_bank':rec.account_bank.id,
-                'origin_account_table':rec.origin_account_table.ids,
-                'origin_account':rec.origin_account.id,
-                'origin_account_cuit':rec.origin_account.cuit,
-                'origin_account_cvu':rec.origin_account.cvu,
-                'origin_account_cbu':rec.origin_account.cbu,
-                'alias_origen':rec.origin_account.alias,
+                'date': rec.date,
+                'customer': rec.customer.id,
+                'service': rec.service.id,
+                'commission': rec.commission,
+                'withdrawal_operations': rec.withdrawal_operations.ids,
+                'operation': rec.operation.id,
+                'description': rec.description,
+                'amount': abs(rec.amount)*-1,
+                'account_bank': rec.account_bank.id,
+                'origin_account_table': rec.origin_account_table.ids,
+                'origin_account': rec.origin_account.id,
+                'origin_account_cuit': rec.origin_account.cuit,
+                'origin_account_cvu': rec.origin_account.cvu,
+                'origin_account_cbu': rec.origin_account.cbu,
+                'alias_origen': rec.origin_account.alias,
 
 
-                'name_destination_account':rec.name_destination_account,
-                'alias_destination_account':rec.alias_destination_account,
-                'cbu_destination_account':rec.cbu_destination_account,
-                'cvu_destination_account':rec.cvu_destination_account,
+                'name_destination_account': rec.name_destination_account,
+                'alias_destination_account': rec.alias_destination_account,
+                'cbu_destination_account': rec.cbu_destination_account,
+                'cvu_destination_account': rec.cvu_destination_account,
                 }
                 list_transfers.append(dict_data)
                 rec.transfer_request_state = 'pasado'

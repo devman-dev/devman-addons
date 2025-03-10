@@ -172,6 +172,7 @@ class WebFormWalletController(Controller):
     def send_transfer_request(self, **kwargs):
         return request.render('billetera_pagoflex.web_form_template_request_transfer')
 
+
     @route('/wallet/tranfers_request/<string:mov_type>/<int:page>', auth='user', website=True)
     def show_movements_request(self, mov_type, page=1, **kwargs):
         items_per_page = 10
@@ -208,6 +209,7 @@ class WebFormWalletController(Controller):
             if total_pages not in visible_pages:
                 visible_pages.append(total_pages)
 
+
         return request.render(
             'billetera_pagoflex.web_template_transfer_request',
             {
@@ -218,6 +220,7 @@ class WebFormWalletController(Controller):
                 'mov_type': mov_type,
             },
         )
+
 
     @route('/wallet/transfer_request/sended', auth='user', website=True)
     def send_transfer_request_sended(self, **kwargs):
@@ -233,6 +236,7 @@ class WebFormWalletController(Controller):
                 'alias_destination_account': kwargs.get('alias'),
                 'cvu_destination_account': kwargs.get('cvu'),
                 'cuit_destination_account': kwargs.get('cuit'),
+                'transfer_type': kwargs.get('tipo_transaccion')
             }
             request.env['transfer.request'].sudo().create(dict_data)
             state_request = True
@@ -240,7 +244,12 @@ class WebFormWalletController(Controller):
             _logger.error(f'Error al crear la solicitud de transferencia: {e}')
             state_request = False
 
-        return request.render('billetera_pagoflex.web_form_template_transfer_request_sended', {'state_request': state_request})
+        if kwargs.get('tipo_transaccion') == 'transferencia':
+            return request.render('billetera_pagoflex.web_form_template_transfer_request_sended', {'state_request': state_request})
+
+        if kwargs.get('tipo_transaccion') == 'retiro':
+            return request.render('billetera_pagoflex.web_form_template_transfer_request_sended_withdrawal', {'state_request': state_request})
+
 
     @route('/wallet/transfer_request/cancel/<int:id>', auth='user', website=True)
     def cancel_transfer_request(self, **kwargs):
@@ -319,3 +328,11 @@ class WebFormWalletController(Controller):
     @route('/my', auth='user', website=True)
     def redirect_to_wallet(self, **kwargs):
         return request.redirect('/wallet')
+
+
+
+    # RETIROS EFECTIVO
+
+    @route('/wallet/transfer_request/withdrawal', auth='user', website=True)
+    def send_transfer_request_withdrawal(self, **kwargs):
+        return request.render('billetera_pagoflex.web_form_template_request_transfer_withdrawal')
