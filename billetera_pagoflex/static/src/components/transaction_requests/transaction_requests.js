@@ -27,7 +27,7 @@ export class Wallet_transfer_request extends Component {
             const result = await this.env.services.orm.searchRead(
                 'transfer.request',
                 [['customer.user_ids', 'in', this.user_id]],
-                ['amount', 'date','transfer_request_state','alias_destination_account', 'description', 'id'],
+                ['amount', 'date','transfer_request_state','alias_destination_account', 'description', 'id','transfer_type'],
                 { limit: 10 }
             );
 

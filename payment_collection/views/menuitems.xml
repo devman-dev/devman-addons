@@ -106,7 +106,7 @@
 
     <menuitem
         id="transfer_request_menu"
-        name="Pedidos de Transferencias"
+        name="Pedidos de Transferencias / Retiros"
         action="transfer_request_action"
         parent="collection_transaction_menu"
         sequence="4" />

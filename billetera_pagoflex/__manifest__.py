@@ -13,6 +13,7 @@
         'views/movimientos.xml',
         'views/pedido_de_transferencia.xml',
         'views/transferencias.xml',
+        'views/retiros.xml',
     ],
     'auto_install': False,
     'application': False,

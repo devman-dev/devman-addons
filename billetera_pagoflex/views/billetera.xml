@@ -132,15 +132,17 @@
                                     <!-- <a href="/wallet/transfer/accounts" class="d-flex flex-column align-items-center justify-content-center" style="color: black;">
                                         <i class="fa fa-long-arrow-up fa-lg" aria-hidden="true" style="display: flex; align-items: center; justify-content: center;background-color:#C6FDFF; border-radius: 50%; height: 45px; width: 45px;"></i>
                                         <span class="">Ingresar</span>
-                                    </a>
-                                    <a href="/wallet/transfer/accounts" class="d-flex flex-column align-items-center justify-content-center" style="color: black;">
-                                        <i class="fa fa-long-arrow-down fa-lg" aria-hidden="true" style="display: flex; align-items: center; justify-content: center;background-color:#C6FDFF; border-radius: 50%; height: 45px; width: 45px;"></i>
-                                        <span class="">Sacar</span>
-                                    </a> -->
-                                    <a href="/wallet/transfer_request" class="d-flex flex-column align-items-center justify-content-center" style="color: black;">
+                                    </a>-->
+                                    <a href="/wallet/transfer_request" class="d-flex flex-column align-items-center justify-content-center" style="color: black;" data-value="transferencia">
                                         <i class="fa fa-exchange fa-lg" aria-hidden="true" style="display: flex; align-items: center; justify-content: center;background-color:#C6FDFF; border-radius: 50%; height: 45px; width: 45px;"/>
                                         <span class="">Pedido de Transferencias</span>
                                     </a>
+
+                                     <a href="/wallet/transfer_request/withdrawal" class="d-flex flex-column align-items-center justify-content-center" style="color: black;" data-value="retiro">
+                                        <i class="fa fa-long-arrow-down fa-lg" aria-hidden="true" style="display: flex; align-items: center; justify-content: center;background-color:#C6FDFF; border-radius: 50%; height: 45px; width: 45px;"></i>
+                                        <span class="">Pedido Retiro Efectivo</span>
+                                    </a>
+
                                     <!-- <a href="/wallet/transfer/accounts" class="d-flex flex-column align-items-center justify-content-center" style="color: black;">
                                         <i class="fa fa-user-o fa-lg" aria-hidden="true" style="display: flex; align-items: center; justify-content: center;background-color:#C6FDFF; border-radius: 50%; height: 45px; width: 45px;"></i>
                                         <span class="">CVU</span>

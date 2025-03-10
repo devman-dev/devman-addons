@@ -2,7 +2,7 @@
 <odoo>
 
     <record id="transfer_request_action" model="ir.actions.act_window">
-        <field name="name">Pedidos de Transferencias</field>
+        <field name="name">Pedidos de Transferencias / Retiros</field>
         <field name="res_model">transfer.request</field>
         <field name="view_mode">tree,form</field>
     </record>
@@ -30,6 +30,7 @@
                 <field name="alias_destination_account" />
                 <field name="cbu_destination_account" />
                 <field name="cvu_destination_account" />
+                <field name="transfer_type"/>
                 <field name="transfer_request_state" force_save="1" readonly="1" widget="badge" decoration-muted="transfer_request_state == 'nuevo'" decoration-warning="transfer_request_state == 'revisar'" decoration-success="transfer_request_state == 'pasado'" decoration-danger="transfer_request_state == 'cancelado'"/>
             </tree>
         </field>
@@ -63,11 +64,26 @@
                             <field name="alias_destination_account" />
                             <field name="cbu_destination_account" />
                             <field name="cvu_destination_account" />
+                            <field name="transfer_type" readonly="1"/>
                             <field name="transfer_request_state" force_save="1" readonly="1" widget="badge" decoration-muted="transfer_request_state == 'nuevo'" decoration-warning="transfer_request_state == 'revisar'" decoration-success="transfer_request_state == 'pasado'" decoration-danger="transfer_request_state == 'cancelado'"/>
                         </group>
                     </group>
                 </sheet>
             </form>
+        </field>
+    </record>
+
+    <record id="transfer_request_view_search" model="ir.ui.view">
+        <field name="name">transfer.request.view.search</field>
+        <field name="model">transfer.request</field>
+        <field name="arch" type="xml">
+            <search string="">
+                <group>
+                    <filter name="transfer_type" string="Tipo de transacción" context="{'group_by': 'transfer_type'}" />
+                    <filter string="Retiros" name="transfer_type" domain="[('transfer_type', '=', 'retiro')]"/>
+                    <filter string="Transferencias" name="transfer_type" domain="[('transfer_type', '=', 'transferencia')]"/>
+                </group>
+            </search>
         </field>
     </record>
 
