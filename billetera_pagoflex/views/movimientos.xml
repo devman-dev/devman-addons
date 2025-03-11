@@ -312,7 +312,7 @@
                                 </t>
                                 
                                 <!-- Default -->
-                                <t t-else="">
+                                <t t-elif="transaction.collection_trans_type == 'retiro' or transaction.collection_trans_type == 'movimiento_recaudacion'">
                                     <div class="col-2 ps-2 pe-1 mb-3">
                                         <i class="fa fa-exchange fa-lg" aria-hidden="true" style="display: flex; align-items: center; justify-content: center;background-color:#C6FDFF; border-radius: 50%; height: 45px; width: 45px;"></i>
                                     </div>
