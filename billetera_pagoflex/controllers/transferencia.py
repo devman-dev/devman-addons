@@ -173,11 +173,11 @@ class WebFormWalletController(Controller):
         return request.render('billetera_pagoflex.web_form_template_request_transfer')
 
 
-    @route('/wallet/tranfers_request/<string:mov_type>/<int:page>', auth='user', website=True)
-    def show_movements_request(self, mov_type, page=1, **kwargs):
-        items_per_page = 10
+    @route('/wallet/movements/<string:mov_type>/<int:id_service>/<int:page>', auth='user', website=True, methods=['GET'])
+    def show_movements(self, mov_type, id_service, page=1, **kwargs):
+        # items_per_page = 10
 
-        domain = [('customer', '=', request.env.user.partner_id.id)]
+        domain = [('customer', '=', request.env.user.partner_id.id), ('service', '=', id_service)]
         # if mov_type == 'pending':
         #     domain.append(('transaction_state', '=', 'pendiente'))
         # elif mov_type == 'refused':
@@ -185,40 +185,44 @@ class WebFormWalletController(Controller):
         # elif mov_type == 'approved':
         #     domain.append(('transaction_state', '=', 'aprobado'))
 
-        all_transactions = request.env['transfer.request'].sudo().search(domain)
+        all_transactions = request.env['collection.transaction'].sudo().search(domain)
 
-        total_items = len(all_transactions)
-        total_pages = (total_items + items_per_page - 1) // items_per_page
-        start_index = (page - 1) * items_per_page
-        end_index = start_index + items_per_page
-        transactions = all_transactions[start_index:end_index]
+        # total_items = len(all_transactions)
+        # total_pages = (total_items + items_per_page - 1) // items_per_page
+        # start_index = (page - 1) * items_per_page
+        # end_index = start_index + items_per_page
+        # transactions = all_transactions
 
         # Calcular las páginas visibles
-        visible_pages = []
-        if total_pages > 1:
-            visible_pages = [1]  # Siempre mostrar la primera página
-            if page > 4:
-                visible_pages.append('...')
+        # visible_pages = []
+        # if total_pages > 1:
+        #     visible_pages = [1]  # Siempre mostrar la primera página
+        #     if page > 4:
+        #         visible_pages.append('...')
 
-            for i in range(max(2, page - 2), min(total_pages, page + 3) + 1):
-                visible_pages.append(i)
+        #     for i in range(max(2, page - 2), min(total_pages, page + 3) + 1):
+        #         visible_pages.append(i)
 
-            if page < total_pages - 3:
-                visible_pages.append('...')
+        #     if page < total_pages - 3:
+        #         visible_pages.append('...')
 
-            if total_pages not in visible_pages:
-                visible_pages.append(total_pages)
+        #     if total_pages not in visible_pages:
+        #         visible_pages.append(total_pages)
 
+        # Obtener el balance del cliente
+        customer = request.env['collection.dashboard.customer'].sudo().search([('customer', '=', request.env.user.partner_id.id)])
+        customer_balance = customer.collection_balance if customer else 0.00
 
         return request.render(
-            'billetera_pagoflex.web_template_transfer_request',
+            'billetera_pagoflex.web_template_movements',
             {
-                'transactions': transactions,
+                'transactions': all_transactions,
                 'current_page': page,
-                'total_pages': total_pages,
-                'visible_pages': visible_pages,
+                # 'total_pages': total_pages,
+                # 'visible_pages': visible_pages,
                 'mov_type': mov_type,
-                'withdrawal': True if kwargs.get('value') == 'withdrawal' else False
+                'customer_balance': customer_balance,
+                'id_service': id_service,
             },
         )
 
