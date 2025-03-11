@@ -69,8 +69,13 @@ class TransferRequest(models.Model):
     def transfer_movements_to_collection(self):
         list_transfers = []
         for rec in self:
-            if not rec.service or not rec.operation or not rec.origin_account:
-                raise  ValidationError('No se puede pasar el pedido de transferencia, complete los campos faltantes.')
+            if rec.transfer_type == 'transferencia' or not rec.transfer_type:
+                if not rec.service or not rec.operation or not rec.origin_account:
+                    msg = f"""No se puede pasar el pedido de transferencia, complete los campos faltantes.\n {'Servicio.' if not rec.service else ''} {'Operación.' if not rec.operation else ''} {'Cuenta Origen.' if not rec.origin_account else ''}"""
+                    raise  ValidationError(msg)
+            elif rec.transfer_type == 'retiro':
+                if not rec.service or not rec.operation:
+                    raise  ValidationError(f'No se puede pasar el pedido de retiro, complete los campos faltantes.\n {"" if rec.service else "Servicio."} {"" if rec.operation else "Operación."}')
 
 
             if rec.transfer_request_state == 'nuevo':
