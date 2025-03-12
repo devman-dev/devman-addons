@@ -1,7 +1,8 @@
 from odoo import fields, api, models
 from datetime import datetime
-
 from odoo.exceptions import ValidationError
+import gspread
+from oauth2client.service_account import ServiceAccountCredentials
 
 
 class TransferRequest(models.Model):
@@ -106,6 +107,28 @@ class TransferRequest(models.Model):
                 }
                 list_transfers.append(dict_data)
                 rec.transfer_request_state = 'pasado'
+
+                # Exportar a Google Sheets
+                # Define el alcance
+                scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
+                # Carga las credenciales
+                creds = ServiceAccountCredentials.from_json_keyfile_name('/mnt/extra-addons/source/devman-addons/payment_collection/keypagoflex.json', scope)
+                client = gspread.authorize(creds)
+                # Abre la hoja de cálculo
+                spreadsheet = client.open("test")
+                # Selecciona la hoja por nombre
+                sheet = spreadsheet.worksheet("Hoja 1")
+                # Datos a escribir
+                new_row = [rec.name_destination_account,
+                            rec.alias_destination_account,
+                            abs(rec.amount)*-1,
+                            rec.cbu_destination_account or rec.cvu_destination_account,
+                            ]
+                # Agrega una nueva fila al final de la hoja
+                sheet.append_row(new_row)
+
+
+
 
         if list_transfers:
             self.env['collection.transaction'].sudo().create(list_transfers)
