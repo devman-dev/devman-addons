@@ -112,17 +112,23 @@ class TransferRequest(models.Model):
                 # Define el alcance
                 scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
                 # Carga las credenciales
-                creds = ServiceAccountCredentials.from_json_keyfile_name('/mnt/extra-addons/source/devman-addons/payment_collection/keypagoflex.json', scope)
+                creds = ServiceAccountCredentials.from_json_keyfile_name('/mnt/extra-addons/devman-addons/payment_collection/keypagoflex.json', scope)
                 client = gspread.authorize(creds)
                 # Abre la hoja de cálculo
                 spreadsheet = client.open("test")
                 # Selecciona la hoja por nombre
                 sheet = spreadsheet.worksheet("Hoja 1")
                 # Datos a escribir
-                new_row = [rec.name_destination_account,
-                            rec.alias_destination_account,
-                            abs(rec.amount)*-1,
-                            rec.cbu_destination_account or rec.cvu_destination_account,
+                new_row = [ rec.date.strftime('%d-%m-%Y'),
+			    rec.name_destination_account,
+			    rec.cbu_destination_account,
+			    rec.cvu_destination_account,
+                rec.alias_destination_account,
+                "Cuit Destinatario",
+			    abs(rec.amount)*-1,
+			    rec.customer.name,
+			    rec.origin_account.id,
+                            rec.account_bank.name,
                             ]
                 # Agrega una nueva fila al final de la hoja
                 sheet.append_row(new_row)
