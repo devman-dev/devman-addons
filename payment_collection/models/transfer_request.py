@@ -1,8 +1,8 @@
-from odoo import fields, api, models
+from odoo import fields, api, models # type: ignore
 from datetime import datetime
-from odoo.exceptions import ValidationError
-import gspread
-from oauth2client.service_account import ServiceAccountCredentials
+from odoo.exceptions import ValidationError # type: ignore
+import gspread # type: ignore
+from oauth2client.service_account import ServiceAccountCredentials # type: ignore
 
 
 class TransferRequest(models.Model):
@@ -119,17 +119,17 @@ class TransferRequest(models.Model):
                 # Selecciona la hoja por nombre
                 sheet = spreadsheet.worksheet("Hoja 1")
                 # Datos a escribir
-                new_row = [ rec.date.strftime('%d-%m-%Y'),
-			    rec.name_destination_account,
-			    rec.cbu_destination_account,
-			    rec.cvu_destination_account,
-                rec.alias_destination_account,
-                "Cuit Destinatario",
-			    abs(rec.amount)*-1,
-			    rec.customer.name,
-			    rec.origin_account.id,
-                            rec.account_bank.name,
-                            ]
+                new_row = [ rec.date.strftime('%d-%m-%Y') or '',
+			            rec.name_destination_account or '',
+			            rec.cbu_destination_account or '',
+                        rec.cvu_destination_account or '',
+                        rec.alias_destination_account or '',
+                        "Cuit Destinatario",
+                        abs(rec.amount)*-1 or '',
+                        rec.customer.name or '',
+                        rec.origin_account.id or '',
+                        rec.account_bank.name or '',
+                        ]
                 # Agrega una nueva fila al final de la hoja
                 sheet.append_row(new_row)
 
