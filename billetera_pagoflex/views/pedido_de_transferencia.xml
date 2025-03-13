@@ -6,31 +6,61 @@
 
             <style>
                 main {
-                background: linear-gradient(to top, #56FC81, #ffffff);
-                font-family: Helvetica, Arial, sans-serif;
+                    background: linear-gradient(to top, #56FC81, #ffffff);
+                    font-family: Helvetica, Arial, sans-serif;
+                }
+                .d-none {
+                    display: none;
                 }
             </style>
             <script>
+                // Función para alternar la visibilidad del formulario
                 function toggleForm() {
                     var form = document.getElementById('transfer-form');
                     var toggleText = document.getElementById('toggle-text');
                     
-                    form.classList.toggle('d-none');
-                    
-                    if (form.classList.contains('d-none')) {
-                        toggleText.textContent = 'Mostrar formulario';
+                    // Verifica el ancho de la pantalla
+                    if (window.innerWidth > 900) {
+                        form.classList.remove('d-none');
+                        toggleText.style.display = 'none';
                     } else {
-                        toggleText.textContent = 'Ocultar formulario';
+                        form.classList.toggle('d-none');
+                        
+                        // Cambia el texto del botón según la visibilidad del formulario
+                        if (form.classList.contains('d-none')) {
+                            toggleText.textContent = 'Mostrar formulario';
+                        } else {
+                            toggleText.textContent = 'Ocultar formulario';
+                        }
                     }
                 }
 
+                // Ejecuta la función toggleForm al cargar la página para aplicar la lógica inicial
+                document.addEventListener("DOMContentLoaded", function () {
+                    var form = document.getElementById('transfer-form');
+                    var toggleText = document.getElementById('toggle-text');
+                    
+                    // Verifica el ancho de la pantalla al cargar la página
+                    if (window.innerWidth > 900) {
+                        form.classList.remove('d-none');
+                        toggleText.style.display = 'none';
+                    } else {
+                        form.classList.add('d-none');
+                        toggleText.style.display = 'block';
+                        toggleText.textContent = 'Mostrar formulario';
+                    }
+                });
+
+                // Evento que se ejecuta cuando el DOM está completamente cargado
                 document.addEventListener("DOMContentLoaded", function () {
                     const montoInput = document.getElementById("monto");
 
-                    montoInput.addEventListener("blur", function () {  // Se ejecuta al salir del input
-                        let value = montoInput.value.replace(/\./g, "").replace(/,/g, "."); // Quita puntos y cambia coma por punto
+                    // Agrega un evento 'blur' al campo de entrada que se ejecuta cuando el usuario sale del campo
+                    montoInput.addEventListener("blur", function () {
+                        let value = montoInput.value.replace(/\./g, "").replace(/,/g, ".");
                         let number = parseFloat(value);
 
+                        // Si el valor es un número válido, lo formatea con dos decimales
                         if (!isNaN(number)) {
                             montoInput.value = new Intl.NumberFormat("es-AR", {
                                 minimumFractionDigits: 2,
@@ -42,7 +72,7 @@
             </script>
             <div class="container mb-3" id="web_form_template_request_transfer_container">
                 <div class="row justify-content-center">
-                    <div class="col-12 col-lg-5">   
+                    <div class="col-12">   
                         <div class="d-flex justify-content-between pt-3 pb-2">
                             <a href="/wallet" class="col-1 text-dark">
                                 <i class="fa fa-arrow-left" aria-hidden="true" style="font-size: 18px; margin-right: 10px;"/>
@@ -50,12 +80,10 @@
                             <p class="mx-auto my-0">Pedido de Transferencias</p>
                         </div>
                     </div>
-                    <div class="col-12 col-sm-10 col-md-8 col-lg-6">
+                    <div class="col-12 col-lg-6">
                         <form action="/wallet/transfer_request/sended" method="post" enctype="multipart/form-data" class="o_mark_required p-4 bg-white text-center mb-3" style="border: 1px solid #56FC81; border-radius: 1rem;">
                             <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
-                            <button class="btn btn-primary" onclick="toggleForm()" type="button">
-                                <span id="toggle-text">Mostrar formulario</span>
-                            </button>
+                            <button class="btn btn-primary mx-auto" id="toggle-text" onclick="toggleForm()">Mostrar formulario</button>
                             <div id="transfer-form" class="d-none text-start">
                                 <div class="my-2">
                                     <label for="fecha" class="form-label mb-0 small">Fecha</label>
@@ -106,7 +134,7 @@
                             </div>
                         </form>
                     </div>
-                    <div class="col-12 col-md-6">
+                    <div class="col-12 col-lg-6">
                         <div class="wallet-card px-4 bg-white shadow rounded">
                             <owl-component class="" name="billetera_pagoflex.Wallet_transfer_request"/>
                             <a t-att-href="'/wallet/tranfers_request/all/1'" class="btn btn-link float-end p-0 text-black">Ver movimientos <i class="fa fa-angle-right" aria-hidden="true" style="margin-left: 10px;"></i>

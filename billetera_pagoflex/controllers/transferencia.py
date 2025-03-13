@@ -1,7 +1,7 @@
-from odoo.http import request, Controller, route, content_disposition
+from odoo.http import request, Controller, route, content_disposition # type: ignore
 import requests
 import json
-import xlsxwriter
+import xlsxwriter # type: ignore
 from io import BytesIO
 import logging
 _logger = logging.getLogger(__name__)
