@@ -50,8 +50,13 @@
                                 </div>
 
                                 <div class="mb-3">
-                                    <label for="cvu" class="form-label">CBU/CVU</label>
-                                    <input type="text" id="cvu" name="cvu" class="form-control" placeholder="Ingrese el CBU/CVU"/>
+                                    <label for="cbu" class="form-label">CBU</label>
+                                    <input type="text" id="cbu" name="cbu" class="form-control" placeholder="Ingrese el CBU"/>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="cvu" class="form-label">CVU</label>
+                                    <input type="text" id="cvu" name="cvu" class="form-control" placeholder="Ingrese el CVU"/>
                                 </div>
 
                                 <div class="mb-3">

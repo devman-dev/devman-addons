@@ -239,6 +239,7 @@ class WebFormWalletController(Controller):
                 'amount': clean_amount,
                 'name_destination_account': kwargs.get('cuenta_destino'),
                 'alias_destination_account': kwargs.get('alias'),
+                'cbu_destination_account': kwargs.get('cbu'),
                 'cvu_destination_account': kwargs.get('cvu'),
                 'cuit_destination_account': kwargs.get('cuit'),
                 'transfer_type': kwargs.get('tipo_transaccion')
