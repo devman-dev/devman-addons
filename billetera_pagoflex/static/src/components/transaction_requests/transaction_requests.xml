@@ -88,7 +88,7 @@
                         <!-- Modal de confirmación -->
                         <div class="modal fade" id="confirmCancelModal" tabindex="-1" aria-labelledby="confirmCancelLabel" aria-hidden="true">
                             <div class="modal-dialog">
-                                <div class="modal-content">
+                                <div class="modal-content" style="background: linear-gradient(to top, #C6FDFF, #ffffff); border: 1px solid #56FC81;">
                                     <div class="modal-header">
                                         <h5 class="modal-title" id="confirmCancelLabel">Confirmar
                                             Cancelación</h5>
