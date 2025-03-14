@@ -40,77 +40,57 @@
                                 <span class="text-center px-2">Hola, <t t-out="user_name"/>
                                 </span>
                             </div>
-                            <!-- <div class="service-group">
-                                <h3>
-                                    <t t-if="group[0] != 'Sin Servicio'">
-                                        <t t-out="request.env['collection.services.commission'].browse(group[0]).name"/>
-                                    </t>
-                                    <t t-else="">
-                                            Sin Servicio
-                                    </t>
-                                </h3>
-                                <ul>
-                                    <t t-foreach="group[1]" t-as="transaction">
-                                        <li>
-                                            <t t-out="transaction.service.display_name"/>
-                                            - $<t t-out="transaction.amount"/>
-                                        </li>
-                                    </t>
-                                </ul>
-                            </div> -->
-                            <t t-foreach="grouped_transactions.items()" t-as="group">
-                                <div class="row my-2" style="background-color:#56FC81; border-radius: 1rem;">
-                                    <div class="row py-3">
-<!--                                        <label class="d-flex align-items-center justify-content-between py-2" style="cursor: pointer;">-->
-                                            <!-- <i class="fa fa-eye" aria-hidden="true"></i> -->
-                                            <div class="col-9">
-                                                <span style="margin-left:10px;">
-                                                <t t-if="group[0] != 'Sin Servicio'">
-                                                    <t t-out="request.env['collection.services.commission'].sudo().browse(group[0]).display_name"/>
-                                                </t>
-                                                </span>
-                                            </div>
-                                            <div class="col-3 d-flex justify-content-end px-0">
-                                                <a href="#" class="btn-sm btn-primary" data-bs-toggle="modal" t-att-data-bs-target="'#watchDataModal_'+ str(group[0])">
-                                                    Ver Datos
-                                                </a>
-                                            </div>
 
-                                            <div class="modal fade" t-att-id="'watchDataModal_'+ str(group[0])" tabindex="-1" aria-labelledby="watchDataLabel" aria-hidden="true">
-                                                <div class="modal-dialog">
-                                                    <div class="modal-content">
-                                                        <div class="modal-header">
-                                                            <h5 class="modal-title" id="watchDataLabel">Datos de la cuenta</h5>
-                                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"/>
-                                                        </div>
-                                                        <div class="modal-body">
-                                                            <p>
-                                                                <b>Nombre: </b>
-                                                                <t t-out="request.env['collection.services.commission'].sudo().browse(group[0]).name_account"/>
-                                                            </p>
-                                                            <p>
-                                                                <b>CUIT: </b>
-                                                                <t t-out="request.env['collection.services.commission'].sudo().browse(group[0]).cuit"/>
-                                                            </p>
-                                                            <p>
-                                                                <b>CBU: </b>
-                                                                <t t-out="request.env['collection.services.commission'].sudo().browse(group[0]).cbu"/>
-                                                            </p>
-                                                            <p>
-                                                                <b>CVU: </b>
-                                                                <t t-out="request.env['collection.services.commission'].sudo().browse(group[0]).cvu"/>
-                                                            </p>
-                                                            <p>
-                                                                <b>ALIAS: </b>
-                                                                <t t-out="request.env['collection.services.commission'].sudo().browse(group[0]).alias"/>
-                                                            </p>
-                                                        </div>
+                            <t t-foreach="grouped_transactions.items()" t-as="group">
+                                <div class="row my-2" style="background-color:#56FC81; border-radius: 1rem; border: 1px solid #56FC81;">
+                                    <div class="row pt-3">
+                                        <div class="col-9">
+                                            <span style="margin-left:10px;">
+                                            <t t-if="group[0] != 'Sin Servicio'">
+                                                <t t-out="request.env['collection.services.commission'].sudo().browse(group[0]).display_name"/>
+                                            </t>
+                                            </span>
+                                        </div>
+                                        <div class="col-3 d-flex justify-content-end px-0">
+                                            <a href="#" class="btn-sm btn-primary" data-bs-toggle="modal" t-att-data-bs-target="'#watchDataModal_'+ str(group[0])">
+                                                Ver Datos
+                                            </a>
+                                        </div>
+
+                                        <div class="modal fade" t-att-id="'watchDataModal_'+ str(group[0])" tabindex="-1" aria-labelledby="watchDataLabel" aria-hidden="true">
+                                            <div class="modal-dialog">
+                                                <div class="modal-content" style="background: linear-gradient(to top, #C6FDFF, #ffffff); border: 1px solid #56FC81;">
+                                                    <div class="modal-header">
+                                                        <h5 class="modal-title" id="watchDataLabel">Datos de la cuenta</h5>
+                                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"/>
+                                                    </div>
+                                                    <div class="modal-body">
+                                                        <p>
+                                                            <b>Nombre: </b>
+                                                            <t t-out="request.env['collection.services.commission'].sudo().browse(group[0]).name_account"/>
+                                                        </p>
+                                                        <p>
+                                                            <b>CUIT: </b>
+                                                            <t t-out="request.env['collection.services.commission'].sudo().browse(group[0]).cuit"/>
+                                                        </p>
+                                                        <p>
+                                                            <b>CBU: </b>
+                                                            <t t-out="request.env['collection.services.commission'].sudo().browse(group[0]).cbu"/>
+                                                        </p>
+                                                        <p>
+                                                            <b>CVU: </b>
+                                                            <t t-out="request.env['collection.services.commission'].sudo().browse(group[0]).cvu"/>
+                                                        </p>
+                                                        <p>
+                                                            <b>ALIAS: </b>
+                                                            <t t-out="request.env['collection.services.commission'].sudo().browse(group[0]).alias"/>
+                                                        </p>
                                                     </div>
                                                 </div>
                                             </div>
-<!--                                        </label>-->
+                                        </div>
                                     </div>
-                                    <div class="row py-3">
+                                    <div class="row pt-2 pb-3">
                                         <div class="col-9">
                                             <h4 class="mb-0 text-secundary" style="margin-left:10px;">
                                                 $
@@ -120,36 +100,36 @@
                                             </h4>
                                         </div>
                                         <div class="col-3 d-flex justify-content-end px-0">
-                                            <a t-att-href="'/wallet/movements/all/' + str(group[0]) + '/1'">Ver todo <i class="fa fa-angle-right" aria-hidden="true"/>
+                                            <a t-att-href="'/wallet/movements/all/' + str(group[0]) + '/1'" style="text-shadow: 0 0 6px #C6FDFF">Ver todo <i class="fa fa-angle-right" aria-hidden="true"/>
                                             </a>
                                         </div>
                                     </div>
                                 </div>
                             </t>
-
+                            <!-- Botones de accion -->
                             <div class="row p-4" style="font-size: 14px;">
                                 <div class="col-12 p-2 my-2 d-flex justify-content-around align-items-center">
                                     <!-- <a href="/wallet/transfer/accounts" class="d-flex flex-column align-items-center justify-content-center" style="color: black;">
                                         <i class="fa fa-long-arrow-up fa-lg" aria-hidden="true" style="display: flex; align-items: center; justify-content: center;background-color:#C6FDFF; border-radius: 50%; height: 45px; width: 45px;"></i>
-                                        <span class="">Ingresar</span>
+                                        <span class="text-center pt-1" style="max-width: 90px;">Ingresar</span>
                                     </a>-->
                                     <a href="/wallet/transfer_request" class="d-flex flex-column align-items-center justify-content-center" style="color: black;" data-value="transferencia">
                                         <i class="fa fa-exchange fa-lg" aria-hidden="true" style="display: flex; align-items: center; justify-content: center;background-color:#C6FDFF; border-radius: 50%; height: 45px; width: 45px;"/>
-                                        <span class="">Pedido de Transferencias</span>
+                                        <span class="text-center pt-1" style="max-width: 90px;">Pedido de Transferencias</span>
                                     </a>
 
                                      <a href="/wallet/transfer_request/withdrawal" class="d-flex flex-column align-items-center justify-content-center" style="color: black;" data-value="retiro">
                                         <i class="fa fa-long-arrow-down fa-lg" aria-hidden="true" style="display: flex; align-items: center; justify-content: center;background-color:#C6FDFF; border-radius: 50%; height: 45px; width: 45px;"></i>
-                                        <span class="">Pedido Retiro Efectivo</span>
+                                        <span class="text-center pt-1" style="max-width: 90px;">Pedido Retiro Efectivo</span>
                                     </a>
 
                                     <!-- <a href="/wallet/transfer/accounts" class="d-flex flex-column align-items-center justify-content-center" style="color: black;">
                                         <i class="fa fa-user-o fa-lg" aria-hidden="true" style="display: flex; align-items: center; justify-content: center;background-color:#C6FDFF; border-radius: 50%; height: 45px; width: 45px;"></i>
-                                        <span class="">CVU</span>
+                                        <span class="text-center pt-1" style="max-width: 90px;">CVU</span>
                                     </a>
                                     <a href="/wallet/transfer/accounts" class="d-flex flex-column align-items-center justify-content-center" style="color: black;">
                                         <i class="fa fa-qrcode fa-lg" aria-hidden="true" style="display: flex; align-items: center; justify-content: center;background-color:#C6FDFF; border-radius: 50%; height: 45px; width: 45px;"></i>
-                                        <span class="">QR</span>
+                                        <span class="text-center pt-1" style="max-width: 90px;">QR</span>
                                     </a> -->
                                 </div>
                             </div>

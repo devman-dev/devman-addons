@@ -15,9 +15,9 @@
                 }
             </style>
 
-            <div class="container" id="web_template_movements">
+            <div class="container" id="web_template_movements_container">
                <div class="row d-flex justify-content-center">
-                    <div class="col-12 col-lg-5" id="web_template_movements">   
+                    <div class="col-12 col-lg-5">   
                         <div class="d-flex justify-content-between pt-3 pb-2">
                             <a href="/wallet" class="col-1 text-dark">
                                 <i class="fa fa-arrow-left" aria-hidden="true" style="font-size: 18px; margin-right: 10px;"/>
