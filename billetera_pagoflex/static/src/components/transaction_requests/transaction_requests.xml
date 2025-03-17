@@ -75,7 +75,7 @@
                         </div>
                     </div>
                     <div class="col-1 p-0 pt-2 pb-1">
-                        <div class="pt-2 pe-4">
+                        <div class="pt-2 pe-4 px-lg-3 pt-lg-3">
                             <t t-if="transaction.transfer_request_state == 'revisar' or transaction.transfer_request_state == 'nuevo'">
                                 <a href="#" class="cancel-transfer pt-1 pe-1" t-att-data-href="'/wallet/transfer_request/cancel/' + transaction.id" data-bs-toggle="modal" data-bs-target="#confirmCancelModal">
                                     <i class="fa fa-times fa-lg text-danger" aria-hidden="true"></i>
