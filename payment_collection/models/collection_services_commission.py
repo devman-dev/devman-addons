@@ -91,6 +91,8 @@ class CollectionServicesCommission(models.Model):
     @api.onchange('commission', 'commission_app_rate', 'agent_services_commission')
     def commission_limit(self):
         for rec in self:
+            if not rec.agent_services_commission:
+                continue
             if rec.commission > 0:
                 total = rec.commission - rec.commission_app_rate
                 total_ac = []
