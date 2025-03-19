@@ -62,6 +62,19 @@
                             <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
                             <span class="btn btn-primary mx-auto" id="toggle-text" onclick="toggleForm()">Mostrar formulario</span>
                             <div id="transfer-form" class="d-none text-start">
+                                
+                                <div class="my-2">
+                                    <label for="cuenta" class="form-label mb-0 small">Cuenta</label>
+                                    <select id="cuenta" name="cuenta" class="form-control py-1 d-flex justify-content-between" required="True">
+                                        <t t-foreach="grouped_transactions.items()" t-as="group">
+                                            <option t-att-value="group[0]" class="">
+                                                <t t-out="request.env['collection.services.commission'].sudo().browse(group[0]).display_name"/> &#160;&#160;&#160;&#160;
+                                                <t t-out="('{:,.2f}'.format(group[1])).replace(',', 'X').replace('.', ',').replace('X', '.')" />
+                                            </option>
+                                        </t>
+                                    </select>
+                                </div>
+                                
                                 <div class="my-2">
                                     <label for="fecha" class="form-label mb-0 small">Fecha</label>
                                     <input type="date" id="fecha" name="fecha" class="form-control py-1" t-att-value="time.strftime('%Y-%m-%d')" required="True"/>

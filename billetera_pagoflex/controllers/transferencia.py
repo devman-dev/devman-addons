@@ -25,9 +25,6 @@ class WebFormWalletController(Controller):
                 grouped_transactions[service] = []
             grouped_transactions[service].append(transaction.amount)
 
-        for key in grouped_transactions.keys():
-            grouped_transactions[key] = sum(grouped_transactions[key])
-
         return request.render('billetera_pagoflex.web_template_wallet', {'customer_balance': customer_balance, 'transactions': transactions, 'user_name': request.env.user.name, 'grouped_transactions': grouped_transactions})
 
     @route('/wallet/transfer/accounts', auth='user', website=True, methods=['GET'])
@@ -170,7 +167,25 @@ class WebFormWalletController(Controller):
 
     @route('/wallet/transfer_request', auth='user', website=True)
     def send_transfer_request(self, **kwargs):
-        return request.render('billetera_pagoflex.web_form_template_request_transfer')
+        collection_balance = request.env['collection.dashboard.customer'].sudo().recalculate_total_recs(request.env.user.partner_id.id)
+        customer_balance = collection_balance if collection_balance else 0.00
+        
+        transactions = request.env['collection.transaction'].sudo().search([('customer', '=', request.env.user.partner_id.id), ('collection_trans_type', '!=', 'movimiento_interno')], order='id desc', limit=10)
+
+        grouped_transactions = {}
+        for transaction in transactions:
+            if transaction.service:
+                service = transaction.service.id
+            else:
+                continue
+            if service not in grouped_transactions:
+                grouped_transactions[service] = []
+            grouped_transactions[service].append(transaction.amount)
+
+        for key in grouped_transactions.keys():
+            grouped_transactions[key] = sum(grouped_transactions[key])
+
+        return request.render('billetera_pagoflex.web_form_template_request_transfer', {'customer_balance': customer_balance, 'transactions': transactions, 'user_name': request.env.user.name, 'grouped_transactions': grouped_transactions})
 
 
     @route('/wallet/movements/<string:mov_type>/<int:id_service>/<int:page>', auth='user', website=True, methods=['GET'])
@@ -264,6 +279,7 @@ class WebFormWalletController(Controller):
         if trans_req:
             if trans_req.transfer_request_state != 'pasado':
                 trans_req.transfer_request_state = 'cancelado'
+
             else:
                 message = 'No se puede cancelar un pedido de transferencia aprobado.'
 

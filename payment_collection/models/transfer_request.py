@@ -44,7 +44,7 @@ class TransferRequest(models.Model):
     origin_account_table = fields.Many2many('collection.services.commission')
 
 
-    account_bank = fields.Many2one('account.bank.pagoflex', string='Cuenta Banco')
+    account_bank = fields.Many2one('account.bank.pagoflex', string='Banco')
 
     transfer_request_state = fields.Selection([('nuevo', 'Nuevo'), ('pasado','Pasado'), ('revisar', 'Revisar'), ('cancelado','Cancelado'),], default='nuevo', string='Estado')
 
