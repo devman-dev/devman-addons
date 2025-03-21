@@ -214,23 +214,39 @@
 
            <!-- QR -->
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> 16.0_mati_m
           <div class="row">
             <div class="col-12 text-center">
               <img alt="qr" style="height:200px" t-att-src="'/report/barcode/?type=%s&amp;value=%s&amp;width=%s&amp;height=%s' % ('QR', o.texto_modificado_qr, 200,200)" t-if="o.texto_modificado_qr"/>
             </div>
           </div>
+<<<<<<< HEAD
           <div class="row" t-if="o.l10n_ar_afip_auth_code"> <!-- cambio afip_auth_code por l10n_ar_afip_auth_code -->
+=======
+          <div class="row" t-if="o.afip_auth_code"> <!-- cambio afip_auth_code por l10n_ar_afip_auth_code -->
+>>>>>>> 16.0_mati_m
             <div class="col-6">
               <span t-field="o.l10n_ar_afip_auth_mode"/>:
               
               
+<<<<<<< HEAD
               <span t-field="o.l10n_ar_afip_auth_code"/></div>
             <div class="col-6">
               <span t-field="o.l10n_ar_afip_auth_mode"/>vencimiento:
               
               
               <span t-field="o.l10n_ar_afip_auth_code_due"/></div>   <!-- cambio afip_auth_code_due por l10n_ar_afip_auth_code_due -->
+=======
+              <span t-field="o.afip_auth_code"/></div>
+            <div class="col-6">
+              <span t-field="o.afip_auth_mode"/>vencimiento:
+              
+              
+              <span t-field="o.afip_auth_code_due"/></div>   <!-- cambio afip_auth_code_due por l10n_ar_afip_auth_code_due -->
+>>>>>>> 16.0_mati_m
           </div>
         </div>
       </t>

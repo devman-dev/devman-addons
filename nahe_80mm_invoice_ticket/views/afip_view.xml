@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 <?xml version="1.0" encoding="UTF-8"?>
 <odoo>
 	<record model="ir.ui.view" id="qr_fe_account_move_view_form">
@@ -11,4 +12,19 @@
             </xpath>
 		</field>
 	</record>
+=======
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+	<record model="ir.ui.view" id="qr_fe_account_move_view_form">
+		<field name="name">qr.fe.account.move.form</field>
+		<field name="model">account.move</field>
+		<field name="inherit_id" ref="l10n_ar.view_move_form"></field>
+		<field name="arch" type="xml">
+			<xpath expr="//field[@name='afip_xml_response']" position="after">
+				<field name="json_qr" widget="ace" />
+				<field name="texto_modificado_qr" widget="ace" />
+            </xpath>
+		</field>
+	</record>
+>>>>>>> 16.0_mati_m
 </odoo>

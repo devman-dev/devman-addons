@@ -20,7 +20,11 @@
     'version': '16.0',
 
     # any module necessary for this one to work correctly
+<<<<<<< HEAD
     'depends': ['base','sale','account','l10n_ar'],
+=======
+    'depends': ['base','sale','account','l10n_ar_afipws_fe'],
+>>>>>>> 16.0_mati_m
 
     # always loaded
     'data': [
