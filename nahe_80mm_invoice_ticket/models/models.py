@@ -1,3 +1,4 @@
+
 # -*- coding: utf-8 -*-
 
 from odoo import models, fields, api
@@ -36,11 +37,7 @@ class AccountMove(models.Model):
     def _compute_json_qr(self):
         for rec in self:
             dict_invoice = ''
-<<<<<<< HEAD
-            if rec.move_type in ['out_invoice', 'out_refund'] and rec.state == 'posted' and rec.l10n_ar_afip_auth_code != '':
-=======
             if rec.move_type in ['out_invoice', 'out_refund'] and rec.state == 'posted' and rec.afip_auth_code != '':
->>>>>>> 16.0_mati_m
                 try:
                     dict_invoice = {
                         "ver": 1,
