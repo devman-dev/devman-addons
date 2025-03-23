@@ -83,6 +83,7 @@ class TransferRequest(models.Model):
                 dict_data = {
                 'count': 0,
                 'collection_trans_type':'retiro',
+                'cuenta' : rec.cuenta,
                 'date': rec.date,
                 'customer': rec.customer.id,
                 'service': rec.service.id,
@@ -127,7 +128,7 @@ class TransferRequest(models.Model):
                         rec.cuit_destination_account or '',
                         abs(rec.amount)*-1 or '',
                         rec.customer.name or '',
-                        rec.origin_account.name_account or '',
+                        rec.cuenta or '',
                         rec.account_bank.name or '',
                         ]
                 # Agrega una nueva fila al final de la hoja

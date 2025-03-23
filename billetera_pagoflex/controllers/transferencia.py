@@ -251,6 +251,7 @@ class WebFormWalletController(Controller):
             amount = kwargs.get('monto','0').replace('.','').replace(',','.')
             clean_amount = abs(float(amount))
             dict_data = {
+                'cuenta' : kwargs.get('cuenta'),
                 'date': kwargs.get('fecha'),
                 'customer': request.env.user.partner_id.id,
                 'description': kwargs.get('comentario'),
