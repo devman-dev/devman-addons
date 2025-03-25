@@ -86,7 +86,7 @@ class CollectionServicesCommission(models.Model):
     def get_commission(self):
         for rec in self:
             if rec.services:
-                rec.commission = rec.services.commission_default
+                rec.commission_app_rate = rec.services.commission_default
 
     @api.onchange('commission', 'commission_app_rate', 'agent_services_commission')
     def commission_limit(self):
