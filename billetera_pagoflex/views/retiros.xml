@@ -62,6 +62,19 @@
                             <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
                             <span class="btn btn-primary mx-auto" id="toggle-text" onclick="toggleForm()">Mostrar formulario</span>
                             <div id="transfer-form" class="d-none text-start">
+                                
+                                <div class="my-2">
+                                    <label for="cuenta" class="form-label mb-0 small">Cuenta</label>
+                                    <select id="cuenta" name="cuenta" class="form-control py-1 d-flex justify-content-between" required="True">
+                                        <t t-foreach="grouped_transactions.items()" t-as="group">
+                                            <option t-att-value="group[0]" class="">
+                                                <t t-out="request.env['collection.services.commission'].sudo().browse(group[0]).display_name"/> &#160;&#160;&#160;
+                                                $ &#160; <t t-out="('{:,.2f}'.format(group[1])).replace(',', 'X').replace('.', ',').replace('X', '.')" />
+                                            </option>
+                                        </t>
+                                    </select>
+                                </div>
+                                
                                 <div class="mb-2">
                                     <label for="fecha" class="form-label mb-0 small">Fecha</label>
                                     <input type="date" id="fecha" name="fecha" class="form-control py-1" t-att-value="time.strftime('%Y-%m-%d')" required="True"/>
@@ -86,8 +99,8 @@
                             </div>
                         </form>
                     </div>
-                    <div class="col-12 col-md-6">
-                        <div class="wallet-card px-4 bg-white shadow rounded">
+                    <div class="col-12 col-lg-6">
+                        <div class="px-2 bg-white" style="border: 1px solid #56FC81; border-radius: 1rem;">
                             <owl-component class="" name="billetera_pagoflex.Wallet_transfer_request"/>
                             <a t-att-href="'/wallet/tranfers_request/all/1?value=withdrawal'" class="btn btn-link float-end p-0 text-black">Ver movimientos <i class="fa fa-angle-right" aria-hidden="true" style="margin-left: 10px;"></i>
                             </a>
@@ -123,7 +136,7 @@
             </style>
 
             <div class="container">
-                <div class="wallet-card mx-auto col-12 col-md-6 wallet-section">
+                <div class="mx-auto col-12 col-md-6">
 <!--                    <input type="hidden" name="tipo_transaccion" value="retiro"/>-->
                     <a href="/wallet/transfer_request">
                         <i class="fa fa-angle-left" aria-hidden="true" style="font-size: 18px; margin-right: 10px;"></i>
