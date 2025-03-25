@@ -54,10 +54,10 @@
                             <a href="/wallet" class="col-1 text-dark">
                                 <i class="fa fa-arrow-left" aria-hidden="true" style="font-size: 18px; margin-right: 10px;"></i>
                             </a>    
-                            <p class="mx-auto my-0">Pedido de Transferencias</p>
+                            <p class="mx-auto my-0">Pedido de Retiro</p>
                         </div>
                     </div>
-                    <div class="col-12 col-sm-10 col-md-8 col-lg-6">
+                    <div class="col-12 col-lg-6">
                         <form action="/wallet/transfer_request/sended" method="post" enctype="multipart/form-data" class="o_mark_required p-4 bg-white text-center mb-2" style="border: 1px solid #56FC81; border-radius: 1rem;">
                             <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
                             <span class="btn btn-primary mx-auto" id="toggle-text" onclick="toggleForm()">Mostrar formulario</span>
@@ -102,8 +102,8 @@
                     <div class="col-12 col-lg-6">
                         <div class="px-2 bg-white" style="border: 1px solid #56FC81; border-radius: 1rem;">
                             <owl-component class="" name="billetera_pagoflex.Wallet_transfer_request"/>
-                            <a t-att-href="'/wallet/tranfers_request/all/1?value=withdrawal'" class="btn btn-link float-end p-0 text-black">Ver movimientos <i class="fa fa-angle-right" aria-hidden="true" style="margin-left: 10px;"></i>
-                            </a>
+                            <!-- <a t-att-href="'/wallet/tranfers_request/all/1?value=withdrawal'" class="btn btn-link float-end p-0 text-black">Ver movimientos <i class="fa fa-angle-right" aria-hidden="true" style="margin-left: 10px;"></i>
+                            </a> -->
                         </div>
                     </div>
                 </div>
