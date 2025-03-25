@@ -1,6 +1,6 @@
-from odoo import fields, models, api
+from odoo import fields, models, api # type: ignore
 
-from odoo.exceptions import ValidationError
+from odoo.exceptions import ValidationError # type: ignore
 
 
 class CollectionServicesCommission(models.Model):
