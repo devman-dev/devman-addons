@@ -314,7 +314,7 @@ class WebFormWalletController(Controller):
                 # Publicar un mensaje en el canal
                 channel.message_post(
                     body = "Este es un mensaje de prueba para el canal: %s" % channel.name,
-                    message_type = 'notification',
+                    message_type = 'comment',
                     subtype_xmlid = 'mail.mt_comment',
                     partner_ids = partner_ids
                 )
