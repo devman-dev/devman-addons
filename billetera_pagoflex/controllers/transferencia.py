@@ -253,7 +253,6 @@ class WebFormWalletController(Controller):
             cuenta = kwargs.get('cuenta')
             cuenta = int(''.join(cuenta))
             dict_data = {
-                # 'origin_account': request.env['collection.services.commission'].sudo().browse(kwargs.get('cuenta')),
                 'origin_account': cuenta,
                 'date': kwargs.get('fecha'),
                 'customer': request.env.user.partner_id.id,
@@ -269,8 +268,13 @@ class WebFormWalletController(Controller):
 
             _logger.error(f'Datos de la solicitud de transferencia: {cuenta}')
             
-            request.env['transfer.request'].sudo().create(dict_data)
-
+            registro = request.env['transfer.request'].sudo().create(dict_data)
+            if kwargs.get('tipo_transaccion') == 'transferencia':
+                operacion = 'transferencia'
+            elif kwargs.get('tipo_transaccion') == 'retiro':
+                operacion = 'Extraccion Efectivo Pesos'
+            operacion_rec = registro.operation.sudo().search([('name', 'ilike', operacion)], limit=1)
+            registro.sudo().write({'operation': operacion_rec.id})
 
             # Administrar los Canales de notificaciones
 
