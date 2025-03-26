@@ -265,10 +265,9 @@ class WebFormWalletController(Controller):
                 'cuit_destination_account': kwargs.get('cuit'),
                 'transfer_type': kwargs.get('tipo_transaccion')
             }
-
-            _logger.error(f'Datos de la solicitud de transferencia: {cuenta}')
             
             registro = request.env['transfer.request'].sudo().create(dict_data)
+
             if kwargs.get('tipo_transaccion') == 'transferencia':
                 operacion = 'transferencia'
             elif kwargs.get('tipo_transaccion') == 'retiro':
@@ -277,7 +276,6 @@ class WebFormWalletController(Controller):
             registro.sudo().write({'operation': operacion_rec.id})
 
             # Administrar los Canales de notificaciones
-
             # Buscar si los canales ya existen
             existing_channels = request.env['discuss.channel'].sudo().search([
                 ('name', 'in', ['Solicitud de transferencia', 'Solicitud de retiro'])

@@ -3,7 +3,8 @@ from datetime import datetime
 from odoo.exceptions import ValidationError # type: ignore
 import gspread # type: ignore
 from oauth2client.service_account import ServiceAccountCredentials # type: ignore
-
+import logging
+_logger = logging.getLogger(__name__)
 
 class TransferRequest(models.Model):
     _name = 'transfer.request'
@@ -119,7 +120,8 @@ class TransferRequest(models.Model):
                 # Selecciona la hoja por nombre
                 sheet = spreadsheet.worksheet("Hoja 1")
                 # Datos a escribir
-                new_row = [ rec.id or '',
+                new_row = [ 
+                        rec.id or '',
                         rec.date.strftime('%d-%m-%Y') or '',
 			            rec.name_destination_account or '',
 			            rec.cbu_destination_account or '',
@@ -128,10 +130,11 @@ class TransferRequest(models.Model):
                         rec.cuit_destination_account or '',
                         abs(rec.amount)*-1 or '',
                         rec.customer.name or '',
-                        rec.origin_account or '',
+                        rec.origin_account.name_account or '',
                         rec.account_bank.name or '',
                         ]
                 # Agrega una nueva fila al final de la hoja
+                _logger.error(f'Datos de la solicitud de transferencia: {new_row}')
                 sheet.append_row(new_row)
 
 

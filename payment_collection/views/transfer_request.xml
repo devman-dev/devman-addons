@@ -59,11 +59,11 @@
                         <group>
                             <field name="account_bank"/>
                             <field name="origin_account_table" invisible="1"/>
-                            <field name="origin_account" domain="[('id','in',origin_account_table)]" context="{'show_account_name': True}" options="{'no_create': True, 'no_create_edit': True, 'no_quick_create': True}"/>
-                            <field name="name_destination_account" />
-                            <field name="alias_destination_account" />
-                            <field name="cbu_destination_account" />
-                            <field name="cvu_destination_account" />
+                            <field name="origin_account" domain="[('id','in',origin_account_table)]" context="{'show_account_name': True}" options="{'no_create': True, 'no_create_edit': True, 'no_quick_create': True}" readonly="1"/>
+                            <field name="name_destination_account" readonly="1" invisible="transfer_type == 'retiro'"/>
+                            <field name="alias_destination_account" readonly="1" invisible="transfer_type == 'retiro'" />
+                            <field name="cbu_destination_account" readonly="1" invisible="transfer_type == 'retiro'"/>
+                            <field name="cvu_destination_account" readonly="1" invisible="transfer_type == 'retiro'"/>
                             <field name="transfer_type" readonly="1"/>
                             <field name="transfer_request_state" force_save="1" readonly="1" widget="badge" decoration-muted="transfer_request_state == 'nuevo'" decoration-warning="transfer_request_state == 'revisar'" decoration-success="transfer_request_state == 'pasado'" decoration-danger="transfer_request_state == 'cancelado'"/>
                         </group>
