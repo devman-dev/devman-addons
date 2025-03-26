@@ -250,8 +250,11 @@ class WebFormWalletController(Controller):
         try:
             amount = kwargs.get('monto','0').replace('.','').replace(',','.')
             clean_amount = abs(float(amount))
+            cuenta = kwargs.get('cuenta')
+            cuenta = int(''.join(cuenta))
             dict_data = {
-                # 'cuenta' : kwargs.get('cuenta'),
+                # 'origin_account': request.env['collection.services.commission'].sudo().browse(kwargs.get('cuenta')),
+                'origin_account': cuenta,
                 'date': kwargs.get('fecha'),
                 'customer': request.env.user.partner_id.id,
                 'description': kwargs.get('comentario'),
@@ -263,6 +266,11 @@ class WebFormWalletController(Controller):
                 'cuit_destination_account': kwargs.get('cuit'),
                 'transfer_type': kwargs.get('tipo_transaccion')
             }
+
+            _logger.error(f'Datos de la solicitud de transferencia: {cuenta}')
+            
+            request.env['transfer.request'].sudo().create(dict_data)
+
 
             # Administrar los Canales de notificaciones
 
@@ -320,7 +328,7 @@ class WebFormWalletController(Controller):
                 )
             
             
-
+            
             state_request = True
         except Exception as e:
             _logger.error(f'Error al crear la solicitud de transferencia: {e}')

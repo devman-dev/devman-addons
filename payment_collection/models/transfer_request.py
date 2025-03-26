@@ -84,7 +84,6 @@ class TransferRequest(models.Model):
                 dict_data = {
                 'count': 0,
                 'collection_trans_type':'retiro',
-                # 'cuenta' : rec.cuenta,
                 'date': rec.date,
                 'customer': rec.customer.id,
                 'service': rec.service.id,
@@ -100,7 +99,6 @@ class TransferRequest(models.Model):
                 'origin_account_cvu': rec.origin_account.cvu,
                 'origin_account_cbu': rec.origin_account.cbu,
                 'alias_origen': rec.origin_account.alias,
-
 
                 'name_destination_account': rec.name_destination_account,
                 'alias_destination_account': rec.alias_destination_account,
@@ -121,7 +119,8 @@ class TransferRequest(models.Model):
                 # Selecciona la hoja por nombre
                 sheet = spreadsheet.worksheet("Hoja 1")
                 # Datos a escribir
-                new_row = [ rec.date.strftime('%d-%m-%Y') or '',
+                new_row = [ rec.id or '',
+                        rec.date.strftime('%d-%m-%Y') or '',
 			            rec.name_destination_account or '',
 			            rec.cbu_destination_account or '',
                         rec.cvu_destination_account or '',
@@ -129,7 +128,7 @@ class TransferRequest(models.Model):
                         rec.cuit_destination_account or '',
                         abs(rec.amount)*-1 or '',
                         rec.customer.name or '',
-                        # rec.cuenta or '',
+                        rec.origin_account or '',
                         rec.account_bank.name or '',
                         ]
                 # Agrega una nueva fila al final de la hoja
