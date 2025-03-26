@@ -63,7 +63,7 @@ access_to_bank_move_imported_comi,access.bank.move.imported,model_bank_move_impo
 
 
 access_to_transfer_request,access.transfer.request,model_transfer_request,groups_payment_collection_admin,1,1,1,1
-access_to_transfer_request_user,access.transfer.request,model_transfer_request,groups_payment_collection_user,0,0,0,0
+access_to_transfer_request_user,access.transfer.request,model_transfer_request,groups_payment_collection_user,1,0,0,0
 access_to_transfer_request_comi,access.transfer.request,model_transfer_request,groups_payment_collection_comi,0,0,0,0
 
 
