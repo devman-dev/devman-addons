@@ -11,13 +11,14 @@
         <div class="col-12" id="Wallet_transfer_request">
             <div class="row">
                 <t t-if="state.transactions_filter.length == 0">
-                    <div class="text-center">
+                    <div class="text-center py-3">
                         <p class="text-muted mb-1" style="font-size: 14px;">No hay solicitudes</p>
                     </div>
                 </t>
                 <t t-foreach="state.transactions_filter" t-as="transaction" t-key="transaction.id">
                     <div class="col-11 pt-2 pb-1">
                         <div class="row align-items-center">
+                            <!-- Estado de transaccion -->
                             <div class="col-4 ps-4" style="min-width: 100px; padding-left: 10px; font-size: 12px;">
                                 <t t-if="transaction.transfer_request_state == 'cancelado'">
                                     <span class="ps-2 position-relative">
@@ -40,6 +41,7 @@
                                     </span>
                                 </t>
                             </div>
+                            <!-- Tipo de transaccion -->
                             <div class="col-4">
                                 <t t-if="transaction.transfer_type == 'retiro'">
                                     <span class="p-1 rounded-pill bg-danger text-white ms-3" style="font-size: 8px;">
@@ -52,6 +54,7 @@
                                     </span>
                                 </t>
                             </div>
+                            <!-- Monto Transaccion -->
                             <div class="col-4 d-flex justify-content-end">
                                 <span class="" style="font-size: 12px; font-weight: bold;">
                                     $<t t-out="transaction.amount.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })" />
@@ -59,11 +62,13 @@
                             </div>
                         </div>
                         <div class="row align-items-center">
+                            <!-- Fecha de transaccion -->
                             <div class="col-4">
                                 <span class="ps-3" style="font-size: 12px;">
                                     <t t-out="new Date(transaction.date + 'T00:00:00').toLocaleDateString('es-AR')" />
                                 </span>
                             </div>
+                            <!-- Alias de cuenta destino y descripcion -->
                             <div class="col-8" style="font-size: 12px; margin-top: -2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
                                 <span class="me-1" style="">
                                     <t t-out="transaction.alias_destination_account"/>

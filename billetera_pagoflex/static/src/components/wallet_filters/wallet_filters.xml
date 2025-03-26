@@ -17,9 +17,9 @@
                             <span class="small text-muted">
                                 <t t-out="new Date(transaction.date + 'T00:00:00').toLocaleDateString('es-AR')" /> 
                             </span>
-                            <strong class="font-weight-bold">Juan perez</strong>
+                            <strong class="font-weight-bold"></strong>
                         </div>
-                        <span class="text-center text-muted small">Transferencia recibida </span>
+                        <span class="text-center text-muted small"></span>
                     </div>
                     <div class="col-4 ps-1 pe-3 mb-3 d-flex justify-content-end align-items-start">
                         $ <t t-out="transaction.amount.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })" />

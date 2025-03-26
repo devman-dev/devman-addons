@@ -170,7 +170,25 @@ class WebFormWalletController(Controller):
 
     @route('/wallet/transfer_request', auth='user', website=True)
     def send_transfer_request(self, **kwargs):
-        return request.render('billetera_pagoflex.web_form_template_request_transfer')
+        collection_balance = request.env['collection.dashboard.customer'].sudo().recalculate_total_recs(request.env.user.partner_id.id)
+        customer_balance = collection_balance if collection_balance else 0.00
+
+        transactions = request.env['collection.transaction'].sudo().search([('customer', '=', request.env.user.partner_id.id), ('collection_trans_type', '!=', 'movimiento_interno')], order='id desc', limit=10)
+
+        grouped_transactions = {}
+        for transaction in transactions:
+            if transaction.service:
+                service = transaction.service.id
+            else:
+                continue
+            if service not in grouped_transactions:
+                grouped_transactions[service] = []
+            grouped_transactions[service].append(transaction.amount)
+
+        for key in grouped_transactions.keys():
+            grouped_transactions[key] = sum(grouped_transactions[key])
+
+        return request.render('billetera_pagoflex.web_form_template_request_transfer', {'customer_balance': customer_balance, 'transactions': transactions, 'user_name': request.env.user.name, 'grouped_transactions': grouped_transactions})
 
 
     @route('/wallet/movements/<string:mov_type>/<int:id_service>/<int:page>', auth='user', website=True, methods=['GET'])
@@ -232,7 +250,10 @@ class WebFormWalletController(Controller):
         try:
             amount = kwargs.get('monto','0').replace('.','').replace(',','.')
             clean_amount = abs(float(amount))
+            cuenta = kwargs.get('cuenta')
+            cuenta = int(''.join(cuenta))
             dict_data = {
+                'origin_account': cuenta,
                 'date': kwargs.get('fecha'),
                 'customer': request.env.user.partner_id.id,
                 'description': kwargs.get('comentario'),
@@ -244,7 +265,72 @@ class WebFormWalletController(Controller):
                 'cuit_destination_account': kwargs.get('cuit'),
                 'transfer_type': kwargs.get('tipo_transaccion')
             }
-            request.env['transfer.request'].sudo().create(dict_data)
+            
+            registro = request.env['transfer.request'].sudo().create(dict_data)
+
+            if kwargs.get('tipo_transaccion') == 'transferencia':
+                operacion = 'transferencia'
+            elif kwargs.get('tipo_transaccion') == 'retiro':
+                operacion = 'Extraccion Efectivo Pesos'
+            operacion_rec = registro.operation.sudo().search([('name', 'ilike', operacion)], limit=1)
+            registro.sudo().write({'operation': operacion_rec.id})
+
+            # Administrar los Canales de notificaciones
+            # Buscar si los canales ya existen
+            existing_channels = request.env['discuss.channel'].sudo().search([
+                ('name', 'in', ['Solicitud de transferencia', 'Solicitud de retiro'])
+            ])
+
+            # Obtener los nombres de los canales existentes
+            existing_channel_names = existing_channels.mapped('name')
+
+            # Crear solo los canales que no existen
+            channels_to_create = []
+            if 'Solicitud de transferencia' not in existing_channel_names:
+                channels_to_create.append({'name': 'Solicitud de transferencia'})
+            if 'Solicitud de retiro' not in existing_channel_names:
+                channels_to_create.append({'name': 'Solicitud de retiro'})
+
+            # Crear los canales faltantes o usar los existentes
+            if channels_to_create:
+                channels = request.env['discuss.channel'].sudo().create(channels_to_create)
+            else:
+                channels = existing_channels
+
+            # Buscar los usuarios internos
+            usuarios_internos = request.env['res.users'].sudo().search([
+                ('groups_id', 'in', request.env.ref('base.group_user').id)
+            ])
+
+            # Suscribir a los usuarios internos a los canales
+            partners_to_subscribe = usuarios_internos.mapped('partner_id')  # Obtener los partners de los usuarios internos
+            channels.sudo().write({'channel_partner_ids': [(4, partner.id) for partner in partners_to_subscribe]})
+
+            # Obtener los IDs de los partners suscritos
+            partner_ids = [partner.id for partner in partners_to_subscribe]
+
+            # Enviar un mensaje al canal y generar una alerta
+            for channel in channels:
+                # Publicar un mensaje en el canal
+                channel.message_post(
+                    body = "Este es un mensaje de prueba para el canal: %s" % channel.name,
+                    message_type = 'notification',
+                    subtype_xmlid = 'mail.mt_comment',
+                    partner_ids = partner_ids
+                )
+                
+                # Enviar una alerta a los usuarios suscritos al canal
+                request.env['bus.bus']._sendone(
+                    channel.id,  # ID del canal como identificador único
+                    'simple_notification',  # Tipo de notificación
+                    {
+                        'type': 'info',  # Tipo de alerta (info, success, warning, danger)
+                        'message': "Se ha enviado un mensaje al canal: %s" % channel.name
+                    }
+                )
+            
+            
+            
             state_request = True
         except Exception as e:
             _logger.error(f'Error al crear la solicitud de transferencia: {e}')
@@ -264,6 +350,7 @@ class WebFormWalletController(Controller):
         if trans_req:
             if trans_req.transfer_request_state != 'pasado':
                 trans_req.transfer_request_state = 'cancelado'
+
             else:
                 message = 'No se puede cancelar un pedido de transferencia aprobado.'
 
@@ -340,4 +427,23 @@ class WebFormWalletController(Controller):
 
     @route('/wallet/transfer_request/withdrawal', auth='user', website=True)
     def send_transfer_request_withdrawal(self, **kwargs):
-        return request.render('billetera_pagoflex.web_form_template_request_transfer_withdrawal')
+        collection_balance = request.env['collection.dashboard.customer'].sudo().recalculate_total_recs(request.env.user.partner_id.id)
+        customer_balance = collection_balance if collection_balance else 0.00
+
+        transactions = request.env['collection.transaction'].sudo().search([('customer', '=', request.env.user.partner_id.id), ('collection_trans_type', '!=', 'movimiento_interno')], order='id desc', limit=10)
+
+        grouped_transactions = {}
+        for transaction in transactions:
+            if transaction.service:
+                service = transaction.service.id
+            else:
+                continue
+            if service not in grouped_transactions:
+                grouped_transactions[service] = []
+            grouped_transactions[service].append(transaction.amount)
+
+        for key in grouped_transactions.keys():
+            grouped_transactions[key] = sum(grouped_transactions[key])
+
+
+        return request.render('billetera_pagoflex.web_form_template_request_transfer_withdrawal', {'customer_balance': customer_balance, 'transactions': transactions, 'user_name': request.env.user.name, 'grouped_transactions': grouped_transactions})

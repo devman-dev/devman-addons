@@ -3,11 +3,13 @@ from datetime import datetime
 from odoo.exceptions import ValidationError # type: ignore
 import gspread # type: ignore
 from oauth2client.service_account import ServiceAccountCredentials # type: ignore
-
+import logging
+_logger = logging.getLogger(__name__)
 
 class TransferRequest(models.Model):
     _name = 'transfer.request'
     _order = 'id desc'
+    _inherit = ['mail.thread', 'mail.activity.mixin']
 
 
     customer = fields.Many2one('res.partner', string='Cliente', required=True, tracking=True,
@@ -44,7 +46,7 @@ class TransferRequest(models.Model):
     origin_account_table = fields.Many2many('collection.services.commission')
 
 
-    account_bank = fields.Many2one('account.bank.pagoflex', string='Cuenta Banco')
+    account_bank = fields.Many2one('account.bank.pagoflex', string='Banco')
 
     transfer_request_state = fields.Selection([('nuevo', 'Nuevo'), ('pasado','Pasado'), ('revisar', 'Revisar'), ('cancelado','Cancelado'),], default='nuevo', string='Estado')
 
@@ -99,7 +101,6 @@ class TransferRequest(models.Model):
                 'origin_account_cbu': rec.origin_account.cbu,
                 'alias_origen': rec.origin_account.alias,
 
-
                 'name_destination_account': rec.name_destination_account,
                 'alias_destination_account': rec.alias_destination_account,
                 'cbu_destination_account': rec.cbu_destination_account,
@@ -119,7 +120,9 @@ class TransferRequest(models.Model):
                 # Selecciona la hoja por nombre
                 sheet = spreadsheet.worksheet("Hoja 1")
                 # Datos a escribir
-                new_row = [ rec.date.strftime('%d-%m-%Y') or '',
+                new_row = [ 
+                        rec.id or '',
+                        rec.date.strftime('%d-%m-%Y') or '',
 			            rec.name_destination_account or '',
 			            rec.cbu_destination_account or '',
                         rec.cvu_destination_account or '',
@@ -131,6 +134,7 @@ class TransferRequest(models.Model):
                         rec.account_bank.name or '',
                         ]
                 # Agrega una nueva fila al final de la hoja
+                _logger.error(f'Datos de la solicitud de transferencia: {new_row}')
                 sheet.append_row(new_row)
 
 
