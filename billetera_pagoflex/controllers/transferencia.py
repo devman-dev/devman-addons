@@ -251,7 +251,7 @@ class WebFormWalletController(Controller):
             amount = kwargs.get('monto','0').replace('.','').replace(',','.')
             clean_amount = abs(float(amount))
             dict_data = {
-                'cuenta' : kwargs.get('cuenta'),
+                # 'cuenta' : kwargs.get('cuenta'),
                 'date': kwargs.get('fecha'),
                 'customer': request.env.user.partner_id.id,
                 'description': kwargs.get('comentario'),
@@ -263,7 +263,64 @@ class WebFormWalletController(Controller):
                 'cuit_destination_account': kwargs.get('cuit'),
                 'transfer_type': kwargs.get('tipo_transaccion')
             }
-            request.env['transfer.request'].sudo().create(dict_data)
+
+            # Administrar los Canales de notificaciones
+
+            # Buscar si los canales ya existen
+            existing_channels = request.env['discuss.channel'].sudo().search([
+                ('name', 'in', ['Solicitud de transferencia', 'Solicitud de retiro'])
+            ])
+
+            # Obtener los nombres de los canales existentes
+            existing_channel_names = existing_channels.mapped('name')
+
+            # Crear solo los canales que no existen
+            channels_to_create = []
+            if 'Solicitud de transferencia' not in existing_channel_names:
+                channels_to_create.append({'name': 'Solicitud de transferencia'})
+            if 'Solicitud de retiro' not in existing_channel_names:
+                channels_to_create.append({'name': 'Solicitud de retiro'})
+
+            # Crear los canales faltantes o usar los existentes
+            if channels_to_create:
+                channels = request.env['discuss.channel'].sudo().create(channels_to_create)
+            else:
+                channels = existing_channels
+
+            # Buscar los usuarios internos
+            usuarios_internos = request.env['res.users'].sudo().search([
+                ('groups_id', 'in', request.env.ref('base.group_user').id)
+            ])
+
+            # Suscribir a los usuarios internos a los canales
+            partners_to_subscribe = usuarios_internos.mapped('partner_id')  # Obtener los partners de los usuarios internos
+            channels.sudo().write({'channel_partner_ids': [(4, partner.id) for partner in partners_to_subscribe]})
+
+            # Obtener los IDs de los partners suscritos
+            partner_ids = [partner.id for partner in partners_to_subscribe]
+
+            # Enviar un mensaje al canal y generar una alerta
+            for channel in channels:
+                # Publicar un mensaje en el canal
+                channel.message_post(
+                    body = "Este es un mensaje de prueba para el canal: %s" % channel.name,
+                    message_type = 'notification',
+                    subtype_xmlid = 'mail.mt_comment',
+                    partner_ids = partner_ids
+                )
+                
+                # Enviar una alerta a los usuarios suscritos al canal
+                request.env['bus.bus']._sendone(
+                    channel.id,  # ID del canal como identificador único
+                    'simple_notification',  # Tipo de notificación
+                    {
+                        'type': 'info',  # Tipo de alerta (info, success, warning, danger)
+                        'message': "Se ha enviado un mensaje al canal: %s" % channel.name
+                    }
+                )
+            
+            
+
             state_request = True
         except Exception as e:
             _logger.error(f'Error al crear la solicitud de transferencia: {e}')

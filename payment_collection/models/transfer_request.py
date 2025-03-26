@@ -8,6 +8,7 @@ from oauth2client.service_account import ServiceAccountCredentials # type: ignor
 class TransferRequest(models.Model):
     _name = 'transfer.request'
     _order = 'id desc'
+    _inherit = ['mail.thread', 'mail.activity.mixin']
 
 
     customer = fields.Many2one('res.partner', string='Cliente', required=True, tracking=True,
@@ -83,7 +84,7 @@ class TransferRequest(models.Model):
                 dict_data = {
                 'count': 0,
                 'collection_trans_type':'retiro',
-                'cuenta' : rec.cuenta,
+                # 'cuenta' : rec.cuenta,
                 'date': rec.date,
                 'customer': rec.customer.id,
                 'service': rec.service.id,
@@ -128,7 +129,7 @@ class TransferRequest(models.Model):
                         rec.cuit_destination_account or '',
                         abs(rec.amount)*-1 or '',
                         rec.customer.name or '',
-                        rec.cuenta or '',
+                        # rec.cuenta or '',
                         rec.account_bank.name or '',
                         ]
                 # Agrega una nueva fila al final de la hoja
