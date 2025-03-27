@@ -71,7 +71,10 @@
                             <!-- Alias de cuenta destino y descripcion -->
                             <div class="col-8" style="font-size: 12px; margin-top: -2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
                                 <span class="me-1" style="">
-                                    <t t-out="transaction.alias_destination_account"/>
+                                    <t t-if="transaction.alias_destination_account != false">
+                                        <t t-out="transaction.alias_destination_account"/>
+                                    </t>
+                                    <t t-else=""></t>
                                 </span>
                                 <span class="ms-1" style="">
                                     <t t-out="transaction.description"/>
