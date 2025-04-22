@@ -1,0 +1,216 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <record id="multi_approval_type_view_tree" model="ir.ui.view">
+        <field name="name">multi_approval_type_view_tree</field>
+        <field name="model">multi.approval.type</field>
+        <field name="arch" type="xml">
+            <list import="false">
+                <field name="name" />
+                <field name="description" />
+            </list>
+        </field>
+    </record>
+
+    <record id="multi_approval_type_view_form" model="ir.ui.view">
+        <field name="name">multi_approval_type_view_form</field>
+        <field name="model">multi.approval.type</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <field name="active" invisible="1" />
+                    <widget
+                        name="web_ribbon"
+                        title="Archived"
+                        bg_color="bg-danger"
+                        invisible="active"
+                    />
+                    <field
+                        name="image"
+                        widget="image"
+                        class="oe_avatar"
+                        options="{&quot;preview_image&quot;: &quot;image&quot;, &quot;size&quot;: [80, 80]}"
+                    />
+                    <div class="oe_title">
+                        <label for="name" class="oe_edit_only" />
+                        <h1>
+                            <field name="name" placeholder="Approvals Type" />
+                        </h1>
+                    </div>
+                    <group>
+                        <field name="description" />
+                    </group>
+                    <notebook>
+                        <page string="Options" name="options">
+                            <group string="Fields" name="option_settings">
+                                <group>
+                                    <field
+                                        name="document_opt"
+                                        widget="radio"
+                                        options="{'horizontal': true}"
+                                    />
+                                    <field
+                                        name="contact_opt"
+                                        widget="radio"
+                                        options="{'horizontal': true}"
+                                    />
+                                    <field
+                                        name="date_opt"
+                                        widget="radio"
+                                        options="{'horizontal': true}"
+                                    />
+                                    <field
+                                        name="period_opt"
+                                        widget="radio"
+                                        options="{'horizontal': true}"
+                                    />
+                                    <field
+                                        name="item_opt"
+                                        widget="radio"
+                                        options="{'horizontal': true}"
+                                    />
+                                    <field
+                                        name="multi_items_opt"
+                                        widget="radio"
+                                        options="{'horizontal': true}"
+                                    />
+                                </group>
+                                <group>
+                                    <field
+                                        name="quantity_opt"
+                                        widget="radio"
+                                        options="{'horizontal': true}"
+                                    />
+                                    <field
+                                        name="amount_opt"
+                                        widget="radio"
+                                        options="{'horizontal': true}"
+                                    />
+                                    <field
+                                        name="payment_opt"
+                                        widget="radio"
+                                        options="{'horizontal': true}"
+                                    />
+                                    <field
+                                        name="reference_opt"
+                                        widget="radio"
+                                        options="{'horizontal': true}"
+                                    />
+                                    <field
+                                        name="location_opt"
+                                        widget="radio"
+                                        options="{'horizontal': true}"
+                                    />
+                                </group>
+                            </group>
+                            <group string="Approvers" name="approvers">
+                                <group>
+                                    <field name="approval_minimum" />
+                                </group>
+                                <field name="line_ids">
+                                    <list editable="bottom">
+                                        <field name="sequence" widget="handle" />
+                                        <field name="name" />
+                                        <field name="user_id" />
+                                        <field name="require_opt" />
+                                    </list>
+                                </field>
+                            </group>
+                        </page>
+                        <page string="Other Information" name="page_other">
+                            <group string="Notification">
+                                <group>
+                                    <field name="mail_notification" />
+                                    <field
+                                        name="mail_template_id"
+                                        invisible="not mail_notification"
+                                        domain="[('model_id.model', '=', 'multi.approval')]"
+                                    />
+                                    <field
+                                        name="approve_mail_template_id"
+                                        invisible="not mail_notification"
+                                        domain="[('model_id.model', '=', 'multi.approval')]"
+                                    />
+                                    <field
+                                        name="refuse_mail_template_id"
+                                        invisible="not mail_notification"
+                                        domain="[('model_id.model', '=', 'multi.approval')]"
+                                    />
+                                </group>
+                                <group>
+                                    <field name="activity_notification" />
+                                </group>
+                            </group>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="multi_approval_type_view_kanban" model="ir.ui.view">
+        <field name="name">multi_approval_type_view_kanban</field>
+        <field name="model">multi.approval.type</field>
+        <field name="arch" type="xml">
+            <kanban class="o_modules_kanban" import="false">
+                <field name="id" />
+                <field name="active" />
+                <templates>
+                    <t
+                        t-name="menu"
+                        groups="multi_level_approval.group_approval_manager"
+                    >
+                        <a
+                            t-if="widget.editable"
+                            role="menuitem"
+                            type="edit"
+                            class="dropdown-item"
+                        >Edit</a>
+                        <a
+                            t-if="record.active.raw_value"
+                            role="menuitem"
+                            type="archive"
+                            class="dropdown-item"
+                        >Archive</a>
+                        <a
+                            t-if="!record.active.raw_value"
+                            role="menuitem"
+                            type="unarchive"
+                            class="dropdown-item"
+                        >Unarchive</a>
+                    </t>
+                    <t t-name="card" class="flex-row">
+                        <widget
+                            name="web_ribbon"
+                            title="Archived"
+                            bg_color="text-bg-danger"
+                            invisible="active"
+                        />
+                        <aside>
+                            <field name="image" widget="image" class="mt-2" />
+                        </aside>
+                        <main class="ms-4">
+                            <field name="name" class="fw-bold fs-5" />
+                            <p class="text-muted small my-0 lh-1">
+                                <field name="description" />
+                            </p>
+                            <footer class="w-100 justify-content-between">
+                                <button
+                                    type="object"
+                                    class="btn btn-primary btn-sm"
+                                    name="create_request"
+                                    context="{'type_id':id}"
+                                >New Request</button>
+                                <button
+                                    type="object"
+                                    class="btn btn-sm btn-secondary ms-auto"
+                                    name="open_submitted_request"
+                                    groups="multi_level_approval.group_approval_user"
+                                >To Review: <field name="submitted_nb" /></button>
+                            </footer>
+                        </main>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+</odoo>
