@@ -8,8 +8,8 @@ import logging
 _logger = logging.getLogger(__name__)
 
 class MaintenanceRequestAPI(http.Controller):
-    TOKEN = config['maintenance_api_token'] or os.environ.get('maintenance_api_token', 'Ar@%Zca$QhPExdwzrf9/QHikFSwgm9')
-
+    TOKEN = 'Ar@%Zca$QhPExdwzrf9/QHikFSwgm9' #config['maintenance_api_token'] or os.environ.get('maintenance_api_token', 'Ar@%Zca$QhPExdwzrf9/QHikFSwgm9')
+    
     def _check_auth(self):
         token = request.httprequest.headers.get('Authorization')
         if token != f'Bearer {self.TOKEN}':
