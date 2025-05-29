@@ -2,6 +2,7 @@
 {
     "name": "nahe_80mm_invoice_ticket",
     "summary": "Permite imprimir el ticket factura de 80mm desde el backend sin estar en el POS.",
+
     "author": "Nähe Consulting Group",
     "website": "http://www.nahe.com.ar",
     "category": "Sales",
@@ -15,6 +16,7 @@
     ],
     "data": [
         "views/views.xml",
+
         "views/afip_view.xml",
         "reports/report_ticket_80mm.xml",
     ],
