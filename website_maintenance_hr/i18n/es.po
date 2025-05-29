@@ -68,6 +68,11 @@ msgstr ""
 
 #. module: website_maintenance_hr
 #: model_terms:ir.ui.view,arch_db:website_maintenance_hr.maintenance_page
+msgid "<option value=\"\">Select Company</option>"
+msgstr "<option value=\"\">Seleccione la Empresa</option>"
+
+#. module: website_maintenance_hr
+#: model_terms:ir.ui.view,arch_db:website_maintenance_hr.maintenance_page
 msgid "<option value=\"\">Select Equipment</option>"
 msgstr "<option value=\"\">Seleccione el Activo</option>"
 
@@ -133,6 +138,11 @@ msgstr "Prioridad"
 #: model_terms:ir.ui.view,arch_db:website_maintenance_hr.maintenance_page
 msgid "Subject"
 msgstr "Asunto"
+
+#. module: website_maintenance_hr
+#: model_terms:ir.ui.view,arch_db:website_maintenance_hr.maintenance_page
+msgid "Company"
+msgstr "Empresa"
 
 #. module: website_maintenance_hr
 #: model_terms:ir.ui.view,arch_db:website_maintenance_hr.maintenance_page

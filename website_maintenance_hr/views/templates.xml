@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <data>
+        <!-- Página principal del formulario de mantenimiento -->
         <template id="maintenance_page" name="Maintenance Request">
             <t t-call="website.layout">
                 <div class="container">
@@ -8,30 +9,49 @@
                     <form t-attf-action="/submit" method="post"
                         data-success_page="/maintenance_request-thanks"
                         enctype="multipart/form-data">
+
                         <div class="form-group form-field o_website_form_required_custom">
                             <br />
                             <br />
                             <p>
-                                <h2>&amp;nbsp; <b>Maintenance Request</b>
-                                </h2>
+                                <h2>&amp;nbsp; <b>Maintenance Request</b></h2>
                             </p>
                             <br />
+                        </div>
+
+                        <!-- Subject -->
+                        <div class="form-group">
                             <label class="col-md-3 col-sm-4 control-label" for="subject">Subject</label>
                             <div class="col-lg-7 col-md-8">
                                 <input type="text" class="form-control o_website_form_input"
-                                    name="subject" />
+                                    name="subject" required="" />
                             </div>
                         </div>
+                        <br />
 
+                        <!-- Company Selection -->
                         <div class="form-group form-field o_website_form_required_custom">
-                            <input type="text" class="form-control o_website_form_input team"
-                                name="team"
-                                style="visibility: hidden; display: none;" />
-                            <label class="col-md-3 col-sm-4 control-label" for="from">Team</label>
+                            <label class="col-md-3 col-sm-4 control-label" for="company_id">Company</label>
+                            <div class="col-lg-7 col-md-8">
+                                <select class="form-control o_website_form_input" id="company_id"
+                                    name="company_id" required="">
+                                    <option value="">Select Company</option>
+                                    <t t-foreach="company_list" t-as="company">
+                                        <option t-att-value="company['id']">
+                                            <t t-esc="company['name']" />
+                                        </option>
+                                    </t>
+                                </select>
+                            </div>
+                        </div>
+                        <br />
+
+                        <!-- Team Selection -->
+                        <div class="form-group form-field o_website_form_required_custom">
+                            <label class="col-md-3 col-sm-4 control-label" for="team_id">Team</label>
                             <div class="col-lg-7 col-md-8">
                                 <select class="form-control o_website_form_input" id="team_id"
-                                    name="teams"
-                                    required="">
+                                    name="teams" required="">
                                     <option value="">Select Team</option>
                                     <t t-foreach="team_selection" t-as="team">
                                         <option t-att-value="team['id']">
@@ -40,13 +60,15 @@
                                     </t>
                                 </select>
                             </div>
-                            <br />
-                            <label class="col-md-3 col-sm-4 control-label date_to" for="to">
-                                Equipment</label>
+                        </div>
+                        <br />
+
+                        <!-- Equipment Selection -->
+                        <div class="form-group form-field o_website_form_required_custom">
+                            <label class="col-md-3 col-sm-4 control-label" for="equipment">Equipment</label>
                             <div class="col-lg-7 col-md-8">
                                 <select class="form-control o_website_form_input" id="equipment"
-                                    name="equipment"
-                                    required="">
+                                    name="equipment" required="">
                                     <option value="">Select Equipment</option>
                                     <t t-foreach="equipment_selection" t-as="equipment">
                                         <option t-att-value="equipment['id']">
@@ -55,30 +77,36 @@
                                     </t>
                                 </select>
                             </div>
-                            <br />
-                            <label class="col-md-3 col-sm-4 control-label date_to" for="to">Priority</label>
+                        </div>
+                        <br />
+
+                        <!-- Priority Selection -->
+                        <div class="form-group form-field o_website_form_required_custom">
+                            <label class="col-md-3 col-sm-4 control-label" for="priority_id">
+                                Priority</label>
                             <div class="col-lg-7 col-md-8">
                                 <select class="form-control o_website_form_input" id="priority_id"
-                                    name="stars"
-                                    required="">
+                                    name="stars" required="">
                                     <option value="">Select Priority</option>
                                     <option value="0">Very Low</option>
                                     <option value="1">Low</option>
-                                    <option value="2">Normal</option>
+                                    <option value="2" selected="selected">Normal</option>
                                     <option value="3">High</option>
                                 </select>
-                            </div>
-                            <br />
-                        </div>
-
-                        <div class="form-group form-field o_website_form_required_custom">
-                            <label class="col-md-3 col-sm-4 control-label" for="description">Details</label>
-                            <div class="col-md-7 col-sm-8">
-                                <textarea class="form-control" rows="5" name="details"></textarea>
                             </div>
                         </div>
                         <br />
 
+                        <!-- Details -->
+                        <div class="form-group form-field o_website_form_required_custom">
+                            <label class="col-md-3 col-sm-4 control-label" for="details">Details</label>
+                            <div class="col-md-7 col-sm-8">
+                                <textarea class="form-control" rows="5" name="details" required=""></textarea>
+                            </div>
+                        </div>
+                        <br />
+
+                        <!-- File Attachment -->
                         <div class="form-group form-field">
                             <label class="col-md-3 col-sm-4 control-label" for="attached_file">Attach
                                 File</label>
@@ -88,12 +116,13 @@
                             </div>
                         </div>
                         <br />
+
+                        <!-- Submit Button -->
                         <div class="form-group form-field">
                             <div class="col-md-offset-3 col-sm-offset-4 col-sm-8 col-md-7">
                                 <button type="submit"
                                     class="btn btn-primary btn-lg o_website_form_send">Submit</button>
-                                <span id="o_website_form_result">
-                                </span>
+                                <span id="o_website_form_result"></span>
                             </div>
                         </div>
                         <br />
@@ -104,6 +133,7 @@
             </t>
         </template>
 
+        <!-- Página de agradecimiento -->
         <record id="thanks" model="website.page">
             <field name="name">Thanks</field>
             <field name="type">qweb</field>
@@ -121,7 +151,8 @@
                                         <div class="alert alert-success" role="status"> Your
                                             maintenance request has been submitted successfully. <button
                                                 type="button" class="close" data-dismiss="alert">
-                                            &amp;times;</button>
+                                            &amp;times;
+                                            </button>
                                         </div>
                                     </div>
                                     <div class="col-lg-4">
@@ -135,6 +166,7 @@
             </field>
         </record>
 
+        <!-- Página de usuario no encontrado -->
         <record id="nouser" model="website.page">
             <field name="name">No User</field>
             <field name="type">qweb</field>
@@ -152,7 +184,9 @@
                                         <div class="alert alert-warning" role="status"> You cannot
                                             send maintenance request to us since you are not a
                                             registered employee. <button type="button" class="close"
-                                                data-dismiss="alert">&amp;times;</button>
+                                                data-dismiss="alert">
+                                                &amp;times;
+                                            </button>
                                         </div>
                                     </div>
                                     <div class="col-lg-4">
@@ -165,6 +199,5 @@
                 </t>
             </field>
         </record>
-
     </data>
 </odoo>
