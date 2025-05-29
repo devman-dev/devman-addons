@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="collection_category_view_tree" model="ir.ui.view">
+        <field name="name">collection.category.view.tree</field>
+        <field name="model">collection.category</field>
+        <field name="arch" type="xml">
+            <tree string="Etiquetas" editable="bottom">
+                <field name="name"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="collection_category_action" model="ir.actions.act_window">
+        <field name="name">Recaudación de Pagos</field>
+        <field name="res_model">collection.category</field>
+        <field name="view_mode">tree</field>
+    </record>
+
+</odoo>

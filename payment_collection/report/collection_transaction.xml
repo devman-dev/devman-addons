@@ -1,0 +1,226 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <template id="collection_transaction_report">
+        <t t-call="web.html_container">
+            <t t-call="web.external_layout">
+                <div class="page">
+                    <style>
+                        table, thead, tbody, tfoot, tr, td, th {
+                        border: none;
+                        border-collapse: collapse;
+                        padding: 0;
+                        margin: 0;
+                        }
+                        table {
+                        border-spacing: 0;
+                        }
+
+
+                        .border {
+                        border: 2px solid black;
+                        }
+                    </style>
+                    <img src="/payment_collection/static/description/icon.png"
+                        style="width: 100px;float: left;" />
+                    <div style="float: left; margin-left: 20px;">
+                        <p> PagoFlex SA<br /> CUIT 30-71870008-2<br /> WhatsApp +54 9 11 7064-3301 </p>
+
+                    </div>
+                    <div style="float: right; margin-right: 20px;">
+                        <p> Av. Gaona 3707 piso 4 Flores<br /> Caba - Bs As. Argentina <br />
+                            <a
+                                href="https://maps.app.goo.gl/U3bfGzSkFfaCUcpH9">
+                            https://maps.app.goo.gl/U3bfGzSkFfaCUcpH9
+                            </a><br />
+                        </p>
+                    </div>
+                    <div style="clear: both;"></div>
+                    <br />
+                    <div style="float: left;">
+                        <span>Cliente: <t t-out="docs[0].customer.name" /></span>
+                    </div>
+                    <div style="float: right; text-align: left; margin-right: 20px;">
+                        <span style="margin-right: 150px;">Extracto de cta. CVU XXXXXX</span>
+                        <t t-if="docs[0].end_date and docs[0].start_date">
+
+                            <span> Fecha desde <t t-esc="docs[0].start_date.strftime('%d/%m/%Y')"
+                                    class="mx-2" /> hasta <t
+                                    t-esc="docs[0].end_date.strftime('%d/%m/%Y')" class="mx-2" />
+                            </span>
+                        </t>
+                        <t t-else=""></t>
+                        <t t-if="docs[0].print_date">
+                            <span style="margin-left: 60px;"> Fecha Impresión: <t
+                                    t-esc="docs[0].print_date.strftime('%d/%m/%Y')" />
+                            </span>
+                        </t>
+                        <t t-else="">
+                            
+                        </t>
+                    </div>
+                    <div style="clear: both;"></div>
+
+                    <table class="table" style="width: 100%; border:none; font-size: 13px;">
+                        <thead class="border" style="background-color: #8dd0f0;">
+                            <tr class="border">
+                                <th class="border" style="text-align: left;">Fecha</th>
+                                <th class="border" style="text-align: left;">Nro T</th>
+                                <th class="border" style="text-align: left; width:150px;">Servicio</th>
+                                <th class="border" style="text-align: left;">Operación</th>
+                                <th class="border" style="text-align: left; width:100px;">CUIT</th>
+                                <th class="border" style="text-align: left;">Descripción</th>
+                                <th class="border" style="text-align: right;">Imp. Operación</th>
+                                <th class="border" style="text-align: right; padding:0;">Comi(%)</th>
+                                <th class="border" style="text-align: right;">Imp. Comisión</th>
+                            </tr>
+                        </thead>
+                        <tbody style="font-size: 10px;">
+                            <tr style="border: none;">
+                                <td style="border: none;" colspan="4"></td>
+                                <td style="border: none; background-color: #8dd0f0;" colspan="2">
+                                    <span>Saldo Anterior:</span>
+                                </td>
+                                <td
+                                    style="border: none; background-color: #8dd0f0; text-align: right;">
+                                    <b>
+                                        <span t-field="docs[0].previous_month"
+                                            t-options="{'widget': 'float', 'precision': 2}" />
+                                    </b>
+                                </td>
+                                <td colspan="1" style="border: none;"></td>
+                            </tr>
+                            <t t-set="total_amount" t-value="0" />
+                            <t t-foreach="docs" t-as="o">
+                                <t t-if="o == docs[-1]">
+                                    <tr class="border">
+                                        <t t-if="o.collection_trans_type != 'movimiento_interno'">
+                                            <t t-set="total_amount"
+                                                t-value="total_amount + o.amount" />
+
+                                            <td class="border">
+                                                <span t-field="o.date" />
+                                            </td>
+                                            <td class="border">
+                                                <span t-field="o.transaction_name" />
+                                            </td>
+                                            <td class="border">
+                                                <span t-field="o.service.services.name" />
+                                            </td>
+                                            <td class="border">
+                                                <span t-field="o.operation.name" />
+                                            </td>
+                                            <td class="border">
+                                                <span t-field="o.origin_account_cuit" />
+                                            </td>
+                                            <td class="border">
+                                                <span t-field="o.description" />
+                                            </td>
+                                            <td class="border" style="text-align: right;">
+                                                <b>
+                                                    <span t-field="o.amount"
+                                                        t-options="{'widget': 'float', 'precision': 2}" />
+                                                </b>
+                                            </td>
+                                            <td class="border" style="text-align: right;">
+                                                <t t-if="o.amount > 0">
+                                                    <span t-field="o.commission"
+                                                        t-options="{'widget': 'float', 'precision': 3}" />
+                                                </t>
+                                                <t t-else="">
+                                                    <span>0</span>
+                                                </t>
+                                            </td>
+                                            <td class="border" style="text-align: right;">
+                                                <t t-if="o.amount> 0">
+                                                    <span t-esc="(o.commission * o.amount) / 100"
+                                                        t-options="{'widget': 'float', 'precision': 2}" />
+                                                </t>
+                                                <t t-else="">
+                                                    <span>0</span>
+                                                </t>
+                                            </td>
+                                        </t>
+                                    </tr>
+                                    <tr style="border: none;">
+                                        <td style="border: none;" colspan="4"></td>
+                                        <td style="border: none; background-color: #adf58c;"
+                                            colspan="2">
+                                            <span>Saldo Final:</span>
+                                        </td>
+                                        <td
+                                            style="border: none; background-color: #adf58c; text-align: right;">
+                                            <b>
+                                                <span t-esc="total_amount + docs[0].previous_month"
+                                                    t-options="{'widget': 'float', 'precision': 2}" />
+                                            </b>
+                                        </td>
+                                        <td colspan="1" style="border: none;"></td>
+                                    </tr>
+
+
+                                </t>
+                                <t t-else="">
+                                    <tr class="border">
+                                        <t t-if="o.collection_trans_type != 'movimiento_interno'">
+                                            <t t-set="total_amount"
+                                                t-value="total_amount + o.amount" />
+
+                                            <td class="border">
+                                                <span t-field="o.date" />
+                                            </td>
+                                            <td class="border">
+                                                <span t-field="o.transaction_name" />
+                                            </td>
+                                            <td class="border">
+                                                <span t-field="o.service.services.name" />
+                                            </td>
+                                            <td class="border">
+                                                <span t-field="o.operation.name" />
+                                            </td>
+                                            <td class="border">
+                                                <span t-field="o.origin_account_cuit" />
+                                            </td>
+                                            <td class="border">
+                                                <span t-field="o.description" />
+                                            </td>
+                                            <td class="border" style="text-align: right;">
+                                                <b>
+                                                    <span t-field="o.amount"
+                                                        t-options="{'widget': 'float', 'precision': 2}" />
+                                                </b>
+                                            </td>
+                                            <td class="border" style="text-align: right;">
+                                                <t t-if="o.amount > 0">
+                                                    <span t-field="o.commission"
+                                                        t-options="{'widget': 'float', 'precision': 3}" />
+                                                </t>
+                                                <t t-else="">
+                                                    <span>0</span>
+                                                </t>
+                                            </td>
+                                            <td class="border" style="text-align: right;">
+                                                <t t-if="o.amount> 0">
+                                                    <span t-esc="(o.commission * o.amount) / 100"
+                                                        t-options="{'widget': 'float', 'precision': 2}" />
+                                                </t>
+                                                <t t-else="">
+                                                    <span>0</span>
+                                                </t>
+                                            </td>
+                                        </t>
+                                    </tr>
+                                </t>
+                            </t>
+                        </tbody>
+                    </table>
+                    <!-- <p style="margin-top: 50px; color: #757575;">El saldo disponible
+                        correspondientes a los movimientos anteriores a las 48hs es: <span
+                    t-field="docs[0].available_balance" t-options="{'widget': 'float', 'precision':
+                    2}" /></p> -->
+                </div>
+            </t>
+        </t>
+    </template>
+
+</odoo>

@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="collection_dashboard_customer_view_tree" model="ir.ui.view">
+        <field name="name">collection.dashboard.customer.view.tree</field>
+        <field name="model">collection.dashboard.customer</field>
+        <field name="arch" type="xml">
+            <tree string="Dashboard de Cobro de cliente">
+                <header>
+                    <button groups="payment_collection.groups_payment_collection_admin" type="object" name="recalculate_total_recs" class="btn btn-primary" string="Recalcular Todo" />
+                </header>
+                <field name="customer" />
+                <field name="customer_real_balance" sum="Total Saldo Real"/>
+                <!-- <field name="customer_available_balance" sum="Total Saldo Disponible"/> -->
+                <field name="collection_balance" sum="Total Saldo de pagos" />
+                <field name="commission_balance" sum="Total Saldo de comisión" optional="hide"/>
+                <field name="last_operation_date" />
+                <field name="commission_app_rate"  optional="hide"/>
+                <field name="commission_app_amount"  sum="Monto Total de la App" optional="hide"/>
+            </tree>
+        </field>
+    </record>
+
+
+    <record id="collection_dashboard_customer_view_form" model="ir.ui.view">
+        <field name="name">collection.dashboard.customer.view.form</field>
+        <field name="model">collection.dashboard.customer</field>
+        <field name="arch" type="xml">
+            <form string="Dashboard de Cobro de cliente">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="customer" required="1"/>
+                            <field name="customer_real_balance"/>
+                            <!-- <field name="customer_available_balance"/> -->
+                            <field name="collection_balance"/>
+                        </group>
+                        <group>
+                            <field name="last_operation_date"/>
+                            <field name="manual_data" invisible="1"/>
+                        </group>
+                    </group>
+                </sheet>
+                <!-- Chatter -->
+                <div class="oe_chatter">
+                    <field name="message_follower_ids" groups="base.group_user" />
+                    <field name="activity_ids" />
+                    <field name="message_ids" />
+                </div>
+            </form>
+        </field>
+    </record>
+
+
+    <record id="collection_dashboard_customer_view_search" model="ir.ui.view">
+        <field name="name">collection.dashboard.customer.view.search</field>
+        <field name="model">collection.dashboard.customer</field>
+        <field name="arch" type="xml">
+            <search string="">
+                <field name="customer"/>
+                <group>
+                    <filter name="last_operation_date" string="Fecha de ultima operación" context="{'group_by': 'last_operation_date'}" />
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="collection_dashboard_customer_action" model="ir.actions.act_window">
+        <field name="name">Dashboard</field>
+        <field name="res_model">collection.dashboard.customer</field>
+        <field name="view_mode">tree,form</field>
+<!--        <field name="view_id" ref="collection_dashboard_customer_view_tree"></field>-->
+    </record>
+</odoo>

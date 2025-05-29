@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <menuitem
+        id="collection_transaction_commision_menu"
+        name="PagoFlex"
+        action="collection_transaction_commission_action"
+        groups="groups_payment_collection_comi"
+        web_icon="payment_collection,static/description/icon.png"
+    />
+    <menuitem
+        id="collection_transaction_menu"
+        name="PagoFlex"
+        action="collection_transaction_action"
+        web_icon="payment_collection,static/description/icon.png"
+    />
+    <menuitem
+        id="collection_transaction_submenu"
+        name="Recaudación de Pagos"
+        action="collection_transaction_action"
+        parent="collection_transaction_menu"
+        sequence="1"
+    />
+
+    <menuitem
+        id="collection_transaction_commission_menu"
+        name="Comisión por agente"
+        action="collection_transaction_commission_action"
+        parent="collection_transaction_menu"
+        sequence="2"
+    />
+    <menuitem
+        id="collection_dashboard_customer_menu"
+        name="Dashboard"
+        action="collection_dashboard_customer_action"
+        parent="collection_transaction_menu"
+        sequence="2"
+    />
+    <menuitem
+        id="bank_statement_menu"
+        name="Extracto de cuenta"
+        action="bank_statement_action"
+        parent="collection_transaction_menu"
+        sequence="2"
+    />
+
+    <menuitem
+        id="collection_configuration_menu"
+        name="Configuración"
+        parent="collection_transaction_menu"
+        sequence="4"
+        groups="payment_collection.groups_payment_collection_admin,base.user_root"
+    />
+
+    <menuitem
+        id="collection_services_commission_menu"
+        name="Comisión-Cliente-Servicio-Agente"
+        action="collection_services_commission_action"
+        parent="collection_configuration_menu"
+        sequence="2"
+    />
+
+
+    <menuitem
+        id="product_template_menu"
+        name="Productos y Servicios"
+        action="product.product_template_action"
+        parent="collection_configuration_menu"
+        sequence="3" />
+
+    <menuitem
+        id="res_partner_menu"
+        name="Clientes"
+        action="contacts.action_contacts"
+        parent="collection_configuration_menu"
+        sequence="4" />
+
+    <menuitem
+        id="account_bank_pagoflex_menu"
+        name="Cuentas Bancarias"
+        action="account_bank_pagoflex_action"
+        parent="collection_configuration_menu"
+        sequence="5" />
+    
+    <menuitem
+        id="banks_pagoflex_menu"
+        name="Bancos"
+        action="base.action_res_bank_form"
+        parent="collection_configuration_menu"
+        sequence="6" />
+        
+    <menuitem
+        id="category_pagoflex_menu"
+        name="Etiquetas"
+        action="collection_category_action"
+        parent="collection_configuration_menu"
+        sequence="7" />
+    
+
+    <!-- Oculto para producción hasta terminar -->
+    <menuitem
+        id="bank_move_imported_pagoflex_menu"
+        name="Movimientos Bancarios Importados"
+        action="bank_move_imported_action"
+        parent="collection_transaction_menu"
+        sequence="4" />
+
+    <menuitem
+        id="transfer_request_menu"
+        name="Pedidos de Transferencias / Retiros"
+        action="transfer_request_action"
+        parent="collection_transaction_menu"
+        sequence="4" />
+
+</odoo>

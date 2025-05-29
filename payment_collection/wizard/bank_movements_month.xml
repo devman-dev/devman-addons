@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="bank_movements_month_wiz_view_form" model="ir.ui.view">
+        <field name="name">bank.movements.month.wizview.form</field>
+        <field name="model">bank.movements.month.wiz</field>
+        <field name="arch" type="xml">
+            <form string="Movimientos bancarios del mes">
+                <sheet>
+                    <group>
+<!--                        <field name="services" options="{'no_create': True, 'no_create_edit': True,'no_quick_create': True}"/>-->
+                        <field name="list_name_account" options="{'no_create': True, 'no_create_edit': True,'no_quick_create': True}"/>
+                    </group>
+                    <group>
+                        <group>
+                             <field name="start_date"/>
+                        </group>
+                        <group>
+                           <field name="end_date"/>
+                        </group>
+                    </group>
+
+                    <footer>
+                        <button name="print" string="Imprimir" class="btn btn-primary" type="object"/>
+                        <button special="cancel" string="Descartar" class="btn btn-secondary"/>
+                    </footer>
+                </sheet>
+            </form>
+        </field>
+    </record>
+</odoo>

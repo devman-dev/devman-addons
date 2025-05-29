@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="product_template_only_form_view_inherit_product" model="ir.ui.view">
+        <field name="name">product.template.view.form.inherit</field>
+        <field name="model">product.template</field>
+        <field name="inherit_id" ref="product.product_template_only_form_view" />
+        <field name="arch" type="xml">
+            <field name="detailed_type" position="before">
+                <field name="collection_type" widget="radio" options="{'horizontal': True}" />
+                <field name="commission_default" />
+                <separator/>
+            </field>
+            <xpath expr="//group[1]" position="before">
+
+                 <div name="options" style="margin-bottom:5px;">
+                        <span class="d-inline-block">
+                            <field name="check_internal" field_id="check_internal_0"/>
+                            <label for="check_internal"/>
+                        </span>
+                        <span class="d-inline-block">
+                            <field name="check_withdrawal" field_id="check_withdrawal_0"/>
+                            <label for="check_withdrawal"/>
+                        </span>
+                        <span class="d-inline-block">
+                            <field name="check_accreditation" field_id="check_accreditation_0"/>
+                            <label for="check_accreditation"/>
+                        </span>
+                 </div>
+            </xpath>
+            <field name="invoice_policy" position="attributes">
+                <attribute name="required">0</attribute>
+            </field>
+        </field>
+    </record>
+
+</odoo>
