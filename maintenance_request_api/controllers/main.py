@@ -79,6 +79,21 @@ class MaintenanceRequestAPI(http.Controller):
         if missing:
             return {'error': f'Missing fields: {", ".join(missing)}'}, 400
         
+        # Validar que maintenance_team_id pertenezca a company_id
+        company_id = data.get('company_id')
+        team_id = data.get('maintenance_team_id')
+        if company_id and team_id:
+            team = request.env['maintenance.team'].sudo().browse(team_id)
+            if not team.exists() or team.company_id.id != int(company_id):
+                return {'error': 'Maintenance_team_id does not belong to the specified company_id.'}, 400
+
+        # Validar que equipment_id pertenezca a company_id
+        equipment_id = data.get('equipment_id')
+        if company_id and equipment_id:
+            equipment = request.env['maintenance.equipment'].sudo().browse(equipment_id)
+            if not equipment.exists() or equipment.company_id.id != int(company_id):
+                return {'error': 'Equipment_id does not belong to the specified company_id.'}, 400
+
         try:
             record = request.env['maintenance.request'].sudo().create(data)
             return {'id': record.id, 'message': 'Created successfully'}
@@ -123,13 +138,32 @@ class MaintenanceRequestAPI(http.Controller):
         if not self._check_auth():
             return self._unauthorized()
 
-        teams = request.env['maintenance.team'].sudo().search([])
-        return [{'id': team.id, 'name': team.name} for team in teams]
+        domain = []
+        company_id = kwargs.get('company_id')
+        if company_id:
+            try:
+                company_id = int(company_id)
+            except ValueError:
+                return {'error': 'Invalid company_id format. Must be an integer.'}, 400
+            domain.append(('company_id', '=', company_id))
+
+
+        teams = request.env['maintenance.team'].sudo().search(domain)
+        return [{'id': team.id, 'name': team.name, 'company_id': team.company_id.id} for team in teams]
 
     @http.route('/api/maintenance/equipment', auth='public', methods=['GET'], type='json', csrf=False)
     def get_equipment(self, **kwargs):
         if not self._check_auth():
             return self._unauthorized()
 
-        equipment = request.env['maintenance.equipment'].sudo().search([])
-        return [{'id': eq.id, 'name': eq.name} for eq in equipment]
+        domain = []
+        company_id = kwargs.get('company_id')
+        if company_id:
+            try:
+                company_id = int(company_id)
+            except ValueError:
+                return {'error': 'Invalid company_id format. Must be an integer.'}, 400
+            domain.append(('company_id', '=', company_id))
+
+        equipment = request.env['maintenance.equipment'].sudo().search(domain)
+        return [{'id': eq.id, 'name': eq.name, 'company_id': eq.company_id.id} for eq in equipment]
