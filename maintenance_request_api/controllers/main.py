@@ -4,6 +4,7 @@ from odoo import http
 from odoo.http import request
 from odoo.tools import config
 import logging
+import datetime
 
 _logger = logging.getLogger(__name__)
 
@@ -27,15 +28,42 @@ class MaintenanceRequestAPI(http.Controller):
         if not self._check_auth():
             return self._unauthorized()
 
-        records = request.env['maintenance.request'].sudo().search([])
+        domain = []
+        company_id = kwargs.get('company_id')
+        date_from = kwargs.get('date_from')
+        date_to = kwargs.get('date_to')
+        if company_id:
+            try:
+                company_id = int(company_id)
+            except ValueError:
+                return {'error': 'Invalid company_id format. Must be an integer.'}, 400
+            domain.append(('company_id', '=', company_id))
+
+        if date_from:
+            try:
+                datetime.datetime.strptime(date_from, "%Y-%m-%d")
+            except ValueError:
+                return {'error': 'Invalid date_from format. Use YYYY-MM-DD.'}, 400
+            domain.append(('request_date', '>=', date_from))
+        if date_to:
+            try:
+                datetime.datetime.strptime(date_to, "%Y-%m-%d")
+            except ValueError:
+                return {'error': 'Invalid date_to format. Use YYYY-MM-DD.'}, 400
+            domain.append(('request_date', '<=', date_to))
+
+        records = request.env['maintenance.request'].sudo().search(domain)
         return [
             {
                 'id': rec.id,
                 'name': rec.name,
+                'company_id': rec.company_id.id,
                 'equipment_id': rec.equipment_id.id,
                 'maintenance_team_id': rec.maintenance_team_id.id,
                 'priority': rec.priority,
+                'sate': rec.stage_id.name,
                 'description': rec.description,
+                'request_date': rec.request_date,
             }
             for rec in records
         ]
@@ -73,11 +101,7 @@ class MaintenanceRequestAPI(http.Controller):
         except Exception as e:
             _logger.error("Error updating maintenance request: %s", e)
             return {'error': 'Server error'}, 500
-
-    @http.route('/api/maintenance/request/<int:request_id>', auth='public', methods=['PATCH'], type='json', csrf=False)
-    def partial_update_request(self, request_id, **kwargs):
-        return self.update_request(request_id, **kwargs)
-        
+   
     @http.route('/api/maintenance/request/<int:request_id>', auth='public', methods=['DELETE'], type='json', csrf=False)
     def delete_request(self, request_id, **kwargs):
         if not self._check_auth():

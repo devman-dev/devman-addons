@@ -106,7 +106,7 @@ class MaintenanceRequest(http.Controller):
                 'description': post['details'] + attachments_note,
                 'priority': post['stars'],
                 'employee_id': employee.id,
-                'company_id': post['company_id'],  # Cambiado de 'company' a 'company_id'
+                'company_id': post['company_id'],
         }
         request_id = request.env['maintenance.request'].sudo().create(values)
         
