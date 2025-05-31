@@ -79,7 +79,7 @@ class ResCompany(models.Model):
         base_url = website.domain or self.env['ir.config_parameter'].sudo().get_param('web.base.url')
         
         # Generar la URL con el ID de la compañía
-        company_url = f"{base_url}?company_id={self.id}"
+        company_url = f"{base_url}/maintenance_request?company_id={self.id}"
 
         # Actualizar el campo custom_website_link
         self.write({'custom_website_link': company_url})
