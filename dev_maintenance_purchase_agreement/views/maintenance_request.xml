@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+Copyright (C) 2015 DevIntelle Consulting Service Pvt.Ltd (<http://www.devintellecs.com>).
+
+For Module Support : devintelle@gmail.com  or Skype : devintelle
+ -->
+<odoo>
+    <record id="form_maintenance_dev_maintenance_purchase_agreement_inherited" model="ir.ui.view">
+        <field name="name">form_maintenance_dev_maintenance_purchase_agreement_inherited_name</field>
+        <field name="model">maintenance.request</field>
+        <field name="inherit_id" ref="maintenance.hr_equipment_request_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//header" position="inside">
+                <button name="create_purchase_agreement"
+                    type="object"
+                    string="Create Purchase Agreement"
+                    class="oe_highlight"/>
+            </xpath>
+            <xpath expr="//sheet//div[1]" position="before">
+                <div class="oe_button_box" name="button_box">
+                    <button type="object" name="view_purchase_requisition" class="oe_stat_button" icon="fa-external-link"
+                            invisible ="agreement_count == 0">
+                        <field string="Agreement" name="agreement_count" widget="statinfo"/>
+                    </button>
+                </div>
+            </xpath>
+            <xpath expr="//field[@name='maintenance_type']" position="after">
+                <field name="vendor_id"/>
+            </xpath>
+            <xpath expr="//group[1]" position="after">
+                <notebook>
+                    <page string="Maintenance Plan Material" name="plan_material">
+                        <field name="plan_material_ids">
+                            <list editable="bottom">
+                                <field name="product_id"/>
+                                <field name="uom_id"/>
+                                <field name="quantity"/>
+                            </list>
+                            <form>
+                                <group>
+                                    <group>
+                                        <field name="product_id"/>
+                                        <field name="uom_id"/>
+                                        <field name="quantity"/>
+                                    </group>
+                                </group>
+                            </form>
+                        </field>
+                    </page>
+                </notebook>
+            </xpath>
+        </field>
+    </record>
+</odoo>

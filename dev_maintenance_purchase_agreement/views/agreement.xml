@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+Copyright (C) 2015 DevIntelle Consulting Service Pvt.Ltd (<http://www.devintellecs.com>).
+
+For Module Support : devintelle@gmail.com  or Skype : devintelle
+ -->
+<odoo>
+    <record id="form_agreement_dev_maintenance_purchase_agreement" model="ir.ui.view">
+        <field name="name">form_agreement_dev_maintenance_purchase_agreement_name</field>
+        <field name="model">purchase.requisition</field>
+        <field name="inherit_id" ref="purchase_requisition.view_purchase_requisition_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='vendor_id']" position="after">
+                <field name="maintenance_request_id" readonly="1" invisible ="maintenance_request_id == 'False'"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="search_agreement_dev_maintenance_purchase_agreement" model="ir.ui.view">
+        <field name="name">search_agreement_dev_maintenance_purchase_agreement_name</field>
+        <field name="model">purchase.requisition</field>
+        <field name="inherit_id" ref="purchase_requisition.view_purchase_requisition_filter"/>
+        <field name="arch" type="xml">
+            <xpath expr="//group[1]" position="inside">
+                <filter string="Maintenance Request" name="maintenance_request_id" context="{'group_by': 'maintenance_request_id'}"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>
