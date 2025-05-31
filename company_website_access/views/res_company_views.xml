@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_company_form_website_links" model="ir.ui.view">
+        <field name="name">res.company.form.website.links</field>
+        <field name="model">res.company</field>
+        <field name="inherit_id" ref="base.view_company_form" />
+        <field name="arch" type="xml">
+            <xpath expr="//notebook" position="inside">
+                <page name="website_links" string="Enlaces del Website">
+                    <group>
+                        <group name="website_link_group" string="Configuración de Enlaces">
+                            <field name="custom_website_link" widget="url" />
+                            <div class="oe_inline">
+                                <button name="action_test_link"
+                                    string="🔗"
+                                    type="object"
+                                    class="btn btn-sm btn-secondary"
+                                    title="Probar enlace"
+                                    invisible="not custom_website_link" />
+                                <button name="action_generate_company_url"
+                                    string="Generar URL de Compañía"
+                                    type="object"
+                                    class="btn btn-sm btn-primary ml-2"
+                                    refresh="1" />
+                            </div>
+                        </group>
+                        <group name="website_qr_group" string="Código QR">
+                            <field name="include_logo_in_qr"
+                                invisible="not logo or not custom_website_link" />
+
+                            <div class="d-flex flex-column align-items-center"
+                                invisible="not custom_website_link">
+                                <field name="website_qr_code"
+                                    widget="image"
+                                    class="oe_avatar"
+                                    options="{'size': [150, 150]}"
+                                    nolabel="1" />
+                                <button name="action_export_qr_code"
+                                    string="Exportar QR"
+                                    type="object"
+                                    class="btn btn-secondary btn-sm"
+                                    icon="fa-download"
+                                    title="Descargar código QR como imagen PNG" />
+                            </div>
+
+                            <div class="alert alert-info"
+                                invisible="not custom_website_link or logo">
+                                <i class="fa fa-info-circle" /> 
+                                <strong>Info:</strong> Para incluir
+                                el logo de la empresa en el QR, primero debe cargar el logo en la
+                                configuración general de la empresa. </div>
+
+                            <div class="alert alert-success"
+                                invisible="not include_logo_in_qr or not logo or not custom_website_link">
+                                <i class="fa fa-check-circle" /> 
+                                <strong>Activo:</strong> El código
+                                QR incluirá el logo de la empresa. </div>
+
+                            <div class="alert alert-warning"
+                                invisible="include_logo_in_qr or not logo or not custom_website_link">
+                                <i class="fa fa-exclamation-triangle" /> 
+                                <strong>Inactivo:</strong>
+                                El código QR no incluirá el logo de la empresa. </div>
+                        </group>
+                    </group>
+                    <group>
+                        <group name="website_notes_group" string="Notas">
+                            <field name="website_notes"
+                                placeholder="Notas..."
+                                nolabel="1" />
+                        </group>
+                    </group>
+                </page>
+            </xpath>
+        </field>
+    </record>
+</odoo>
