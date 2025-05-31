@@ -3,10 +3,12 @@ from odoo.exceptions import UserError
 import requests
 import webbrowser
 import qrcode
+
 from qrcode.image.pil import PilImage
 import io
 import base64
 from PIL import Image, ImageDraw
+
 
 
 class ResCompany(models.Model):
@@ -24,6 +26,7 @@ class ResCompany(models.Model):
         help='Notas adicionales sobre el website de la compañía'
     )
 
+
     # Campo checkbox para incluir logo en QR
     include_logo_in_qr = fields.Boolean(
         string='Incluir Logo en QR',
@@ -31,6 +34,7 @@ class ResCompany(models.Model):
         help='Marcar para incluir el logo de la empresa en el centro del código QR'
     )
     
+
     # Campo para el QR del enlace
     website_qr_code = fields.Binary(
         string='Código QR',
@@ -79,6 +83,7 @@ class ResCompany(models.Model):
         base_url = website.domain or self.env['ir.config_parameter'].sudo().get_param('web.base.url')
         
         # Generar la URL con el ID de la compañía
+
         company_url = f"{base_url}/maintenance_request?company_id={self.id}"
 
         # Actualizar el campo custom_website_link
@@ -93,6 +98,7 @@ class ResCompany(models.Model):
             'context': dict(self.env.context, active_tab='contact_tab'),
         }
         
+
     @api.depends('custom_website_link', 'include_logo_in_qr', 'logo')
     def _compute_website_qr_code(self):
         """Genera el código QR basado en el enlace del website"""
@@ -103,6 +109,7 @@ class ResCompany(models.Model):
                     qr = qrcode.QRCode(
                         version=1,
                         error_correction=qrcode.constants.ERROR_CORRECT_L,
+
                         box_size=20,
                         border=4,
                     )
@@ -116,6 +123,7 @@ class ResCompany(models.Model):
                     qr.make(fit=True)
 
                     # Crear la imagen
+
                     img = qr.make_image(
                         fill_color="#000000", 
                         back_color="#FFFFFF",
@@ -218,11 +226,15 @@ class ResCompany(models.Model):
         
         # Crear el nombre del archivo
         company_name = self.name.replace(' ', '_').replace('/', '_')
+
         logo_suffix = "_con_logo" if self.include_logo_in_qr and self.logo else ""  
         filename = f"QR_{company_name}{logo_suffix}.png"
+
         
         return {
             'type': 'ir.actions.act_url',
             'url': f'/web/content?model=res.company&id={self.id}&field=website_qr_code&download=true&filename={filename}',
             'target': 'self',
         }
+            
+        

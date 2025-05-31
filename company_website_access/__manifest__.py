@@ -12,7 +12,9 @@
     """,
     'author': 'Hito',
     'website': 'https://www.tuwebsite.com',
+
     'depends': ['base', 'website', 'website_maintenance_hr'],
+
     'external_dependencies': {
         'python': ['qrcode', 'pillow'],
     },
