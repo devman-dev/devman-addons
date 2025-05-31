@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_company_form_website_links" model="ir.ui.view">
+        <field name="name">res.company.form.website.links</field>
+        <field name="model">res.company</field>
+        <field name="inherit_id" ref="base.view_company_form" />
+        <field name="arch" type="xml">
+            <xpath expr="//notebook" position="inside">
+                <page name="website_links" string="Enlaces del Website">
+                    <group>
+                        <group name="website_link_group" string="Configuración de Enlaces">
+                            <field name="custom_website_link" widget="url" />
+                            <div class="oe_inline">
+                                <button name="action_test_link"
+                                    string="🔗"
+                                    type="object"
+                                    class="btn btn-sm btn-secondary"
+                                    title="Probar enlace"
+                                    invisible="not custom_website_link" />
+                                <button name="action_generate_company_url"
+                                    string="Generar URL de Compañía"
+                                    type="object"
+                                    class="btn btn-sm btn-primary ml-2"
+                                    refresh="1" />
+                            </div>
+                        </group>
+                        <group name="website_qr_group" string="Código QR">
+                            <div class="d-flex flex-column align-items-center"
+                                invisible="not custom_website_link">
+                                <field name="website_qr_code"
+                                    widget="image"
+                                    class="oe_avatar"
+                                    options="{'size': [150, 150]}"
+                                    nolabel="1" />
+                                <button name="action_export_qr_code"
+                                    string="📥 Exportar QR"
+                                    type="object"
+                                    class="btn btn-sm btn-info mt-2"
+                                    title="Descargar código QR como imagen PNG" />
+                            </div>
+                        </group>
+                    </group>
+                    <group>
+                        <group name="website_notes_group" string="Notas">
+                            <field name="website_notes"
+                                placeholder="Notas..."
+                                nolabel="1" />
+                        </group>
+                    </group>
+                </page>
+            </xpath>
+        </field>
+    </record>
+</odoo>
