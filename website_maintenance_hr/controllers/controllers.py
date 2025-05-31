@@ -29,17 +29,29 @@ from werkzeug.utils import redirect, secure_filename
 
 class MaintenanceRequest(http.Controller):
 
+    
     @http.route(['/maintenance_request'], methods=['GET', 'POST'], type='http', auth='public', website=True, csrf=False)
     def request(self, **post):
         """
         Browses all maintenance teams and equipments in backend and returns them to the web page
         """
-        maintenance_requests = request.env['maintenance.equipment'].sudo().search([])
-        maintenance_team = request.env['maintenance.team'].sudo().search([])
+        company_id = post.get('company_id')
+        domain = []
+        if company_id and company_id.isdigit():
+            company_id = int(company_id)
+            domain = [('company_id', '=', company_id)]
+
+        companies = request.env['res.company'].sudo().search([('id', '=', company_id)] if company_id else [])
+        company_list = [{'id': c.id, 'name': c.name} for c in companies]
+
+        # Cargar todos los equipos y equipos inicialmente (se filtrarán via JS)
+        maintenance_requests = request.env['maintenance.equipment'].sudo().search(domain)
+        maintenance_team = request.env['maintenance.team'].sudo().search(domain)
         user = request.env.user.id
         employee = request.env['hr.employee'].sudo().search([('user_id', '=', user)])
         request_dict = []
         team_name = []
+        
         for record in maintenance_requests:
             name = record.name
             request_dict.append({'id': record.id, 'name': name})
@@ -51,14 +63,26 @@ class MaintenanceRequest(http.Controller):
             return http.request.render('website_maintenance_hr.maintenance_page', {
                 'equipment_selection': request_dict,
                 'team_selection': team_name,
+                'company_list': company_list,
             })
         
         return http.request.render('website_maintenance_hr.maintenance_page', {
                 'equipment_selection': request_dict,
                 'team_selection': team_name,
+                'company_list': company_list,
             })
-    
-        return redirect('/maintenance_request-nouser')
+
+    @http.route('/maintenance/get_options', type='json', auth='public', csrf=False)
+    def get_options(self, company_id):
+        """
+        Obtiene equipos y equipos filtrados por empresa
+        """
+        equipments = request.env['maintenance.equipment'].sudo().search([('company_id', '=', int(company_id))])
+        teams = request.env['maintenance.team'].sudo().search([('company_id', '=', int(company_id))])
+        return {
+            'equipments': [{'id': e.id, 'name': e.name} for e in equipments],
+            'teams': [{'id': t.id, 'name': t.name} for t in teams],
+        }
 
     @http.route('/submit', methods=["GET", "POST"], type='http', auth='public', website=True, csrf=False)
     def send_request(self, **post):
@@ -87,8 +111,8 @@ class MaintenanceRequest(http.Controller):
                 'equipment_id': post['equipment'],
                 'description': post['details'] + attachments_note,
                 'priority': post['stars'],
-                'employee_id': employee.id
-
+                'employee_id': employee.id,
+                'company_id': post['company_id'],
         }
         request_id = request.env['maintenance.request'].sudo().create(values)
         
@@ -112,21 +136,3 @@ class MaintenanceRequest(http.Controller):
         template.sudo().send_mail(request_id.id, force_send=True)
 
         return redirect('/maintenance_request-thanks')
-    
-        if employee:
-            values = {
-                'name': post['subject'],
-                'maintenance_team_id': post['teams'],
-                'equipment_id': post['equipment'],
-                'description': post['details'],
-                'priority': post['stars'],
-                'employee_id': employee.id
-
-            }
-            request_id = request.env['maintenance.request'].sudo().create(values)
-            template = request.env.ref('website_maintenance_hr.mail_template_maintenance_request')
-            template.sudo().send_mail(request_id.id, force_send=True)
-
-            return redirect('/maintenance_request-thanks')
-        else:
-            return redirect('/maintenance_request-nouser')
