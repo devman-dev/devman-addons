@@ -9,7 +9,7 @@ import datetime
 _logger = logging.getLogger(__name__)
 
 class MaintenanceRequestAPI(http.Controller):
-    TOKEN = 'Ar@%Zca$QhPExdwzrf9/QHikFSwgm9'
+    TOKEN = 'Ar@%Zca$QhPExdwzrf9/QHikFSwgm9' #config['maintenance_api_token'] or os.environ.get('maintenance_api_token', 'Ar@%Zca$QhPExdwzrf9/QHikFSwgm9')
     
     def _check_auth(self):
         token = request.httprequest.headers.get('Authorization')
@@ -79,20 +79,20 @@ class MaintenanceRequestAPI(http.Controller):
         if missing:
             return {'error': f'Missing fields: {", ".join(missing)}'}, 400
         
-        # Validar que maintenance_team_id pertenezca a company_id
+         # Validar que maintenance_team_id pertenezca a company_id
         company_id = data.get('company_id')
         team_id = data.get('maintenance_team_id')
         if company_id and team_id:
             team = request.env['maintenance.team'].sudo().browse(team_id)
             if not team.exists() or team.company_id.id != int(company_id):
-                return {'error': 'Maintenance_team_id does not belong to the specified company_id.'}, 400
+                return {'error': 'maintenance_team_id does not belong to the specified company_id.'}, 400
 
         # Validar que equipment_id pertenezca a company_id
         equipment_id = data.get('equipment_id')
         if company_id and equipment_id:
             equipment = request.env['maintenance.equipment'].sudo().browse(equipment_id)
             if not equipment.exists() or equipment.company_id.id != int(company_id):
-                return {'error': 'Equipment_id does not belong to the specified company_id.'}, 400
+                return {'error': 'equipment_id does not belong to the specified company_id.'}, 400
 
         try:
             record = request.env['maintenance.request'].sudo().create(data)
