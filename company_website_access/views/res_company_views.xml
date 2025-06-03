@@ -44,23 +44,26 @@
                             </div>
 
                             <div class="alert alert-info"
+                                role="status"
                                 invisible="not custom_website_link or logo">
-                                <i class="fa fa-info-circle" /> 
-                                <strong>Info:</strong> Para incluir
-                                el logo de la empresa en el QR, primero debe cargar el logo en la
-                                configuración general de la empresa. </div>
+                                <i class="fa fa-info-circle" title="Información" /> 
+                                <strong>Info:</strong>
+                                Para incluir el logo de la empresa en el QR, primero debe cargar el
+                                logo en la configuración general de la empresa. </div>
 
                             <div class="alert alert-success"
+                                role="status"
                                 invisible="not include_logo_in_qr or not logo or not custom_website_link">
-                                <i class="fa fa-check-circle" /> 
-                                <strong>Activo:</strong> El código
-                                QR incluirá el logo de la empresa. </div>
+                                <i class="fa fa-check-circle" title="Se incluirá el logo" /> 
+                                <strong>
+                                Activo:</strong> El código QR incluirá el logo de la empresa. </div>
 
                             <div class="alert alert-warning"
+                                role="status"
                                 invisible="include_logo_in_qr or not logo or not custom_website_link">
-                                <i class="fa fa-exclamation-triangle" /> 
-                                <strong>Inactivo:</strong>
-                                El código QR no incluirá el logo de la empresa. </div>
+                                <i class="fa fa-exclamation-triangle" title="No se incluirá el logo" />
+                                <strong>
+                                Inactivo:</strong> El código QR no incluirá el logo de la empresa. </div>
                         </group>
                     </group>
                     <group>
