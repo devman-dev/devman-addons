@@ -132,7 +132,7 @@ class MaintenanceRequest(http.Controller):
                     'description': f'Adjunto de solicitud de mantenimiento #{request_id.id}',
                 })
                 
-        template = request.env.ref('website_maintenance_hr.mail_template_maintenance_request')
-        template.sudo().send_mail(request_id.id, force_send=True)
+        # template = request.env.ref('website_maintenance_hr.mail_template_maintenance_request')
+        # template.sudo().send_mail(request_id.id, force_send=True)
 
         return redirect('/maintenance_request-thanks')

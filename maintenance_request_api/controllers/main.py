@@ -1,10 +1,11 @@
 import os
 import base64
 from odoo import http
-from odoo.http import request
+from odoo.http import request, Response
 from odoo.tools import config
 import logging
 import datetime
+import json
 
 _logger = logging.getLogger(__name__)
 
@@ -17,21 +18,28 @@ class MaintenanceRequestAPI(http.Controller):
             return False
         return True
 
-    def _unauthorized(self):
-        return {'error': 'Unauthorized'}, 401
-
-    def _not_found(self):
-        return {'error': 'Not Found'}, 404
+    def _unauthorized(self, type='json'):
+        if type == 'json':
+            return {'error': 'Unauthorized'}, 401
         
-    @http.route('/api/maintenance/requests', auth='public', methods=['GET'], type='json', csrf=False)
+        return Response(json.dumps({'error': 'Unauthorized'}), content_type='application/json', status=401)
+    
+    def _not_found(self, type='json'):
+        if type == 'json':
+            return {'error': 'Not Found'}, 404
+
+        return Response(json.dumps({'error': 'Not Found'}), content_type='application/json', status=404)
+    
+    @http.route('/api/maintenance/requests', auth='public', methods=['GET'], type='http', csrf=False)
     def list_requests(self, **kwargs):
         if not self._check_auth():
-            return self._unauthorized()
+            return self._unauthorized('http')
 
         domain = []
-        company_id = kwargs.get('company_id')
-        date_from = kwargs.get('date_from')
-        date_to = kwargs.get('date_to')
+        company_id = request.httprequest.args.get('company_id')
+        date_from = request.httprequest.args.get('date_from')
+        date_to = request.httprequest.args.get('date_to')
+
         if company_id:
             try:
                 company_id = int(company_id)
@@ -53,7 +61,7 @@ class MaintenanceRequestAPI(http.Controller):
             domain.append(('request_date', '<=', date_to))
 
         records = request.env['maintenance.request'].sudo().search(domain)
-        return [
+        result = [
             {
                 'id': rec.id,
                 'name': rec.name,
@@ -61,17 +69,18 @@ class MaintenanceRequestAPI(http.Controller):
                 'equipment_id': rec.equipment_id.id,
                 'maintenance_team_id': rec.maintenance_team_id.id,
                 'priority': rec.priority,
-                'sate': rec.stage_id.name,
+                'state': rec.stage_id.name,
                 'description': rec.description,
-                'request_date': rec.request_date,
+                'request_date': rec.request_date.isoformat() if rec.request_date else None,
             }
             for rec in records
         ]
+        return Response(json.dumps({'count': len(result), 'results': result}), content_type='application/json')
 
     @http.route('/api/maintenance/request', auth='public', methods=['POST'], type='json', csrf=False)
     def create_request(self, **kwargs):
         if not self._check_auth():
-            return self._unauthorized()
+            return self._unauthorized('json')
 
         data = kwargs #.get('params', {})
         required_fields = ['name', 'description']
@@ -104,11 +113,11 @@ class MaintenanceRequestAPI(http.Controller):
     @http.route('/api/maintenance/request/<int:request_id>', auth='public', methods=['PUT'], type='json', csrf=False)
     def update_request(self, request_id, **kwargs):
         if not self._check_auth():
-            return self._unauthorized()
+            return self._unauthorized('json')
 
         record = request.env['maintenance.request'].sudo().browse(request_id)
         if not record.exists():
-            return self._not_found()
+            return self._not_found('json')
         
         try:
             record.write(kwargs)
@@ -117,29 +126,29 @@ class MaintenanceRequestAPI(http.Controller):
             _logger.error("Error updating maintenance request: %s", e)
             return {'error': 'Server error'}, 500
    
-    @http.route('/api/maintenance/request/<int:request_id>', auth='public', methods=['DELETE'], type='json', csrf=False)
+    @http.route('/api/maintenance/request/<int:request_id>', auth='public', methods=['DELETE'], type='http', csrf=False)
     def delete_request(self, request_id, **kwargs):
         if not self._check_auth():
-            return self._unauthorized()
+            return self._unauthorized('http')
 
         record = request.env['maintenance.request'].sudo().browse(request_id)
         if not record.exists():
-            return self._not_found()
+            return self._not_found('http')
         
         try:
             record.unlink()
-            return {'message': 'Deleted successfully'}
+            return Response(json.dumps({'message': 'Deleted successfully'}), content_type='application/json')
         except Exception as e:
             _logger.error("Error deleting maintenance request: %s", e)
-            return {'error': 'Server error'}, 500
-
-    @http.route('/api/maintenance/teams', auth='public', methods=['GET'], type='json', csrf=False)
+            return Response(json.dumps({'error': 'Server error'}), content_type='application/json', status=500)
+        
+    @http.route('/api/maintenance/teams', auth='public', methods=['GET'], type='http', csrf=False)
     def get_teams(self, **kwargs):
         if not self._check_auth():
-            return self._unauthorized()
+            return self._unauthorized('http')
 
         domain = []
-        company_id = kwargs.get('company_id')
+        company_id = request.httprequest.args.get('company_id')
         if company_id:
             try:
                 company_id = int(company_id)
@@ -149,15 +158,23 @@ class MaintenanceRequestAPI(http.Controller):
 
 
         teams = request.env['maintenance.team'].sudo().search(domain)
-        return [{'id': team.id, 'name': team.name, 'company_id': team.company_id.id} for team in teams]
+        result = [
+            {
+                'id': team.id,
+                'name': team.name,
+               'company_id': team.company_id.id
+            }
+            for team in teams
+        ]
+        return Response(json.dumps({'count': len(result), 'results': result}), content_type='application/json')
 
-    @http.route('/api/maintenance/equipment', auth='public', methods=['GET'], type='json', csrf=False)
+    @http.route('/api/maintenance/equipment', auth='public', methods=['GET'], type='http', csrf=False)
     def get_equipment(self, **kwargs):
         if not self._check_auth():
-            return self._unauthorized()
+            return self._unauthorized('http')
 
         domain = []
-        company_id = kwargs.get('company_id')
+        company_id = request.httprequest.args.get('company_id')
         if company_id:
             try:
                 company_id = int(company_id)
@@ -166,4 +183,12 @@ class MaintenanceRequestAPI(http.Controller):
             domain.append(('company_id', '=', company_id))
 
         equipment = request.env['maintenance.equipment'].sudo().search(domain)
-        return [{'id': eq.id, 'name': eq.name, 'company_id': eq.company_id.id} for eq in equipment]
+        result = [
+            {
+                'id': eq.id,
+                'name': eq.name,
+                'company_id': eq.company_id.id
+            }
+            for eq in equipment
+        ]
+        return Response(json.dumps({'count': len(result), 'results': result}), content_type='application/json')
