@@ -30,7 +30,7 @@ class MaintenanceRequestAPI(http.Controller):
 
         return Response(json.dumps({'error': 'Not Found'}), content_type='application/json', status=404)
     
-    @http.route('/api/maintenance/requests', auth='public', methods=['GET'], type='http', csrf=False)
+    @http.route('/api/v1/maintenance/requests', auth='public', methods=['GET'], type='http', csrf=False)
     def list_requests(self, **kwargs):
         if not self._check_auth():
             return self._unauthorized('http')
@@ -69,7 +69,7 @@ class MaintenanceRequestAPI(http.Controller):
                 'equipment_id': rec.equipment_id.id,
                 'maintenance_team_id': rec.maintenance_team_id.id,
                 'priority': rec.priority,
-                'state': rec.stage_id.name,
+                'stage': rec.stage_id.name,
                 'description': rec.description,
                 'request_date': rec.request_date.isoformat() if rec.request_date else None,
             }
@@ -77,7 +77,7 @@ class MaintenanceRequestAPI(http.Controller):
         ]
         return Response(json.dumps({'count': len(result), 'results': result}), content_type='application/json')
 
-    @http.route('/api/maintenance/request', auth='public', methods=['POST'], type='json', csrf=False)
+    @http.route('/api/v1/maintenance/request', auth='public', methods=['POST'], type='json', csrf=False)
     def create_request(self, **kwargs):
         if not self._check_auth():
             return self._unauthorized('json')
@@ -110,7 +110,7 @@ class MaintenanceRequestAPI(http.Controller):
             _logger.error("Error creating maintenance request: %s", e)
             return {'error': 'Server error'}, 500
 
-    @http.route('/api/maintenance/request/<int:request_id>', auth='public', methods=['PUT'], type='json', csrf=False)
+    @http.route('/api/v1/maintenance/request/<int:request_id>', auth='public', methods=['PUT'], type='json', csrf=False)
     def update_request(self, request_id, **kwargs):
         if not self._check_auth():
             return self._unauthorized('json')
@@ -126,7 +126,7 @@ class MaintenanceRequestAPI(http.Controller):
             _logger.error("Error updating maintenance request: %s", e)
             return {'error': 'Server error'}, 500
    
-    @http.route('/api/maintenance/request/<int:request_id>', auth='public', methods=['DELETE'], type='http', csrf=False)
+    @http.route('/api/v1/maintenance/request/<int:request_id>', auth='public', methods=['DELETE'], type='http', csrf=False)
     def delete_request(self, request_id, **kwargs):
         if not self._check_auth():
             return self._unauthorized('http')
@@ -141,8 +141,78 @@ class MaintenanceRequestAPI(http.Controller):
         except Exception as e:
             _logger.error("Error deleting maintenance request: %s", e)
             return Response(json.dumps({'error': 'Server error'}), content_type='application/json', status=500)
-        
-    @http.route('/api/maintenance/teams', auth='public', methods=['GET'], type='http', csrf=False)
+
+    @http.route('/api/v1/maintenance/companies', auth='public', methods=['GET'], type='http', csrf=False)
+    def get_companies(self, **kwargs):
+        if not self._check_auth():
+            return self._unauthorized('http')
+
+        domain = []
+        company_id = request.httprequest.args.get('id')
+        if company_id:
+            try:
+                company_id = int(company_id)
+            except ValueError:
+                return {'error': 'Invalid id format. Must be an integer.'}, 400
+            domain.append(('id', '=', company_id))
+
+        companies = request.env['res.company'].sudo().search(domain)
+        result = [
+            {
+                'id': company.id,
+                'name': company.name
+            }
+            for company in companies
+        ]
+        return Response(json.dumps({'count': len(result), 'results': result}), content_type='application/json')
+    
+    @http.route('/api/v1/maintenance/stages', auth='public', methods=['GET'], type='http', csrf=False)
+    def get_stages(self, **kwargs):
+        if not self._check_auth():
+            return self._unauthorized('http')
+
+        domain = []
+        stage_id = request.httprequest.args.get('stage_id')
+        if stage_id:
+            try:
+                stage_id = int(stage_id)
+            except ValueError:
+                return {'error': 'Invalid id format. Must be an integer.'}, 400
+            domain.append(('id', '=', stage_id))
+
+        # Obtener parámetros de idioma
+        lang_param = request.httprequest.args.get('lang')  # por ejemplo, 'es_ES'
+        all_langs = request.httprequest.args.get('all_langs') == 'true'
+
+        stages = request.env['maintenance.stage'].sudo().search(domain)
+
+        result = []
+        for stage in stages:
+            stage_data = {'id': stage.id}
+
+            if all_langs:
+                # Mostrar los nombres en todos los idiomas activos
+                names_by_lang = {}
+                active_langs = request.env['res.lang'].sudo().search([('active', '=', True)])
+                for lang in active_langs:
+                    name = stage.with_context(lang=lang.code).name
+                    names_by_lang[lang.code] = name
+                stage_data['name'] = names_by_lang
+
+            elif lang_param:
+                # Mostrar nombre traducido a un idioma específico
+                translated_name = stage.with_context(lang=lang_param).name
+                stage_data['name'] = translated_name
+
+            else:
+                # Mostrar nombre en idioma actual del entorno (por defecto)
+                stage_data['name'] = stage.name
+
+            result.append(stage_data)
+
+        return Response(json.dumps({'count': len(result), 'results': result}), content_type='application/json')
+
+    @http.route('/api/v1/maintenance/teams', auth='public', methods=['GET'], type='http', csrf=False)
     def get_teams(self, **kwargs):
         if not self._check_auth():
             return self._unauthorized('http')
@@ -168,7 +238,7 @@ class MaintenanceRequestAPI(http.Controller):
         ]
         return Response(json.dumps({'count': len(result), 'results': result}), content_type='application/json')
 
-    @http.route('/api/maintenance/equipment', auth='public', methods=['GET'], type='http', csrf=False)
+    @http.route('/api/v1/maintenance/equipment', auth='public', methods=['GET'], type='http', csrf=False)
     def get_equipment(self, **kwargs):
         if not self._check_auth():
             return self._unauthorized('http')
