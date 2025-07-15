@@ -172,7 +172,7 @@ class MaintenanceRequestAPI(http.Controller):
             return self._unauthorized('http')
 
         domain = []
-        stage_id = request.httprequest.args.get('stage_id')
+        stage_id = request.httprequest.args.get('id')
         if stage_id:
             try:
                 stage_id = int(stage_id)
@@ -181,15 +181,15 @@ class MaintenanceRequestAPI(http.Controller):
             domain.append(('id', '=', stage_id))
 
         # Obtener parámetros de idioma
-        lang_param = request.httprequest.args.get('lang')  # por ejemplo, 'es_ES'
+        lang_param = request.httprequest.args.get('lang')
         all_langs = request.httprequest.args.get('all_langs') == 'true'
 
         stages = request.env['maintenance.stage'].sudo().search(domain)
-
+        
         result = []
         for stage in stages:
             stage_data = {'id': stage.id}
-
+            
             if all_langs:
                 # Mostrar los nombres en todos los idiomas activos
                 names_by_lang = {}
