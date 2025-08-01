@@ -2,7 +2,7 @@ from odoo import fields, models, api
 from datetime import datetime
 import datetime as dt
 from dateutil.relativedelta import relativedelta
-from odoo.exceptions import UserError
+from odoo.exceptions import UserError, ValidationError
 
 
 class CollectionTransaction(models.Model):
@@ -87,7 +87,26 @@ class CollectionTransaction(models.Model):
     end_date = fields.Date(string='Fecha fin para el reporte')
     print_date = fields.Date(string='Fecha de impresión')
 
-    
+    #Moneda
+    currency_id = fields.Many2one('res.currency', default=lambda self: self.env.company.currency_id.id)
+
+    currency_pesos = fields.Float(string='Peso')
+    currency_usd = fields.Float(string='USD')
+    currency_euro = fields.Float(string='Euro')
+    currency_real = fields.Float(string='Real')
+    currency_crypto = fields.Float(string='Crypto')
+
+    #MESES PREVIOS
+    previous_month_pesos = fields.Float('Mes Anterior Pesos')
+    previous_month_usd = fields.Float('Mes Anterior Dolares')
+    previous_month_euros = fields.Float('Mes Anterior Euros')
+    previous_month_reales = fields.Float('Mes Anterior Reales')
+
+    #CHEQUE
+
+    payment_id = fields.Many2one('account.payment')
+    create_check = fields.Boolean('Ingresar cheque')
+
     
     def change_positive_comission(self):
         all_comission = self.env['collection.transaction'].search([('is_commission', '=', True),('amount', '>', 0)])
@@ -103,12 +122,46 @@ class CollectionTransaction(models.Model):
         previous_months = self.env['collection.transaction'].search(domain)
 
         previous_balance = sum([pm.amount for pm in previous_months])
+
+        previous_month_pesos = 0
+        previous_month_usd = 0
+        previous_month_euros = 0
+        previous_month_reales = 0
+
+        for rec in self:
+            if rec.currency_id.name == "ARS":
+                domain = [('date', '>=', start_date), ('date', '<=', end_date), ('customer', '=', rec.customer.id),('currency_id', '=', rec.currency_id.id)]
+                previous_months = self.env['collection.transaction'].search(domain)
+                previous_month_pesos = sum([pm.amount for pm in previous_months])
+
+            if rec.currency_id.name == "USD":
+                domain = [('date', '>=', start_date), ('date', '<=', end_date), ('customer', '=', rec.customer.id),('currency_id', '=', rec.currency_id.id)]
+                previous_months = self.env['collection.transaction'].search(domain)
+                previous_month_usd = sum([pm.amount for pm in previous_months])
+
+            if rec.currency_id.name == "EUR":
+                domain = [('date', '>=', start_date), ('date', '<=', end_date), ('customer', '=', rec.customer.id),('currency_id', '=', rec.currency_id.id)]
+                previous_months = self.env['collection.transaction'].search(domain)
+                previous_month_euros = sum([pm.amount for pm in previous_months])
+
+            if rec.currency_id.name == "BRL":
+                domain = [('date', '>=', start_date), ('date', '<=', end_date), ('customer', '=', rec.customer.id),
+                          ('currency_id', '=', rec.currency_id.id)]
+                previous_months = self.env['collection.transaction'].search(domain)
+                previous_month_reales = sum([pm.amount for pm in previous_months])
+
+
         dashboard_customer = self.env['collection.dashboard.customer'].search([('customer', '=', self.customer.id)], limit=1)
         dashboard_customer.update_available_balance()
         filtered_records = self
+
         if filtered_records:
             filtered_records[0].sudo().write({
-                'previous_month': previous_balance, 
+                'previous_month': previous_balance,
+                'previous_month_pesos':previous_month_pesos,
+                'previous_month_usd':previous_month_usd,
+                'previous_month_euros':previous_month_euros,
+                'previous_month_reales':previous_month_reales,
                 'available_balance': dashboard_customer.customer_available_balance,
                 'start_date': start_date, 
                 'end_date': end_date,
@@ -204,20 +257,31 @@ class CollectionTransaction(models.Model):
                             rec_commission.with_context(no_write=True).commission = vals['commission']
                     else:
                         bills_id = self.env['product.template'].sudo().search([('name', 'ilike', 'gastos')], limit=1)
-                        self.env['collection.transaction'].sudo().with_context(no_write=True).create(
-                            {
-                                'amount': ((vals['commission'] / 100) * rec.amount) * -1,
-                                'service': rec.service.id,
-                                'customer': rec.customer.id,
-                                'is_commission': True,
-                                'transaction_name': rec.transaction_name,
-                                'commission': vals['commission'],
-                                'count': 1,
-                                'collection_trans_type': 'movimiento_recaudacion',
-                                'description': 'Comisión',
-                                'operation': bills_id.id,
-                            }
-                        )
+                        dict_commission_write = {
+                            'amount': ((vals['commission'] / 100) * rec.amount) * -1,
+                            'service': rec.service.id,
+                            'customer': rec.customer.id,
+                            'is_commission': True,
+                            'transaction_name': rec.transaction_name,
+                            'commission': vals['commission'],
+                            'count': 1,
+                            'collection_trans_type': 'movimiento_recaudacion',
+                            'description': 'Comisión',
+                            'operation': bills_id.id,
+                            'currency_id': rec.currency_id.id,
+                        }
+                        if rec.currency_id:
+                            if rec.currency_id.name == 'ARS':
+                                dict_commission_write.update({'currency_pesos': ((vals['commission'] / 100) * rec.amount) * -1})
+                            if rec.currency_id.name == 'USD':
+                                dict_commission_write.update({'currency_usd': ((vals['commission'] / 100) * rec.amount) * -1})
+                            if rec.currency_id.name == 'EUR':
+                                dict_commission_write.update({'currency_euro': ((vals['commission'] / 100) * rec.amount) * -1})
+                            if rec.currency_id.name == 'BRL':
+                                dict_commission_write.update({'currency_real': ((vals['commission'] / 100) * rec.amount) * -1})
+
+                        self.env['collection.transaction'].sudo().with_context(no_write=True).create(dict_commission_write)
+
                 elif vals['commission'] == 0:
                     rec_commission = self.env['collection.transaction'].search([('transaction_name', '=', rec.transaction_name), ('customer', '=', rec.customer.id), ('is_commission', '=', True)])
                     if rec_commission:
@@ -250,25 +314,111 @@ class CollectionTransaction(models.Model):
                         for agent_service in service.agent_services_commission:
                             commission_amount = (agent_service.commission_rate * amount) / 100
                             if commission_amount > 0 and rec.count == 0:
-                                rec.env['collection.transaction.commission'].sudo().create(
-                                    {
-                                        'date': rec.date,
-                                        'transaction_name': rec.transaction_name,
-                                        'operation_amount': amount,
-                                        'payment_rest': commission_amount,
-                                        'customer': rec.customer.id,
-                                        'transaction_service': vals['service'],
-                                        'transaction_operation': rec.operation.id,
-                                        'agent': agent_service.agent.id,
-                                        'commission_rate': agent_service.commission_rate,
-                                        'commission_amount': commission_amount,
-                                    }
-                                )
+                                coll_trans_commi_dict = {
+                                    'date': rec.date,
+                                    'transaction_name': rec.transaction_name,
+                                    'operation_amount': amount,
+                                    'payment_rest': commission_amount,
+                                    'customer': rec.customer.id,
+                                    'transaction_service': vals['service'],
+                                    'transaction_operation': rec.operation.id,
+                                    'agent': agent_service.agent.id,
+                                    'commission_rate': agent_service.commission_rate,
+                                    'commission_amount': commission_amount,
+                                    'currency_id': rec.currency_id.id,
+                                }
+                                if rec.currency_id:
+                                    if rec.currency_id.name == 'ARS':
+                                        coll_trans_commi_dict.update({'currency_pesos': rec.amount})
+                                    if rec.currency_id.name == 'USD':
+                                        coll_trans_commi_dict.update({'currency_usd': rec.amount})
+                                    if rec.currency_id.name == 'EUR':
+                                        coll_trans_commi_dict.update({'currency_euro': rec.amount})
+                                    if rec.currency_id.name == 'BRL':
+                                        coll_trans_commi_dict.update({'currency_real': rec.amount})
+
+                                rec.env['collection.transaction.commission'].sudo().create(coll_trans_commi_dict)
+
+
                 if rec_commission:
                     if 'commission' in vals:
                         rec_commission.with_context(no_write=True).commission = vals['commission']
                         rec_commission.with_context(no_write=True).amount = ((vals['commission'] / 100) * rec.amount) * -1
                     rec_commission.with_context(no_write=True).service = vals['service']
+
+            if 'currency_id' in vals:
+                if rec.env.context.get('no_write', False):
+                    continue
+
+                moneda = self.env['res.currency'].sudo().search([('id', '=', vals['currency_id'])])
+
+                # RECAUDACION DE PAGO
+
+                rec.with_context(no_write=True).currency_pesos = 0
+                rec.with_context(no_write=True).currency_usd = 0
+                rec.with_context(no_write=True).currency_euro = 0
+                rec.with_context(no_write=True).currency_real = 0
+                rec.with_context(no_write=True).currency_crypto = 0
+
+                if moneda:
+                    if moneda.name == 'ARS':
+                        rec.with_context(no_write=True).currency_pesos = rec.amount
+                    if moneda.name == 'USD':
+                        rec.with_context(no_write=True).currency_usd = rec.amount
+                    if moneda.name == 'EUR':
+                        rec.with_context(no_write=True).currency_euro = rec.amount
+                    if moneda.name == 'BRL':
+                        rec.with_context(no_write=True).currency_real = rec.amount
+
+                # COMISION DE RECAUDACION DE PAGO
+
+                rec_commission = self.env['collection.transaction'].search(
+                    [('transaction_name', '=', rec.transaction_name), ('is_commission', '=', True)])
+
+                if rec_commission:
+                    rec_commission.with_context(no_write=True).currency_id = vals['currency_id']
+
+                    rec_commission.with_context(no_write=True).currency_pesos = 0
+                    rec_commission.with_context(no_write=True).currency_usd = 0
+                    rec_commission.with_context(no_write=True).currency_euro = 0
+                    rec_commission.with_context(no_write=True).currency_real = 0
+                    rec_commission.with_context(no_write=True).currency_crypto = 0
+
+                    if moneda:
+                        if moneda.name == 'ARS':
+                            rec_commission.with_context(no_write=True).currency_pesos = rec_commission.amount
+                        if moneda.name == 'USD':
+                            rec_commission.with_context(no_write=True).currency_usd = rec_commission.amount
+                        if moneda.name == 'EUR':
+                            rec_commission.with_context(no_write=True).currency_euro = rec_commission.amount
+                        if moneda.name == 'BRL':
+                            rec_commission.with_context(no_write=True).currency_real = rec_commission.amount
+
+                #COMISION POR AGENTE
+
+                agents = self.env['collection.transaction.commission'].search(
+                    [('transaction_name', '=', rec.transaction_name), ('customer', '=', rec.customer.id)])
+
+                if agents:
+                    agents.with_context(no_write=True).currency_id = vals['currency_id']
+
+                    agents.with_context(no_write=True).currency_pesos = 0
+                    agents.with_context(no_write=True).currency_usd = 0
+                    agents.with_context(no_write=True).currency_euro = 0
+                    agents.with_context(no_write=True).currency_real = 0
+                    agents.with_context(no_write=True).currency_crypto = 0
+
+                    if moneda:
+                        if moneda.name == 'ARS':
+                            agents.with_context(no_write=True).currency_pesos = agents.commission_amount
+                        if moneda.name == 'USD':
+                            agents.with_context(no_write=True).currency_usd = agents.commission_amount
+                        if moneda.name == 'EUR':
+                            agents.with_context(no_write=True).currency_euro = agents.commission_amount
+                        if moneda.name == 'BRL':
+                            agents.with_context(no_write=True).currency_real = agents.commission_amount
+
+
 
         return super().write(vals)
 
@@ -299,9 +449,12 @@ class CollectionTransaction(models.Model):
     @api.model
     def create(self, vals_list):
         if vals_list['count'] == 0:
+
             if 'transaction_name' not in vals_list:
                 vals_list['transaction_name'] = self.env['ir.sequence'].next_by_code('collection.transaction') or ('New')
             bills_id = self.env['product.template'].sudo().search([('name', 'ilike', 'gastos')], limit=1)
+
+            #ACREDITACION
 
             if not vals_list['collection_trans_type'] == 'retiro' and not vals_list['collection_trans_type'] == 'movimiento_interno':
                 dict_transac = {
@@ -319,6 +472,7 @@ class CollectionTransaction(models.Model):
                     'cbu_destination_account': 0,
                     'is_commission': True,
                     'count': 1,
+                    'currency_id': vals_list['currency_id'],
                  
                 }
                 if 'commission' not in vals_list:
@@ -331,6 +485,8 @@ class CollectionTransaction(models.Model):
 
                 if vals_list['commission'] > 0:
                     self.env['collection.transaction'].sudo().create(dict_transac)
+
+            #RETIRO
 
             if vals_list['collection_trans_type'] == 'retiro' and not self.env.context.get('ignore_acr', False) and vals_list['commission'] != 0:
                 dict_with = {
@@ -348,6 +504,7 @@ class CollectionTransaction(models.Model):
                     'cbu_destination_account': 0,
                     'is_commission': True,
                     'count': 1,
+                    'currency_id': vals_list['currency_id'],
                 }
                 if 'commission' not in vals_list:
                     commission_search = self.env['collection.services.commission'].sudo().search([('id', '=', vals_list['service'])], limit=1)
@@ -358,7 +515,28 @@ class CollectionTransaction(models.Model):
                     dict_with['amount'] = ((vals_list['commission'] / 100) * vals_list['amount'])
                 self.env['collection.transaction'].sudo().create(dict_with)
 
+        # ASIGNO EL MONTO AL CAMPO DE LA MONEDA CORRESPONDIENTE
+        # currency_pesos
+        # currency_usd
+        # currency_euro
+        # currency_real
+        # currency_crypto
+
+        if vals_list['currency_id']:
+            moneda = self.env['res.currency'].sudo().search([('id','=', vals_list['currency_id'])])
+            if moneda:
+                if moneda.name == 'ARS':
+                    vals_list.update({'currency_pesos':vals_list['amount']})
+                if moneda.name == 'USD':
+                    vals_list.update({'currency_usd':vals_list['amount']})
+                if moneda.name == 'EUR':
+                    vals_list.update({'currency_euro': vals_list['amount']})
+                if moneda.name == 'BRL':
+                    vals_list.update({'currency_real': vals_list['amount']})
+
         res = super(CollectionTransaction, self).create(vals_list)
+
+        #MOVIMIENTO INTERNO
 
         if vals_list['collection_trans_type'] == 'movimiento_interno' and not self.env.context.get('ignore_acr', False):
             if vals_list['collection_trans_type_dest'] == 'movimiento_recaudacion':
@@ -375,6 +553,7 @@ class CollectionTransaction(models.Model):
                     'amount': vals_list['amount'] if vals_list['amount'] > 0 else vals_list['amount'] * -1,
                     'count': 0,
                     'collection_trans_type': 'movimiento_recaudacion',
+                    'currency_id': vals_list['currency_id'],
                 }
                 self.env['collection.transaction'].sudo().with_context(ignore_acr=True).create(dict_dest)
 
@@ -388,6 +567,7 @@ class CollectionTransaction(models.Model):
                     'amount': vals_list['amount'] * -1 if vals_list['amount'] > 0 else vals_list['amount'],
                     'count': 0,
                     'collection_trans_type': 'retiro',
+                    'currency_id': vals_list['currency_id'],
                 }
                 self.env['collection.transaction'].sudo().with_context(ignore_acr=True).create(dict_dest)
             else:
@@ -642,20 +822,30 @@ class CollectionTransaction(models.Model):
             for agent_service in rec.service.agent_services_commission:
                 commission_amount = (agent_service.commission_rate * rec.amount) / 100
                 if commission_amount > 0 and rec.count == 0:
-                    rec.env['collection.transaction.commission'].sudo().create(
-                        {
-                            'date': rec.date,
-                            'transaction_name': rec.transaction_name,
-                            'operation_amount': rec.amount,
-                            'payment_rest': commission_amount,
-                            'customer': rec.customer.id,
-                            'transaction_service': rec.service.id,
-                            'transaction_operation': rec.operation.id,
-                            'agent': agent_service.agent.id,
-                            'commission_rate': agent_service.commission_rate,
-                            'commission_amount': commission_amount,
-                        }
-                    )
+                    coll_trans_commi_dict = {
+                        'date': rec.date,
+                        'transaction_name': rec.transaction_name,
+                        'operation_amount': rec.amount,
+                        'payment_rest': commission_amount,
+                        'customer': rec.customer.id,
+                        'transaction_service': rec.service.id,
+                        'transaction_operation': rec.operation.id,
+                        'agent': agent_service.agent.id,
+                        'commission_rate': agent_service.commission_rate,
+                        'commission_amount': commission_amount,
+                        'currency_id': rec.currency_id.id,
+                    }
+                    if rec.currency_id:
+                        if rec.currency_id.name == 'ARS':
+                            coll_trans_commi_dict.update({'currency_pesos': commission_amount})
+                        if rec.currency_id.name == 'USD':
+                            coll_trans_commi_dict.update({'currency_usd': commission_amount})
+                        if rec.currency_id.name == 'EUR':
+                            coll_trans_commi_dict.update({'currency_euro': commission_amount})
+                        if rec.currency_id.name == 'BRL':
+                            coll_trans_commi_dict.update({'currency_real': commission_amount})
+
+                    rec.env['collection.transaction.commission'].sudo().create(coll_trans_commi_dict)
 
     @api.constrains('customer')
     def create_dashboard_customer(self):
@@ -828,6 +1018,7 @@ class CollectionTransaction(models.Model):
             previous_months = self.env['collection.transaction'].search(domain)
             rec.previous_month = sum([pm.amount for pm in previous_months])
 
+
     @api.onchange('collection_trans_type')
     def no_commission_on_withdrawal(self):
         for rec in self:
@@ -950,4 +1141,37 @@ class CollectionTransaction(models.Model):
             'res_model': 'filter.collection.movement',
             'type': 'ir.actions.act_window',
             'target': 'new',
+        }
+
+
+    def open_create_check(self):
+        search_journal = self.env['journal.transaction'].sudo().search([('id', '=', '1')])
+        diario = False
+        method = False
+        if not search_journal:
+            raise ValidationError('Diario de cheques no configurado.')
+        if search_journal:
+            diario = search_journal.journal_id.id
+            method = search_journal.journal_id.inbound_payment_method_line_ids.filtered(
+                lambda m: m.code == 'new_third_party_checks')
+            if not method:
+                raise ValidationError('No se encontro el metodo de pago: Nuevo Cheque de Tercero')
+
+
+        return {
+            'name': 'Ingresar cheque',
+            'view_type': 'form',
+            'view_mode': 'form',
+            'res_model': 'account.payment',
+            'type': 'ir.actions.act_window',
+            'target': 'new',
+            'context': {'default_journal_id': diario,
+                        'default_payment_method_line_id': method.id,
+                        'default_amount': self.amount,
+                        'default_currency_id': self.currency_id.id,
+                        'default_date': self.date,
+                        'default_partner_id': self.customer.id,
+                        'default_check_origin_collection': True,
+                        'default_id_transaction':self.id,
+                        },
         }

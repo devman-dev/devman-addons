@@ -7,7 +7,7 @@
     'website': '',
     'license': 'LGPL-3',
     'category': 'account',
-    'depends': ['base', 'contacts', 'stock', 'report_xlsx', 'sale'],
+    'depends': ['base', 'contacts', 'stock', 'report_xlsx', 'sale','l10n_latam_check'],
     'data': [
         'security/security.xml',
         'security/ir.model.access.csv',
@@ -28,6 +28,8 @@
         'views/account_bank_pagoflex.xml',
         'views/bank_move_imported.xml',
         'views/transfer_request.xml',
+        'views/account_payment.xml',
+        'views/journal_transaction.xml',
         'views/menuitems.xml',
         'wizard/payment_wiz.xml',
         'wizard/report_agent_wiz.xml',

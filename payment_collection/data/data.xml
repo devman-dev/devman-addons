@@ -125,4 +125,11 @@
         </record>
     </data>
 
+    <data noupdate="1">
+        <record id="journal_transaction_config_record" model="journal.transaction">
+            <field name="id">1</field>
+            <field name="name">Configuración de diario para cheques de recaudación de pagos</field>
+        </record>
+    </data>
+
 </odoo>

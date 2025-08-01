@@ -111,4 +111,10 @@
         parent="collection_transaction_menu"
         sequence="4" />
 
+    <menuitem id="menu_journal_transaction_config"
+              name="Diario para cheques de recaudación"
+              action="action_journal_transaction"
+              parent="collection_configuration_menu"
+              sequence="8"/>
+
 </odoo>

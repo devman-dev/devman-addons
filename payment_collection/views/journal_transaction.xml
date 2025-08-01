@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="action_journal_transaction" model="ir.actions.act_window">
+        <field name="name">Asignar Diario para Cheques de recaudación de pagos</field>
+        <field name="res_model">journal.transaction</field>
+        <field name="view_mode">form</field>
+        <field name="target">main</field>
+        <field name="res_id">1</field>
+    </record>
+
+
+    <record id="journal_transaction_form_view" model="ir.ui.view">
+        <field name="name">journal.transaction.form.view</field>
+        <field name="model">journal.transaction</field>
+        <field name="arch" type="xml">
+            <form create="false">
+                <sheet>
+                    <group>
+                        <field name="journal_id" string="Diario"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+</odoo>

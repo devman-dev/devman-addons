@@ -23,6 +23,12 @@
                 <field name="operation" />
                 <field name="description" />
                 <field name="amount" sum="Total" />
+                <field name="currency_id" string="Moneda" optional="hide" />
+                <field name="currency_pesos" optional="hide" sum="Total Pesos"/>
+                <field name="currency_usd" optional="hide" sum="Total USD"/>
+                <field name="currency_euro" optional="hide" sum="Total Euros"/>
+                <field name="currency_real" optional="hide" sum="Total Reales"/>
+                <field name="currency_crypto" optional="hide" sum="Total Crypto"/>
                 <field name="origin_name" />
                 <field name="commission_app_amount" sum="Total APP" optional="hide" />
                 <!-- <field name="available_balance" optional="hide" /> -->
@@ -63,8 +69,18 @@
                             <field name="withdrawal_operations" invisible="1" />
                             <field name="date" />
                             <field name="related_customer" invisible="collection_trans_type == 'retiro'" />
-                            <field name="amount"/>
-                            <separator />
+                            <label for="amount">Monto</label>
+                            <div style="display: flex; gap: 8px; align-items: center;">
+                                <field name="amount" nolabel="1"/>
+                                <field name="currency_id" nolabel="1"/>
+                            </div>
+                            <label for="payment_id">Cheque</label>
+                            <div style="display: flex; gap: 8px; align-items: center;">
+                                <field name="payment_id" readonly="1" force_save="1" string="Cheque" nolabel="1" options="{'no_create': True, 'no_create_edit': True,'no_quick_create': True}"/>
+                                <button name="open_create_check" type="object" string="Cargar"/>
+                            </div>
+
+                            <separator/>
                             <!-- <field name="available_balance" readonly="1" force_save="1" /> -->
                             <field name="total_balance_customer" readonly="1" force_save="1" />
                             <field name="real_balance" readonly="1" force_save="1" groups="payment_collection.groups_payment_collection_admin" />
@@ -73,6 +89,7 @@
                             <field name="destination_name" force_save="1" invisible="1" />
                             <field name="is_concilied" readonly="1" force_save="1" />
                             <field name="concilied_id" widget="many2one" readonly="1" force_save="1" domain="[('is_concilied','=',False)]" />
+                            <field name="previous_month" invisible="1" />
                         </group>
 
 
@@ -156,7 +173,8 @@
                             <field name="commission_app_rate" readonly="1" force_save="1" />
                             <field name="commission_app_amount" readonly="1" force_save="1" />
                             <field name="transaction_state" />
-                            <field name="previous_month" invisible="1" />
+                            <field name="previous_month" invisible="1"/>
+
                         </group>
 
                         <!-- Cheque -->

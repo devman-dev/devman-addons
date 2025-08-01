@@ -28,6 +28,15 @@ class CollectionTransactionCommission(models.Model):
     duplicate = fields.Boolean('Duplicado')
     previous_month = fields.Float('Mes Anterior')
 
+    # Moneda
+    currency_id = fields.Many2one('res.currency', default=lambda self: self.env.company.currency_id.id)
+
+    currency_pesos = fields.Float(string='Peso')
+    currency_usd = fields.Float(string='USD')
+    currency_euro = fields.Float(string='Euro')
+    currency_real = fields.Float(string='Real')
+    currency_crypto = fields.Float(string='Crypto')
+
     @api.model
     def create(self, vals):
 

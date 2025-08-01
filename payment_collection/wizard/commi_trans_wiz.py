@@ -18,8 +18,44 @@ class CommiTransWiz(models.TransientModel):
         end_date = self.end_date
         customer = self.customer
 
+        previous_month_pesos = 0
+        previous_month_usd = 0
+        previous_month_euros = 0
+        previous_month_reales = 0
+
+
         domain = [('date', '<', start_date), ('customer', '=', customer.id),('collection_trans_type', '!=', 'movimiento_interno')]
         previous_months = self.env['collection.transaction'].search(domain)
+        if previous_months:
+
+
+            #REVISAR EL MONTO DE LOS SALDOS ANTERIORES
+
+            for rec in previous_months:
+                if rec.currency_id.name == "ARS":
+                    domain = [('date', '<', start_date), ('customer', '=', customer.id),('collection_trans_type', '!=', 'movimiento_interno'),
+                              ('currency_id', '=', rec.currency_id.id)]
+                    previous_months = self.env['collection.transaction'].search(domain)
+                    previous_month_pesos = sum([pm.amount for pm in previous_months])
+
+                if rec.currency_id.name == "USD":
+                    domain = [('date', '<', start_date), ('customer', '=', customer.id),('collection_trans_type', '!=', 'movimiento_interno'),
+                              ('currency_id', '=', rec.currency_id.id)]
+                    previous_months = self.env['collection.transaction'].search(domain)
+                    previous_month_usd = sum([pm.amount for pm in previous_months])
+
+                if rec.currency_id.name == "EUR":
+                    domain = [('date', '<', start_date), ('customer', '=', customer.id),('collection_trans_type', '!=', 'movimiento_interno'),
+                              ('currency_id', '=', rec.currency_id.id)]
+                    previous_months = self.env['collection.transaction'].search(domain)
+                    previous_month_euros = sum([pm.amount for pm in previous_months])
+
+                if rec.currency_id.name == "BRL":
+                    domain = [('date', '<', start_date), ('customer', '=', customer.id),('collection_trans_type', '!=', 'movimiento_interno'),
+                              ('currency_id', '=', rec.currency_id.id)]
+                    previous_months = self.env['collection.transaction'].search(domain)
+                    previous_month_reales = sum([pm.amount for pm in previous_months])
+
 
         self.previous_balance = sum([pm.amount for pm in previous_months])
         dashboard_customer = self.env['collection.dashboard.customer'].search([('customer', '=', self.customer.id)], limit=1)
@@ -28,7 +64,11 @@ class CommiTransWiz(models.TransientModel):
         filtered_records = self.env['collection.transaction'].search(domain_2, order='date asc, id desc')
         if filtered_records:
             filtered_records[0].sudo().write({
-                'previous_month': self.previous_balance, 
+                'previous_month': self.previous_balance,
+                'previous_month_pesos': previous_month_pesos,
+                'previous_month_usd': previous_month_usd,
+                'previous_month_euros': previous_month_euros,
+                'previous_month_reales': previous_month_reales,
                 'available_balance': dashboard_customer.customer_available_balance,
                 'start_date': start_date, 
                 'end_date': end_date,
