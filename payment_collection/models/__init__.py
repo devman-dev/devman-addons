@@ -13,3 +13,4 @@ from . import account_bank_pagoflex
 from . import collection_category
 from . import bank_move_imported
 from . import transfer_request
+from . import res_config_settings

@@ -89,7 +89,8 @@
                             <field name="destination_name" force_save="1" invisible="1" />
                             <field name="is_concilied" readonly="1" force_save="1" />
                             <field name="concilied_id" widget="many2one" readonly="1" force_save="1" domain="[('is_concilied','=',False)]" />
-                            <field name="previous_month" invisible="1" />
+                            <field name="previous_month" invisible="1"/>
+                            <field name="account_move_id"/>
                         </group>
 
 

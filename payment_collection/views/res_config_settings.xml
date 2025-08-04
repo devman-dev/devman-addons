@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="view_res_config_settings_inherit_caja_journal" model="ir.ui.view">
+        <field name="name">res.config.settings.inherit.caja.journal</field>
+        <field name="model">res.config.settings</field>
+        <field name="inherit_id" ref="account.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+
+            <xpath expr="//form" position="inside">
+                <app data-string="Pagoflex" string="Pagoflex" name="payment_collection" groups="payment_collection.groups_payment_collection_admin">
+                    <block title="Configuración de Caja">
+                        <setting title="Configuración del diario contable de Caja." help="Configuración del diario contable de Caja.">
+                            <field name="caja_journal_id"/>
+                        </setting>
+                    </block>
+                </app>
+            </xpath>
+
+        </field>
+    </record>
+</odoo>

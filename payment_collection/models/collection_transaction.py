@@ -107,6 +107,9 @@ class CollectionTransaction(models.Model):
     payment_id = fields.Many2one('account.payment')
     create_check = fields.Boolean('Ingresar cheque')
 
+    #CAJA
+    account_move_id = fields.Many2one('account.move', string='Asiento Contable')
+
     
     def change_positive_comission(self):
         all_comission = self.env['collection.transaction'].search([('is_commission', '=', True),('amount', '>', 0)])
@@ -219,6 +222,16 @@ class CollectionTransaction(models.Model):
                 if vals['amount'] < 0 and collection_trans_type == 'movimiento_recaudacion':
                     continue
                 if vals['amount'] != rec.amount:
+                    if rec.currency_id:
+                        if rec.currency_id.name == 'ARS':
+                            rec.currency_pesos = vals['amount']
+                        if rec.currency_id.name == 'USD':
+                            rec.currency_usd = vals['amount']
+                        if rec.currency_id.name == 'EUR':
+                            rec.currency_euro = vals['amount']
+                        if rec.currency_id.name == 'BRL':
+                            rec.currency_real = vals['amount']
+
                     # Relculo de comision
                     commission = ((rec.commission / 100) * vals['amount']) * -1
 
@@ -230,7 +243,61 @@ class CollectionTransaction(models.Model):
                     ]
                     rec_commission = self.env['collection.transaction'].search(domain)
 
-                    # Relculo de comision de agentes
+                    if rec_commission:
+                        rec_commission.currency_pesos = 0
+                        rec_commission.currency_usd = 0
+                        rec_commission.currency_euro = 0
+                        rec_commission.currency_real = 0
+
+                        if rec.currency_id.name == 'ARS':
+                            rec_commission.currency_pesos = commission
+                        if rec.currency_id.name == 'USD':
+                            rec_commission.currency_usd = commission
+                        if rec.currency_id.name == 'EUR':
+                            rec_commission.currency_euro = commission
+                        if rec.currency_id.name == 'BRL':
+                            rec_commission.currency_real = commission
+
+                        if rec_commission.account_move_id:
+                            move = rec_commission.account_move_id
+
+                            if move.state == 'posted':
+                                move.button_draft()
+
+                            amount = commission
+
+                            move_name = rec.transaction_name + ' ' + 'Comisión'
+
+                            account_442000 = self.env['account.account'].search([('code', '=', '442000')], limit=1)
+                            account_642000 = self.env['account.account'].search([('code', '=', '642000')], limit=1)
+
+                            if not account_442000 or not account_642000:
+                                raise UserError("No se encontraron las cuentas contables 442000 o 642000.")
+
+                            # Eliminar todas las líneas actuales del asiento
+                            move.line_ids.unlink()
+
+                            # Crear nuevas líneas
+                            move.write({
+                                'line_ids': [
+                                    (0, 0, {
+                                        'account_id': account_442000.id,
+                                        'name': move_name,
+                                        'debit': commission,
+                                        'credit': 0.0,
+                                    }),
+                                    (0, 0, {
+                                        'account_id': account_642000.id,
+                                        'name': move_name,
+                                        'debit': 0.0,
+                                        'credit': commission,
+                                    }),
+                                ]
+                            })
+                            move.action_post()
+
+
+                    # Recalculo de comision de agentes
 
                     domain = [('transaction_name', '=', rec.transaction_name), ('customer', '=', rec.customer.id)]
                     commission_agent = self.env['collection.transaction.commission'].search(domain)
@@ -248,6 +315,44 @@ class CollectionTransaction(models.Model):
                             )
                     rec_commission.amount = commission
                     self.recalculate_customer_balance_write(vals)
+
+                    # modificación de asientos contables
+
+                    if rec.account_move_id:
+                        move = rec.account_move_id
+
+                        if move.state == 'posted':
+                            move.button_draft()
+
+                        amount = float(vals.get('amount', 0.0))
+
+                        account_442000 = self.env['account.account'].search([('code', '=', '442000')], limit=1)
+                        account_642000 = self.env['account.account'].search([('code', '=', '642000')], limit=1)
+
+                        if not account_442000 or not account_642000:
+                            raise UserError("No se encontraron las cuentas contables 442000 o 642000.")
+
+                        move.line_ids.unlink()
+
+                        move.write({
+                            'line_ids': [
+                                (0, 0, {
+                                    'account_id': account_442000.id,
+                                    'name': rec.transaction_name,
+                                    'debit': amount,
+                                    'credit': 0.0,
+                                }),
+                                (0, 0, {
+                                    'account_id': account_642000.id,
+                                    'name': rec.transaction_name,
+                                    'debit': 0.0,
+                                    'credit': amount,
+                                }),
+                            ]
+                        })
+                        move.action_post()
+
+
             if 'commission' in vals:
                 if vals['commission'] > 0:
                     rec_commission = self.env['collection.transaction'].search([('transaction_name', '=', rec.transaction_name), ('customer', '=', rec.customer.id), ('is_commission', '=', True)])
@@ -440,9 +545,25 @@ class CollectionTransaction(models.Model):
             commission_ids = rec_commission.id if len(rec_commission) == 1 else rec_commission.ids
 
             if rec_commission and commission_ids not in self.ids:
+                if rec_commission.account_move_id:
+                    move = rec_commission.account_move_id
+
+                    if move.state == 'posted':
+                        move.button_draft()
+
+                    move.line_ids.unlink()
+
                 rec_commission.with_context(force_unlink=True).unlink()
 
         self.recalculate_customer_balance_unlink()
+
+        if rec.account_move_id:
+            move = rec.account_move_id
+
+            if move.state == 'posted':
+                move.button_draft()
+
+            move.line_ids.unlink()
 
         return super().unlink()
 
@@ -575,8 +696,57 @@ class CollectionTransaction(models.Model):
         message = ('Se ha creado la siguiente transaccion: %s.') % (str(vals_list['transaction_name']))
         res.message_post(body=message)
 
+        res._create_account_move()
+
         return res
 
+    #CREAR ASIENTOS CONTABLES
+
+    def _create_account_move(self):
+        self.ensure_one()
+        journal_id = self.env['ir.config_parameter'].sudo().get_param('payment_collection.caja_journal_id')
+        if not journal_id:
+            raise UserError("No está configurado el diario de caja.")
+
+        journal = self.env['account.journal'].browse(int(journal_id))
+
+
+        cuenta_de_caja_id =  journal.profit_account_id.id
+        cuenta_contraparte_id = journal.loss_account_id.id
+
+        amount = self.amount
+        if self.is_commission:
+            name = self.transaction_name + ' ' + 'Comision'  or 'Movimiento de caja'
+        else:
+            name = self.transaction_name or 'Movimiento de caja'
+
+        move_vals = {
+            'journal_id': journal.id,
+            'date': self.date or fields.Date.context_today(self),
+            'ref': name,
+            'currency_id':self.currency_id.id,
+            'line_ids': [
+                (0, 0, {
+                    'account_id': cuenta_de_caja_id,
+                    'debit': amount if amount > 0 else 0.0,
+                    'credit': -amount if amount < 0 else 0.0,
+                    'name': name,
+                    'currency_id':self.currency_id.id,
+                }),
+                (0, 0, {
+                    'account_id': cuenta_contraparte_id,
+                    'debit': -amount if amount < 0 else 0.0,
+                    'credit': amount if amount > 0 else 0.0,
+                    'name': name,
+                    'currency_id': self.currency_id.id,
+                }),
+            ],
+        }
+
+        move = self.env['account.move'].create(move_vals)
+        move.action_post()
+
+        self.account_move_id = move.id
 
     def recalculate_customer_balance_unlink(self):
         for rec in self:
