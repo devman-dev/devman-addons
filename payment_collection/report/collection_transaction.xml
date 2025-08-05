@@ -91,7 +91,28 @@
 <!--                                </td>-->
 <!--                                <td colspan="1" style="border: none;"></td>-->
 <!--                            </tr>-->
-                            <t t-if="docs[0].previous_month_pesos != 0">
+                            <t t-set="pesos_true" t-value="False"/>
+                            <t t-set="dolar_true" t-value="False"/>
+                            <t t-set="euro_true" t-value="False"/>
+                            <t t-set="real_true" t-value="False"/>
+
+                            <t t-foreach="docs" t-as="o">
+                                <t t-if="o.currency_id.name == 'ARS' or docs[0].previous_month_pesos">
+                                     <t t-set="pesos_true" t-value="True"/>
+                                </t>
+                                <t t-if="o.currency_id.name == 'USD' or docs[0].previous_month_usd">
+                                     <t t-set="dolar_true" t-value="True"/>
+                                </t>
+                                <t t-if="o.currency_id.name == 'EUR' or docs[0].previous_month_euros">
+                                     <t t-set="euro_true" t-value="True"/>
+                                </t>
+                                <t t-if="o.currency_id.name == 'BRL' or docs[0].previous_month_reales">
+                                     <t t-set="real_true" t-value="True"/>
+                                </t>
+                            </t>
+
+
+                            <t t-if="pesos_true">
                                 <tr style="border: none;">
                                     <td class="pt-1 pb-0" style="border: none;" colspan="4"></td>
                                     <td class="pt-1 pb-0" style="border: none; background-color: #8dd0f0;" colspan="2">
@@ -108,7 +129,7 @@
                                 </tr>
                             </t>
 
-                            <t t-if="docs[0].previous_month_usd != 0">
+                            <t t-if="dolar_true">
                                 <tr style="border: none;">
                                     <td class="pt-1 pb-0" style="border: none;" colspan="4"></td>
                                     <td class="pt-1 pb-0" style="border: none; background-color: #8dd0f0;" colspan="2">
@@ -125,7 +146,7 @@
                                 </tr>
                             </t>
 
-                            <t t-if="docs[0].previous_month_euros != 0">
+                            <t t-if="euro_true">
                                 <tr style="border: none;">
                                     <td class="pt-1 pb-0" style="border: none;" colspan="4"></td>
                                     <td class="pt-1 pb-0" style="border: none; background-color: #8dd0f0;" colspan="2">
@@ -142,7 +163,7 @@
                                 </tr>
                             </t>
 
-                            <t t-if="docs[0].previous_month_reales != 0">
+                            <t t-if="real_true">
                                 <tr style="border: none;">
                                     <td class="pt-1 pb-0" style="border: none;" colspan="4"></td>
                                     <td class="pt-1 pb-0" style="border: none; background-color: #8dd0f0;" colspan="2">

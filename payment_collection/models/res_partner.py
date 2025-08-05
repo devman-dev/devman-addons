@@ -10,9 +10,25 @@ class ResPartnerInherit(models.Model):
     def create(self, vals_list):
         if 'customer_code' not in vals_list:
             vals_list['customer_code'] = self.env['ir.sequence'].next_by_code('res.partner') or ('New')
-            res = super().create(vals_list)
-            res._insert_customer_code()
+        res = super().create(vals_list)
+        res._insert_customer_code()
         return res
+
+
+
+    @api.model
+    def copy(self, default=None):
+        if default is None:
+            default = {}
+
+        # Modificás el nombre para evitar duplicados con el mismo nombre exacto
+        default.setdefault('name', self.name + " (copia)")
+
+        # Podés modificar otros campos si querés
+        # default['email'] = False  # por ejemplo, borrar el email en el duplicado
+
+        # Llamás al método original con tus cambios
+        return super().copy(default)
 
     def upload_customer_code(self):
         all_recs = self.env['res.partner'].search([('customer_code', '=', False)])
@@ -29,7 +45,8 @@ class ResPartnerInherit(models.Model):
                      base_name = re.sub(pattern, "", rec.name).strip()
                      same_code = self.env['res.partner'].search([('customer_code', '=', rec.customer_code.upper()),('id', '!=', rec.id)])
                      if same_code:
-                         raise UserError('El código de cliente ya existe en otro registro.')
+                         rec.customer_code = self.env['ir.sequence'].next_by_code('res.partner') or ('New')
+                         # raise UserError('El código de cliente ya existe en otro registro.')
                    
                      rec.with_context(pass_constrain=True).write({'name': f'{base_name} [{rec.customer_code.upper()}]'})  
                  else:
