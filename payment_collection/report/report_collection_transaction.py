@@ -18,7 +18,7 @@ class ReportPrestamoBancarioXlsx(models.AbstractModel):
         sheet.set_column('C:C', 14)
         sheet.set_column('D:D', 22)
         sheet.set_column('E:E', 22)
-        sheet.set_column('F:F', 14)
+        sheet.set_column('F:F', 21)
         sheet.set_column('G:G', 16)
         sheet.set_column('H:H', 16)
         sheet.set_column('I:I', 14)
@@ -36,11 +36,28 @@ class ReportPrestamoBancarioXlsx(models.AbstractModel):
         sheet.write(1, 2, 'Fecha hasta: ', bold)
         sheet.write(1, 3, partners[0].end_date.strftime('%d/%m/%Y'))
 
-        sheet.write(1, 5, 'Saldo Anterior: ', bold)
-        sheet.write(1, 6, partners[0].previous_month, number_format)
+        add_row = 0
+        if partners[0].previous_month_pesos:
+            sheet.write(2, 5, 'Saldo Anterior Pesos: ', bold)
+            sheet.write(2, 6, partners[0].previous_month_pesos, number_format)
+            add_row += 1
 
+        if partners[0].previous_month_usd:
+            sheet.write(3, 5, 'Saldo Anterior Dolares: ', bold)
+            sheet.write(3, 6, partners[0].previous_month_pesos, number_format)
+            add_row += 1
 
-        row = 2
+        if partners[0].previous_month_euros:
+            sheet.write(4, 5, 'Saldo Anterior Euros: ', bold)
+            sheet.write(4, 6, partners[0].previous_month_pesos, number_format)
+            add_row += 1
+
+        if partners[0].previous_month_reales:
+            sheet.write(5, 5, 'Saldo Anterior Reales: ', bold)
+            sheet.write(5, 6, partners[0].previous_month_pesos, number_format)
+            add_row += 1
+
+        row = 3 + add_row
         col = 0
         sheet.write(row, col, 'Fecha:', bold)
         sheet.write(row, col + 1, 'Nro T:', bold)
@@ -49,11 +66,17 @@ class ReportPrestamoBancarioXlsx(models.AbstractModel):
         sheet.write(row, col + 4, 'CUIT:', bold)
         sheet.write(row, col + 5, 'Descripción:', bold)
         sheet.write(row, col + 6, 'Imp. Operación:', bold)
-        sheet.write(row, col + 7, 'Comi(%):', bold)
-        sheet.write(row, col + 8, 'Imp. Comisión:', bold)
+        sheet.write(row, col + 7, 'Moneda:', bold)
+        sheet.write(row, col + 8, 'Comi(%):', bold)
+        sheet.write(row, col + 9, 'Imp. Comisión:', bold)
 
-        row = 3
-        total_amount = 0
+
+        row = 4 + add_row
+        total_amount_pesos = 0
+        total_amount_dolares = 0
+        total_amount_euros = 0
+        total_amount_reales = 0
+
         for rec in partners:
             sheet.write(row, col, rec.date.strftime('%d/%m/%Y'))
             if rec.transaction_name:
@@ -86,15 +109,46 @@ class ReportPrestamoBancarioXlsx(models.AbstractModel):
             else:
                 sheet.write(row, col + 6, '', number_format)
 
-            if rec.commission:
-                sheet.write(row, col + 7, rec.commission / 100, percent_fmt)
+            if rec.currency_id:
+                sheet.write(row, col + 7, rec.currency_id.name, number_format)
             else:
-                sheet.write(row, col + 7, '', percent_fmt)
+                sheet.write(row, col + 7, '', number_format)
 
-            sheet.write(row, col + 8, (rec.commission * rec.amount) / 100, number_format)
+            if rec.commission:
+                sheet.write(row, col + 8, rec.commission / 100, percent_fmt)
+            else:
+                sheet.write(row, col + 8, '', percent_fmt)
+
+            sheet.write(row, col + 9, (rec.commission * rec.amount) / 100, number_format)
 
             row += 1
-            total_amount += rec.amount
+            if rec.currency_id.name == 'ARS':
+                total_amount_pesos += rec.amount
+            if rec.currency_id.name == 'USD':
+                total_amount_dolares += rec.amount
+            if rec.currency_id.name== 'EUR':
+                total_amount_euros += rec.amount
+            if rec.currency_id.name == 'BRL':
+                total_amount_reales += rec.amount
 
-        sheet.write(row, 5, 'Saldo Final: ', bold)
-        sheet.write(row, 6, total_amount, number_format)
+
+        if partners[0].previous_month_pesos:
+            sheet.write(row, 5, 'Saldo Final Pesos: ', bold)
+            sheet.write(row, 6, total_amount_pesos + partners[0].previous_month_pesos, number_format)
+            row += 1
+
+        if partners[0].previous_month_usd:
+            sheet.write(row, 5, 'Saldo Final Dolares: ', bold)
+            sheet.write(row, 6, total_amount_dolares + partners[0].previous_month_usd, number_format)
+            row += 1
+
+        if partners[0].previous_month_euros:
+            sheet.write(row, 5, 'Saldo Final Euros: ', bold)
+            sheet.write(row, 6, total_amount_euros + partners[0].previous_month_euros, number_format)
+            row += 1
+
+        if partners[0].previous_month_reales:
+            sheet.write(row, 5, 'Saldo Final Reales: ', bold)
+            sheet.write(row, 6, total_amount_reales + partners[0].previous_month_reales, number_format)
+            row += 1
+

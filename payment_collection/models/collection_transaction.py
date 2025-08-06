@@ -268,11 +268,19 @@ class CollectionTransaction(models.Model):
 
                             move_name = rec.transaction_name + ' ' + 'Comisión'
 
-                            account_442000 = self.env['account.account'].search([('code', '=', '442000')], limit=1)
-                            account_642000 = self.env['account.account'].search([('code', '=', '642000')], limit=1)
 
-                            if not account_442000 or not account_642000:
-                                raise UserError("No se encontraron las cuentas contables 442000 o 642000.")
+                            journal_id = self.env['ir.config_parameter'].sudo().get_param('payment_collection.caja_journal_id')
+                            if not journal_id:
+                                raise UserError("No está configurado el diario de caja.")
+
+                            journal = self.env['account.journal'].browse(int(journal_id))
+
+                            cuenta_de_caja_id = journal.profit_account_id.id
+                            cuenta_contraparte_id = journal.loss_account_id.id
+
+
+                            if not cuenta_de_caja_id or not cuenta_contraparte_id:
+                                raise UserError("No se encontraron las cuentas contables, configurelas en el diario de la caja.")
 
                             # Eliminar todas las líneas actuales del asiento
                             move.line_ids.unlink()
@@ -281,13 +289,13 @@ class CollectionTransaction(models.Model):
                             move.write({
                                 'line_ids': [
                                     (0, 0, {
-                                        'account_id': account_442000.id,
+                                        'account_id': cuenta_de_caja_id,
                                         'name': move_name,
                                         'debit': commission,
                                         'credit': 0.0,
                                     }),
                                     (0, 0, {
-                                        'account_id': account_642000.id,
+                                        'account_id': cuenta_contraparte_id,
                                         'name': move_name,
                                         'debit': 0.0,
                                         'credit': commission,
@@ -326,24 +334,31 @@ class CollectionTransaction(models.Model):
 
                         amount = float(vals.get('amount', 0.0))
 
-                        account_442000 = self.env['account.account'].search([('code', '=', '442000')], limit=1)
-                        account_642000 = self.env['account.account'].search([('code', '=', '642000')], limit=1)
+                        journal_id = self.env['ir.config_parameter'].sudo().get_param('payment_collection.caja_journal_id')
+                        if not journal_id:
+                            raise UserError("No está configurado el diario de caja.")
 
-                        if not account_442000 or not account_642000:
-                            raise UserError("No se encontraron las cuentas contables 442000 o 642000.")
+                        journal = self.env['account.journal'].browse(int(journal_id))
+
+                        cuenta_de_caja_id = journal.profit_account_id.id
+                        cuenta_contraparte_id = journal.loss_account_id.id
+
+                        if not cuenta_de_caja_id or not cuenta_contraparte_id:
+                            raise UserError(
+                                "No se encontraron las cuentas contables, configurelas en el diario de la caja.")
 
                         move.line_ids.unlink()
 
                         move.write({
                             'line_ids': [
                                 (0, 0, {
-                                    'account_id': account_442000.id,
+                                    'account_id': cuenta_de_caja_id,
                                     'name': rec.transaction_name,
                                     'debit': amount,
                                     'credit': 0.0,
                                 }),
                                 (0, 0, {
-                                    'account_id': account_642000.id,
+                                    'account_id': cuenta_contraparte_id,
                                     'name': rec.transaction_name,
                                     'debit': 0.0,
                                     'credit': amount,
