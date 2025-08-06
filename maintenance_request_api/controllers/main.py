@@ -72,6 +72,7 @@ class MaintenanceRequestAPI(http.Controller):
                 'stage': rec.stage_id.name,
                 'description': rec.description,
                 'request_date': rec.request_date.isoformat() if rec.request_date else None,
+                'number_seq': rec.number_seq,
             }
             for rec in records
         ]
