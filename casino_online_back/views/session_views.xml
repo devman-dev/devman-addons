@@ -31,6 +31,8 @@
                 
                 <field name="game_id" string="Juego"/>
                 <field name="user_id" string="Usuario"/>
+                <field name="initial_balance" string="S.Ant."/>
+                <field name="final_balance" string="S.Pos."/>
                 <field name="start_datetime" string="Inicio"/>
                 <field name="end_datetime" string="Fin"/>
                 <field name="result" string="Resultado"/>
