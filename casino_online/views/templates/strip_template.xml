@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="product_skip" inherit_id="website_sale.product">
+        <xpath expr="//div[@id='o_wsale_cta_wrapper']" position="replace">
+        </xpath>
+        <xpath expr="//div[contains(@class, 'js_product') and contains(@class, 'js_main_product') and contains(@class, 'mb-3')]" position="replace">
+
+        </xpath>
+
+    </template>
+    <template id="product_price_skip" inherit_id="website_sale.product_price">
+        <xpath expr="//div[@itemprop='offers']" position="replace">
+        </xpath>
+    </template>
+    <template id="product_price_item_skip" inherit_id="website_sale.products_item">
+        <xpath expr="//div[contains(@class, 'o_wsale_product_sub') and contains(@class, 'd-flex') and contains(@class, 'justify-content-between')]" position="replace">
+
+        </xpath>
+    </template>
+    <template id="sort_filter_skip" inherit_id="website_sale.sort">
+        <xpath expr="//div" position="replace">
+        </xpath>
+    </template>
+</odoo>
