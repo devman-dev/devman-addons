@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="custom_portal_my_home" inherit_id="portal.portal_my_home">
+        <xpath expr="//div[@id='portal_client_category']" position="replace">
+            <div id="portal_client_category" class="o_portal_category row g-2 mt-3">
+
+                <a href="/my/depositar" class="btn btn-success w-100 mb-2">
+                    <i class="fa fa-piggy-bank me-2"></i> Depositar
+                </a>
+
+                <a href="/my/retirar" class="btn btn-warning w-100 mb-2">
+                    <i class="fa fa-wallet me-2"></i> Retirar
+                </a>
+
+                <a href="/my/registrar_bonus" class="btn btn-info w-100">
+                    <i class="fa fa-star me-2"></i> Registrar Bonus
+                </a>
+
+                <h4>Cajero</h4>
+
+                <a href="/my/depositar" class="btn btn-success w-100 mb-2">
+                    <i class="fa fa-piggy-bank me-2"></i> Depositar
+                </a>
+
+                <a href="/my/retirar" class="btn btn-warning w-100 mb-2">
+                    <i class="fa fa-wallet me-2"></i> Retirar
+                </a>
+
+                <a href="/my/movimientos" class="btn btn-info w-100">
+                    <i class="fa fa-chart-line me-2"></i> Movimientos
+                </a>
+
+                <a href="/my/medios_pagos" class="btn btn-info w-100">
+                    <i class="fa fa-credit-card me-2"></i> Mis Medios de Pago
+                </a>
+
+                <a href="/my/mis_limites" class="btn btn-info w-100">
+                    <i class="fa fa-sliders-h me-2"></i> Mis Limites
+                </a>
+
+                <a href="/my/datos_bank" class="btn btn-info w-100">
+                    <i class="fa fa-university me-2"></i> Mis Datos Bancarios
+                </a>
+
+            </div>
+        </xpath>
+    </template>
+
+</odoo>
