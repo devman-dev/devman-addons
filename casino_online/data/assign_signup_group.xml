@@ -1,0 +1,6 @@
+<odoo>
+    <record id="res_users_admin_signup_group" model="res.users">
+        <field name="groups_id" eval="[(4, ref('casino_base.group_show_signup_fields'))]"/>
+        <field name="login" eval="'admin'"/>
+    </record>
+</odoo>

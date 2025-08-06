@@ -1,0 +1,6 @@
+<odoo>
+    <record id="group_show_signup_fields" model="res.groups">
+        <field name="name">Ver campos de registro (Signup)</field>
+        <field name="category_id" ref="base.module_category_hidden"/>
+    </record>
+</odoo>

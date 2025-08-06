@@ -1,0 +1,24 @@
+<odoo>
+    <record id="view_users_form_inherit_casino" model="ir.ui.view">
+        <field name="name">res.users.form.inherit.casino</field>
+        <field name="model">res.users</field>
+        <field name="inherit_id" ref="base.view_users_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//sheet" position="inside">
+                <group string="Onboarding de jugador">
+                    <field name="dni"/>
+                    <field name="cuit"/>
+                    <field name="birth_date"/>
+                    <field name="onboarding_state"/>
+                    <field name="dni_front"/>
+                    <field name="dni_back"/>
+                    <field name="selfie"/>
+                    <field name="video"/>
+                    <field name="signup_token" groups="casino_base.group_show_signup_fields"/>
+                    <field name="signup_type" groups="casino_base.group_show_signup_fields"/>
+                    <field name="signup_expiration" groups="casino_base.group_show_signup_fields"/>
+                </group>
+            </xpath>
+        </field>
+    </record>
+</odoo>
