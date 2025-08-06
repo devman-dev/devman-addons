@@ -12,6 +12,7 @@
         'views/player_signup_visibility.xml',
         'views/account_move.xml',
         'views/menus.xml',
+        'security/ir.model.access.csv'
         
         #'data/assign_signup_group.xml',
     ],

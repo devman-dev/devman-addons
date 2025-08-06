@@ -1,0 +1,4 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_casino_game_session_user,casino.game.session.user,casino_online.model_casino_game_session,,1,1,1,1
+access_casino_game_session_portal,casino.game.session.portal,casino_online.model_casino_game_session,,1,0,0,0
+access_casino_game_session_public,casino.game.session.public,casino_online.model_casino_game_session,,1,0,0,0

@@ -2,7 +2,6 @@
     <record id="view_casino_game_session_form" model="ir.ui.view">
         <field name="name">casino.game.session.form</field>
         <field name="model">casino.game.session</field>
-        <field name="type">form</field>
         <field name="arch" type="xml">
             <form string="Sesión de Juego">
                 <group>
@@ -26,9 +25,9 @@
         <field name="model">casino.game.session</field>
         <field name="arch" type="xml">
             <list string="Sesiones de Juego" 
-                  decoration-success="state=='completed'" 
+                  decoration-success="state=='finished'" 
                   decoration-warning="state=='in_progress'" 
-                  decoration-muted="state=='cancelled'">
+                  decoration-muted="state=='pending'">
                 
                 <field name="game_id" string="Juego"/>
                 <field name="user_id" string="Usuario"/>
@@ -41,52 +40,12 @@
         </field>
     </record>
 
-    <!-- Acción para las sesiones de juego -->
+    <!-- Acción corregida para Odoo 18 -->
     <record id="action_casino_game_session" model="ir.actions.act_window">
         <field name="name">Sesiones de Juego</field>
         <field name="res_model">casino.game.session</field>
-        <field name="view_mode">tree,form</field>
+        <field name="view_mode">list,form</field>
         <field name="view_id" ref="view_casino_game_session_tree"/>
-        <field name="context">{
-            'search_default_group_by_state': 1
-        }</field>
-        <field name="help" type="html">
-            <p class="o_view_nocontent_smiling_face">
-                Crear nueva sesión de juego
-            </p>
-            <p>
-                Registra las sesiones de juego de los usuarios del casino.
-            </p>
-        </field>
-    </record>
-
-    <!-- Vista de búsqueda (opcional pero recomendado) -->
-    <record id="view_casino_game_session_search" model="ir.ui.view">
-        <field name="name">casino.game.session.search</field>
-        <field name="model">casino.game.session</field>
-        <field name="arch" type="xml">
-            <search string="Buscar Sesiones">
-                <field name="game_id" string="Juego"/>
-                <field name="user_id" string="Usuario"/>
-                <field name="state" string="Estado"/>
-                
-                <!-- Filtros -->
-                <filter name="active_sessions" string="Sesiones Activas" 
-                        domain="[('state', '=', 'in_progress')]"/>
-                <filter name="completed_sessions" string="Sesiones Completadas" 
-                        domain="[('state', '=', 'completed')]"/>
-                
-                <!-- Agrupaciones -->
-                <group expand="0" string="Agrupar Por">
-                    <filter name="group_by_state" string="Estado" 
-                            context="{'group_by': 'state'}"/>
-                    <filter name="group_by_game" string="Juego" 
-                            context="{'group_by': 'game_id'}"/>
-                    <filter name="group_by_user" string="Usuario" 
-                            context="{'group_by': 'user_id'}"/>
-                </group>
-            </search>
-        </field>
     </record>
 
 </odoo>
