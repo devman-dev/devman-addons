@@ -1,0 +1,14 @@
+<odoo>
+  <template id="product_iframe_extension" inherit_id="website_sale.product">
+    <xpath expr="//div[@id='product_details']" position="after">
+      <div class="mt-3">
+        <button class="btn btn-primary show-iframe" 
+                t-att-data-product-id="product.id"
+                t-att-data-product-name="product.name"
+                t-att-data-product-price="product.list_price">
+          Mostrar Información Adicional
+        </button>
+      </div>
+    </xpath>
+  </template>
+</odoo>
