@@ -1,12 +1,23 @@
 <odoo>
   <template id="product_iframe_extension" inherit_id="website_sale.product">
-    <xpath expr="//div[@id='product_details']" position="after">
-      <div class="mt-3">
-        <button class="btn btn-primary show-iframe" 
+    <xpath expr="//form[@action='/shop/cart/update']" position="after">
+      <div class="mt-3 text-center" t-if="product.iframe_url">
+        <!-- Botón con registro de sesión -->
+        <button class="btn btn-success show-iframe me-2" 
                 t-att-data-product-id="product.id"
                 t-att-data-product-name="product.name"
-                t-att-data-product-price="product.list_price">
-          Mostrar Información Adicional
+                t-att-data-product-price="product.list_price"
+                t-att-data-product-url="product.iframe_url">
+          🎯 Jugar (Con Registro)
+        </button>
+        
+        <!-- Botón directo sin registro -->
+        <button class="btn btn-outline-primary show-iframe-direct" 
+                t-att-data-product-id="product.id"
+                t-att-data-product-name="product.name"
+                t-att-data-product-price="product.list_price"
+                t-att-data-product-url="product.iframe_url">
+          🚀 Jugar Directo
         </button>
       </div>
     </xpath>
