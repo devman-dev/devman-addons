@@ -36,11 +36,16 @@ class WebsiteShop(WebsiteSale):
 
             if not product.property_account_income_id:
                 raise UserError("El producto debe tener precio y cuenta de ingreso configurados.")
+            doc_type = request.env['l10n_latam.document.type'].sudo().search([
+                ('code', '=', '11'),
+                ('country_id.code', '=', 'DO')  # ajusta el país según tu localización
+            ], limit=1)
 
             invoice_vals = {
                 'move_type': 'out_invoice',
                 'partner_id': partner.id,
                 'invoice_date': fields.Date.today(),
+                'l10n_latam_document_type_id': doc_type.id,
                 'invoice_line_ids': [(0, 0, {
                     'product_id': product.id,
                     'name': product.name,
