@@ -58,87 +58,122 @@ class MiPortalController(http.Controller):
             'movements': movements,
             'request': request,  # para que funcione request.params en el template
         })
-        
-        
     
     @http.route('/my/movimientos', type='http', auth='user', website=True)
     def portal_movements(self, **kwargs):
+        from datetime import datetime
+
         partner_id = request.env.user.partner_id.id
         company_id = request.env.company.id
 
-        domain = [
+        # account.move (deudas -> negativo)
+        move_domain = [
             ('company_id', '=', company_id),
             ('partner_id', '=', partner_id),
-            ('state', 'in', ['draft', 'posted'])
+            ('state', 'in', ['draft', 'posted']),
         ]
-
-        fields_to_read = [
-            'date', 'name', 'ref', 'narration',
-            'amount_total_signed', 'state', 'move_type',
-            'journal_id'
+        move_fields = [
+            'date', 'name',
+            'amount_total_signed', 'state', 'move_type', 'journal_id',
         ]
+        moves = request.env['account.move'].sudo().search(move_domain, order='date asc, id asc')
+        move_data = moves.read(move_fields)
 
-        moves = request.env['account.move'].sudo().search(domain, order='date asc, id asc')
-        data = moves.read(fields_to_read)
-        
-        
-        #raise UserError(f'No se encontraron movimientos contables para el usuario.{data}') 
+        # account.payment (inbound -> +, outbound -> -)
+        payment_domain = [
+            ('company_id', '=', company_id),
+            ('partner_id', '=', partner_id),
+            ('state', 'in', ['draft', 'paid']),
+        ]
+        payment_fields = [
+            'date', 'name',
+            'amount', 'state', 'payment_type',
+            'journal_id', 'partner_type', 'move_id',
+        ]
+        payments = request.env['account.payment'].sudo().search(payment_domain, order='date asc, id asc')
+        payment_data = payments.read(payment_fields)
 
-        def classify(move_dict):
-            move_type = move_dict.get('move_type') or ''
-            journal = move_dict.get('journal_id')
-            journal_name = (journal and isinstance(journal, list) and journal[1]) or ''
-
+        def classify_move(m):
+            move_type = m.get('move_type') or ''
+            jname = (m.get('journal_id') and isinstance(m['journal_id'], list) and m['journal_id'][1]) or ''
             if move_type == 'entry':
                 return 'Ajustes'
             if move_type in ('out_invoice', 'out_refund', 'in_invoice', 'in_refund'):
-                return 'Transacciones de Juegos' if 'juego' in journal_name.lower() else 'Facturación'
-            jn = journal_name.lower()
-            if any(x in jn for x in ('bank', 'cash', 'tesorer', 'banco', 'caja')):
-                return 'Dep./Retiros'
-            if any(x in jn for x in ('bonus', 'promo', 'bono')):
+                return 'Transacciones de Juegos' if 'juego' in jname.lower() else 'Facturación'
+            if any(x in jname.lower() for x in ('bonus', 'promo', 'bono')):
                 return 'Saldo de Bonus'
             return 'Ajustes'
 
-        def describe(move_dict):
-            return (
-                move_dict.get('ref')
-                or move_dict.get('narration')
-                or move_dict.get('name')
-                or _('Movimiento contable')
-            )
+        def classify_payment(p):
+            jname = (p.get('journal_id') and isinstance(p['journal_id'], list) and p['journal_id'][1]) or ''
+            if any(x in jname.lower() for x in ('bonus', 'promo', 'bono')):
+                return 'Saldo de Bonus'
+            return 'Dep./Retiros'
 
-        def state_label(move_dict):
-            return 'Completado' if move_dict.get('state') == 'posted' else 'Pendiente'
+        def describe_move(m):
+            return m.get('name') or 'Movimiento contable'
 
-        balance = 0.0
-        movements3 = []
-        for m in data:
-            amount = float(m.get('amount_total_signed') or 0.0)
-            balance += amount
+        def describe_payment(p):
+            desc = p.get('name')
+            if (not desc) and p.get('move_id'):
+                mv = request.env['account.move'].sudo().browse(p['move_id'][0])
+                desc = mv.name
+            if p.get('payment_type') == 'inbound':
+                return f"Depósito - {desc}" if desc else "Depósito recibido"
+            return f"Retiro - {desc}" if desc else "Retiro realizado"
 
-            date_val = m.get('date')
-            date_str = date_val.date().isoformat() if isinstance(date_val, datetime) else date_val
+        def state_label(rec):
+            return rec.get('state') 
 
-            movements3.append({
-                'date': date_str,
-                'description': describe(m),
-                'type_display': classify(m),
-                'amount': round(amount, 2),
+        all_movements = []
+
+        for m in move_data:
+            amt = -abs(float(m.get('amount_total_signed') or 0.0))
+            dval = m.get('date')
+            dstr = dval.date().isoformat() if hasattr(dval, 'date') else str(dval)
+            all_movements.append({
+                'date': dstr,
+                'datetime_obj': dval,
+                'description': describe_move(m),
+                'type_display': classify_move(m),
+                'amount': round(amt, 2),
                 'state': state_label(m),
-                'balance': round(balance, 2),
+                'source': 'move',
             })
 
+        for p in payment_data:
+            base = float(p.get('amount') or 0.0)
+            amt = abs(base) if p.get('payment_type') == 'inbound' else -abs(base)
+            dval = p.get('date')
+            dstr = dval.date().isoformat() if hasattr(dval, 'date') else str(dval)
+            all_movements.append({
+                'date': dstr,
+                'datetime_obj': dval,
+                'description': describe_payment(p),
+                'type_display': classify_payment(p),
+                'amount': round(amt, 2),
+                'state': state_label(p),
+                'source': 'payment',
+            })
 
-        #raise UserError(f'No se encontraron movimientos contables para el usuario.{movements}') 
-        
-        # Renderizamos usando tu template
+        all_movements.sort(key=lambda x: x['datetime_obj'] if x['datetime_obj'] else datetime.min)
+
+        balance = 0.0
+        movements = []
+        for mv in all_movements:
+            balance += mv['amount']
+            mv['balance'] = round(balance, 2)
+            mv.pop('datetime_obj', None)
+            movements.append(mv)
+
         return request.render('casino_online.portal_movimientos', {
-            'movements': movements3,
-            'request': request,  # para que funcione request.params en el template
-        })    
-        
-        
+            'movements': movements,
+            'saldo_final': round(balance, 2),
+            'total_movements': len(movements),
+            'request': request,
+        })
+
+   
         
     @http.route('/my/medios_pagos', type='http', auth='user', website=True, methods=['GET', 'POST'], csrf=True)
     def portal_medios_pagos(self, **post):
