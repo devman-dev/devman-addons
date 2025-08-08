@@ -1,69 +1,68 @@
 <odoo>
     <template id="portal_depositar_form" t-name="casino_online.portal_depositar_form" name="Formulario Depositar">
-        <t t-call="website.layout">
-            <div class="container mt16 mb16">
-                <h2>Depositar Dinero</h2>
+        <div class="container">
+            <h2>Depositar Dinero</h2>
 
-                <form action="/my/depositar" method="post">
-                    <!-- Métodos de pago -->
-                    <div class="mb-3">
-                        <label class="form-label">Selecciona un método de pago:</label>
-                        <t t-foreach="payment_providers" t-as="provider">
-                            <label class="list-group-item">
-                                <input type="radio" name="payment_provider_id" t-att-value="provider.id" class="form-check-input me-2" required="required" />
-                                <t t-esc="provider.name" />
-                            </label>
-                        </t>
-                    </div>
+            <form action="/my/depositar" method="post">
+                <!-- Métodos de pago -->
+                <div class="mb-3">
+                    <label class="form-label">Selecciona un método de pago:</label>
+                    <t t-foreach="payment_providers" t-as="provider">
+                        <label class="list-group-item">
+                            <input type="radio" name="payment_provider_id" t-att-value="provider.id" class="form-check-input me-2" required="required" />
+                            <t t-esc="provider.name" />
+                        </label>
+                    </t>
+                </div>
 
-                    <!-- Monto a depositar -->
-                    <div class="mb-3">
-                        <label for="amount" class="form-label">Monto a depositar</label>
-                        <input type="number" step="0.01" min="0" name="amount" id="amount" class="form-control" required="required" />
-                    </div>
+                <!-- Monto a depositar -->
+                <div class="mb-3">
+                    <label for="amount" class="form-label">Monto a depositar</label>
+                    <input type="number" step="0.01" min="0" name="amount" id="amount" class="form-control" required="required" />
+                </div>
 
-                    <!-- Botón -->
-                    <button type="submit" class="btn btn-primary">Depositar</button>
+                <!-- Botón -->
+                <button type="submit" class="btn btn-primary">Depositar</button>
 
-                    <!-- Tabla de movimientos -->
-                    <table class="table table-striped">
-                        <thead>
-                            <tr>
-                                <th>Fecha</th>
-                                <th>Descripción</th>
-                                <th>Tipo</th>
-                                <th>Monto</th>
-                                <th>Estado</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td>2025-08-05</td>
-                                <td>Depósito inicial</td>
-                                <td>Ingreso</td>
-                                <td>$1000.00</td>
-                                <td>Completado</td>
-                            </tr>
-                            <tr>
-                                <td>2025-08-04</td>
-                                <td>Retiro cajero</td>
-                                <td>Egreso</td>
-                                <td>$200.00</td>
-                                <td>Pendiente</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </form>
-            </div>
-        </t>
+                <!-- Tabla de movimientos -->
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Fecha</th>
+                            <th>Descripción</th>
+                            <th>Tipo</th>
+                            <th>Monto</th>
+                            <th>Estado</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>2025-08-05</td>
+                            <td>Depósito inicial</td>
+                            <td>Ingreso</td>
+                            <td>$1000.00</td>
+                            <td>Completado</td>
+                        </tr>
+                        <tr>
+                            <td>2025-08-04</td>
+                            <td>Retiro cajero</td>
+                            <td>Egreso</td>
+                            <td>$200.00</td>
+                            <td>Pendiente</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </form>
+        </div>
+
     </template>
 
 
 
 
     <template id="portal_retirar_form" name="Formulario Retirar">
-        <t t-call="website.layout">
-            <div class="container mt16 mb16">
+        <!--<t t-call="website.layout"> -->
+            <div class="container ">
                 <h2>Retirar Dinero</h2>
 
                 <form action="/my/retirar" method="post">
@@ -88,12 +87,11 @@
                     <button type="submit" class="btn btn-primary">Retirar</button>
                 </form>
             </div>
-        </t>
+        <!--</t> --> 
     </template>
 
     <template id="portal_registrar_bonus_form" name="Formulario Registrar Bonus">
-        <t t-call="website.layout">
-            <div class="container mt16 mb16">
+            <div class="container  ">
                 <h2>Registrar Código Promocional</h2>
 
                 <form action="/my/registrar_bonus" method="post">
@@ -105,12 +103,10 @@
                     <button type="submit" class="btn btn-success">Registrar Bonus</button>
                 </form>
             </div>
-        </t>
     </template>
 
     <template id="portal_movimientos" name="Movimientos del Usuario">
-    <t t-call="website.layout">
-        <div class="container mt16 mb16">
+        <div class="container  ">
             <h2>Historial de Movimientos</h2>
 
             <!-- Mostrar saldo final -->
@@ -225,13 +221,11 @@
                 </table>
             </div>
         </div>
-    </t>
 </template>
 
 
     <template id="portal_medios_pagos" name="Mis Medios de Pago">
-        <t t-call="website.layout">
-            <div class="container mt16 mb16">
+            <div class="container  ">
                 <h2>Configura tus Métodos de Pago</h2>
 
                 <form action="/my/medios_pagos" method="post">
@@ -263,12 +257,10 @@
                     <button type="submit" class="btn btn-primary">Guardar Configuración</button>
                 </form>
             </div>
-        </t>
     </template>
 
     <template id="portal_mis_limites" name="Mis Límites">
-        <t t-call="website.layout">
-            <div class="container mt16 mb16">
+            <div class="container  ">
                 <h2>Mis Límites</h2>
 
                 <form action="/my/mis_limites" method="post">
@@ -292,12 +284,10 @@
                     <button type="submit" class="btn btn-primary">Guardar Límites</button>
                 </form>
             </div>
-        </t>
     </template>
 
     <template id="portal_datos_bancarios" name="Mis Datos Bancarios">
-        <t t-call="website.layout">
-            <div class="container mt16 mb16">
+            <div class="container  ">
                 <h2>MIS DATOS BANCARIOS</h2>
 
                 <form action="/my/datos_bank" method="post">
@@ -336,6 +326,5 @@
                     <button type="submit" class="btn btn-primary">Guardar Datos</button>
                 </form>
             </div>
-        </t>
     </template>
 </odoo>
