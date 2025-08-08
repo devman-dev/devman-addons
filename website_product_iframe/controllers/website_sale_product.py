@@ -38,7 +38,6 @@ class WebsiteShop(WebsiteSale):
                 raise UserError("El producto debe tener precio y cuenta de ingreso configurados.")
             doc_type = request.env['l10n_latam.document.type'].sudo().search([
                 ('code', '=', '11'),
-                ('country_id.code', '=', 'DO')  # ajusta el país según tu localización
             ], limit=1)
 
             invoice_vals = {
