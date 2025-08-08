@@ -136,7 +136,7 @@
                         <t t-call="casino_online.portal_registrar_bonus_form" />
                     </div>
                     <div id="movimientos_form" class="d-none">
-                    <!--	<t t-call="casino_online.portal_movimientos" /> -->
+                    <t t-call="casino_online.portal_movimientos" />
                     </div>
                     <div id="medios_pagos_form" class="d-none">
                         <t t-call="casino_online.portal_medios_pagos" />
