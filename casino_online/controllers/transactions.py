@@ -128,7 +128,14 @@ class MiPortalController(http.Controller):
         all_movements = []
 
         for m in move_data:
-            amt = -abs(float(m.get('amount_total_signed') or 0.0))
+            
+            cm = classify_move(m)
+            if cm == 'Ajustes':
+                amt = abs(float(m.get('amount_total_signed') or 0.0))
+            else:
+                amt = -abs(float(m.get('amount_total_signed') or 0.0))
+                
+            
             dval = m.get('date')
             dstr = dval.date().isoformat() if hasattr(dval, 'date') else str(dval)
             all_movements.append({
@@ -140,7 +147,7 @@ class MiPortalController(http.Controller):
                 'state': state_label(m),
                 'source': 'move',
             })
-
+        """
         for p in payment_data:
             base = float(p.get('amount') or 0.0)
             amt = abs(base) if p.get('payment_type') == 'inbound' else -abs(base)
@@ -155,6 +162,7 @@ class MiPortalController(http.Controller):
                 'state': state_label(p),
                 'source': 'payment',
             })
+        """
 
         all_movements.sort(key=lambda x: x['datetime_obj'] if x['datetime_obj'] else datetime.min)
 
