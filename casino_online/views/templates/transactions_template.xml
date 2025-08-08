@@ -109,107 +109,87 @@
     </template>
 
     <template id="portal_movimientos" name="Movimientos del Usuario">
-        <t t-call="website.layout">
-            <div class="container mt16 mb16">
-                <h2>Historial de Movimientos</h2>
+    <t t-call="website.layout">
+        <div class="container mt16 mb16">
+            <h2>Historial de Movimientos</h2>
 
-                <!-- Filtros -->
-                <form method="get" action="/my/movimientos" class="mb-4">
-
-                    <!-- Buscar por fecha -->
-                    <div class="row mb-3">
-                        <div class="col-md-6">
-                            <label for="start_date" class="form-label">Fecha de Inicio</label>
-                            <input type="date" id="start_date" name="start_date" class="form-control" value="2025-08-01" />
-                        </div>
-                        <div class="col-md-6">
-                            <label for="end_date" class="form-label">Fecha de Fin</label>
-                            <input type="date" id="end_date" name="end_date" class="form-control" value="2025-08-10" />
-                        </div>
+            <!-- Filtros -->
+            <form method="get" action="/mi-cuenta/movimientos" class="mb-4">
+                <!-- Buscar por fecha -->
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label for="start_date" class="form-label">Fecha de Inicio</label>
+                        <input type="date" id="start_date" name="start_date" class="form-control" value="" />
                     </div>
-
-                    <!-- Buscar por tipo -->
-                    <div class="mb-3">
-                        <label class="form-label d-block">Buscar por Tipo</label>
-                        <div class="form-check form-check-inline">
-                            <input class="form-check-input" type="checkbox" name="types" value="deposito_retiro" checked="checked" />
-                            <label class="form-check-label">Dep./Retiros</label>
-                        </div>
-                        <div class="form-check form-check-inline">
-                            <input class="form-check-input" type="checkbox" name="types" value="bonus" />
-                            <label class="form-check-label">Saldo de Bonus</label>
-                        </div>
-                        <div class="form-check form-check-inline">
-                            <input class="form-check-input" type="checkbox" name="types" value="juego" />
-                            <label class="form-check-label">Transacciones de Juegos</label>
-                        </div>
-                        <div class="form-check form-check-inline">
-                            <input class="form-check-input" type="checkbox" name="types" value="ajuste" />
-                            <label class="form-check-label">Ajustes</label>
-                        </div>
+                    <div class="col-md-6">
+                        <label for="end_date" class="form-label">Fecha de Fin</label>
+                        <input type="date" id="end_date" name="end_date" class="form-control" value="" />
                     </div>
+                </div>
 
-                    <button type="submit" class="btn btn-primary">Filtrar</button>
-                </form>
+                <!-- Buscar por tipo -->
+                <div class="mb-3">
+                    <label class="form-label d-block">Buscar por Tipo</label>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="checkbox" name="types" value="deposito_retiro" checked="checked" />
+                        <label class="form-check-label">Dep./Retiros</label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="checkbox" name="types" value="bonus" />
+                        <label class="form-check-label">Saldo de Bonus</label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="checkbox" name="types" value="juego" />
+                        <label class="form-check-label">Transacciones de Juegos</label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="checkbox" name="types" value="ajuste" />
+                        <label class="form-check-label">Ajustes</label>
+                    </div>
+                </div>
 
-                <!-- Tabla de resultados con datos de prueba -->
-                <table class="table table-striped">
-                    <thead>
+                <button type="submit" class="btn btn-primary">Filtrar</button>
+            </form>
+
+            <!-- Tabla de resultados -->
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Fecha</th>
+                        <th>Descripción</th>
+                        <th>Tipo</th>
+                        <th>Monto</th>
+                        <th>Estado</th>
+                        <th>Balance</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <t t-if="movements">
+                        <t t-foreach="movements" t-as="m">
+                            <tr>
+                                <td><t t-esc="m['date']"/></td>
+                                <td><t t-esc="m['description']"/></td>
+                                <td><t t-esc="m['type_display']"/></td>
+                                <td>
+                                    <t t-if="m['amount'] &gt;= 0">$<t t-esc="('%.2f' % m['amount'])"/></t>
+                                    <t t-else="">-$<t t-esc="('%.2f' % abs(m['amount']))"/></t>
+                                </td>
+                                <td><t t-esc="m['state']"/></td>
+                                <td>$<t t-esc="('%.2f' % m['balance'])"/></td>
+                            </tr>
+                        </t>
+                    </t>
+                    <t t-else="">
                         <tr>
-                            <th>Fecha</th>
-                            <th>Descripción</th>
-                            <th>Tipo</th>
-                            <th>Monto</th>
-                            <th>Estado</th>
-                            <th>Balance</th>
+                            <td colspan="6" class="text-center">No se encontraron movimientos.</td>
                         </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>2025-08-05</td>
-                            <td>Depósito inicial</td>
-                            <td>Dep./Retiros</td>
-                            <td>$1000.00</td>
-                            <td>Completado</td>
-                            <td>$1000.00</td>
-                        </tr>
-                        <tr>
-                            <td>2025-08-06</td>
-                            <td>Retiro cajero</td>
-                            <td>Dep./Retiros</td>
-                            <td>-$200.00</td>
-                            <td>Pendiente</td>
-                            <td>$800.00</td>
-                        </tr>
-                        <tr>
-                            <td>2025-08-07</td>
-                            <td>Bonus por promoción</td>
-                            <td>Saldo de Bonus</td>
-                            <td>$50.00</td>
-                            <td>Completado</td>
-                            <td>$850.00</td>
-                        </tr>
-                        <tr>
-                            <td>2025-08-08</td>
-                            <td>Transacción juego A</td>
-                            <td>Transacciones de Juegos</td>
-                            <td>-$30.00</td>
-                            <td>Completado</td>
-                            <td>$820.00</td>
-                        </tr>
-                        <tr>
-                            <td>2025-08-09</td>
-                            <td>Ajuste manual</td>
-                            <td>Ajustes</td>
-                            <td>$10.00</td>
-                            <td>Completado</td>
-                            <td>$830.00</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </t>
-    </template>
+                    </t>
+                </tbody>
+            </table>
+        </div>
+    </t>
+</template>
+
 
     <template id="portal_medios_pagos" name="Mis Medios de Pago">
         <t t-call="website.layout">

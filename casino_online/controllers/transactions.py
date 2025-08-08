@@ -2,11 +2,14 @@ from odoo import http
 from odoo.http import request
 from datetime import datetime
 
+from odoo.exceptions import UserError, ValidationError
+
+
 
 class MiPortalController(http.Controller):
 
-    @http.route('/my/movimientos', type='http', auth='user', website=True)
-    def portal_movimientos(self, **kwargs):
+    @http.route('/my/movimientos2', type='http', auth='user', website=True)
+    def portal_movimientos2(self, **kwargs):
         # Datos de prueba simulando movimientos
         movements = [
             {
@@ -55,6 +58,87 @@ class MiPortalController(http.Controller):
             'movements': movements,
             'request': request,  # para que funcione request.params en el template
         })
+        
+        
+    
+    @http.route('/my/movimientos', type='http', auth='user', website=True)
+    def portal_movements(self, **kwargs):
+        partner_id = request.env.user.partner_id.id
+        company_id = request.env.company.id
+
+        domain = [
+            ('company_id', '=', company_id),
+            ('partner_id', '=', partner_id),
+            ('state', 'in', ['draft', 'posted'])
+        ]
+
+        fields_to_read = [
+            'date', 'name', 'ref', 'narration',
+            'amount_total_signed', 'state', 'move_type',
+            'journal_id'
+        ]
+
+        moves = request.env['account.move'].sudo().search(domain, order='date asc, id asc')
+        data = moves.read(fields_to_read)
+        
+        
+        #raise UserError(f'No se encontraron movimientos contables para el usuario.{data}') 
+
+        def classify(move_dict):
+            move_type = move_dict.get('move_type') or ''
+            journal = move_dict.get('journal_id')
+            journal_name = (journal and isinstance(journal, list) and journal[1]) or ''
+
+            if move_type == 'entry':
+                return 'Ajustes'
+            if move_type in ('out_invoice', 'out_refund', 'in_invoice', 'in_refund'):
+                return 'Transacciones de Juegos' if 'juego' in journal_name.lower() else 'Facturación'
+            jn = journal_name.lower()
+            if any(x in jn for x in ('bank', 'cash', 'tesorer', 'banco', 'caja')):
+                return 'Dep./Retiros'
+            if any(x in jn for x in ('bonus', 'promo', 'bono')):
+                return 'Saldo de Bonus'
+            return 'Ajustes'
+
+        def describe(move_dict):
+            return (
+                move_dict.get('ref')
+                or move_dict.get('narration')
+                or move_dict.get('name')
+                or _('Movimiento contable')
+            )
+
+        def state_label(move_dict):
+            return 'Completado' if move_dict.get('state') == 'posted' else 'Pendiente'
+
+        balance = 0.0
+        movements3 = []
+        for m in data:
+            amount = float(m.get('amount_total_signed') or 0.0)
+            balance += amount
+
+            date_val = m.get('date')
+            date_str = date_val.date().isoformat() if isinstance(date_val, datetime) else date_val
+
+            movements3.append({
+                'date': date_str,
+                'description': describe(m),
+                'type_display': classify(m),
+                'amount': round(amount, 2),
+                'state': state_label(m),
+                'balance': round(balance, 2),
+            })
+
+
+        #raise UserError(f'No se encontraron movimientos contables para el usuario.{movements}') 
+        
+        # Renderizamos usando tu template
+        return request.render('casino_online.portal_movimientos', {
+            'movements': movements3,
+            'request': request,  # para que funcione request.params en el template
+        })    
+        
+        
         
     @http.route('/my/medios_pagos', type='http', auth='user', website=True, methods=['GET', 'POST'], csrf=True)
     def portal_medios_pagos(self, **post):
