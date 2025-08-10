@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="res_config_settings_view_form_fx_exchange" model="ir.ui.view">
+        <field name="name">res.config.settings.view.form.inherit.fx.exchange</field>
+        <field name="model">res.config.settings</field>
+        <field name="inherit_id" ref="base.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            <!-- Usar XPath más específico y compatible con Odoo 17 -->
+            <xpath expr="//form" position="inside">
+                <div class="app_settings_block" data-string="FX Exchange" string="FX Exchange" data-key="fx_exchange">
+                    <h2>Casa de Cambio</h2>
+                    <div class="row mt16 o_settings_container">
+                        <div class="col-12 col-lg-6 o_setting_box">
+                            <div class="o_setting_left_pane">
+                                <field name="fx_default_journal_id"/>
+                            </div>
+                            <div class="o_setting_right_pane">
+                                <label for="fx_default_journal_id"/>
+                                <div class="text-muted">Diario por defecto para operaciones FX</div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-12 col-lg-6 o_setting_box">
+                            <div class="o_setting_left_pane">
+                                <field name="fx_inventory_account_id"/>
+                            </div>
+                            <div class="o_setting_right_pane">
+                                <label for="fx_inventory_account_id"/>
+                                <div class="text-muted">Cuenta de inventario de divisas</div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-12 col-lg-6 o_setting_box">
+                            <div class="o_setting_left_pane">
+                                <field name="fx_income_account_id"/>
+                            </div>
+                            <div class="o_setting_right_pane">
+                                <label for="fx_income_account_id"/>
+                                <div class="text-muted">Ingresos por spread/comisión</div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-12 col-lg-6 o_setting_box">
+                            <div class="o_setting_left_pane">
+                                <field name="fx_expense_account_id"/>
+                            </div>
+                            <div class="o_setting_right_pane">
+                                <label for="fx_expense_account_id"/>
+                                <div class="text-muted">Gastos por spread</div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-12 col-lg-6 o_setting_box">
+                            <div class="o_setting_left_pane">
+                                <field name="fx_commission_product_id"/>
+                            </div>
+                            <div class="o_setting_right_pane">
+                                <label for="fx_commission_product_id"/>
+                                <div class="text-muted">Producto para facturar comisión (opcional)</div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-12 col-lg-6 o_setting_box">
+                            <div class="o_setting_left_pane">
+                                <field name="fx_commission_percent"/>
+                            </div>
+                            <div class="o_setting_right_pane">
+                                <label for="fx_commission_percent"/>
+                                <div class="text-muted">Porcentaje de comisión por operación (%)</div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-12 col-lg-6 o_setting_box">
+                            <div class="o_setting_left_pane">
+                                <field name="fx_block_negative_inventory"/>
+                            </div>
+                            <div class="o_setting_right_pane">
+                                <label for="fx_block_negative_inventory"/>
+                                <div class="text-muted">Evitar saldo de divisas negativo</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </xpath>
+        </field>
+    </record>
+</odoo>

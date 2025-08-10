@@ -1,0 +1,192 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    
+    <!-- Form View -->
+    <record id="view_fx_operation_form" model="ir.ui.view">
+        <field name="name">fx.operation.form</field>
+        <field name="model">fx.operation</field>
+        <field name="arch" type="xml">
+            <form string="FX Operation">
+                <header>
+                    <button name="action_confirm" string="Confirmar" type="object" 
+                            invisible="state != 'draft'" class="btn-primary"/>
+                    <button name="action_post" string="Crear Asiento" type="object" 
+                            invisible="state != 'confirmed'" class="btn-primary"/>
+                    <button name="action_done" string="Completar" type="object" 
+                            invisible="state != 'posted'" class="btn-success"/>
+                    <button name="action_reset_to_draft" string="A Borrador" type="object" 
+                            invisible="state != 'confirmed'"/>
+                    <button name="action_cancel" string="Cancelar" type="object" 
+                            invisible="state not in ('draft', 'confirmed')" class="btn-secondary"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,confirmed,posted,done"/>
+                </header>
+                <sheet>
+                    <!-- ==================== BOTONES INTELIGENTES ====================  -->
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_view_contact" type="object" 
+                                class="oe_stat_button" icon="fa-user"
+                                invisible="not partner_id">
+                            <div class="o_field_widget o_stat_info">
+                                <span class="o_stat_text">Ver</span>
+                                <span class="o_stat_text">Contacto</span>
+                            </div>
+                        </button>
+                        <button name="action_view_journal_entry" type="object" 
+                                class="oe_stat_button" icon="fa-book"
+                                invisible="not move_id">
+                            <div class="o_field_widget o_stat_info">
+                                <span class="o_stat_text">Ver</span>
+                                <span class="o_stat_text">Asiento</span>
+                            </div>
+                        </button>
+                    </div>
+                    
+                    <!-- ==================== INFORMACIÓN BÁSICA ====================  -->
+                    <group>
+                        <group string="Contact Information">
+                            <field name="partner_id" options="{'no_create': False, 'no_open': False}"/>
+                            <field name="partner_email" readonly="1"/>
+                            <field name="partner_phone" readonly="1"/>
+                            <field name="partner_company" readonly="1" invisible="not partner_company"/>
+                        </group>
+                        <group string="Operation Details">
+                            <field name="name" readonly="1"/>
+                            <field name="date"/>
+                            <field name="journal_id"/>
+                            <field name="move_id" readonly="1" invisible="not move_id"/>
+                        </group>
+                    </group>
+                    
+                    <!-- ==================== INFORMACIÓN DE CAMBIO ====================  -->
+                    <group string="Exchange Information">
+                        <group string="From">
+                            <field name="currency_from"/>
+                            <field name="amount_from"/>
+                            <field name="account_from_id" invisible="state == 'draft'"/>
+                        </group>
+                        <group string="To">
+                            <field name="exchange_rate"/>
+                            <field name="currency_to"/>
+                            <field name="amount_to"/>
+                            <field name="account_to_id" invisible="state == 'draft'"/>
+                        </group>
+                    </group>
+                    
+                    <!-- ==================== INFORMACIÓN CONTABLE ====================  -->
+                    <group string="Accounting Information" invisible="state == 'draft'">
+                        <group string="Amounts">
+                            <field name="commission_amount" readonly="1"/>
+                            <field name="spread_amount"/>
+                        </group>
+                        <group string="Accounts">
+                            <field name="income_account_id"/>
+                        </group>
+                    </group>
+                    
+                    <!-- ==================== LÍNEAS CONTABLES ====================  -->
+                    <notebook invisible="not move_id">
+                        <page string="Journal Items">
+                            <field name="move_line_ids" readonly="1">
+                                <tree>
+                                    <field name="name"/>
+                                    <field name="account_id"/>
+                                    <field name="partner_id"/>
+                                    <field name="debit"/>
+                                    <field name="credit"/>
+                                    <field name="currency_id"/>
+                                    <field name="amount_currency"/>
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
+                    
+                    <group string="Additional Information">
+                        <field name="notes"/>
+                    </group>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <!-- Tree View -->
+    <record id="view_fx_operation_tree" model="ir.ui.view">
+        <field name="name">fx.operation.tree</field>
+        <field name="model">fx.operation</field>
+        <field name="arch" type="xml">
+            <tree string="FX Operations">
+                <field name="name"/>
+                <field name="date"/>
+                <field name="partner_id"/>
+                <field name="currency_from"/>
+                <field name="amount_from"/>
+                <field name="exchange_rate"/>
+                <field name="currency_to"/>
+                <field name="amount_to"/>
+                <field name="commission_amount" optional="hide"/>
+                <field name="move_id" optional="hide"/>
+                <field name="state" decoration-success="state == 'done'" 
+                       decoration-info="state in ('confirmed', 'posted')" 
+                       decoration-muted="state == 'cancelled'"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Search View -->
+    <record id="view_fx_operation_search" model="ir.ui.view">
+        <field name="name">fx.operation.search</field>
+        <field name="model">fx.operation</field>
+        <field name="arch" type="xml">
+            <search string="Search FX Operations">
+                <field name="name"/>
+                <field name="partner_id"/>
+                <field name="currency_from"/>
+                <field name="currency_to"/>
+                <field name="journal_id"/>
+                <field name="move_id"/>
+                <field name="date"/>
+                <separator/>
+                <filter string="Draft" name="draft" domain="[('state', '=', 'draft')]"/>
+                <filter string="Confirmed" name="confirmed" domain="[('state', '=', 'confirmed')]"/>
+                <filter string="Posted" name="posted" domain="[('state', '=', 'posted')]"/>
+                <filter string="Done" name="done" domain="[('state', '=', 'done')]"/>
+                <filter string="With Journal Entry" name="with_entry" domain="[('move_id', '!=', False)]"/>
+                <separator/>
+                <group expand="0" string="Group By">
+                    <filter string="Contact" name="group_contact" context="{'group_by': 'partner_id'}"/>
+                    <filter string="State" name="group_state" context="{'group_by': 'state'}"/>
+                    <filter string="Journal" name="group_journal" context="{'group_by': 'journal_id'}"/>
+                    <filter string="Date" name="group_date" context="{'group_by': 'date'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- Actions -->
+    <record id="action_fx_operation" model="ir.actions.act_window">
+        <field name="name">FX Operations</field>
+        <field name="res_model">fx.operation</field>
+        <field name="view_mode">tree,form</field>
+        <field name="search_view_id" ref="view_fx_operation_search"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create your first FX Operation
+            </p>
+            <p>
+                Manage foreign exchange operations with automatic accounting entries,
+                contact tracking, and commission calculations.
+            </p>
+        </field>
+    </record>
+
+    <!-- Menu -->
+    <menuitem id="menu_fx_exchange_root" name="FX Exchange" sequence="50"/>
+    <menuitem id="menu_fx_operations" name="Operations" 
+              parent="menu_fx_exchange_root" 
+              action="action_fx_operation" 
+              sequence="10"/>
+
+</odoo>
