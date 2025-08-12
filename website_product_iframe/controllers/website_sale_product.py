@@ -1,7 +1,7 @@
 from odoo import http
 from datetime import datetime, timedelta
 from odoo.http import request
-from werkzeug.utils import redirect
+# from werkzeug.utils import redirect  # ya no se usa
 from odoo.addons.website_sale.controllers.main import WebsiteSale
 from odoo import fields
 from odoo.exceptions import UserError
@@ -16,9 +16,11 @@ class WebsiteShop(WebsiteSale):
     def product(self, product, category='', search='', **kwargs):
         if not request.website.has_ecommerce_access():
             return request.redirect('/web/login')
+
         if product.iframe_url:
             user = request.env.user
 
+            # Mantengo creación de sesión
             session = request.env['casino.game.session'].sudo().create({
                 'game_id': product.id,
                 'user_id': user.id,
@@ -36,6 +38,8 @@ class WebsiteShop(WebsiteSale):
 
             if not product.property_account_income_id:
                 raise UserError("El producto debe tener precio y cuenta de ingreso configurados.")
+
+            # Mantengo creación y posteo de factura
             doc_type = request.env['l10n_latam.document.type'].sudo().search([
                 ('code', '=', '11'),
             ], limit=1)
@@ -57,5 +61,11 @@ class WebsiteShop(WebsiteSale):
             invoice = request.env['account.move'].sudo().create(invoice_vals)
             invoice.action_post()
 
-            return redirect(product.iframe_url)
+            # ⬇️ cambio mínimo: NO redirigimos, renderizamos la página de producto
+            values = self._prepare_product_values(product, category, search, **kwargs)
+            # (opcional) pasamos la URL al template por si la usas
+            values['iframe_url'] = product.iframe_url
+            return request.render("website_sale.product", values)
+
+        # Caso sin iframe_url: render estándar
         return request.render("website_sale.product", self._prepare_product_values(product, category, search, **kwargs))
