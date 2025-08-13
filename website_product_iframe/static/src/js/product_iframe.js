@@ -3,63 +3,49 @@
 import publicWidget from '@web/legacy/js/public/public_widget';
 import { rpc } from "@web/core/network/rpc";
 
-/* ========= Guard para evitar SecurityError por mensajes cross-origin ========= */
+/* ========= Guard cross-origin ========= */
 (function installCrossOriginMessageGuard() {
     if (window.__gameIframeMessageGuardInstalled) return;
     window.__gameIframeMessageGuardInstalled = true;
     window.__gameIframeWindows = window.__gameIframeWindows || new Set();
-
     window.addEventListener('message', function (event) {
-        try {
-            if (window.__gameIframeWindows.has(event.source)) {
-                event.stopImmediatePropagation();
-            }
-        } catch (e) { /* ignore */ }
+        try { if (window.__gameIframeWindows.has(event.source)) event.stopImmediatePropagation(); } catch(e) {}
     }, true);
 })();
 
-/* ========= Estilos del overlay (inyectados una sola vez) ========= */
+/* ========= Estilos del overlay ========= */
 (function ensureOverlayStyles() {
     if (document.getElementById('game-overlay-styles')) return;
     const css = `
-    .game-overlay-backdrop {
-        position: fixed; inset: 0; background: rgba(0,0,0,.6);
-        display: flex; align-items: center; justify-content: center;
-        z-index: 1050; opacity: 0; transition: opacity .15s ease;
+    .game-overlay-root{
+        position:fixed; inset:0;
+        background:#000;                /* fullscreen sin backdrop */
+        z-index:1050;
+        opacity:0; transition:opacity .15s ease;
     }
-    .game-overlay-backdrop.show { opacity: 1; }
-    .game-overlay-container {
-    position: relative;
-    width: 100vw;
-    height: 100vh;
-    max-width: none;
-    background: #111;
-    border-radius: 0;
-    overflow: hidden;
-    box-shadow: none;
-    transform: translateY(0);
-    transition: none;
-}
+    .game-overlay-root.show{ opacity:1; }
 
-    .game-overlay-backdrop.show .game-overlay-container { transform: translateY(0); }
-    .game-overlay-header {
-        position: absolute; top: 8px; left: 8px; right: 8px; z-index: 2;
-        display: flex; align-items: center; justify-content: space-between; gap: 8px;
+    .game-overlay-header{
+        position:absolute; top:8px; left:8px; right:8px;
+        z-index:10;                     /* por encima del iframe */
+        display:flex; align-items:center; justify-content:space-between; gap:8px;
     }
-    .game-toolbar { display: flex; flex-wrap: wrap; gap: 6px; }
-    .game-btn {
-        border: 0; padding: 6px 10px; border-radius: 8px; color: #fff; cursor: pointer;
-        background: rgba(255,255,255,.15);
+    .game-toolbar{ display:flex; flex-wrap:wrap; gap:6px; }
+    .game-btn{
+        border:0; padding:6px 10px; border-radius:8px;
+        color:#fff; cursor:pointer; background:rgba(255,255,255,.15);
     }
-    .game-btn:hover { background: rgba(255,255,255,.25); }
-    .game-overlay-close {
-        border: 0; background: rgba(255,255,255,.15); color: #fff;
-        padding: 6px 10px; border-radius: 8px;
+    .game-btn:hover{ background:rgba(255,255,255,.25); }
+    .game-overlay-close{
+        border:0; background:rgba(255,255,255,.15); color:#fff;
+        padding:6px 10px; border-radius:8px;
     }
-    .game-overlay-iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; background: #000; }
-    .game-badge { color: #fff; font-size: 13px; margin-left: 8px; opacity: .9; min-width: 120px; }
-    @media (max-width: 768px){
-        .game-overlay-container { width: 100vw; height: 85vh; border-radius: 8px; }
+    .game-badge{ color:#fff; font-size:13px; margin-left:8px; opacity:.9; min-width:120px; }
+
+    .game-overlay-iframe{
+        position:absolute; inset:0; width:100%; height:100%;
+        border:0; background:#000;
+        z-index:1;                      /* debajo del header */
     }
     `;
     const style = document.createElement('style');
@@ -71,52 +57,66 @@ import { rpc } from "@web/core/network/rpc";
 publicWidget.registry.ProductIframe = publicWidget.Widget.extend({
     selector: '.oe_website_sale',
     events: {
-        'click .show-iframe': '_onShowIframe',            // con registro (Login)
-        'click .show-iframe-direct': '_onShowIframeDirect',// directo (sin login)
+        // Interceptamos cualquier <a> con nuestros data-* en /shop
+        'click a[data-overlay-trigger]': '_onProductCardClick',
+        'click a[data-product-url]': '_onProductCardClick',
     },
 
-    /* ===================== Handlers ===================== */
-    _onShowIframe(ev) {
-        ev.preventDefault(); ev.stopPropagation();
-        const $btn = $(ev.currentTarget);
-        const productId = $btn.data('product-id');
-        const iframeUrl = $btn.data('product-url');
-        if (!iframeUrl) return alert('Este juego no tiene una URL configurada.');
+    // ======= Flags de control =======
+    _overlayOpen: false,
+    _squelchUntil: 0,
+    _historyPushed: false,
+    _popstateHandler: null,
+    _disabledLinks: null,
 
-        $btn.text('🔄 Iniciando...').prop('disabled', true);
-
-        // Login (usa tu EP alias de start_game)
-        rpc('/casino/api/login', { product_id: productId })
-            .then((res) => {
-                if (res?.error) return alert(res.error);
-                this._openOverlay(res.iframe_url || iframeUrl, {
-                    productId,
-                    sessionId: res.session_id,
-                    tracked: true,
-                    balance: res.balance || 0,
-                });
-            })
-            .catch(() => alert('Error al conectar con el servidor'))
-            .finally(() => $btn.text('🎯 Jugar (Con Registro)').prop('disabled', false));
+    _shouldSquelchClicks() {
+        return Date.now() < this._squelchUntil;
     },
 
-    _onShowIframeDirect(ev) {
-        ev.preventDefault(); ev.stopPropagation();
-        const $btn = $(ev.currentTarget);
-        const productId = $btn.data('product-id');
-        const iframeUrl = $btn.data('product-url');
-        if (!iframeUrl) return alert('Este juego no tiene una URL configurada.');
+    _onProductCardClick(ev) {
+        // Ignorar si overlay ya está abierto o en anti-rebote
+        if (this._overlayOpen || this._shouldSquelchClicks()) {
+            ev.preventDefault();
+            ev.stopPropagation();
+            return;
+        }
+        // Permitir abrir en nueva pestaña con Ctrl/Meta/etc.
+        if (ev.button !== 0 || ev.ctrlKey || ev.metaKey || ev.shiftKey || ev.altKey) return;
 
-        // Abre overlay sin sesión; podrás hacer Login desde la botonera
+        const a = ev.currentTarget;
+        const productId = a.dataset.productId;
+        const iframeUrl = a.dataset.productUrl;
+        if (!iframeUrl) return; // sin iframe_url -> navegación normal
+
+        ev.preventDefault();
+        ev.stopPropagation();
+
         this._openOverlay(iframeUrl, { productId, tracked: false });
     },
 
-    /* ===================== Overlay con toolbar ===================== */
+    /* === Overlay fullscreen sin backdrop === */
     _openOverlay(iframeUrl, { productId = null, sessionId = null, tracked = false, balance = 0 } = {}) {
-        const backdrop = document.createElement('div');
-        backdrop.className = 'game-overlay-backdrop';
-        const container = document.createElement('div');
-        container.className = 'game-overlay-container';
+        this._overlayOpen = true;
+
+        // Desactivar temporalmente href de los enlaces de productos con iframe
+        this._disableProductLinks();
+
+        // Push history para que el botón "Atrás" cierre el overlay
+        this._historyPushed = true;
+        this._popstateHandler = () => {
+            if (this._currentOverlay) {
+                this._closeOverlay({ fromPopstate: true });
+            }
+        };
+        window.addEventListener('popstate', this._popstateHandler);
+        // Pusheamos un estado “virtual” del overlay
+        history.pushState({ overlay: true }, '');
+
+        // Root
+        const root = document.createElement('div');
+        root.className = 'game-overlay-root';
+
+        // Header
         const header = document.createElement('div');
         header.className = 'game-overlay-header';
 
@@ -124,7 +124,7 @@ publicWidget.registry.ProductIframe = publicWidget.Widget.extend({
         const toolbar = document.createElement('div');
         toolbar.className = 'game-toolbar';
 
-        // Botones EP
+        // Acciones (mantener lógica/llamados tal cual)
         const btnLogin  = this._makeBtn('🔐 Login', async () => {
             if (!productId) return alert('Producto no identificado.');
             try {
@@ -136,16 +136,15 @@ publicWidget.registry.ProductIframe = publicWidget.Widget.extend({
                 alert('Login OK');
             } catch { alert('Error de red'); }
         });
-         // botones de acciones- modificar desde aca
-        const btnWin    = this._makeBtn('✅ Ganada', () => this._promptAndCall(sessionIdGetter(), '/casino/api/win'));
-        const btnLose   = this._makeBtn('❌ Perdida', () => this._promptAndCall(sessionIdGetter(), '/casino/api/lose'));
-        const btnRefund = this._makeBtn('↩️ Devolución', () => this._promptAndCall(sessionIdGetter(), '/casino/api/refund'));
-        const btnBalance= this._makeBtn('💰 Balance', () => this._getBalance(sessionIdGetter()));
-        const btnEnd    = this._makeBtn('🛑 Terminar', () => this._endSession(sessionIdGetter()));
+        const btnWin     = this._makeBtn('✅ Ganada', () => this._promptAndCall(sessionIdGetter(), '/casino/api/win'));
+        const btnLose    = this._makeBtn('❌ Perdida', () => this._promptAndCall(sessionIdGetter(), '/casino/api/lose'));
+        const btnRefund  = this._makeBtn('↩️ Devolución', () => this._promptAndCall(sessionIdGetter(), '/casino/api/refund'));
+        const btnBalance = this._makeBtn('💰 Balance', () => this._getBalance(sessionIdGetter()));
+        const btnEnd     = this._makeBtn('🛑 Terminar', () => this._endSession(sessionIdGetter()));
 
         toolbar.append(btnLogin, btnWin, btnLose, btnRefund, btnBalance, btnEnd);
 
-        // Badge de saldo
+        // Badge
         const badge = document.createElement('span');
         badge.className = 'game-badge';
         badge.textContent = tracked ? `Saldo: ${(+balance).toFixed(2)}` : 'Sin sesión';
@@ -153,9 +152,8 @@ publicWidget.registry.ProductIframe = publicWidget.Widget.extend({
         // Cerrar
         const btnClose = document.createElement('button');
         btnClose.className = 'game-overlay-close';
+        btnClose.type = 'button';
         btnClose.textContent = 'Cerrar';
-
-        header.append(toolbar, badge, btnClose);
 
         // Iframe
         const iframe = document.createElement('iframe');
@@ -163,14 +161,14 @@ publicWidget.registry.ProductIframe = publicWidget.Widget.extend({
         iframe.src = iframeUrl;
         iframe.allowFullscreen = true;
 
-        container.append(header, iframe);
-        backdrop.appendChild(container);
-        document.body.appendChild(backdrop);
+        header.append(toolbar, badge, btnClose);
+        root.append(header, iframe);
+        document.body.appendChild(root);
 
         // Estado del overlay
         const ov = this._currentOverlay = {
-            backdrop, container, header, toolbar, iframe, badge, btnClose,
-            productId, sessionId, tracked
+            root, header, toolbar, iframe, badge, btnClose,
+            productId, sessionId, tracked,
         };
 
         // Registrar window en guard
@@ -178,21 +176,22 @@ publicWidget.registry.ProductIframe = publicWidget.Widget.extend({
             try { window.__gameIframeWindows.add(iframe.contentWindow); } catch(e) {}
         });
 
-        // Handlers cierre
-        const closeHandler = (e) => { e.preventDefault(); this._closeOverlay(); };
-        const keyHandler = (e) => { if (e.key === 'Escape') this._closeOverlay(); };
-        const backdropHandler = (e) => { if (e.target === backdrop) this._closeOverlay(); };
+        // Handlers de cierre (solo por la cruz)
+        const closeHandler = (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            this._closeOverlay({ viaButton: true });
+        };
         btnClose.addEventListener('click', closeHandler);
-        document.addEventListener('keydown', keyHandler);
-        backdrop.addEventListener('click', backdropHandler);
 
+        // Bloquear scroll de la página
         const prevOverflow = document.body.style.overflow;
         document.body.style.overflow = 'hidden';
-        requestAnimationFrame(() => backdrop.classList.add('show'));
+        requestAnimationFrame(() => root.classList.add('show'));
 
-        ov._handlers = { closeHandler, keyHandler, backdropHandler, prevOverflow };
+        ov._handlers = { closeHandler, prevOverflow };
 
-        // Utils que necesitan acceso al estado actual
+        // Utils con acceso al estado actual
         const sessionIdGetter = () => this._currentOverlay?.sessionId || null;
 
         this._updateBadge = (val) => {
@@ -224,16 +223,12 @@ publicWidget.registry.ProductIframe = publicWidget.Widget.extend({
             } catch { alert('Error de red'); }
         };
 
-        this._endSession = async (sid) => {
-            if (!sid) return this._closeOverlay();
-            try {
-                const res = await rpc('/casino/api/end', { session_id: sid });
-                console.log('Sesión finalizada:', res);
-            } catch {}
-            this._closeOverlay();
+        this._endSession = (sid) => {
+            if (sid) rpc('/casino/api/end', { session_id: sid }).catch(() => {});
+            this._closeOverlay({ viaButton: true });
         };
 
-        return backdrop;
+        return root;
     },
 
     _makeBtn(label, onClick) {
@@ -245,25 +240,65 @@ publicWidget.registry.ProductIframe = publicWidget.Widget.extend({
         return b;
     },
 
-    _closeOverlay() {
+    _disableProductLinks() {
+        // Quitar href para que un mouseup/click no dispare el link al cerrar
+        this._disabledLinks = [];
+        document.querySelectorAll('a[data-product-url]').forEach(a => {
+            const href = a.getAttribute('href');
+            this._disabledLinks.push([a, href]);
+            if (href !== null) a.removeAttribute('href');
+        });
+    },
+
+    _restoreProductLinks() {
+        if (!this._disabledLinks) return;
+        for (const [a, href] of this._disabledLinks) {
+            if (href !== null && href !== undefined) a.setAttribute('href', href);
+        }
+        this._disabledLinks = null;
+    },
+
+    _teardownHistory({ fromPopstate = false, viaButton = false } = {}) {
+        if (this._popstateHandler) {
+            window.removeEventListener('popstate', this._popstateHandler);
+            this._popstateHandler = null;
+        }
+        if (this._historyPushed) {
+            // Si cerramos por botón, pedimos volver 1 estado (consume el overlay) sin navegar.
+            if (viaButton && !fromPopstate) {
+                try { history.back(); } catch { /* ignore */ }
+            }
+            this._historyPushed = false;
+        }
+    },
+
+    _closeOverlay({ fromPopstate = false, viaButton = false } = {}) {
         const ov = this._currentOverlay;
         if (!ov) return;
 
         // Quitar del guard
         try { if (ov.iframe) window.__gameIframeWindows.delete(ov.iframe.contentWindow); } catch(e) {}
 
-        // Restaurar eventos/scroll
+        // Restaurar scroll y eventos
         if (ov._handlers) {
             ov.btnClose.removeEventListener('click', ov._handlers.closeHandler);
-            document.removeEventListener('keydown', ov._handlers.keyHandler);
-            ov.backdrop.removeEventListener('click', ov._handlers.backdropHandler);
             document.body.style.overflow = ov._handlers.prevOverflow || '';
         }
 
-        // Cerrar visualmente
-        ov.backdrop.classList.remove('show');
-        setTimeout(() => ov.backdrop.remove(), 150);
+        // Restaurar href de los links
+        this._restoreProductLinks();
+
+        // History
+        this._teardownHistory({ fromPopstate, viaButton });
+
+        // Anti-rebote: ignorar clics por 400ms tras cerrar
+        this._squelchUntil = Date.now() + 400;
+
+        // Remover visualmente
+        ov.root.classList.remove('show');
+        setTimeout(() => ov.root.remove(), 150);
         this._currentOverlay = null;
+        this._overlayOpen = false;
     },
 });
 

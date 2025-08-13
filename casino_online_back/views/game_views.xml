@@ -10,6 +10,13 @@
                     <field name="iframe_url"/>
                     <field name="provider_id"/>
                     <field name="code"/>
+                    <field name="url_login"/> <!-- URL para login del usuario -->
+                    <field name="url_debit"/> <!-- ganada-->
+                    <field name="url_credit"/> <!--perdida -->
+                    <field name="url_balance"/> <!-- balance del usuario -->
+                    <field name="game_id"/> <!-- ID del juego en el proveedor -->
+                    <field name="agency_id"/> <!-- Agencia asociada al juego -->
+                    <field name="game_id"/> <!-- ID del juego en el proveedor -->
                 </group>
             </xpath>
         </field>
