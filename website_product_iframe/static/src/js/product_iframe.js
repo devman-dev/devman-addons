@@ -9,7 +9,7 @@ import { rpc } from "@web/core/network/rpc";
     window.__gameIframeMessageGuardInstalled = true;
     window.__gameIframeWindows = window.__gameIframeWindows || new Set();
     window.addEventListener('message', function (event) {
-        try { if (window.__gameIframeWindows.has(event.source)) event.stopImmediatePropagation(); } catch(e) {}
+        try { if (window.__gameIframeWindows.has(event.source)) event.stopImmediatePropagation(); } catch (e) { }
     }, true);
 })();
 
@@ -125,22 +125,25 @@ publicWidget.registry.ProductIframe = publicWidget.Widget.extend({
         toolbar.className = 'game-toolbar';
 
         // Acciones (mantener lógica/llamados tal cual)
-        const btnLogin  = this._makeBtn('🔐 Login', async () => {
+        const btnLogin = this._makeBtn('🔐 Login', async () => {
+            console.log('Presiono botón de Login');
             if (!productId) return alert('Producto no identificado.');
             try {
-                const res = await rpc('/casino/api/login', { product_id: productId });
+                console.log("Llamada a la api de login");
+                const res = await rpc('/api/v1/login', { product_id: productId });
                 if (res.error) return alert(res.error);
                 ov.sessionId = res.session_id;
                 ov.tracked = true;
                 this._updateBadge(res.balance ?? 0);
+                console.log('ov:', ov);
                 alert('Login OK');
             } catch { alert('Error de red'); }
         });
-        const btnWin     = this._makeBtn('✅ Ganada', () => this._promptAndCall(sessionIdGetter(), '/casino/api/win'));
-        const btnLose    = this._makeBtn('❌ Perdida', () => this._promptAndCall(sessionIdGetter(), '/casino/api/lose'));
-        const btnRefund  = this._makeBtn('↩️ Devolución', () => this._promptAndCall(sessionIdGetter(), '/casino/api/refund'));
-        const btnBalance = this._makeBtn('💰 Balance', () => this._getBalance(sessionIdGetter()));
-        const btnEnd     = this._makeBtn('🛑 Terminar', () => this._endSession(sessionIdGetter()));
+        const btnWin = this._makeBtn('✅ Ganada', () => this._promptAndCall(sessionIdGetter(), '/api/v1/credit'));
+        const btnLose = this._makeBtn('❌ Perdida', () => this._promptAndCall(sessionIdGetter(), '/api/v1/debit'));
+        const btnRefund = this._makeBtn('↩️ Devolución', () => this._promptAndCall(sessionIdGetter(), '/api/v1/refund'));
+        const btnBalance = this._makeBtn('💰 Balance', () => this._getBalance(sessionIdGetter(), '/api/v1/balance'));
+        const btnEnd = this._makeBtn('🛑 Terminar', () => this._endSession(sessionIdGetter()));
 
         toolbar.append(btnLogin, btnWin, btnLose, btnRefund, btnBalance, btnEnd);
 
@@ -173,7 +176,7 @@ publicWidget.registry.ProductIframe = publicWidget.Widget.extend({
 
         // Registrar window en guard
         iframe.addEventListener('load', () => {
-            try { window.__gameIframeWindows.add(iframe.contentWindow); } catch(e) {}
+            try { window.__gameIframeWindows.add(iframe.contentWindow); } catch (e) { }
         });
 
         // Handlers de cierre (solo por la cruz)
@@ -216,7 +219,7 @@ publicWidget.registry.ProductIframe = publicWidget.Widget.extend({
         this._getBalance = async (sid) => {
             if (!this._currentOverlay?.tracked || !sid) return alert('No hay sesión activa. Hacé Login.');
             try {
-                const res = await rpc('/casino/api/balance', { session_id: sid });
+                const res = await rpc('/api/v1/balance', { session_id: sid });
                 if (res.error) return alert(res.error);
                 alert(`Balance actual: ${res.balance}`);
                 if (res.balance !== undefined) this._updateBadge(res.balance);
@@ -224,7 +227,7 @@ publicWidget.registry.ProductIframe = publicWidget.Widget.extend({
         };
 
         this._endSession = (sid) => {
-            if (sid) rpc('/casino/api/end', { session_id: sid }).catch(() => {});
+            if (sid) rpc('/api/v1/end', { session_id: sid }).catch(() => { });
             this._closeOverlay({ viaButton: true });
         };
 
@@ -277,7 +280,7 @@ publicWidget.registry.ProductIframe = publicWidget.Widget.extend({
         if (!ov) return;
 
         // Quitar del guard
-        try { if (ov.iframe) window.__gameIframeWindows.delete(ov.iframe.contentWindow); } catch(e) {}
+        try { if (ov.iframe) window.__gameIframeWindows.delete(ov.iframe.contentWindow); } catch (e) { }
 
         // Restaurar scroll y eventos
         if (ov._handlers) {
