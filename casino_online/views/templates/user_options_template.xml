@@ -2,7 +2,7 @@
 <odoo>
 
     <template id="side_content_custom" inherit_id="portal.side_content">
-        <xpath expr="//div[2]" position="replace"> <!--esta buscando el 2do div de esta vista-->
+        <xpath expr="//div[2]" position="replace">
             <div t-attf-class="{{'offcanvas-body' if isOffcanvas else 'mt-3 mw-100'}}" style="display:none;">
                 <div class="d-flex justify-content-start align-items-start gap-3 mb-4">
                     <img class="o_portal_contact_img rounded o_object_fit_cover" t-att-src="image_data_uri(user_id.partner_id.avatar_128)" alt="Contact" width="50"/>
@@ -22,8 +22,7 @@
         </xpath>
     </template>
 
-
-    <template id="portal_layout_custom" inherit_id="portal.portal_layout" >
+    <template id="portal_layout_custom" inherit_id="portal.portal_layout">
         <xpath expr="//div[@class='row justify-content-between']" position="replace">
             <div class="row justify-content-between">
                 <div t-attf-class="o_portal_content col-12 mb-5">
@@ -39,119 +38,171 @@
                 </div>
             </div>
         </xpath>
-
-
     </template>
-
 
     <template id="custom_portal_my_home" inherit_id="portal.portal_my_home">
         <xpath expr="//div[contains(@class, 'o_portal_my_home')]" position="before">
-        	<script type="text/javascript">
+            <script type="text/javascript">
                 document.addEventListener("DOMContentLoaded", function () {
                     const buttons = document.querySelectorAll("button[data-target]");
                     buttons.forEach((button) => {
                         button.addEventListener("click", function () {
                             const targetId = this.getAttribute("data-target");
-                            const allDivs = document.querySelectorAll(".w-75 > div"); // Selecciona todos los divs hijos del contenedor
-
-                            // Ocultar todos los div
-                            allDivs.forEach((div) => {
-                                div.classList.add("d-none");
-                            });
-
-                            // Mostrar el div seleccionado
+                            const allDivs = document.querySelectorAll(".w-75 > div");
+                            allDivs.forEach((div) => { div.classList.add("d-none"); });
                             const targetDiv = document.querySelector(targetId);
-                            if (targetDiv) {
-                                targetDiv.classList.remove("d-none");
-                            }
+                            if (targetDiv) { targetDiv.classList.remove("d-none"); }
                         });
                     });
                 });
             </script>
-        
+
             <div id="portal_client_category_1" class="o_portal_category row g-2 d-flex">
                 <div class="w-25">
-                    <button
-                        type="button"
-                        class="btn btn-success w-100 mb-2"
-                        data-target="#depositar_form"
-                    >
-                        Depositar
-                    </button>
-
-                    <button
-                        type="button"
-                        class="btn btn-warning w-100 mb-2"
-                        data-target="#retirar_form"
-                    >
-                        Retirar
-                    </button>
-
-                    <button
-                        type="button"
-                        class="btn btn-info w-100 mb-2"
-                        data-target="#registrar_bonus_form"
-                    >
-                        Registrar Bonus
-                    </button>
+                    <button type="button" class="btn btn-success w-100 mb-2" data-target="#depositar_form">Depositar</button>
+                    <button type="button" class="btn btn-warning w-100 mb-2" data-target="#retirar_form">Retirar</button>
+                    <button type="button" class="btn btn-info w-100 mb-2" data-target="#registrar_bonus_form">Registrar Bonus</button>
 
                     <h4>Cajero</h4>
 
-                    <button
-                        type="button"
-                        class="btn btn-info w-100 mb-2"
-                        data-target="#movimientos_form"
-                    >
-                        Movimientos
-                    </button>
-
-                    <button
-                        type="button"
-                        class="btn btn-info w-100  mb-2"
-                        data-target="#medios_pagos_form"
-                    >
-                        Mis Medios de Pago
-                    </button>
-
-                    <button type="button" class="btn btn-info w-100  mb-2" data-target="#mis_limites_form">
-                        Mis Limites
-                    </button>
-
-                    <button
-                        type="button"
-                        class="btn btn-info w-100 mb-2"
-                        data-target="#datos_bancarios_form"
-                    >
-                        Mis Datos Bancarios
-                    </button>  
+                    <button type="button" class="btn btn-info w-100 mb-2" data-target="#movimientos_form">Movimientos</button>
+                    <button type="button" class="btn btn-info w-100 mb-2" data-target="#medios_pagos_form">Mis Medios de Pago</button>
+                    <button type="button" class="btn btn-info w-100 mb-2" data-target="#mis_limites_form">Mis Limites</button>
+                    <button type="button" class="btn btn-info w-100 mb-2" data-target="#datos_bancarios_form">Mis Datos Bancarios</button>
                 </div>
+
                 <div class="w-75 my-0 ps-4">
                     <div id="depositar_form">
-                        <t t-call="casino_online.portal_depositar_form" />
+                        <t t-call="casino_online.portal_depositar_form"/>
                     </div>
+
                     <div id="retirar_form" class="d-none">
-                        <t t-call="casino_online.portal_retirar_form" />
+                        <t t-call="casino_online.portal_retirar_form"/>
                     </div>
+
                     <div id="registrar_bonus_form" class="d-none">
-                        <t t-call="casino_online.portal_registrar_bonus_form" />
+                        <t t-call="casino_online.portal_registrar_bonus_form"/>
                     </div>
+
+                    <!-- ===== Movimientos dentro de /my/home (sin AJAX) ===== -->
                     <div id="movimientos_form" class="d-none">
-                    <t t-call="casino_online.portal_movimientos" />
+                        <div class="o_portal_movements">
+                            <h2>Historial de Movimientos</h2>
+
+                            <!-- Importante: enviar a /my/home -->
+                            <form method="get" action="/my/home" class="mb-4 o_movements_filters">
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <label for="start_date" class="form-label">Fecha de Inicio</label>
+                                        <input type="date" id="start_date" name="start_date" class="form-control"/>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="end_date" class="form-label">Fecha de Fin</label>
+                                        <input type="date" id="end_date" name="end_date" class="form-control"/>
+                                    </div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label d-block">Buscar por Tipo</label>
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input" type="checkbox" name="types" value="deposito_retiro" checked="checked"/>
+                                        <label class="form-check-label">Dep./Retiros</label>
+                                    </div>
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input" type="checkbox" name="types" value="bonus"/>
+                                        <label class="form-check-label">Saldo de Bonus</label>
+                                    </div>
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input" type="checkbox" name="types" value="juego"/>
+                                        <label class="form-check-label">Transacciones de Juegos</label>
+                                    </div>
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input" type="checkbox" name="types" value="ajuste"/>
+                                        <label class="form-check-label">Ajustes</label>
+                                    </div>
+                                </div>
+
+                                <button type="submit" class="btn btn-primary">Filtrar</button>
+                            </form>
+
+                            <!-- Render directo con variables provistas por /my/home -->
+                            <div class="alert alert-info mb-4">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <strong>Saldo Actual:
+                                            <span t-if="(saldo_final is not None) and (saldo_final &gt;= 0)" class="text-success">
+                                                $<t t-esc="saldo_final"/>
+                                            </span>
+                                            <span t-elif="(saldo_final is not None) and (saldo_final &lt; 0)" class="text-danger">
+                                                -$<t t-esc="abs(saldo_final)"/>
+                                            </span>
+                                        </strong>
+                                    </div>
+                                    <div class="col-md-6 text-end">
+                                        <strong>Total de Movimientos: <t t-esc="total_movements or 0"/></strong>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="table-responsive">
+                                <table class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>Fecha</th>
+                                            <th>Descripción</th>
+                                            <th>Tipo</th>
+                                            <th class="text-end">Monto</th>
+                                            <th>Estado</th>
+                                            <th class="text-end">Saldo</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <t t-foreach="movements or []" t-as="movement">
+                                            <tr>
+                                                <td><t t-esc="movement['date']"/></td>
+                                                <td><t t-esc="movement['description']"/></td>
+                                                <td><span class="badge bg-secondary"><t t-esc="movement['type_display']"/></span></td>
+                                                <td class="text-end">
+                                                    <span t-if="movement['amount'] &gt;= 0" class="text-success">+$<t t-esc="movement['amount']"/></span>
+                                                    <span t-else="" class="text-danger">$<t t-esc="movement['amount']"/></span>
+                                                </td>
+                                                <td>
+                                                    <span t-if="movement['state'] == 'posted'" class="badge bg-success">Completado</span>
+                                                    <span t-else="" class="badge bg-warning"><t t-esc="movement['state']"/></span>
+                                                </td>
+                                                <td class="text-end">
+                                                    <strong>
+                                                        <span t-if="movement['balance'] &gt;= 0" class="text-success">
+                                                            $<t t-esc="movement['balance']"/>
+                                                        </span>
+                                                        <span t-else="" class="text-danger">
+                                                            $<t t-esc="movement['balance']"/>
+                                                        </span>
+                                                    </strong>
+                                                </td>
+                                            </tr>
+                                        </t>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
                     </div>
+                    <!-- ===== /Movimientos ===== -->
+
                     <div id="medios_pagos_form" class="d-none">
-                        <t t-call="casino_online.portal_medios_pagos" />
+                        <t t-call="casino_online.portal_medios_pagos"/>
                     </div>
+
                     <div id="mis_limites_form" class="d-none">
-                        <t t-call="casino_online.portal_mis_limites" />
+                        <t t-call="casino_online.portal_mis_limites"/>
                     </div>
+
                     <div id="datos_bancarios_form" class="d-none">
-                        <t t-call="casino_online.portal_datos_bancarios" />
+                        <t t-call="casino_online.portal_datos_bancarios"/>
                     </div>
                 </div>
-                
             </div>
         </xpath>
     </template>
 
 </odoo>
-

@@ -1,266 +1,223 @@
+# controllers/transactions.py
 from odoo import http
 from odoo.http import request
-from datetime import datetime
-
+from datetime import datetime, date
 from odoo.exceptions import UserError, ValidationError
+from odoo.addons.portal.controllers.portal import CustomerPortal
 
 
+class CasinoHome(CustomerPortal):
+    @http.route(['/my', '/my/home'], type='http', auth='user', website=True)
+    def home(self, **kw):
+        values = self._prepare_portal_layout_values()
+
+        def _parse_date(s):
+            if not s:
+                return None
+            s = s.strip()
+            for fmt in ('%Y-%m-%d', '%d/%m/%Y'):
+                try:
+                    return datetime.strptime(s, fmt).date()
+                except ValueError:
+                    pass
+            return None
+
+        start_date = _parse_date(kw.get('start_date'))
+        end_date = _parse_date(kw.get('end_date'))
+        filtered = bool(start_date or end_date)
+
+        partner = request.env.user.partner_id.commercial_partner_id
+        company = request.env.company
+        AML = request.env['account.move.line'].sudo()
+
+        base_domain = [
+            ('company_id', '=', company.id),
+            ('partner_id', '=', partner.id),
+            ('account_id.account_type', 'in', ['asset_receivable', 'liability_payable']),
+            ('parent_state', 'in', ['draft', 'posted']),
+        ]
+
+        # 1) Saldo actual sobre TODO el historial
+        saldo_total = 0.0
+        for l in AML.search(base_domain):
+            a = l.amount_signed if l.amount_signed is not None else l.balance
+            saldo_total += float(a or 0.0)
+
+        # 2) Líneas a mostrar
+        if filtered:
+            domain_display = list(base_domain)
+            if start_date:
+                domain_display.append(('date', '>=', start_date))
+            if end_date:
+                domain_display.append(('date', '<=', end_date))
+            lines_display = AML.search(domain_display, order='date asc, id asc')
+        else:
+            # últimos 10 por fecha, luego reordenadas ascendente para el cálculo del saldo progresivo
+            last10 = AML.search(base_domain, order='date desc, id desc', limit=10)
+            lines_display = last10.sorted(key=lambda r: (r.date or date.min, r.id))
+
+        def _classify(l):
+            mt = l.move_id.move_type or ''
+            jn = (l.journal_id and l.journal_id.name or '').lower()
+            if any(x in jn for x in ('bonus', 'promo', 'bono')):
+                return 'Saldo de Bonus'
+            if mt in ('out_invoice', 'out_refund', 'in_invoice', 'in_refund'):
+                return 'Transacciones de Juegos' if 'juego' in jn else 'Facturación'
+            if mt == 'entry':
+                return 'Ajustes'
+            return 'Ajustes'
+
+        def _desc(l):
+            return l.name or l.move_id.ref or l.move_id.name or 'Movimiento contable'
+
+        movements = []
+        running = 0.0
+        for l in lines_display:
+            amt = l.amount_signed if l.amount_signed is not None else l.balance
+            val = {
+                'date': (l.date or date.min).isoformat(),
+                'description': _desc(l),
+                'type_display': _classify(l),
+                'amount': round(float(amt or 0.0), 2),
+                'state': l.parent_state or l.move_id.state or '',
+            }
+            running += val['amount']
+            val['balance'] = round(running, 2)
+            movements.append(val)
+
+        values.update({
+            'movements': movements,
+            'saldo_final': round(saldo_total, 2),     # saldo global
+            'total_movements': len(movements),        # mostrados en la tabla
+        })
+        return request.render("portal.portal_my_home", values)
 
 class MiPortalController(http.Controller):
 
     @http.route('/my/movimientos2', type='http', auth='user', website=True)
     def portal_movimientos2(self, **kwargs):
-        # Datos de prueba simulando movimientos
         movements = [
-            {
-                'date': datetime(2025, 8, 5),
-                'description': 'Depósito inicial',
-                'type_display': 'Dep./Retiros',
-                'amount': 1000.00,
-                'state': 'Completado',
-                'balance': 1000.00,
-            },
-            {
-                'date': datetime(2025, 8, 6),
-                'description': 'Retiro cajero',
-                'type_display': 'Dep./Retiros',
-                'amount': -200.00,
-                'state': 'Pendiente',
-                'balance': 800.00,
-            },
-            {
-                'date': datetime(2025, 8, 7),
-                'description': 'Bonus por promoción',
-                'type_display': 'Saldo de Bonus',
-                'amount': 50.00,
-                'state': 'Completado',
-                'balance': 850.00,
-            },
-            {
-                'date': datetime(2025, 8, 8),
-                'description': 'Transacción juego A',
-                'type_display': 'Transacciones de Juegos',
-                'amount': -30.00,
-                'state': 'Completado',
-                'balance': 820.00,
-            },
-            {
-                'date': datetime(2025, 8, 9),
-                'description': 'Ajuste manual',
-                'type_display': 'Ajustes',
-                'amount': 10.00,
-                'state': 'Completado',
-                'balance': 830.00,
-            },
+            {'date': datetime(2025, 8, 5), 'description': 'Depósito inicial', 'type_display': 'Dep./Retiros', 'amount': 1000.00, 'state': 'Completado', 'balance': 1000.00},
+            {'date': datetime(2025, 8, 6), 'description': 'Retiro cajero', 'type_display': 'Dep./Retiros', 'amount': -200.00, 'state': 'Pendiente', 'balance': 800.00},
+            {'date': datetime(2025, 8, 7), 'description': 'Bonus por promoción', 'type_display': 'Saldo de Bonus', 'amount': 50.00, 'state': 'Completado', 'balance': 850.00},
+            {'date': datetime(2025, 8, 8), 'description': 'Transacción juego A', 'type_display': 'Transacciones de Juegos', 'amount': -30.00, 'state': 'Completado', 'balance': 820.00},
+            {'date': datetime(2025, 8, 9), 'description': 'Ajuste manual', 'type_display': 'Ajustes', 'amount': 10.00, 'state': 'Completado', 'balance': 830.00},
         ]
-
         return request.render('casino_online.portal_movimientos', {
             'movements': movements,
-            'request': request,  # para que funcione request.params en el template
+            'request': request,
         })
-    
+
+    # Puedes dejar esto o eliminarlo. El form ya no lo usa.
     @http.route('/my/movimientos', type='http', auth='user', website=True)
     def portal_movements(self, **kwargs):
-        from datetime import datetime
-
-        partner_id = request.env.user.partner_id.id
-        company_id = request.env.company.id
-
-        # account.move (deudas -> negativo)
-        move_domain = [
-            ('company_id', '=', company_id),
-            ('partner_id', '=', partner_id),
-            ('state', 'in', ['draft', 'posted']),
+        partner = request.env.user.partner_id.commercial_partner_id
+        company = request.env.company
+        domain = [
+            ('company_id', '=', company.id),
+            ('partner_id', '=', partner.id),
+            ('account_id.account_type', 'in', ['asset_receivable', 'liability_payable']),
+            ('parent_state', 'in', ['draft', 'posted']),
         ]
-        move_fields = [
-            'date', 'name',
-            'amount_total_signed', 'state', 'move_type', 'journal_id',
-        ]
-        moves = request.env['account.move'].sudo().search(move_domain, order='date asc, id asc')
-        move_data = moves.read(move_fields)
+        lines = request.env['account.move.line'].sudo().search(domain, order='date asc, id asc')
 
-        # account.payment (inbound -> +, outbound -> -)
-        payment_domain = [
-            ('company_id', '=', company_id),
-            ('partner_id', '=', partner_id),
-            ('state', 'in', ['draft', 'paid']),
-        ]
-        payment_fields = [
-            'date', 'name',
-            'amount', 'state', 'payment_type',
-            'journal_id', 'partner_type', 'move_id',
-        ]
-        payments = request.env['account.payment'].sudo().search(payment_domain, order='date asc, id asc')
-        payment_data = payments.read(payment_fields)
-
-        def classify_move(m):
-            move_type = m.get('move_type') or ''
-            jname = (m.get('journal_id') and isinstance(m['journal_id'], list) and m['journal_id'][1]) or ''
-            if move_type == 'entry':
-                return 'Ajustes'
-            if move_type in ('out_invoice', 'out_refund', 'in_invoice', 'in_refund'):
-                return 'Transacciones de Juegos' if 'juego' in jname.lower() else 'Facturación'
-            if any(x in jname.lower() for x in ('bonus', 'promo', 'bono')):
+        def classify_line(l):
+            mt = l.move_id.move_type or ''
+            jn = (l.journal_id and l.journal_id.name or '').lower()
+            if any(x in jn for x in ('bonus', 'promo', 'bono')):
                 return 'Saldo de Bonus'
+            if mt in ('out_invoice', 'out_refund', 'in_invoice', 'in_refund'):
+                return 'Transacciones de Juegos' if 'juego' in jn else 'Facturación'
+            if mt == 'entry':
+                return 'Ajustes'
             return 'Ajustes'
 
-        def classify_payment(p):
-            jname = (p.get('journal_id') and isinstance(p['journal_id'], list) and p['journal_id'][1]) or ''
-            if any(x in jname.lower() for x in ('bonus', 'promo', 'bono')):
-                return 'Saldo de Bonus'
-            return 'Dep./Retiros'
-
-        def describe_move(m):
-            return m.get('name') or 'Movimiento contable'
-
-        def describe_payment(p):
-            desc = p.get('name')
-            if (not desc) and p.get('move_id'):
-                mv = request.env['account.move'].sudo().browse(p['move_id'][0])
-                desc = mv.name
-            if p.get('payment_type') == 'inbound':
-                return f"Depósito - {desc}" if desc else "Depósito recibido"
-            return f"Retiro - {desc}" if desc else "Retiro realizado"
-
-        def state_label(rec):
-            return rec.get('state') 
+        def describe_line(l):
+            return l.name or l.move_id.ref or l.move_id.name or 'Movimiento contable'
 
         all_movements = []
-
-        for m in move_data:
-            
-            cm = classify_move(m)
-            if cm == 'Ajustes':
-                amt = abs(float(m.get('amount_total_signed') or 0.0))
-            else:
-                amt = -abs(float(m.get('amount_total_signed') or 0.0))
-                
-            
-            dval = m.get('date')
-            dstr = dval.date().isoformat() if hasattr(dval, 'date') else str(dval)
+        for l in lines:
+            dval = l.date
+            amt = l.amount_signed if l.amount_signed is not None else l.balance
             all_movements.append({
-                'date': dstr,
-                'datetime_obj': dval,
-                'description': describe_move(m),
-                'type_display': classify_move(m),
-                'amount': round(amt, 2),
-                'state': state_label(m),
-                'source': 'move',
+                'date': dval.isoformat(),
+                'datetime_obj': dval or datetime.min,
+                'description': describe_line(l),
+                'type_display': classify_line(l),
+                'amount': round(float(amt or 0.0), 2),
+                'state': l.parent_state or l.move_id.state or '',
             })
-        """
-        for p in payment_data:
-            base = float(p.get('amount') or 0.0)
-            amt = abs(base) if p.get('payment_type') == 'inbound' else -abs(base)
-            dval = p.get('date')
-            dstr = dval.date().isoformat() if hasattr(dval, 'date') else str(dval)
-            all_movements.append({
-                'date': dstr,
-                'datetime_obj': dval,
-                'description': describe_payment(p),
-                'type_display': classify_payment(p),
-                'amount': round(amt, 2),
-                'state': state_label(p),
-                'source': 'payment',
-            })
-        """
 
-        all_movements.sort(key=lambda x: x['datetime_obj'] if x['datetime_obj'] else datetime.min)
-
+        all_movements.sort(key=lambda x: x['datetime_obj'])
         balance = 0.0
-        movements = []
         for mv in all_movements:
             balance += mv['amount']
             mv['balance'] = round(balance, 2)
             mv.pop('datetime_obj', None)
-            movements.append(mv)
 
-        return request.render('casino_online.portal_movimientos', {
-            'movements': movements,
+        ctx = {
+            'movements': all_movements,
             'saldo_final': round(balance, 2),
-            'total_movements': len(movements),
+            'total_movements': len(all_movements),
             'request': request,
-        })
+        }
+        return request.render('casino_online.portal_movimientos', ctx)
 
-   
-        
+    @http.route('/mi-cuenta/movimientos', type='http', auth='user', website=True)
+    def portal_movements_alias(self, **kw):
+        qs = request.httprequest.query_string.decode() or ''
+        return request.redirect('/my/movimientos' + (f'?{qs}' if qs else ''))
+
+    # Resto de endpoints existentes (sin cambios)
     @http.route('/my/medios_pagos', type='http', auth='user', website=True, methods=['GET', 'POST'], csrf=True)
     def portal_medios_pagos(self, **post):
         partner = request.env.user.partner_id
-
         PaymentProvider = request.env['payment.provider']
         ConfigModel = request.env['partner.payment.method.config'].sudo()
 
         if request.httprequest.method == 'POST':
-            # Guardar configuración
             payment_methods = PaymentProvider.sudo().search([('state', '=', 'enabled')])
-
             for pm in payment_methods:
                 for_deposit = bool(post.get(f'deposit_{pm.id}'))
                 for_withdraw = bool(post.get(f'withdraw_{pm.id}'))
-
-                # Buscar si ya existe configuración
                 config = ConfigModel.search([('partner_id', '=', partner.id), ('payment_provider_id', '=', pm.id)], limit=1)
-                vals = {
-                    'for_deposit': for_deposit,
-                    'for_withdraw': for_withdraw,
-                }
+                vals = {'for_deposit': for_deposit, 'for_withdraw': for_withdraw}
                 if config:
                     config.write(vals)
                 else:
-                    vals.update({
-                        'partner_id': partner.id,
-                        'payment_provider_id': pm.id,
-                    })
+                    vals.update({'partner_id': partner.id, 'payment_provider_id': pm.id})
                     ConfigModel.create(vals)
-
             return request.redirect('/my/medios_pagos')
 
-        # GET: Mostrar formulario con configuraciones
         payment_methods = PaymentProvider.sudo().search([('state', '=', 'enabled')])
-
-        # Para cada método de pago, adjuntamos la configuración del partner si existe
         for pm in payment_methods:
             pm.config = ConfigModel.search([('partner_id', '=', partner.id), ('payment_provider_id', '=', pm.id)], limit=1)
 
-        return request.render('casino_online.portal_medios_pagos', {
-            'payment_methods': payment_methods,
-        })
-        
+        return request.render('casino_online.portal_medios_pagos', {'payment_methods': payment_methods})
+
     @http.route('/my/mis_limites', type='http', auth='user', website=True, methods=['GET', 'POST'], csrf=True)
     def portal_mis_limites(self, **post):
         partner = request.env.user.partner_id.sudo()
-
         if request.httprequest.method == 'POST':
-            daily_limit = post.get('daily_limit')
-            weekly_limit = post.get('weekly_limit')
-            monthly_limit = post.get('monthly_limit')
-
             vals = {}
-            if daily_limit is not None:
-                vals['daily_deposit_limit'] = float(daily_limit)
-            if weekly_limit is not None:
-                vals['weekly_deposit_limit'] = float(weekly_limit)
-            if monthly_limit is not None:
-                vals['monthly_deposit_limit'] = float(monthly_limit)
-
+            if post.get('daily_limit') is not None:
+                vals['daily_deposit_limit'] = float(post.get('daily_limit'))
+            if post.get('weekly_limit') is not None:
+                vals['weekly_deposit_limit'] = float(post.get('weekly_limit'))
+            if post.get('monthly_limit') is not None:
+                vals['monthly_deposit_limit'] = float(post.get('monthly_limit'))
             partner.write(vals)
             return request.redirect('/my/mis_limites')
 
-        # GET request
-        daily_limit = partner.daily_deposit_limit
-        weekly_limit = partner.weekly_deposit_limit
-        monthly_limit = partner.monthly_deposit_limit
-
         return request.render('casino_online.portal_mis_limites', {
-            'daily_limit': daily_limit,
-            'weekly_limit': weekly_limit,
-            'monthly_limit': monthly_limit,
+            'daily_limit': partner.daily_deposit_limit,
+            'weekly_limit': partner.weekly_deposit_limit,
+            'monthly_limit': partner.monthly_deposit_limit,
         })
-        
+
     @http.route('/my/datos_bank', type='http', auth='user', website=True, methods=['GET', 'POST'], csrf=True)
     def portal_datos_bancarios(self, **post):
         partner = request.env.user.partner_id.sudo()
-
         if request.httprequest.method == 'POST':
             vals = {
                 'account_number': post.get('account_number'),
@@ -273,7 +230,6 @@ class MiPortalController(http.Controller):
             partner.write(vals)
             return request.redirect('/my/datos_bank')
 
-        # GET request: cargar valores actuales
         return request.render('casino_online.portal_datos_bancarios', {
             'account_number': partner.account_number,
             'bank_name': partner.bank_name,
@@ -282,84 +238,60 @@ class MiPortalController(http.Controller):
             'cuil': partner.cuil,
             'nuevo_cbu': partner.nuevo_cbu,
         })
-        
+
     @http.route('/my/depositar', type='http', auth='user', website=True, methods=['GET', 'POST'], csrf=True)
     def portal_depositar(self, **post):
         if request.httprequest.method == 'POST':
             amount = post.get('amount')
             payment_provider_id = post.get('payment_provider_id')
-
             if not amount or not payment_provider_id:
                 return request.redirect('/my/depositar')
-
-            # Aquí podrías registrar el depósito si tienes un modelo
             request.env['portal.deposito'].sudo().create({
                 'partner_id': request.env.user.partner_id.id,
                 'amount': float(amount),
                 'payment_provider_id': int(payment_provider_id),
             })
-
             return request.redirect('/my')
 
-        # Cargar métodos de pago habilitados
         payment_methods = request.env['payment.provider'].sudo().search([
-            ('state', '=', 'test'),('is_published', '=', True)
+            ('state', '=', 'test'), ('is_published', '=', True)
         ])
-
-        return request.render('casino_online.portal_depositar_form', {
-            'payment_providers': payment_methods,
-        })
+        return request.render('casino_online.portal_depositar_form', {'payment_providers': payment_methods})
 
     @http.route('/my/depositar', type='http', auth='user', methods=['POST'], website=True)
     def portal_depositar_submit(self, **post):
-        # Aquí procesas los datos enviados por el formulario
         amount = post.get('amount')
-        # Validar y guardar en base de datos, etc.
-        # Luego redirigir o mostrar mensaje
         return request.redirect('/my/confirmacion_deposito')
-    
+
     @http.route('/my/retirar', type='http', auth='user', website=True, methods=['GET', 'POST'], csrf=True)
     def portal_retirar(self, **post):
         if http.request.httprequest.method == 'POST':
             amount = post.get('amount')
             payment_provider_id = post.get('payment_provider_id')
-
-            # Validaciones básicas
             if not amount or not payment_provider_id:
-                return request.redirect('/my/retirar')  # o renderizar con error
-
-            # Aquí podrías registrar el retiro en un modelo personalizado
+                return request.redirect('/my/retirar')
             request.env['portal.retiro'].sudo().create({
                 'partner_id': request.env.user.partner_id.id,
                 'amount': float(amount),
                 'payment_provider_id': int(payment_provider_id),
             })
+            return request.redirect('/my')
 
-            return request.redirect('/my')  # o a una página de confirmación
-
-        # GET request: mostrar el formulario
         payment_methods = request.env['payment.provider'].sudo().search([
-            ('state', '=', 'test'),
-            ('is_published', '=', True)
+            ('state', '=', 'test'), ('is_published', '=', True)
         ])
-        return request.render('casino_online.portal_retirar_form', {
-            'payment_providers': payment_methods,
-        })
+        return request.render('casino_online.portal_retirar_form', {'payment_providers': payment_methods})
 
     @http.route('/my/registrar_bonus', type='http', auth='user', website=True, methods=['GET', 'POST'], csrf=True)
     def portal_registrar_bonus(self, **post):
         if request.httprequest.method == 'POST':
             promo_code = post.get('promo_code')
-
             if not promo_code:
                 return request.redirect('/my/registrar_bonus')
-
-            # Registrar el bonus si tienes un modelo (opcional)
             request.env['portal.bonus'].sudo().create({
                 'partner_id': request.env.user.partner_id.id,
                 'code': promo_code,
             })
-
-            return request.redirect('/my')  # o a una página de confirmación
+            return request.redirect('/my')
 
         return request.render('casino_online.portal_registrar_bonus_form')

@@ -54,83 +54,49 @@
                 </table>
             </form>
         </div>
-
     </template>
 
-
-
-
     <template id="portal_retirar_form" name="Formulario Retirar">
-        <!--<t t-call="website.layout"> -->
-            <div class="container ">
-                <h2>Retirar Dinero</h2>
-
-                <form action="/my/retirar" method="post">
-                    <!-- Métodos de pago -->
-                    <div class="mb-3">
-                        <label class="form-label">Selecciona un método de pago:</label>
-                        <t t-foreach="payment_providers" t-as="provider">
-                            <label class="list-group-item">
-                                <input type="radio" name="payment_provider_id" t-att-value="provider.id" class="form-check-input me-2" required="required" />
-                                <t t-esc="provider.name" />
-                            </label>
-                        </t>
-                    </div>
-
-                    <!-- Monto -->
-                    <div class="mb-3">
-                        <label for="amount" class="form-label">Monto a retirar</label>
-                        <input type="number" step="0.01" min="0" name="amount" id="amount" class="form-control" required="required" />
-                    </div>
-
-                    <!-- Botón -->
-                    <button type="submit" class="btn btn-primary">Retirar</button>
-                </form>
-            </div>
-        <!--</t> --> 
+        <div class="container">
+            <h2>Retirar Dinero</h2>
+            <form action="/my/retirar" method="post">
+                <div class="mb-3">
+                    <label class="form-label">Selecciona un método de pago:</label>
+                    <t t-foreach="payment_providers" t-as="provider">
+                        <label class="list-group-item">
+                            <input type="radio" name="payment_provider_id" t-att-value="provider.id" class="form-check-input me-2" required="required" />
+                            <t t-esc="provider.name" />
+                        </label>
+                    </t>
+                </div>
+                <div class="mb-3">
+                    <label for="amount" class="form-label">Monto a retirar</label>
+                    <input type="number" step="0.01" min="0" name="amount" id="amount" class="form-control" required="required" />
+                </div>
+                <button type="submit" class="btn btn-primary">Retirar</button>
+            </form>
+        </div>
     </template>
 
     <template id="portal_registrar_bonus_form" name="Formulario Registrar Bonus">
-            <div class="container  ">
-                <h2>Registrar Código Promocional</h2>
-
-                <form action="/my/registrar_bonus" method="post">
-                    <div class="mb-3">
-                        <label for="promo_code" class="form-label">Ingresa tu código promocional</label>
-                        <input type="text" name="promo_code" id="promo_code" class="form-control" required="required" placeholder="Ej: BONUS2025" />
-                    </div>
-
-                    <button type="submit" class="btn btn-success">Registrar Bonus</button>
-                </form>
-            </div>
+        <div class="container">
+            <h2>Registrar Código Promocional</h2>
+            <form action="/my/registrar_bonus" method="post">
+                <div class="mb-3">
+                    <label for="promo_code" class="form-label">Ingresa tu código promocional</label>
+                    <input type="text" name="promo_code" id="promo_code" class="form-control" required="required" placeholder="Ej: BONUS2025" />
+                </div>
+                <button type="submit" class="btn btn-success">Registrar Bonus</button>
+            </form>
+        </div>
     </template>
 
+    <!-- ===== BLOQUE MODIFICADO PARA AJAX ===== -->
     <template id="portal_movimientos" name="Movimientos del Usuario">
-        <div class="container  ">
+        <div class="container o_portal_movements">
             <h2>Historial de Movimientos</h2>
-
-            <!-- Mostrar saldo final -->
-            <div class="alert alert-info mb-4">
-                <div class="row">
-                    <div class="col-md-6">
-                        <strong>Saldo Actual: 
-                            <span t-if="(saldo_final is not None) and (saldo_final &gt;= 0)" class="text-success">
-                                $<t t-esc="saldo_final"/>
-                            </span>
-                            <span t-elif="(saldo_final is not None) and (saldo_final &lt; 0)" class="text-danger">
-                                -$<t t-esc="abs(saldo_final)"/>
-                            </span>
-                        </strong>
-                    </div>
-                    <div class="col-md-6 text-end">
-                        <strong>Total de Movimientos: <t t-esc="total_movements"/></strong>
-                    </div>
-                </div>
-            </div>
-
             <!-- Filtros -->
-            <form method="get" action="/mi-cuenta/movimientos" class="mb-4">
-                <!-- Buscar por fecha -->
+            <form method="get" action="/my/movimientos" class="mb-4 o_movements_filters">
                 <div class="row mb-3">
                     <div class="col-md-6">
                         <label for="start_date" class="form-label">Fecha de Inicio</label>
@@ -141,8 +107,6 @@
                         <input type="date" id="end_date" name="end_date" class="form-control" value="" />
                     </div>
                 </div>
-
-                <!-- Buscar por tipo -->
                 <div class="mb-3">
                     <label class="form-label d-block">Buscar por Tipo</label>
                     <div class="form-check form-check-inline">
@@ -162,66 +126,72 @@
                         <label class="form-check-label">Ajustes</label>
                     </div>
                 </div>
-
                 <button type="submit" class="btn btn-primary">Filtrar</button>
             </form>
-
-            <!-- Tabla de movimientos -->
-            <div class="table-responsive">
-                <table class="table table-striped">
-                    <thead>
-                        <tr>
-                            <th>Fecha</th>
-                            <th>Descripción</th>
-                            <th>Tipo</th>
-                            <th class="text-end">Monto</th>
-                            <th>Estado</th>
-                            <th class="text-end">Saldo</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <t t-foreach="movements" t-as="movement">
-                            <tr>
-                                <td><t t-esc="movement['date']"/></td>
-                                <td><t t-esc="movement['description']"/></td>
-                                <td>
-                                    <span class="badge bg-secondary">
-                                        <t t-esc="movement['type_display']"/>
-                                    </span>
-                                </td>
-                                <td class="text-end">
-                                    <span t-if="movement['amount'] >= 0" class="text-success">
-                                        +$<t t-esc="movement['amount']"/>
-                                    </span>
-                                    <span t-else="" class="text-danger">
-                                        $<t t-esc="movement['amount']"/>
-                                    </span>
-                                </td>
-                                <td>
-                                    <span t-if="movement['state'] == 'Completado'" class="badge bg-success">
-                                        <t t-esc="movement['state']"/>
-                                    </span>
-                                    <span t-else="" class="badge bg-warning">
-                                        <t t-esc="movement['state']"/>
-                                    </span>
-                                </td>
-                                <td class="text-end">
-                                    <strong>
-                                        <span t-if="movement['balance'] >= 0" class="text-success">
-                                            $<t t-esc="movement['balance']"/>
-                                        </span>
-                                        <span t-else="" class="text-danger">
-                                            $<t t-esc="movement['balance']"/>
-                                        </span>
-                                    </strong>
-                                </td>
-                            </tr>
-                        </t>
-                    </tbody>
-                </table>
+            <!-- Contenedor que se recarga por AJAX -->
+            <div id="movements_container">
+                <t t-call="casino_online.portal_movimientos_inner"/>
             </div>
         </div>
-</template>
+    </template>
+
+    <!-- Fragmento interno -->
+    <template id="portal_movimientos_inner">
+        <div class="alert alert-info mb-4">
+            <div class="row">
+                <div class="col-md-6">
+                    <strong>Saldo Actual:
+                        <span t-if="(saldo_final is not None) and (saldo_final &gt;= 0)" class="text-success">
+                            $<t t-esc="saldo_final"/>
+                        </span>
+                        <span t-elif="(saldo_final is not None) and (saldo_final &lt; 0)" class="text-danger">
+                            -$<t t-esc="abs(saldo_final)"/>
+                        </span>
+                    </strong>
+                </div>
+                <div class="col-md-6 text-end">
+                    <strong>Total de Movimientos: <t t-esc="total_movements"/></strong>
+                </div>
+            </div>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Fecha</th>
+                        <th>Descripción</th>
+                        <th>Tipo</th>
+                        <th class="text-end">Monto</th>
+                        <th>Estado</th>
+                        <th class="text-end">Saldo</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <t t-foreach="movements" t-as="movement">
+                        <tr>
+                            <td><t t-esc="movement['date']"/></td>
+                            <td><t t-esc="movement['description']"/></td>
+                            <td><span class="badge bg-secondary"><t t-esc="movement['type_display']"/></span></td>
+                            <td class="text-end">
+                                <span t-if="movement['amount'] &gt;= 0" class="text-success">+$<t t-esc="movement['amount']"/></span>
+                                <span t-else="" class="text-danger">$<t t-esc="movement['amount']"/></span>
+                            </td>
+                            <td>
+                                <span t-if="movement['state'] == 'Completado'" class="badge bg-success"><t t-esc="movement['state']"/></span>
+                                <span t-else="" class="badge bg-warning"><t t-esc="movement['state']"/></span>
+                            </td>
+                            <td class="text-end">
+                                <strong>
+                                    <span t-if="movement['balance'] &gt;= 0" class="text-success">$<t t-esc="movement['balance']"/></span>
+                                    <span t-else="" class="text-danger">$<t t-esc="movement['balance']"/></span>
+                                </strong>
+                            </td>
+                        </tr>
+                    </t>
+                </tbody>
+            </table>
+        </div>
+    </template>
 
 
     <template id="portal_medios_pagos" name="Mis Medios de Pago">
