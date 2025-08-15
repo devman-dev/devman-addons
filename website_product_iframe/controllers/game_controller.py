@@ -7,7 +7,7 @@ import logging
 _logger = logging.getLogger(__name__)
 class GameController(http.Controller):
 
-    def _prepare_session_vals(self, product_id, user_id, initial_balance, final_balance, state, result):
+    def _prepare_session_vals(self, product_id, user_id, initial_balance, final_balance, amount, state, result):
         """
         Devuelve los valores para crear una sesión de juego.
         """
@@ -19,6 +19,7 @@ class GameController(http.Controller):
             'end_datetime': fields.Datetime.now() + timedelta(hours=1),
             'result': result,
             'state': state,
+            'amount': amount,
             'initial_balance': initial_balance,
             'final_balance': final_balance,
             'currency_id': request.env.company.currency_id.id,
@@ -66,7 +67,7 @@ class GameController(http.Controller):
             state = 'in_progress'
             initial_balance = 0.0
             final_balance = 0.0
-            session_vals = self._prepare_session_vals(product_id, user_id, initial_balance, final_balance, state, result=None)
+            session_vals = self._prepare_session_vals(product_id, user_id, initial_balance, final_balance, 0, state, result=None)
             
             session = request.env['casino.game.session'].sudo().create(session_vals)
             _logger.info('Sesión creada en start_game: %s', session)
@@ -166,6 +167,7 @@ class GameController(http.Controller):
             session = request.env['casino.game.session'].sudo().browse(resp['session_id'])
             balance = session.final_balance if session.final_balance not in (None, False) else (session.initial_balance or 0.0)
             resp['balance'] = balance
+            
             return resp
         except Exception as e:
             return {'error': f'Error en login: {str(e)}'}
@@ -263,7 +265,7 @@ class GameController(http.Controller):
             else:
                 return {'error': 'Operación inválida'}
 
-            session_vals = self._prepare_session_vals(s.game_id.id, s.user_id.id, last_session.final_balance, new_balance, state, result)
+            session_vals = self._prepare_session_vals(s.game_id.id, s.user_id.id, last_session.final_balance, new_balance, amt, state, result)
             
             session = request.env['casino.game.session'].sudo().create(session_vals)
             _logger.info('Sesión creada en _apply_amount: %s', session)

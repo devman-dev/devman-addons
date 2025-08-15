@@ -8,6 +8,7 @@ class CasinoGameSession(models.Model):
     user_id = fields.Many2one('res.users', string='Jugador', required=True)
     start_datetime = fields.Datetime(string='Inicio')
     end_datetime = fields.Datetime(string='Fin')
+    amount = fields.Monetary(string='Monto', required=True)
     initial_balance = fields.Monetary(string='Saldo Inicial')
     final_balance = fields.Monetary(string='Saldo Final')
     currency_id = fields.Many2one('res.currency', string='Moneda')

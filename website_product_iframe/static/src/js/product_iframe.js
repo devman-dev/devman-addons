@@ -30,7 +30,7 @@ import { rpc } from "@web/core/network/rpc";
         z-index:10;                     /* por encima del iframe */
         display:flex; align-items:center; justify-content:space-between; gap:8px;
     }
-    .game-toolbar{ display:flex; flex-wrap:wrap; gap:6px; }
+    .game-toolbar{ display:flex; flex-wrap:wrap; gap:6px; margin-left:160px; flex:1; }
     .game-btn{
         border:0; padding:6px 10px; border-radius:8px;
         color:#fff; cursor:pointer; background:rgba(255,255,255,.15);
@@ -206,14 +206,19 @@ publicWidget.registry.ProductIframe = publicWidget.Widget.extend({
         this._promptAndCall = async (sid, url) => {
             if (!this._currentOverlay?.tracked || !sid) return alert('No hay sesión activa. Hacé Login.');
             const raw = prompt('Ingrese monto:');
+            const transactionId = prompt('Ingrese ID de transacción:');
             if (raw === null) return;
             const amount = parseFloat(String(raw).replace(',', '.'));
             if (Number.isNaN(amount) || amount < 0) return alert('Monto inválido');
             try {
-                const res = await rpc(url, { session_id: sid, amount });
+                const res = await rpc(url, { session_id: sid, amount, transaction_id: transactionId });
                 if (res.error) return alert(res.error);
-                if (res.balance !== undefined) this._updateBadge(res.balance);
-            } catch { alert('Error de red'); }
+                if (res.balance !== undefined) {
+                    this._updateBadge(res.balance);
+                    alert(`Balance actual: ${res.balance}`)
+                }
+            }
+            catch { alert('Error de red'); }
         };
 
         this._getBalance = async (sid) => {
