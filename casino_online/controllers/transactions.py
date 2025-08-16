@@ -2,6 +2,7 @@
 from odoo import http
 from odoo.http import request
 from datetime import datetime, date
+from odoo.addons.payment import utils as payment_utils
 from odoo.exceptions import UserError, ValidationError
 from odoo.addons.portal.controllers.portal import CustomerPortal
 
@@ -239,29 +240,69 @@ class MiPortalController(http.Controller):
             'nuevo_cbu': partner.nuevo_cbu,
         })
 
-    @http.route('/my/depositar', type='http', auth='user', website=True, methods=['GET', 'POST'], csrf=True)
-    def portal_depositar(self, **post):
-        if request.httprequest.method == 'POST':
-            amount = post.get('amount')
-            payment_provider_id = post.get('payment_provider_id')
-            if not amount or not payment_provider_id:
-                return request.redirect('/my/depositar')
-            request.env['portal.deposito'].sudo().create({
-                'partner_id': request.env.user.partner_id.id,
-                'amount': float(amount),
-                'payment_provider_id': int(payment_provider_id),
-            })
-            return request.redirect('/my')
+    @http.route('/my/depositar', type='http', auth='user', website=True)
+    def depositar_form(self, **kwargs):
+        try:
+            partner = request.env.user.partner_id
+            amount = float(kwargs.get('amount', 10.0))  # Monto mínimo de $10
 
-        payment_methods = request.env['payment.provider'].sudo().search([
-            ('state', '=', 'test'), ('is_published', '=', True)
-        ])
-        return request.render('casino_online.portal_depositar_form', {'payment_providers': payment_methods})
+            # Configuración base
+            availability_report = {}
+            currency = request.env.company.currency_id
 
-    @http.route('/my/depositar', type='http', auth='user', methods=['POST'], website=True)
-    def portal_depositar_submit(self, **post):
-        amount = post.get('amount')
-        return request.redirect('/my/confirmacion_deposito')
+            # Obtener proveedores compatibles con manejo seguro
+            providers = request.env['payment.provider'].sudo()._get_compatible_providers(
+                request.env.company.id,
+                partner.id,
+                amount,
+                report=availability_report,
+            ) or request.env['payment.provider']  # Lista vacía si es None
+
+            # Obtener métodos de pago con manejo seguro
+            payment_methods = request.env['payment.method'].sudo()._get_compatible_payment_methods(
+                providers.ids,
+                partner.id,
+                report=availability_report,
+            ) or request.env['payment.method']  # Lista vacía si es None
+
+            # Obtener tokens con manejo seguro
+            tokens = request.env['payment.token'].sudo()._get_available_tokens(
+                None, partner.id
+            ) or request.env['payment.token']  # Lista vacía si es None
+
+            # Contexto completo para el template
+            rendering_context = {
+                # Datos del formulario
+                'amount': amount,
+                'mode': 'form',
+                'allow_token_selection': True,
+                'allow_token_deletion': False,
+
+                # Contexto de pago
+                'partner_id': partner.id,
+                'currency_id': currency.id,
+                'reference_prefix': payment_utils.singularize_reference_prefix(prefix='DEP'),
+                'providers_sudo': providers,
+                'payment_methods_sudo': payment_methods,
+                'tokens_sudo': tokens,
+                'availability_report': availability_report,
+
+                # Rutas y seguridad
+                'transaction_route': '/payment/transaction',
+                'landing_route': '/my/depositar',
+                'access_token': payment_utils.generate_access_token(partner.id, None, None),
+
+                # Valores por defecto para evitar None
+                'selected_token_id': None,
+                'selected_provider_id': None,
+            }
+
+            return request.render('casino_online.portal_depositar_form', rendering_context)
+
+        except Exception as e:
+            # Manejo de errores para diagnóstico
+            # _logger.error("Error rendering deposit form: %s", str(e))
+            raise
 
     @http.route('/my/retirar', type='http', auth='user', website=True, methods=['GET', 'POST'], csrf=True)
     def portal_retirar(self, **post):

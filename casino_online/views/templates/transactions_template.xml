@@ -1,61 +1,124 @@
 <odoo>
-    <template id="portal_depositar_form" t-name="casino_online.portal_depositar_form" name="Formulario Depositar">
-        <div class="container">
-            <h2>Depositar Dinero</h2>
+    <template id="portal_depositar_form" name="Deposit Form">
+        <t t-set="page_title" t-value="'Depositar Fondos'"/>
 
-            <form action="/my/depositar" method="post">
-                <!-- Métodos de pago -->
-                <div class="mb-3">
-                    <label class="form-label">Selecciona un método de pago:</label>
-                    <t t-foreach="payment_providers" t-as="provider">
-                        <label class="list-group-item">
-                            <input type="radio" name="payment_provider_id" t-att-value="provider.id" class="form-check-input me-2" required="required" />
-                            <t t-esc="provider.name" />
-                        </label>
-                    </t>
+        <div class="container mt-4">
+            <div class="row justify-content-center">
+                <div class="col-lg-8">
+                    <div class="card">
+                        <div class="card-header bg-primary text-white">
+                            <h3 class="card-title mb-0">Depositar Dinero</h3>
+                        </div>
+
+                        <div class="card-body">
+                            <form action="/my/depositar" method="post" class="oe_payment_form">
+                                <!-- Campo de monto -->
+                                <div class="form-group mb-4">
+                                    <label for="amount" class="form-label">Monto a depositar (USD)</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">$</span>
+                                        <input type="number" step="0.01" min="10"
+                                               name="amount" id="amount" class="form-control"
+                                               required="required" t-att-value="amount"/>
+                                    </div>
+                                </div>
+
+                                <!-- Sección de métodos de pago -->
+                                <div class="payment-methods-section border-top pt-3">
+                                    <h4 class="mb-3">Método de Pago</h4>
+
+                                    <t t-if="payment_methods_sudo">
+                                        <t t-call="payment.payment_methods">
+                                            <!-- Todos los parámetros necesarios -->
+                                        </t>
+                                    </t>
+                                    <t t-else="">
+                                        <div class="alert alert-warning">
+                                            No hay métodos de pago disponibles. Por favor contacte al administrador.
+                                        </div>
+                                    </t>
+                                </div>
+
+                                <div class="text-center mt-4">
+                                    <button type="submit" class="btn btn-primary btn-lg px-5">
+                                        Confirmar Depósito
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Tabla de Historial de Transacciones Mejorada -->
+                    <div class="card mt-4">
+                        <div class="card-header bg-info text-white">
+                            <h4 class="card-title mb-0">Historial de Transacciones</h4>
+                        </div>
+                        <div class="card-body p-0">
+                            <div class="table-responsive">
+                                <table class="table table-hover mb-0">
+                                    <thead class="thead-light">
+                                        <tr>
+                                            <th class="text-center">Fecha</th>
+                                            <th>Descripción</th>
+                                            <th class="text-center">Tipo</th>
+                                            <th class="text-end">Monto</th>
+                                            <th class="text-center">Estado</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td class="text-center">15/08/2025</td>
+                                            <td>Depósito inicial</td>
+                                            <td class="text-center">
+                                                <span class="badge bg-success">Ingreso</span>
+                                            </td>
+                                            <td class="text-end text-success fw-bold">$1,000.00</td>
+                                            <td class="text-center">
+                                                <span class="badge bg-success">Completado</span>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="text-center">14/08/2025</td>
+                                            <td>Retiro cajero</td>
+                                            <td class="text-center">
+                                                <span class="badge bg-danger">Egreso</span>
+                                            </td>
+                                            <td class="text-end text-danger fw-bold">$200.00</td>
+                                            <td class="text-center">
+                                                <span class="badge bg-warning text-dark">Pendiente</span>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="text-center">10/08/2025</td>
+                                            <td>Depósito por transferencia</td>
+                                            <td class="text-center">
+                                                <span class="badge bg-success">Ingreso</span>
+                                            </td>
+                                            <td class="text-end text-success fw-bold">$500.00</td>
+                                            <td class="text-center">
+                                                <span class="badge bg-success">Completado</span>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                    <tfoot>
+                                        <tr class="table-active">
+                                            <td colspan="3" class="text-end fw-bold">Total:</td>
+                                            <td class="text-end fw-bold">$1,300.00</td>
+                                            <td></td>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="card-footer text-muted">
+                            Mostrando 3 de 15 transacciones
+                        </div>
+                    </div>
                 </div>
-
-                <!-- Monto a depositar -->
-                <div class="mb-3">
-                    <label for="amount" class="form-label">Monto a depositar</label>
-                    <input type="number" step="0.01" min="0" name="amount" id="amount" class="form-control" required="required" />
-                </div>
-
-                <!-- Botón -->
-                <button type="submit" class="btn btn-primary">Depositar</button>
-
-                <!-- Tabla de movimientos -->
-                <table class="table table-striped">
-                    <thead>
-                        <tr>
-                            <th>Fecha</th>
-                            <th>Descripción</th>
-                            <th>Tipo</th>
-                            <th>Monto</th>
-                            <th>Estado</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>2025-08-05</td>
-                            <td>Depósito inicial</td>
-                            <td>Ingreso</td>
-                            <td>$1000.00</td>
-                            <td>Completado</td>
-                        </tr>
-                        <tr>
-                            <td>2025-08-04</td>
-                            <td>Retiro cajero</td>
-                            <td>Egreso</td>
-                            <td>$200.00</td>
-                            <td>Pendiente</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </form>
+            </div>
         </div>
-    </template>
 
+    </template>
     <template id="portal_retirar_form" name="Formulario Retirar">
         <div class="container">
             <h2>Retirar Dinero</h2>
@@ -64,14 +127,16 @@
                     <label class="form-label">Selecciona un método de pago:</label>
                     <t t-foreach="payment_providers" t-as="provider">
                         <label class="list-group-item">
-                            <input type="radio" name="payment_provider_id" t-att-value="provider.id" class="form-check-input me-2" required="required" />
-                            <t t-esc="provider.name" />
+                            <input type="radio" name="payment_provider_id" t-att-value="provider.id"
+                                   class="form-check-input me-2" required="required"/>
+                            <t t-esc="provider.name"/>
                         </label>
                     </t>
                 </div>
                 <div class="mb-3">
                     <label for="amount" class="form-label">Monto a retirar</label>
-                    <input type="number" step="0.01" min="0" name="amount" id="amount" class="form-control" required="required" />
+                    <input type="number" step="0.01" min="0" name="amount" id="amount" class="form-control"
+                           required="required"/>
                 </div>
                 <button type="submit" class="btn btn-primary">Retirar</button>
             </form>
@@ -84,7 +149,8 @@
             <form action="/my/registrar_bonus" method="post">
                 <div class="mb-3">
                     <label for="promo_code" class="form-label">Ingresa tu código promocional</label>
-                    <input type="text" name="promo_code" id="promo_code" class="form-control" required="required" placeholder="Ej: BONUS2025" />
+                    <input type="text" name="promo_code" id="promo_code" class="form-control" required="required"
+                           placeholder="Ej: BONUS2025"/>
                 </div>
                 <button type="submit" class="btn btn-success">Registrar Bonus</button>
             </form>
@@ -100,29 +166,30 @@
                 <div class="row mb-3">
                     <div class="col-md-6">
                         <label for="start_date" class="form-label">Fecha de Inicio</label>
-                        <input type="date" id="start_date" name="start_date" class="form-control" value="" />
+                        <input type="date" id="start_date" name="start_date" class="form-control" value=""/>
                     </div>
                     <div class="col-md-6">
                         <label for="end_date" class="form-label">Fecha de Fin</label>
-                        <input type="date" id="end_date" name="end_date" class="form-control" value="" />
+                        <input type="date" id="end_date" name="end_date" class="form-control" value=""/>
                     </div>
                 </div>
                 <div class="mb-3">
                     <label class="form-label d-block">Buscar por Tipo</label>
                     <div class="form-check form-check-inline">
-                        <input class="form-check-input" type="checkbox" name="types" value="deposito_retiro" checked="checked" />
+                        <input class="form-check-input" type="checkbox" name="types" value="deposito_retiro"
+                               checked="checked"/>
                         <label class="form-check-label">Dep./Retiros</label>
                     </div>
                     <div class="form-check form-check-inline">
-                        <input class="form-check-input" type="checkbox" name="types" value="bonus" />
+                        <input class="form-check-input" type="checkbox" name="types" value="bonus"/>
                         <label class="form-check-label">Saldo de Bonus</label>
                     </div>
                     <div class="form-check form-check-inline">
-                        <input class="form-check-input" type="checkbox" name="types" value="juego" />
+                        <input class="form-check-input" type="checkbox" name="types" value="juego"/>
                         <label class="form-check-label">Transacciones de Juegos</label>
                     </div>
                     <div class="form-check form-check-inline">
-                        <input class="form-check-input" type="checkbox" name="types" value="ajuste" />
+                        <input class="form-check-input" type="checkbox" name="types" value="ajuste"/>
                         <label class="form-check-label">Ajustes</label>
                     </div>
                 </div>
@@ -142,15 +209,19 @@
                 <div class="col-md-6">
                     <strong>Saldo Actual:
                         <span t-if="(saldo_final is not None) and (saldo_final &gt;= 0)" class="text-success">
-                            $<t t-esc="saldo_final"/>
+                            $
+                            <t t-esc="saldo_final"/>
                         </span>
                         <span t-elif="(saldo_final is not None) and (saldo_final &lt; 0)" class="text-danger">
-                            -$<t t-esc="abs(saldo_final)"/>
+                            -$
+                            <t t-esc="abs(saldo_final)"/>
                         </span>
                     </strong>
                 </div>
                 <div class="col-md-6 text-end">
-                    <strong>Total de Movimientos: <t t-esc="total_movements"/></strong>
+                    <strong>Total de Movimientos:
+                        <t t-esc="total_movements"/>
+                    </strong>
                 </div>
             </div>
         </div>
@@ -169,21 +240,41 @@
                 <tbody>
                     <t t-foreach="movements" t-as="movement">
                         <tr>
-                            <td><t t-esc="movement['date']"/></td>
-                            <td><t t-esc="movement['description']"/></td>
-                            <td><span class="badge bg-secondary"><t t-esc="movement['type_display']"/></span></td>
-                            <td class="text-end">
-                                <span t-if="movement['amount'] &gt;= 0" class="text-success">+$<t t-esc="movement['amount']"/></span>
-                                <span t-else="" class="text-danger">$<t t-esc="movement['amount']"/></span>
+                            <td>
+                                <t t-esc="movement['date']"/>
                             </td>
                             <td>
-                                <span t-if="movement['state'] == 'Completado'" class="badge bg-success"><t t-esc="movement['state']"/></span>
-                                <span t-else="" class="badge bg-warning"><t t-esc="movement['state']"/></span>
+                                <t t-esc="movement['description']"/>
+                            </td>
+                            <td>
+                                <span class="badge bg-secondary">
+                                    <t t-esc="movement['type_display']"/>
+                                </span>
+                            </td>
+                            <td class="text-end">
+                                <span t-if="movement['amount'] &gt;= 0" class="text-success">+$
+                                    <t t-esc="movement['amount']"/>
+                                </span>
+                                <span t-else="" class="text-danger">$
+                                    <t t-esc="movement['amount']"/>
+                                </span>
+                            </td>
+                            <td>
+                                <span t-if="movement['state'] == 'Completado'" class="badge bg-success">
+                                    <t t-esc="movement['state']"/>
+                                </span>
+                                <span t-else="" class="badge bg-warning">
+                                    <t t-esc="movement['state']"/>
+                                </span>
                             </td>
                             <td class="text-end">
                                 <strong>
-                                    <span t-if="movement['balance'] &gt;= 0" class="text-success">$<t t-esc="movement['balance']"/></span>
-                                    <span t-else="" class="text-danger">$<t t-esc="movement['balance']"/></span>
+                                    <span t-if="movement['balance'] &gt;= 0" class="text-success">$
+                                        <t t-esc="movement['balance']"/>
+                                    </span>
+                                    <span t-else="" class="text-danger">$
+                                        <t t-esc="movement['balance']"/>
+                                    </span>
                                 </strong>
                             </td>
                         </tr>
@@ -195,106 +286,115 @@
 
 
     <template id="portal_medios_pagos" name="Mis Medios de Pago">
-            <div class="container  ">
-                <h2>Configura tus Métodos de Pago</h2>
+        <div class="container  ">
+            <h2>Configura tus Métodos de Pago</h2>
 
-                <form action="/my/medios_pagos" method="post">
-                    <table class="table table-bordered">
-                        <thead>
+            <form action="/my/medios_pagos" method="post">
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th>Método de Pago</th>
+                            <th>Usar para Depósito</th>
+                            <th>Usar para Retiro</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <t t-foreach="payment_methods" t-as="pm">
                             <tr>
-                                <th>Método de Pago</th>
-                                <th>Usar para Depósito</th>
-                                <th>Usar para Retiro</th>
+                                <td>
+                                    <t t-esc="pm.name"/>
+                                </td>
+                                <td>
+                                    <input type="checkbox" name="deposit_{{ pm.id }}"
+                                           t-att-checked="pm.config.for_deposit if pm.config else False"/>
+                                </td>
+                                <td>
+                                    <input type="checkbox" name="withdraw_{{ pm.id }}"
+                                           t-att-checked="pm.config.for_withdraw if pm.config else False"/>
+                                </td>
                             </tr>
-                        </thead>
-                        <tbody>
-                            <t t-foreach="payment_methods" t-as="pm">
-                                <tr>
-                                    <td>
-                                        <t t-esc="pm.name" />
-                                    </td>
-                                    <td>
-                                        <input type="checkbox" name="deposit_{{ pm.id }}" t-att-checked="pm.config.for_deposit if pm.config else False" />
-                                    </td>
-                                    <td>
-                                        <input type="checkbox" name="withdraw_{{ pm.id }}" t-att-checked="pm.config.for_withdraw if pm.config else False" />
-                                    </td>
-                                </tr>
-                            </t>
-                        </tbody>
-                    </table>
+                        </t>
+                    </tbody>
+                </table>
 
-                    <button type="submit" class="btn btn-primary">Guardar Configuración</button>
-                </form>
-            </div>
+                <button type="submit" class="btn btn-primary">Guardar Configuración</button>
+            </form>
+        </div>
     </template>
 
     <template id="portal_mis_limites" name="Mis Límites">
-            <div class="container  ">
-                <h2>Mis Límites</h2>
+        <div class="container  ">
+            <h2>Mis Límites</h2>
 
-                <form action="/my/mis_limites" method="post">
-                    <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()" />
+            <form action="/my/mis_limites" method="post">
+                <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
 
-                    <div class="mb-4">
-                        <label for="daily_limit" class="form-label fw-bold">Límite diario de depósito</label>
-                        <input type="number" step="0.01" min="0" name="daily_limit" id="daily_limit" class="form-control" t-att-value="daily_limit or ''" />
-                    </div>
+                <div class="mb-4">
+                    <label for="daily_limit" class="form-label fw-bold">Límite diario de depósito</label>
+                    <input type="number" step="0.01" min="0" name="daily_limit" id="daily_limit" class="form-control"
+                           t-att-value="daily_limit or ''"/>
+                </div>
 
-                    <div class="mb-4">
-                        <label for="weekly_limit" class="form-label fw-bold">Límite semanal de depósito</label>
-                        <input type="number" step="0.01" min="0" name="weekly_limit" id="weekly_limit" class="form-control" t-att-value="weekly_limit or ''" />
-                    </div>
+                <div class="mb-4">
+                    <label for="weekly_limit" class="form-label fw-bold">Límite semanal de depósito</label>
+                    <input type="number" step="0.01" min="0" name="weekly_limit" id="weekly_limit" class="form-control"
+                           t-att-value="weekly_limit or ''"/>
+                </div>
 
-                    <div class="mb-4">
-                        <label for="monthly_limit" class="form-label fw-bold">Límite mensual de depósito</label>
-                        <input type="number" step="0.01" min="0" name="monthly_limit" id="monthly_limit" class="form-control" t-att-value="monthly_limit or ''" />
-                    </div>
+                <div class="mb-4">
+                    <label for="monthly_limit" class="form-label fw-bold">Límite mensual de depósito</label>
+                    <input type="number" step="0.01" min="0" name="monthly_limit" id="monthly_limit"
+                           class="form-control" t-att-value="monthly_limit or ''"/>
+                </div>
 
-                    <button type="submit" class="btn btn-primary">Guardar Límites</button>
-                </form>
-            </div>
+                <button type="submit" class="btn btn-primary">Guardar Límites</button>
+            </form>
+        </div>
     </template>
 
     <template id="portal_datos_bancarios" name="Mis Datos Bancarios">
-            <div class="container  ">
-                <h2>MIS DATOS BANCARIOS</h2>
+        <div class="container  ">
+            <h2>MIS DATOS BANCARIOS</h2>
 
-                <form action="/my/datos_bank" method="post">
-                    <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()" />
+            <form action="/my/datos_bank" method="post">
+                <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
 
-                    <div class="mb-3">
-                        <label for="account_number" class="form-label">Cuenta Bancaria</label>
-                        <input type="text" name="account_number" id="account_number" class="form-control" t-att-value="account_number or ''" />
-                    </div>
+                <div class="mb-3">
+                    <label for="account_number" class="form-label">Cuenta Bancaria</label>
+                    <input type="text" name="account_number" id="account_number" class="form-control"
+                           t-att-value="account_number or ''"/>
+                </div>
 
-                    <div class="mb-3">
-                        <label for="bank_name" class="form-label">Banco</label>
-                        <input type="text" name="bank_name" id="bank_name" class="form-control" t-att-value="bank_name or ''" />
-                    </div>
+                <div class="mb-3">
+                    <label for="bank_name" class="form-label">Banco</label>
+                    <input type="text" name="bank_name" id="bank_name" class="form-control"
+                           t-att-value="bank_name or ''"/>
+                </div>
 
-                    <div class="mb-3">
-                        <label for="account_type" class="form-label">Tipo de Cuenta</label>
-                        <input type="text" name="account_type" id="account_type" class="form-control" t-att-value="account_type or ''" />
-                    </div>
+                <div class="mb-3">
+                    <label for="account_type" class="form-label">Tipo de Cuenta</label>
+                    <input type="text" name="account_type" id="account_type" class="form-control"
+                           t-att-value="account_type or ''"/>
+                </div>
 
-                    <div class="mb-3">
-                        <label for="cbu" class="form-label">CBU</label>
-                        <input type="text" name="cbu" id="cbu" class="form-control" t-att-value="cbu or ''" />
-                    </div>
+                <div class="mb-3">
+                    <label for="cbu" class="form-label">CBU</label>
+                    <input type="text" name="cbu" id="cbu" class="form-control" t-att-value="cbu or ''"/>
+                </div>
 
-                    <div class="mb-3">
-                        <label for="cuil" class="form-label">CUIL</label>
-                        <input type="text" name="cuil" id="cuil" class="form-control" t-att-value="cuil or ''" />
-                    </div>
+                <div class="mb-3">
+                    <label for="cuil" class="form-label">CUIL</label>
+                    <input type="text" name="cuil" id="cuil" class="form-control" t-att-value="cuil or ''"/>
+                </div>
 
-                    <div class="mb-3">
-                        <label for="nuevo_cbu" class="form-label">Nuevo CBU</label>
-                        <input type="text" name="nuevo_cbu" id="nuevo_cbu" class="form-control" t-att-value="nuevo_cbu or ''" />
-                    </div>
+                <div class="mb-3">
+                    <label for="nuevo_cbu" class="form-label">Nuevo CBU</label>
+                    <input type="text" name="nuevo_cbu" id="nuevo_cbu" class="form-control"
+                           t-att-value="nuevo_cbu or ''"/>
+                </div>
 
-                    <button type="submit" class="btn btn-primary">Guardar Datos</button>
-                </form>
-            </div>
+                <button type="submit" class="btn btn-primary">Guardar Datos</button>
+            </form>
+        </div>
     </template>
 </odoo>
