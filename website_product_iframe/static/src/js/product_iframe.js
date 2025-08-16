@@ -146,14 +146,8 @@ publicWidget.registry.ProductIframe = publicWidget.Widget.extend({
                     timestamp: res.timestamp,
                     country: res.country,
                 });
-                alert(`Login Exitoso:`, {
-                    token: res.token,
-                    balance: res.balance,
-                    currency: res.currency,
-                    nickname: res.nickname,
-                    timestamp: res.timestamp,
-                    country: res.country,
-                });
+                alert(`Login Exitoso: ${JSON.stringify({ token: res.token }, null, 2)}`);
+
             } catch { alert('Error de red'); }
         });
         const btnWin = this._makeBtn('✅ Ganada', () => this._promptAndCall(sessionIdGetter(), '/api/v1/credit'));
