@@ -6,6 +6,7 @@ class CasinoGameSession(models.Model):
 
     game_id = fields.Many2one('product.product', string='Juego', required=True)
     user_id = fields.Many2one('res.users', string='Jugador', required=True)
+    transaction_id = fields.Text(string='Transacción')
     start_datetime = fields.Datetime(string='Inicio')
     end_datetime = fields.Datetime(string='Fin')
     amount = fields.Monetary(string='Monto', required=True)
@@ -16,7 +17,8 @@ class CasinoGameSession(models.Model):
         ('win', 'Ganó'),
         ('loss', 'Perdió'),
         ('draw', 'Empate'),
-        ('abandoned', 'Abandonada')
+        ('abandoned', 'Abandonada'),
+        ('balance', 'Balance')
     ], string='Resultado')
     state = fields.Selection([
         ('pending', 'Pendiente'),
@@ -26,3 +28,4 @@ class CasinoGameSession(models.Model):
     ], default='pending', string='Estado')
     description = fields.Text(string='Descripción')
     move_ids = fields.One2many('account.move', 'game_session_id', string='Movimientos')
+    json_data = fields.Text(string='JSON Recibido')

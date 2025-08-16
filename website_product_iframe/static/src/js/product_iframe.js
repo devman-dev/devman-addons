@@ -130,20 +130,37 @@ publicWidget.registry.ProductIframe = publicWidget.Widget.extend({
             if (!productId) return alert('Producto no identificado.');
             try {
                 console.log("Llamada a la api de login");
-                const res = await rpc('/api/v1/login', { product_id: productId });
+                const transactionID = prompt('Ingrese ID de transacción:');
+                const res = await rpc('/api/v1/login', { product_id: productId, transaction_id: transactionID });
                 if (res.error) return alert(res.error);
                 ov.sessionId = res.session_id;
                 ov.tracked = true;
                 this._updateBadge(res.balance ?? 0);
                 console.log('ov:', ov);
-                alert('Login OK');
+                // console.log(`Response Debit / Credit: ${JSON.stringify(res, null, 2)}`);
+                console.log('Login Exitoso:', {
+                    token: res.token,
+                    balance: res.balance,
+                    currency: res.currency,
+                    nickname: res.nickname,
+                    timestamp: res.timestamp,
+                    country: res.country,
+                });
+                alert(`Login Exitoso:`, {
+                    token: res.token,
+                    balance: res.balance,
+                    currency: res.currency,
+                    nickname: res.nickname,
+                    timestamp: res.timestamp,
+                    country: res.country,
+                });
             } catch { alert('Error de red'); }
         });
         const btnWin = this._makeBtn('✅ Ganada', () => this._promptAndCall(sessionIdGetter(), '/api/v1/credit'));
         const btnLose = this._makeBtn('❌ Perdida', () => this._promptAndCall(sessionIdGetter(), '/api/v1/debit'));
         const btnRefund = this._makeBtn('↩️ Devolución', () => this._promptAndCall(sessionIdGetter(), '/api/v1/refund'));
         const btnBalance = this._makeBtn('💰 Balance', () => this._getBalance(sessionIdGetter(), '/api/v1/balance'));
-        const btnEnd = this._makeBtn('🛑 Terminar', () => this._endSession(sessionIdGetter()));
+        const btnEnd = this._makeBtn('🛑 Terminar', () => this._endSession(sessionIdGetter(), '/api/v1/end_game'));
 
         toolbar.append(btnLogin, btnWin, btnLose, btnRefund, btnBalance, btnEnd);
 
@@ -206,33 +223,57 @@ publicWidget.registry.ProductIframe = publicWidget.Widget.extend({
         this._promptAndCall = async (sid, url) => {
             if (!this._currentOverlay?.tracked || !sid) return alert('No hay sesión activa. Hacé Login.');
             const raw = prompt('Ingrese monto:');
-            const transactionId = prompt('Ingrese ID de transacción:');
+            // const transactionID = prompt('Ingrese ID de transacción:');
             if (raw === null) return;
             const amount = parseFloat(String(raw).replace(',', '.'));
             if (Number.isNaN(amount) || amount < 0) return alert('Monto inválido');
             try {
-                const res = await rpc(url, { session_id: sid, amount, transaction_id: transactionId });
+                const res = await rpc(url, { session_id: sid, amount });
                 if (res.error) return alert(res.error);
+                console.log(`Response Debit / Credit: ${JSON.stringify(res, null, 2)}`);
+                alert(`Response Debit/Credit: ${JSON.stringify(res, null, 2)}`);
                 if (res.balance !== undefined) {
                     this._updateBadge(res.balance);
-                    alert(`Balance actual: ${res.balance}`)
                 }
             }
             catch { alert('Error de red'); }
         };
 
-        this._getBalance = async (sid) => {
+        this._getBalance = async (sid, url) => {
             if (!this._currentOverlay?.tracked || !sid) return alert('No hay sesión activa. Hacé Login.');
             try {
-                const res = await rpc('/api/v1/balance', { session_id: sid });
+                // const transactionID = prompt('Ingrese ID de transacción:');
+                const res = await rpc(url, { session_id: sid, amount: 0 });
                 if (res.error) return alert(res.error);
-                alert(`Balance actual: ${res.balance}`);
-                if (res.balance !== undefined) this._updateBadge(res.balance);
+                console.log(`Response Balance Actual: ${JSON.stringify(res, null, 2)}`);
+                alert(`Response Balance Actual: ${JSON.stringify(res, null, 2)}`)
+                if (res.balance !== undefined) {
+                    this._updateBadge(res.balance);
+                }
             } catch { alert('Error de red'); }
         };
 
-        this._endSession = (sid) => {
-            if (sid) rpc('/api/v1/end', { session_id: sid }).catch(() => { });
+        this._endSession = async (sid, url) => {
+            if (!this._currentOverlay?.tracked || !sid) {
+                alert('No hay sesión activa. El juego se cerrará.');
+            }
+            else {
+                const raw = prompt('Esta opción da por finalizado el juego. Ingrese monto:');
+                // const transactionID = prompt('Ingrese ID de transacción:');
+                if (raw === null) return;
+                const amount = parseFloat(String(raw).replace(',', '.'));
+                if (Number.isNaN(amount) || amount < 0) return alert('Monto inválido');
+                try {
+                    const res = await rpc(url, { session_id: sid, amount });
+                    if (res.error) return alert(res.error);
+                    console.log(`Fin del Juego: ${JSON.stringify(res, null, 2)}`);
+                    alert(`Fin del juego: ${JSON.stringify(res, null, 2)}`)
+                    if (res.balance !== undefined) {
+                        this._updateBadge(res.balance);
+                    }
+                } catch { alert('Error de red'); }
+            }
+            // if (sid) rpc('/api/v1/end', { session_id: sid }).catch(() => { });
             this._closeOverlay({ viaButton: true });
         };
 
