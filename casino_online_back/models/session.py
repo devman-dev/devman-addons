@@ -3,6 +3,7 @@ from odoo import models, fields
 class CasinoGameSession(models.Model):
     _name = 'casino.game.session'
     _description = 'Sesión de juego del jugador'
+    _order = "id desc"
 
     game_id = fields.Many2one('product.product', string='Juego', required=True)
     user_id = fields.Many2one('res.users', string='Jugador', required=True)

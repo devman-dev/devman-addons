@@ -46,12 +46,29 @@
         </field>
     </record>
 
-    <!-- Acción corregida para Odoo 18 -->
+    <!-- Vista de búsqueda con agrupación por transaction_id -->
+    <record id="view_casino_game_session_search" model="ir.ui.view">
+        <field name="name">casino.game.session.search</field>
+        <field name="model">casino.game.session</field>
+        <field name="arch" type="xml">
+            <search string="Buscar Sesiones de Juego">
+                <field name="game_id" />
+                <field name="user_id" />
+                <field name="transaction_id" />
+                <filter string="Agrupar por Transacción"
+                    name="group_by_transaction_id"
+                    context="{'group_by':'transaction_id'}" />
+            </search>
+        </field>
+    </record>
+
+    <!-- Acción con agrupamiento por defecto en transaction_id -->
     <record id="action_casino_game_session" model="ir.actions.act_window">
         <field name="name">Sesiones de Juego</field>
         <field name="res_model">casino.game.session</field>
         <field name="view_mode">list,form</field>
         <field name="view_id" ref="view_casino_game_session_tree" />
+        <field name="search_view_id" ref="view_casino_game_session_search" />
+        <field name="context">{'search_default_group_by_transaction_id': 1}</field>
     </record>
-
 </odoo>
