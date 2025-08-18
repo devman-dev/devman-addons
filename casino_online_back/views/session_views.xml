@@ -5,10 +5,10 @@
         <field name="arch" type="xml">
             <form string="Sesión de Juego">
                 <group>
+                    <field name="transaction_id" />
                     <field name="game_id" />
                     <field name="user_id" />
                     <field name="token" />
-                    <field name="transaction_id" />
                     <field name="start_datetime" />
                     <field name="end_datetime" />
                     <field name="initial_balance" />
@@ -33,9 +33,10 @@
                 decoration-warning="state=='in_progress'"
                 decoration-muted="state=='pending'">
 
+                <field name="start_datetime" invisible="1" />
+                <field name="transaction_id" string="ID Transacción" />
                 <field name="game_id" string="Juego" />
                 <field name="user_id" string="Usuario" />
-                <field name="transaction_id" string="ID Transacción" />
                 <field name="initial_balance" string="S.Inicial" />
                 <field name="amount" string="Monto" />
                 <field name="final_balance" string="S.Final" />
@@ -53,12 +54,13 @@
         <field name="model">casino.game.session</field>
         <field name="arch" type="xml">
             <search string="Buscar Sesiones de Juego">
+                <field name="transaction_id" />
                 <field name="game_id" />
                 <field name="user_id" />
-                <field name="transaction_id" />
+                <field name="start_datetime" invisible="1" />
                 <filter string="Agrupar por Transacción"
-                    name="group_by_transaction_id"
-                    context="{'group_by':'transaction_id'}" />
+                    name="group_by_group_display_name"
+                    context="{'group_by':'group_display_name'}" />
             </search>
         </field>
     </record>

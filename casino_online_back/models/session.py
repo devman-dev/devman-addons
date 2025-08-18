@@ -1,4 +1,4 @@
-from odoo import models, fields
+from odoo import models, fields, api
 
 class CasinoGameSession(models.Model):
     _name = 'casino.game.session'
@@ -19,15 +19,29 @@ class CasinoGameSession(models.Model):
         ('loss', 'Perdió'),
         ('draw', 'Empate'),
         ('abandoned', 'Abandonada'),
-        ('balance', 'Balance')
+        ('balance', 'Balance'),
+        ('started', 'Started')
     ], string='Resultado')
     state = fields.Selection([
         ('pending', 'Pendiente'),
         ('in_progress', 'En curso'),
         ('finished', 'Finalizada'),
-        ('error', 'Error')
+        ('error', 'Error'),
+        ('logged_in', 'Logged In')
     ], default='pending', string='Estado')
     description = fields.Text(string='Descripción')
     move_ids = fields.One2many('account.move', 'game_session_id', string='Movimientos')
     json_data = fields.Text(string='JSON Recibido')
     token = fields.Char(string='Token')
+
+    group_display_name = fields.Char(
+        string="Agrupación Detallada",
+        compute="_compute_group_display_name",
+        store=True
+    )
+
+    @api.depends('transaction_id', 'game_id', 'user_id', 'start_datetime')
+    def _compute_group_display_name(self):
+        for rec in self:
+            rec.group_display_name = f"{rec.transaction_id or 'N/A'} - {rec.game_id.name or 'N/A'} - {rec.user_id.name or 'N/A'} - {rec.start_datetime.strftime('%Y-%m-%d %H:%M') if rec.start_datetime else 'N/A'}"
+            

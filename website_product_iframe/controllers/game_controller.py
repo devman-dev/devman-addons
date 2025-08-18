@@ -68,7 +68,7 @@ class GameController(http.Controller):
                 return {'error': 'Producto no encontrado'}
             
             # 1. Registrar en casino.game.session
-            state = 'in_progress'
+            state = 'logged_in'
             initial_balance = 0.0
             final_balance = 0.0
 
@@ -80,7 +80,7 @@ class GameController(http.Controller):
                 "timestamp": int(time.time() * 1000),
                 "country": "AR",
             }
-            session_vals = self._prepare_session_vals(product_id, user_id, token, initial_balance, final_balance, 0, state, result=None, transaction_id=transaction_id, json_data=json_data)
+            session_vals = self._prepare_session_vals(product_id, user_id, token, initial_balance, final_balance, 0, state, result='started', transaction_id=transaction_id, json_data=json_data)
 
             session = request.env['casino.game.session'].sudo().create(session_vals)
             _logger.info('Sesión creada en start_game: %s', session)
