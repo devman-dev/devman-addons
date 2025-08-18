@@ -209,11 +209,11 @@
                 <div class="col-md-6">
                     <strong>Saldo Actual:
                         <span t-if="(saldo_final is not None) and (saldo_final &gt;= 0)" class="text-success">
-                            $
+                            -$
                             <t t-esc="saldo_final"/>
                         </span>
                         <span t-elif="(saldo_final is not None) and (saldo_final &lt; 0)" class="text-danger">
-                            -$
+                            $
                             <t t-esc="abs(saldo_final)"/>
                         </span>
                     </strong>

@@ -42,6 +42,7 @@
 
     <template id="custom_portal_my_home" inherit_id="portal.portal_my_home">
         <xpath expr="//div[contains(@class, 'o_portal_my_home')]" position="before">
+            <!-- Script original -->
             <script type="text/javascript">
                 document.addEventListener("DOMContentLoaded", function () {
                     const buttons = document.querySelectorAll("button[data-target]");
@@ -52,8 +53,19 @@
                             allDivs.forEach((div) => { div.classList.add("d-none"); });
                             const targetDiv = document.querySelector(targetId);
                             if (targetDiv) { targetDiv.classList.remove("d-none"); }
+                            if (targetId) {
+                                history.replaceState(null, "", targetId);
+                            }
                         });
                     });
+
+                    // Si llega con hash #movimientos_form, mostrar esa sección
+                    if (window.location.hash === "#movimientos_form") {
+                        const allDivs = document.querySelectorAll(".w-75 > div");
+                        allDivs.forEach((div) => { div.classList.add("d-none"); });
+                        const targetDiv = document.querySelector("#movimientos_form");
+                        if (targetDiv) { targetDiv.classList.remove("d-none"); }
+                    }
                 });
             </script>
 
@@ -84,48 +96,57 @@
                         <t t-call="casino_online.portal_registrar_bonus_form"/>
                     </div>
 
-                    <!-- ===== Movimientos dentro de /my/home (sin AJAX) ===== -->
+                    <!-- ===== Movimientos ===== -->
                     <div id="movimientos_form" class="d-none">
                         <div class="o_portal_movements">
-                            <h2>Historial de Movimientos</h2>
-
-                            <!-- Importante: enviar a /my/home -->
-                            <form method="get" action="/my/home" class="mb-4 o_movements_filters">
+                            <!-- Form con hash para permanecer en la sección -->
+                            <form method="get" t-attf-action="{{ request.httprequest.path }}#movimientos_form" class="mb-4 o_movements_filters">
                                 <div class="row mb-3">
                                     <div class="col-md-6">
                                         <label for="start_date" class="form-label">Fecha de Inicio</label>
-                                        <input type="date" id="start_date" name="start_date" class="form-control"/>
+                                        <input type="date" id="start_date" name="start_date"
+                                               class="form-control" t-att-value="start_date or ''"/>
                                     </div>
                                     <div class="col-md-6">
                                         <label for="end_date" class="form-label">Fecha de Fin</label>
-                                        <input type="date" id="end_date" name="end_date" class="form-control"/>
+                                        <input type="date" id="end_date" name="end_date"
+                                               class="form-control" t-att-value="end_date or ''"/>
                                     </div>
                                 </div>
 
                                 <div class="mb-3">
                                     <label class="form-label d-block">Buscar por Tipo</label>
-                                    <div class="form-check form-check-inline">
-                                        <input class="form-check-input" type="checkbox" name="types" value="deposito_retiro" checked="checked"/>
-                                        <label class="form-check-label">Dep./Retiros</label>
-                                    </div>
-                                    <div class="form-check form-check-inline">
-                                        <input class="form-check-input" type="checkbox" name="types" value="bonus"/>
-                                        <label class="form-check-label">Saldo de Bonus</label>
-                                    </div>
-                                    <div class="form-check form-check-inline">
-                                        <input class="form-check-input" type="checkbox" name="types" value="juego"/>
-                                        <label class="form-check-label">Transacciones de Juegos</label>
-                                    </div>
-                                    <div class="form-check form-check-inline">
-                                        <input class="form-check-input" type="checkbox" name="types" value="ajuste"/>
-                                        <label class="form-check-label">Ajustes</label>
+                                    <div class="d-flex flex-wrap align-items-center gap-3">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" name="types" value="deposito_retiro"
+                                                   t-att-checked="'checked' if (selected_types and 'deposito_retiro' in selected_types) or (not selected_types) else None"/>
+                                            <label class="form-check-label">Dep./Retiros</label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" name="types" value="bonus"
+                                                   t-att-checked="'checked' if (selected_types and 'bonus' in selected_types) else None"/>
+                                            <label class="form-check-label">Saldo de Bonus</label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" name="types" value="juego"
+                                                   t-att-checked="'checked' if (selected_types and 'juego' in selected_types) else None"/>
+                                            <label class="form-check-label">Transacciones de Juegos</label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" name="types" value="ajuste"
+                                                   t-att-checked="'checked' if (selected_types and 'ajuste' in selected_types) else None"/>
+                                            <label class="form-check-label">Ajustes</label>
+                                        </div>
+
+                                        <!-- reset de página y preservación del tamaño -->
+                                        <input type="hidden" name="page" value="1"/>
+                                        <input type="hidden" name="page_size" t-att-value="page_size or 10"/>
+
+                                        <button type="submit" class="btn btn-primary ms-auto">Filtrar</button>
                                     </div>
                                 </div>
-
-                                <button type="submit" class="btn btn-primary">Filtrar</button>
                             </form>
 
-                            <!-- Render directo con variables provistas por /my/home -->
                             <div class="alert alert-info mb-4">
                                 <div class="row">
                                     <div class="col-md-6">
@@ -162,22 +183,26 @@
                                                 <td><t t-esc="movement['date']"/></td>
                                                 <td><t t-esc="movement['description']"/></td>
                                                 <td><span class="badge bg-secondary"><t t-esc="movement['type_display']"/></span></td>
+
+                                                <t t-set="is_fact" t-value="movement['type_display'] in ('Facturación','facturacion','Factura')"/>
+                                                <t t-set="signed_amount" t-value="(-movement['amount']) if is_fact else movement['amount']"/>
+
                                                 <td class="text-end">
-                                                    <span t-if="movement['amount'] &gt;= 0" class="text-success">+$<t t-esc="movement['amount']"/></span>
-                                                    <span t-else="" class="text-danger">$<t t-esc="movement['amount']"/></span>
+                                                    <span t-if="signed_amount &gt;= 0" class="text-success">+$<t t-esc="signed_amount"/></span>
+                                                    <span t-else="" class="text-danger">$<t t-esc="signed_amount"/></span>
                                                 </td>
+
                                                 <td>
                                                     <span t-if="movement['state'] == 'posted'" class="badge bg-success">Completado</span>
                                                     <span t-else="" class="badge bg-warning"><t t-esc="movement['state']"/></span>
                                                 </td>
+
+                                                <t t-set="signed_balance" t-value="(-movement['balance']) if is_fact else movement['balance']"/>
+
                                                 <td class="text-end">
                                                     <strong>
-                                                        <span t-if="movement['balance'] &gt;= 0" class="text-success">
-                                                            $<t t-esc="movement['balance']"/>
-                                                        </span>
-                                                        <span t-else="" class="text-danger">
-                                                            $<t t-esc="movement['balance']"/>
-                                                        </span>
+                                                        <span t-if="signed_balance &gt;= 0" class="text-success">$<t t-esc="signed_balance"/></span>
+                                                        <span t-else="" class="text-danger">-$<t t-esc="abs(signed_balance)"/></span>
                                                     </strong>
                                                 </td>
                                             </tr>
@@ -185,6 +210,45 @@
                                     </tbody>
                                 </table>
                             </div>
+
+                            <!-- ===== Paginación ===== -->
+                            <t t-set="q" t-value="'start_date=%s&amp;end_date=%s' % (start_date or '', end_date or '')"/>
+                            <t t-foreach="selected_types or []" t-as="tval">
+                                <t t-set="q" t-value="q + '&amp;types=' + tval"/>
+                            </t>
+                            <t t-set="q" t-value="q + '&amp;page_size=%s' % (page_size or 10)"/>
+
+                            <div class="d-flex align-items-center justify-content-between mt-3">
+                                <div class="small text-muted">
+                                    <t t-set="first_item" t-value="((page or 1)-1)*(page_size or 10) + 1 if (total_movements or 0) else 0"/>
+                                    <t t-set="last_item" t-value="min((page or 1)*(page_size or 10), (total_movements or 0))"/>
+                                    Mostrando <t t-esc="first_item"/>–<t t-esc="last_item"/> de <t t-esc="total_movements or 0"/>
+                                </div>
+
+                                <nav aria-label="Pagination">
+                                    <ul class="pagination mb-0">
+                                        <li class="page-item" t-att-class="'disabled' if (page or 1) &lt;= 1 else None">
+                                            <a class="page-link"
+                                               t-attf-href="{{ request.httprequest.path }}?{{ q }}&amp;page={{ (page or 1) - 1 }}#movimientos_form">￩</a>
+                                        </li>
+
+                                        <!-- Números de página -->
+                                        <t t-foreach="range(1, (page_count or 1)+1)" t-as="p">
+                                            <li class="page-item" t-att-class="'active' if p == (page or 1) else None">
+                                                <a class="page-link"
+                                                   t-attf-href="{{ request.httprequest.path }}?{{ q }}&amp;page={{ p }}#movimientos_form"><t t-esc="p"/></a>
+                                            </li>
+                                        </t>
+
+                                        <li class="page-item" t-att-class="'disabled' if (page or 1) &gt;= (page_count or 1) else None">
+                                            <a class="page-link"
+                                               t-attf-href="{{ request.httprequest.path }}?{{ q }}&amp;page={{ (page or 1) + 1 }}#movimientos_form">￫</a>
+                                        </li>
+                                    </ul>
+                                </nav>
+                            </div>
+                            <!-- ===== /Paginación ===== -->
+
                         </div>
                     </div>
                     <!-- ===== /Movimientos ===== -->

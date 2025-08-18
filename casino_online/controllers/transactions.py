@@ -1,10 +1,12 @@
 # controllers/transactions.py
-from odoo import http
+import math
+from datetime import date, datetime
+
+from odoo import http, fields
 from odoo.http import request
-from datetime import datetime, date
+from odoo.addons.portal.controllers.portal import CustomerPortal
 from odoo.addons.payment import utils as payment_utils
 from odoo.exceptions import UserError, ValidationError
-from odoo.addons.portal.controllers.portal import CustomerPortal
 
 
 class CasinoHome(CustomerPortal):
@@ -12,20 +14,24 @@ class CasinoHome(CustomerPortal):
     def home(self, **kw):
         values = self._prepare_portal_layout_values()
 
-        def _parse_date(s):
-            if not s:
-                return None
-            s = s.strip()
-            for fmt in ('%Y-%m-%d', '%d/%m/%Y'):
-                try:
-                    return datetime.strptime(s, fmt).date()
-                except ValueError:
-                    pass
-            return None
+        # === usar MultiDict para soportar getlist ===
+        args = request.httprequest.args
+        start_date_s   = args.get('start_date') or None
+        end_date_s     = args.get('end_date') or None
+        selected_types = args.getlist('types') or None
 
-        start_date = _parse_date(kw.get('start_date'))
-        end_date = _parse_date(kw.get('end_date'))
-        filtered = bool(start_date or end_date)
+        # parse robusto
+        start_date = fields.Date.to_date(start_date_s) if start_date_s else None
+        end_date   = fields.Date.to_date(end_date_s) if end_date_s else None
+
+        try:
+            page = max(int(args.get('page', 1)), 1)
+        except Exception:
+            page = 1
+        try:
+            page_size = min(max(int(args.get('page_size', 10)), 1), 100)
+        except Exception:
+            page_size = 10
 
         partner = request.env.user.partner_id.commercial_partner_id
         company = request.env.company
@@ -38,60 +44,112 @@ class CasinoHome(CustomerPortal):
             ('parent_state', 'in', ['draft', 'posted']),
         ]
 
-        # 1) Saldo actual sobre TODO el historial
-        saldo_total = 0.0
-        for l in AML.search(base_domain):
-            a = l.amount_signed if l.amount_signed is not None else l.balance
-            saldo_total += float(a or 0.0)
+        # ================================
+        # ANTES
+        # ================================
+        # start_date = _parse_date(kw.get('start_date'))
+        # end_date = _parse_date(kw.get('end_date'))
+        # filtered = bool(start_date or end_date)
+        #
+        # if filtered:
+        #     domain_display = list(base_domain)
+        #     if start_date:
+        #         domain_display.append(('date', '>=', start_date))
+        #     if end_date:
+        #         domain_display.append(('date', '<=', end_date))
+        #     lines_display = AML.search(domain_display, order='date asc, id asc')
+        # else:
+        #     # últimos 10
+        #     last10 = AML.search(base_domain, order='date desc, id desc', limit=10)
+        #     lines_display = last10.sorted(key=lambda r: (r.date or date.min, r.id))
+        #
+        # → Problema: cuando filtrabas se mostraban todos juntos,
+        #   sin paginación, y por defecto solo 10.
 
-        # 2) Líneas a mostrar
-        if filtered:
-            domain_display = list(base_domain)
-            if start_date:
-                domain_display.append(('date', '>=', start_date))
-            if end_date:
-                domain_display.append(('date', '<=', end_date))
-            lines_display = AML.search(domain_display, order='date asc, id asc')
+        # ================================
+        # AHORA (versión corregida con paginación)
+        # ================================
+
+        # saldo global
+        saldo_total = sum(
+            float((l.amount_signed if l.amount_signed is not None else l.balance) or 0.0)
+            for l in AML.search(base_domain)
+        )
+
+        # traigo todas las líneas del partner y filtro por fecha en Python usando fecha efectiva
+        lines_all = AML.search(base_domain, order='date asc, id asc')
+
+        def _eff_date(l):
+            # prioridad: línea.date, si no existe usar fecha del asiento
+            return l.date or l.move_id.date or date.min
+
+        # filtro por fecha si vienen parámetros
+        if start_date or end_date:
+            lines = [l for l in lines_all
+                     if (not start_date or _eff_date(l) >= start_date)
+                     and (not end_date or _eff_date(l) <= end_date)]
         else:
-            # últimos 10 por fecha, luego reordenadas ascendente para el cálculo del saldo progresivo
-            last10 = AML.search(base_domain, order='date desc, id desc', limit=10)
-            lines_display = last10.sorted(key=lambda r: (r.date or date.min, r.id))
+            lines = list(lines_all)
 
         def _classify(l):
             mt = l.move_id.move_type or ''
             jn = (l.journal_id and l.journal_id.name or '').lower()
+            jt = (l.journal_id.type or '').lower() if l.journal_id else ''
             if any(x in jn for x in ('bonus', 'promo', 'bono')):
-                return 'Saldo de Bonus'
+                return 'Saldo de Bonus', 'bonus'
+            if jt in ('bank', 'cash'):
+                return 'Dep./Retiros', 'deposito_retiro'
             if mt in ('out_invoice', 'out_refund', 'in_invoice', 'in_refund'):
-                return 'Transacciones de Juegos' if 'juego' in jn else 'Facturación'
+                return ('Transacciones de Juegos', 'juego') if 'juego' in jn else ('Facturación', 'juego')
             if mt == 'entry':
-                return 'Ajustes'
-            return 'Ajustes'
+                return 'Ajustes', 'ajuste'
+            return 'Ajustes', 'ajuste'
 
-        def _desc(l):
-            return l.name or l.move_id.ref or l.move_id.name or 'Movimiento contable'
-
-        movements = []
-        running = 0.0
-        for l in lines_display:
+        prepared = []
+        selset = set(selected_types) if selected_types else None
+        for l in lines:
+            label, key = _classify(l)
+            if selset and key not in selset:
+                continue
             amt = l.amount_signed if l.amount_signed is not None else l.balance
-            val = {
-                'date': (l.date or date.min).isoformat(),
-                'description': _desc(l),
-                'type_display': _classify(l),
+            prepared.append({
+                'id': l.id,
+                'date': _eff_date(l).isoformat(),
+                'description': l.name or l.move_id.ref or l.move_id.name or 'Movimiento contable',
+                'type_display': label,
+                'type_key': key,
                 'amount': round(float(amt or 0.0), 2),
                 'state': l.parent_state or l.move_id.state or '',
-            }
-            running += val['amount']
-            val['balance'] = round(running, 2)
-            movements.append(val)
+            })
+
+        # saldo progresivo sobre el subconjunto filtrado
+        running = 0.0
+        for mv in prepared:
+            running += mv['amount']
+            mv['balance'] = round(running, 2)
+
+        # paginación
+        total = len(prepared)
+        page_count = max(math.ceil(total / page_size), 1)
+        if page > page_count:
+            page = page_count
+        offset = (page - 1) * page_size
+        rows = prepared[offset: offset + page_size]
 
         values.update({
-            'movements': movements,
-            'saldo_final': round(saldo_total, 2),     # saldo global
-            'total_movements': len(movements),        # mostrados en la tabla
+            'movements': rows,
+            'saldo_final': round(saldo_total, 2),
+            'total_movements': total,
+            'page': page,
+            'page_count': page_count,
+            'page_size': page_size,
+            'start_date': start_date_s,
+            'end_date': end_date_s,
+            'selected_types': selected_types,
         })
         return request.render("portal.portal_my_home", values)
+
+
 
 class MiPortalController(http.Controller):
 
