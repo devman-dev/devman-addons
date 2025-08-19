@@ -130,8 +130,8 @@ publicWidget.registry.ProductIframe = publicWidget.Widget.extend({
             if (!productId) return alert('Producto no identificado.');
             try {
                 console.log("Llamada a la api de login");
-                const transactionID = prompt('Ingrese ID de transacción:');
-                const res = await rpc('/api/v1/login', { product_id: productId, transaction_id: transactionID });
+                const token = prompt('Ingrese el Token:');
+                const res = await rpc('/api/v1/login', { token: token });
                 if (res.error) return alert(res.error);
                 ov.sessionId = res.session_id;
                 ov.tracked = true;

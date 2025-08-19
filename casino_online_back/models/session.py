@@ -5,12 +5,17 @@ class CasinoGameSession(models.Model):
     _description = 'Sesión de juego del jugador'
     _order = "id desc"
 
-    game_id = fields.Many2one('product.product', string='Juego', required=True)
-    user_id = fields.Many2one('res.users', string='Jugador', required=True)
+    token = fields.Char(string='Token')
+    game_id = fields.Many2one('product.product', string='Juego')
+    endGame = fields.Boolean(string='Fin del Juego')
+    round_id = fields.Text(string='Ronda')
     transaction_id = fields.Text(string='Transacción')
+    amount = fields.Monetary(string='Monto')
+    TokenLive = fields.Boolean(string='Token Live')
+
+    user_id = fields.Many2one('res.users', string='Jugador', required=True)
     start_datetime = fields.Datetime(string='Inicio')
     end_datetime = fields.Datetime(string='Fin')
-    amount = fields.Monetary(string='Monto', required=True)
     initial_balance = fields.Monetary(string='Saldo Inicial')
     final_balance = fields.Monetary(string='Saldo Final')
     currency_id = fields.Many2one('res.currency', string='Moneda')
@@ -32,7 +37,6 @@ class CasinoGameSession(models.Model):
     description = fields.Text(string='Descripción')
     move_ids = fields.One2many('account.move', 'game_session_id', string='Movimientos')
     json_data = fields.Text(string='JSON Recibido')
-    token = fields.Char(string='Token')
 
     group_display_name = fields.Char(
         string="Agrupación Detallada",
