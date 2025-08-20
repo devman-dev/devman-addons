@@ -1,7 +1,7 @@
 from datetime import timedelta, datetime
 import token
 from odoo import http, fields
-from odoo.http import request
+from odoo.http import request, route, Response
 import logging
 import time
 import uuid
@@ -218,13 +218,15 @@ class GameController(http.Controller):
 
     # ===================== API extra (botones) =====================
 
-    @http.route('/api/v1/login', type='json', auth='public', methods=['POST'], csrf=False)
+    @http.route('/api/v1/login', type='http', auth='public', methods=['POST'], csrf=False)
     def api_login(self, **kwargs):
         """
         Login del juego: alias de start_game. Devuelve también balance actual.
         """
         data = request.get_json_data()
         token = data.get('token', None)
+        # data = request.params
+        # token = data.get('token')
         if token is None:
             token = data.get('params', {}).get('token')
         _logger.info('api_login called with kwargs: %s ----- %s ----- token: %s', json.dumps(kwargs, indent=2, ensure_ascii=False), data, token)
@@ -252,7 +254,8 @@ class GameController(http.Controller):
                 # 'iframe_url': result['iframe_url'],
                 # 'message': result['message']
             }
-            return response
+            return Response(json.dumps(response), content_type='application/json')
+            # return response
         except Exception as e:
             return {'error': f'Error en login: {str(e)}'}
         
@@ -286,7 +289,7 @@ class GameController(http.Controller):
         except Exception as e:
             return {'error': f'Error en login: {str(e)}'}
 
-    @http.route('/api/v1/credit', type='json', auth='public', methods=['POST'], csrf=False)
+    @http.route('/api/v1/credit', type='http', auth='public', methods=['POST'], csrf=False)
     def api_win(self, **kwargs):
         """Jugada ganada: suma amount al balance."""
         data = request.get_json_data()
@@ -309,6 +312,7 @@ class GameController(http.Controller):
             "transactionId": result.get("transaction_id", None),
             "timestamp": int(time.time() * 1000) # now
         }
+        return Response(json.dumps(response), content_type='application/json')
         return response
     
     def api_win2(self, session_id, amount, **kwargs):
@@ -326,7 +330,7 @@ class GameController(http.Controller):
         }
         return response
         
-    @http.route('/api/v1/debit', type='json', auth='public', methods=['POST'], csrf=False)
+    @http.route('/api/v1/debit', type='http', auth='public', methods=['POST'], csrf=False)
     def api_lose(self, **kwargs):
         """Jugada perdida: resta amount del balance."""
         data = request.get_json_data()
@@ -348,6 +352,7 @@ class GameController(http.Controller):
             "transactionId": result.get("transaction_id"),
             "timestamp": int(time.time() * 1000) # now
         }
+        return Response(json.dumps(response), content_type='application/json')
         return response
     
     def api_lose2(self, session_id, amount, **kwargs):
@@ -370,7 +375,7 @@ class GameController(http.Controller):
         """Devolución de plata: suma amount al balance (crédito)."""
         return self._apply_amount(session_id, amount, op='refund', token="", transaction_id=None)
 
-    @http.route('/api/v1/balance', type='json', auth='public', methods=['POST'], csrf=False)
+    @http.route('/api/v1/balance', type='http', auth='public', methods=['POST'], csrf=False)
     def api_balance(self, **kwargs):
         """Balance: devuelve saldo actual y estado de la sesión."""
         data = request.get_json_data()
@@ -393,6 +398,7 @@ class GameController(http.Controller):
                 "balance": result.get("balance", 0.0),
                 "timestamp": int(time.time() * 1000) # now
             }
+            return Response(json.dumps(response), content_type='application/json')
             return response
             # return {'success': True, 'balance': bal, 'state': s.state}
         except Exception as e:
