@@ -73,7 +73,7 @@ publicWidget.registry.ProductIframe = publicWidget.Widget.extend({
         return Date.now() < this._squelchUntil;
     },
 
-    _onProductCardClick(ev) {
+    async _onProductCardClick(ev) {
         // Ignorar si overlay ya está abierto o en anti-rebote
         if (this._overlayOpen || this._shouldSquelchClicks()) {
             ev.preventDefault();
@@ -85,17 +85,49 @@ publicWidget.registry.ProductIframe = publicWidget.Widget.extend({
 
         const a = ev.currentTarget;
         const productId = a.dataset.productId;
+        const agencyId = a.dataset.agencyId;
+        const lang = a.dataset.lang || 'es';
         const iframeUrl = a.dataset.productUrl;
         if (!iframeUrl) return; // sin iframe_url -> navegación normal
+        const baseIframeUrl = a.dataset.productUrl;
+        if (!baseIframeUrl || !agencyId) return; // sin datos -> navegación normal
 
         ev.preventDefault();
         ev.stopPropagation();
 
-        this._openOverlay(iframeUrl, { productId, tracked: false });
+        let token = '';
+        try {
+            token = await this._generateTokenForUser();
+        } catch {
+            alert('No se pudo obtener el token de usuario');
+            return;
+        }
+
+        const url = new URL(baseIframeUrl, window.location.origin);
+        url.searchParams.set('token', token);
+        url.searchParams.set('agencyId', agencyId);
+        url.searchParams.set('lang', lang);
+
+        // Realizar petición fetch y mostrar resultado en consola
+        try {
+            const response = await fetch(url.toString());
+            const result = await response.json();
+            console.log('Resultado de la petición:', result);
+        } catch (error) {
+            console.error('Error en la petición:', error);
+        }
+
+        this._openOverlay(url.toString(), { productId, token, tracked: false });
+        this._openOverlay(iframeUrl, { productId, token, tracked: false });
+    },
+
+    async _generateTokenForUser() {
+        // return await rpc('/api/v1/get_token');
+        return 'db8f24d5bd25fc9f89a800bb7d396621';
     },
 
     /* === Overlay fullscreen sin backdrop === */
-    _openOverlay(iframeUrl, { productId = null, sessionId = null, tracked = false, balance = 0 } = {}) {
+    _openOverlay(iframeUrl, { productId = null, sessionId = null, tracked = false, balance = 0, token } = {}) {
         this._overlayOpen = true;
 
         // Desactivar temporalmente href de los enlaces de productos con iframe

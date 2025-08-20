@@ -1,8 +1,11 @@
 <odoo>
-  <template id="products_item_iframe" inherit_id="website_sale.products_item" name="Shop Grid: Iframe on Click (robusto)">
+  <template id="products_item_iframe" inherit_id="website_sale.products_item"
+    name="Shop Grid: Iframe on Click (robusto)">
     <xpath expr=".//a[1]" position="attributes">
       <attribute name="t-att-data-product-id">product.id</attribute>
       <attribute name="t-att-data-product-url">product.iframe_url</attribute>
+      <attribute name="t-att-data-agency-id">product.agency_id</attribute>
+      <!-- <attribute name="t-att-data-lang">product.lang</attribute> -->
       <attribute name="data-overlay-trigger">1</attribute>
     </xpath>
   </template>

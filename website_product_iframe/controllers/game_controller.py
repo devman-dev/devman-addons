@@ -66,7 +66,7 @@ class GameController(http.Controller):
         """
         try:
             # Obtener datos del request
-            user_id = request.env.user.id
+            user = request.env.user
             
             # Buscar el producto
             product_id = None
@@ -85,56 +85,16 @@ class GameController(http.Controller):
                 "token": token,
                 "balance": initial_balance,
                 "currency": transaction_id,
-                "nickname": "Player1",
+                "nickname": user.name,
                 "timestamp": int(time.time() * 1000),
                 "country": "AR",
             }
-            session_vals = self._prepare_session_vals(product_id, user_id, token, initial_balance, final_balance, 0, state, result='started', transaction_id=transaction_id, json_data=json_data)
+            # session_vals = self._prepare_session_vals(product_id, user_id, token, initial_balance, final_balance, 0, state, result='started', transaction_id=transaction_id, json_data=json_data)
 
-            session = request.env['casino.game.session'].sudo().create(session_vals)
-            _logger.info('Sesión creada en start_game: %s', session)
-            
-            # 2. Registrar movimiento contable (account.move.line)
-            # Buscar o crear cuenta contable para juegos
-            account = request.env['account.account'].sudo().search([
-                ('code', '=', '400001')  # Ajusta según tu plan contable
-            ], limit=1)
-            
-            if not account:
-                # Crear cuenta si no existe
-                account = request.env['account.account'].sudo().create({
-                    'name': 'Cuenta Juegos Casino',
-                    'code': '400001',
-                    'account_type': 'income',
-                })
-            
-            ###### # Crear asiento contable
-            ###### move_vals = {
-            ######     'name': f'Juego: {product.name}',
-            ######     'journal_id': request.env['account.journal'].sudo().search([('type', '=', 'general')], limit=1).id,
-            ######     'date': fields.Datetime.today(),
-            ######     'ref': f'Casino Game - {product.name}',
-            ######     'line_ids': [
-            ######         (0, 0, {
-            ######             'name': f'Inicio juego: {product.name}',
-            ######             'account_id': account.id,
-            ######             'partner_id': request.env.user.partner_id.id,
-            ######             'debit': 0.0,
-            ######             'credit': 0.0,  # Ajustar según tu lógica de negocio
-            ######         })
-            ######     ]
-            ###### }
-            debit = 0.0
-            credit = 0.0
-
-            ###### move_vals = self._prepare_move_vals(product, account, debit, credit)
-            # move = request.env['account.move'].sudo().create(move_vals)
+            # session = request.env['casino.game.session'].sudo().create(session_vals)
             
             return {
                 'success': True,
-                'session_id': session.id,
-                'move_id': None, #move.id i,
-                'iframe_url': None, #product.iframe_url,
                 'message': 'Sesión iniciada correctamente'
             }
             
