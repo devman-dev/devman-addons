@@ -215,37 +215,6 @@ class GameController(http.Controller):
         #     "message": "Fin de juego"
         # }
         return response
-    
-        try:
-            s = request.env['casino.game.session'].sudo().browse(int(session_id))
-            if not s.exists():
-                return {'error': 'Sesión no encontrada'}
-            bal = s.final_balance if s.final_balance not in (None, False) else (s.initial_balance or 0.0)
-            result = self._apply_amount(session_id, bal, op='balance')
-            response = {
-                "balance": result.get("balance", 0.0),
-                "timestamp": int(time.time() * 1000),
-                "message": "Fin de juego"
-            }
-            return response
-            # return {'success': True, 'balance': bal, 'state': s.state}
-        except Exception as e:
-            return {'error': f'Sesión no encontrada: {str(e)}'}
-        
-        try:
-            session = request.env['casino.game.session'].sudo().browse(int(session_id))
-            if session.exists():
-                session.write({
-                    'end_datetime': fields.Datetime.Datetime.now(),
-                    'state': 'finished'
-                })
-                
-                return {'success': True, 'message': 'Sesión finalizada'}
-            else:
-                return {'error': 'Sesión no encontrada'}
-                
-        except Exception as e:
-            return {'error': f'Error al finalizar sesión: {str(e)}'}
 
     # ===================== API extra (botones) =====================
 
@@ -413,9 +382,9 @@ class GameController(http.Controller):
         _logger.info('api_balance called with token: %s', token)
 
         try:
-            s = request.env['casino.game.session'].sudo().browse(int(session.id))
-            if not s.exists():
-                return {'error': 'Sesión no encontrada'}
+            # s = request.env['casino.game.session'].sudo().browse(int(session.id))
+            # if not s.exists():
+            #     return {'error': 'Sesión no encontrada'}
             # bal = s.final_balance if s.final_balance not in (None, False) else (s.initial_balance or 0.0)
             result = self._apply_amount(session.id, 0.0, op='balance', token=token, transaction_id=None)
             _logger.info('api_balance called with session_id: %s, amount: %s, result: %s', session.id, 0.0, result)
@@ -444,8 +413,8 @@ class GameController(http.Controller):
         _logger.info('Aplicando monto: %s, operación: %s', amount, op)
         try:
             s = request.env['casino.game.session'].sudo().browse(int(session_id))
-            if not s.exists():
-                return {'error': 'Sesión no encontrada'}
+            # if not s.exists():
+            #     return {'error': 'Sesión no encontrada'}
 
             try:
                 amt = float(amount or 0.0)
