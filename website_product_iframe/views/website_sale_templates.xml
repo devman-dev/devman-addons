@@ -5,6 +5,8 @@
       <attribute name="t-att-data-product-id">product.id</attribute>
       <attribute name="t-att-data-product-url">product.iframe_url</attribute>
       <attribute name="t-att-data-agency-id">product.agency_id</attribute>
+      <a data-user-id="request.env.user.id"></a>
+      <attribute name="t-att-data-user-id">request.env.user.id</attribute>
       <!-- <attribute name="t-att-data-lang">product.lang</attribute> -->
       <attribute name="data-overlay-trigger">1</attribute>
     </xpath>

@@ -1,4 +1,5 @@
 # controllers/transactions.py
+import json
 import math
 from datetime import date, datetime
 
@@ -8,6 +9,8 @@ from odoo.addons.portal.controllers.portal import CustomerPortal
 from odoo.addons.payment import utils as payment_utils
 from odoo.exceptions import UserError, ValidationError
 
+import logging
+_logger = logging.getLogger(__name__)
 
 class CasinoHome(CustomerPortal):
     @http.route(['/my', '/my/home'], type='http', auth='user', website=True)
@@ -394,3 +397,28 @@ class MiPortalController(http.Controller):
             return request.redirect('/my')
 
         return request.render('casino_online.portal_registrar_bonus_form')
+
+    @http.route('/my/movimientos/balance', type='http', auth='public', website=True, methods=['GET', 'POST'], csrf=True)
+    def get_movements_balance(self, **kwargs):
+        _logger.info("Calculating movements balance for user %s", request.env.user.partner_id.name)
+        partner = request.env.user.partner_id.commercial_partner_id
+        company = request.env.company
+        
+        domain = [
+            ('company_id', '=', company.id),
+            # ('partner_id', '=', partner.id),
+            ('account_id.account_type', 'in', ['asset_receivable', 'liability_payable']),
+            ('parent_state', 'in', ['draft', 'posted']),
+        ]
+        _logger.info("Search domain for movements balance: %s", domain)
+        lines = request.env['account.move.line'].sudo().search(domain)
+        _logger.info("Found %d lines for balance calculation", len(lines))
+        total = sum(
+            float((l.amount_signed if l.amount_signed is not None else l.balance) or 0.0)
+            for l in lines
+        )
+        _logger.info("Total movements balance calculated: %s", total)
+        return http.Response(
+            json.dumps({'balance': round(total, 2)}),
+            content_type='application/json'
+        )

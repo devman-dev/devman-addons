@@ -74,6 +74,10 @@ publicWidget.registry.ProductIframe = publicWidget.Widget.extend({
     },
 
     async _onProductCardClick(ev) {
+        // Evitar doble disparo y doble overlay
+        if (ev._handledByProductIframe) return;
+        ev._handledByProductIframe = true;
+
         // Ignorar si overlay ya está abierto o en anti-rebote
         if (this._overlayOpen || this._shouldSquelchClicks()) {
             ev.preventDefault();
@@ -86,8 +90,10 @@ publicWidget.registry.ProductIframe = publicWidget.Widget.extend({
         const a = ev.currentTarget;
         const productId = a.dataset.productId;
         const agencyId = a.dataset.agencyId;
+        const userId = a.dataset.userId;
         const lang = a.dataset.lang || 'es';
         const iframeUrl = a.dataset.productUrl;
+        console.log('Datos del producto:', { productId, agencyId, userId, lang, iframeUrl });
         if (!iframeUrl) return; // sin iframe_url -> navegación normal
         const baseIframeUrl = a.dataset.productUrl;
         if (!baseIframeUrl || !agencyId) return; // sin datos -> navegación normal
@@ -117,8 +123,10 @@ publicWidget.registry.ProductIframe = publicWidget.Widget.extend({
             console.error('Error en la petición:', error);
         }
 
-        this._openOverlay(url.toString(), { productId, token, tracked: false });
-        this._openOverlay(iframeUrl, { productId, token, tracked: false });
+        // this._openOverlay(url.toString(), { productId, token, tracked: false });
+        if (!this._overlayOpen) {
+            this._openOverlay(iframeUrl, { productId, token, tracked: false });
+        }
     },
 
     async _generateTokenForUser() {
@@ -127,7 +135,7 @@ publicWidget.registry.ProductIframe = publicWidget.Widget.extend({
     },
 
     /* === Overlay fullscreen sin backdrop === */
-    _openOverlay(iframeUrl, { productId = null, sessionId = null, tracked = false, balance = 0, token } = {}) {
+    _openOverlay(iframeUrl, { productId = null, sessionId = null, tracked = true, balance = 0, token } = {}) {
         this._overlayOpen = true;
 
         // Desactivar temporalmente href de los enlaces de productos con iframe
@@ -164,9 +172,14 @@ publicWidget.registry.ProductIframe = publicWidget.Widget.extend({
                 console.log("Llamada a la api de login");
                 const token = prompt('Ingrese el Token:');
                 const res = await rpc('/api/v1/login', { token: token });
+                balance = res.balance;
+                console.log('ov 0:', balance);
                 if (res.error) return alert(res.error);
+                console.log('ov 1:');
                 ov.sessionId = res.session_id;
+                console.log('ov 2:', ov);
                 ov.tracked = true;
+                console.log('ov 3:', ov);
                 this._updateBadge(res.balance ?? 0);
                 console.log('ov:', ov);
                 // console.log(`Response Debit / Credit: ${JSON.stringify(res, null, 2)}`);

@@ -1,5 +1,7 @@
 from datetime import timedelta, datetime
 import token
+
+import requests
 from odoo import http, fields
 from odoo.http import request, route, Response
 import logging
@@ -225,11 +227,14 @@ class GameController(http.Controller):
         """
         data = request.get_json_data()
         token = data.get('token', None)
+        userId = request.env.user.id
+        user = request.env['res.users'].sudo().browse(userId)
+
         # data = request.params
         # token = data.get('token')
         if token is None:
             token = data.get('params', {}).get('token')
-        _logger.info('api_login called with kwargs: %s ----- %s ----- token: %s', json.dumps(kwargs, indent=2, ensure_ascii=False), data, token)
+        _logger.info('\n\n\napi_login called with kwargs: %s \n\n\n----- %s \n\n\n----- token: %s \n\n\n------ userId: %s \n\n\n------', json.dumps(kwargs, indent=2, ensure_ascii=False), data, token, userId)
         try:
             # token = uuid.uuid4().hex  # Genera un token único
             product_id = 0
@@ -239,14 +244,22 @@ class GameController(http.Controller):
                 return result
             session = '' # request.env['casino.game.session'].sudo().browse(result['session_id'])
             balance = 0 # session.final_balance if session.final_balance not in (None, False) else (session.initial_balance or 0.0)
-            
+            # Obtener la URL base del sitio web dinámicamente
+            base_url = request.httprequest.host_url.rstrip('/')
+            url = f'{base_url}/my/movimientos/balance'
+            response = requests.get(url, cookies=request.httprequest.cookies)
+            _logger.info('Balance response: %s', response.text)
+            balance = response.json().get('balance', 0.0)
+            _logger.info('Balance obtenido: %s', balance)
+            # balance = balance_data.get('balance', 0.00)
+            # _logger.info('api_login called balance with session_id: %s, balance: %s', session.id if session else 'N/A', balance)
             response = {
                 "token": token,
-                "balance": result.get("balance", 0.0),
+                "balance": balance,
                 "currency": transaction_id,
-                "nickname": "Player1",
+                "nickname": user.name,
                 "timestamp": int(time.time() * 1000),
-                "country": "AR",
+                "country": user.country_id.name if user.country_id else "AR",
 
                 # 'success': True,
                 # 'session_id': result['session_id'],
