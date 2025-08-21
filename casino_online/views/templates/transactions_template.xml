@@ -204,27 +204,6 @@
 
     <!-- Fragmento interno -->
     <template id="portal_movimientos_inner">
-        <div class="alert alert-info mb-4">
-            <div class="row">
-                <div class="col-md-6">
-                    <strong>Saldo Actual:
-                        <span t-if="(saldo_final is not None) and (saldo_final &gt;= 0)" class="text-success">
-                            -$
-                            <t t-esc="saldo_final"/>
-                        </span>
-                        <span t-elif="(saldo_final is not None) and (saldo_final &lt; 0)" class="text-danger">
-                            $
-                            <t t-esc="abs(saldo_final)"/>
-                        </span>
-                    </strong>
-                </div>
-                <div class="col-md-6 text-end">
-                    <strong>Total de Movimientos:
-                        <t t-esc="total_movements"/>
-                    </strong>
-                </div>
-            </div>
-        </div>
         <div class="table-responsive">
             <table class="table table-striped">
                 <thead>
@@ -240,41 +219,21 @@
                 <tbody>
                     <t t-foreach="movements" t-as="movement">
                         <tr>
-                            <td>
-                                <t t-esc="movement['date']"/>
-                            </td>
-                            <td>
-                                <t t-esc="movement['description']"/>
-                            </td>
-                            <td>
-                                <span class="badge bg-secondary">
-                                    <t t-esc="movement['type_display']"/>
-                                </span>
-                            </td>
+                            <td><t t-esc="movement['date']"/></td>
+                            <td><t t-esc="movement['description']"/></td>
+                            <td><span class="badge bg-secondary"><t t-esc="movement['type_display']"/></span></td>
                             <td class="text-end">
-                                <span t-if="movement['amount'] &gt;= 0" class="text-success">+$
-                                    <t t-esc="movement['amount']"/>
-                                </span>
-                                <span t-else="" class="text-danger">$
-                                    <t t-esc="movement['amount']"/>
-                                </span>
+                                <span t-if="movement['amount'] &gt;= 0" class="text-success">+$<t t-esc="movement['amount']"/></span>
+                                <span t-else="" class="text-danger">$<t t-esc="movement['amount']"/></span>
                             </td>
                             <td>
-                                <span t-if="movement['state'] == 'Completado'" class="badge bg-success">
-                                    <t t-esc="movement['state']"/>
-                                </span>
-                                <span t-else="" class="badge bg-warning">
-                                    <t t-esc="movement['state']"/>
-                                </span>
+                                <span t-if="movement['state'] == 'Completado'" class="badge bg-success"><t t-esc="movement['state']"/></span>
+                                <span t-else="" class="badge bg-warning"><t t-esc="movement['state']"/></span>
                             </td>
                             <td class="text-end">
                                 <strong>
-                                    <span t-if="movement['balance'] &gt;= 0" class="text-success">$
-                                        <t t-esc="movement['balance']"/>
-                                    </span>
-                                    <span t-else="" class="text-danger">$
-                                        <t t-esc="movement['balance']"/>
-                                    </span>
+                                    <span t-if="movement['balance'] &gt;= 0" class="text-success">$<t t-esc="movement['balance']"/></span>
+                                    <span t-else="" class="text-danger">$<t t-esc="movement['balance']"/></span>
                                 </strong>
                             </td>
                         </tr>
@@ -283,6 +242,7 @@
             </table>
         </div>
     </template>
+
 
 
     <template id="portal_medios_pagos" name="Mis Medios de Pago">

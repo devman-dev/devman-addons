@@ -25,9 +25,12 @@
     <template id="portal_layout_custom" inherit_id="portal.portal_layout">
         <xpath expr="//div[@class='row justify-content-between']" position="replace">
             <div class="row justify-content-between">
+                <!-- Contenido portal -->
                 <div t-attf-class="o_portal_content col-12 mb-5">
                     <t t-out="0"/>
                 </div>
+
+                <!-- Side content oculto -->
                 <div class="d-none d-lg-flex justify-content-end col-lg-0" visibility="hidden">
                     <t t-call="portal.side_content" style="display:none;"/>
                 </div>
@@ -147,23 +150,7 @@
                                 </div>
                             </form>
 
-                            <div class="alert alert-info mb-4">
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <strong>Saldo Actual:
-                                            <span t-if="(saldo_final is not None) and (saldo_final &gt;= 0)" class="text-success">
-                                                $<t t-esc="saldo_final"/>
-                                            </span>
-                                            <span t-elif="(saldo_final is not None) and (saldo_final &lt; 0)" class="text-danger">
-                                                -$<t t-esc="abs(saldo_final)"/>
-                                            </span>
-                                        </strong>
-                                    </div>
-                                    <div class="col-md-6 text-end">
-                                        <strong>Total de Movimientos: <t t-esc="total_movements or 0"/></strong>
-                                    </div>
-                                </div>
-                            </div>
+                            <div class="alert alert-info mb-4" t-if="False"/>
 
                             <div class="table-responsive">
                                 <table class="table table-striped">

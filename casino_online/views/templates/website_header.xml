@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <template id="website_header_balance" inherit_id="website.layout">
+    <xpath expr="//header" position="inside">
+      <t t-if="saldo_final is not None">
+        <div style="position:absolute; right:16px; top:14px; z-index:2;"
+             class="d-none d-md-flex align-items-center">
+          <span class="me-1 text-muted">Saldo Actual:</span>
+          <span t-att-class="'badge rounded-pill ' + ('bg-success' if saldo_final >= 0 else 'bg-danger')">
+            <t t-if="saldo_final >= 0">$<t t-esc="saldo_final"/></t>
+            <t t-else="">-$<t t-esc="abs(saldo_final)"/></t>
+          </span>
+        </div>
+      </t>
+    </xpath>
+  </template>
+</odoo>

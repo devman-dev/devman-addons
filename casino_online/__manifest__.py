@@ -17,6 +17,7 @@
         'security/ir.model.access.csv',
         'views/templates/user_options_template.xml',
         'views/templates/transactions_template.xml',
+        'views/templates/website_header.xml',
         'views/templates/strip_template.xml'
     ],
     'installable': True,
