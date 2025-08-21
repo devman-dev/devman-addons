@@ -23,7 +23,7 @@ class GameController(http.Controller):
 
         _logger.info(f"Starting game session for product: {product_id} - {product_name}")
         return {
-            'game_id': None,
+            'game_id': product_id,
             'user_id': user_id,
             'token': token,
             'transaction_id': transaction_id,
@@ -204,7 +204,34 @@ class GameController(http.Controller):
         Finaliza una sesión de juego
         """
         data = request.get_json_data()
-        token = data.get('token')
+        token = data.get('token', None)
+        if token is None:
+            token = data.get('params', {}).get('token')
+
+        gameId = data.get('gameId', None)
+        if gameId is None:
+            gameId = data.get('params', {}).get('gameId')
+
+        endGame = data.get('endGame', None)
+        if endGame is None:
+            endGame = data.get('params', {}).get('endGame')
+
+        roundId = data.get('roundId', None)
+        if roundId is None:
+            roundId = data.get('params', {}).get('roundId')
+
+        transactionId = data.get('transactionId', None)
+        if transactionId is None:
+            transactionId = data.get('params', {}).get('transactionId')
+        
+        amount = data.get('amount', 0.0)
+        if amount is None:
+            amount = data.get('params', {}).get('amount', 0.0)
+
+        token = data.get('token', None)
+        if token is None:
+            token = data.get('params', {}).get('token')
+
         if token is None:
             token = data.get('data', {}).get('token')
         result = self._apply_amount(session_id, amount, op='finished', token=token, transaction_id=None)
@@ -243,8 +270,7 @@ class GameController(http.Controller):
             if result.get('error'):
                 return result
             session = '' # request.env['casino.game.session'].sudo().browse(result['session_id'])
-            balance = 0 # session.final_balance if session.final_balance not in (None, False) else (session.initial_balance or 0.0)
-            # Obtener la URL base del sitio web dinámicamente
+            
             base_url = request.httprequest.host_url.rstrip('/')
             url = f'{base_url}/my/movimientos/balance'
             response = requests.get(url, cookies=request.httprequest.cookies)
@@ -309,19 +335,45 @@ class GameController(http.Controller):
         token = data.get('token', None)
         if token is None:
             token = data.get('params', {}).get('token')
+
+        gameId = data.get('gameId', None)
+        if gameId is None:
+            gameId = data.get('params', {}).get('gameId')
+
+        endGame = data.get('endGame', None)
+        if endGame is None:
+            endGame = data.get('params', {}).get('endGame')
+
+        roundId = data.get('roundId', None)
+        if roundId is None:
+            roundId = data.get('params', {}).get('roundId')
+
+        transactionId = data.get('transactionId', None)
+        if transactionId is None:
+            transactionId = data.get('params', {}).get('transactionId')
         
         amount = data.get('amount', 0.0)
-        transactionId = data.get('transactionId', None)
+        if amount is None:
+            amount = data.get('params', {}).get('amount', 0.0)
+
+        token = data.get('token', None)
+        if token is None:
+            token = data.get('params', {}).get('token')
 
         session = request.env['casino.game.session'].sudo().search([('token', '=', token)], limit=1)
         _logger.info('api_win called with session_id: %s, amount: %s, transactionId: %s', session.id, amount, transactionId)
-        result = self._apply_amount(session.id, amount, op='win', token=token, transaction_id=transactionId)
+        result = self._apply_amount(session.id, product_id = gameId, amount=amount, op='win', token=token, transaction_id=transactionId)
         # s = request.env['casino.game.session'].sudo().browse(int(session_id))
         # now = datetime.now().strftime('%H:%M:%S')
 
-        # response = result.get("json_data")
+        base_url = request.httprequest.host_url.rstrip('/')
+        url = f'{base_url}/my/movimientos/balance'
+        response = requests.get(url, cookies=request.httprequest.cookies)
+        _logger.info('Balance response: %s', response.text)
+        balance = response.json().get('balance', 0.0)
+        
         response = {
-            "balance": result.get("balance", 0.0),
+            "balance": balance,
             "transactionId": result.get("transaction_id", None),
             "timestamp": int(time.time() * 1000) # now
         }
@@ -331,7 +383,7 @@ class GameController(http.Controller):
     def api_win2(self, session_id, amount, **kwargs):
         """Jugada ganada: suma amount al balance."""
         _logger.info('api_win called with session_id: %s, amount: %s', session_id, amount)
-        result = self._apply_amount(session_id, amount, op='win', token="", transaction_id=None)
+        result = self._apply_amount(session_id, 0, amount, op='win', token="", transaction_id=None)
         # s = request.env['casino.game.session'].sudo().browse(int(session_id))
         # now = datetime.now().strftime('%H:%M:%S')
 
@@ -351,17 +403,44 @@ class GameController(http.Controller):
         if token is None:
             token = data.get('params', {}).get('token')
 
-        amount = data.get('amount', 0.0)
+        gameId = data.get('gameId', None)
+        if gameId is None:
+            gameId = data.get('params', {}).get('gameId')
+
+        endGame = data.get('endGame', None)
+        if endGame is None:
+            endGame = data.get('params', {}).get('endGame')
+
+        roundId = data.get('roundId', None)
+        if roundId is None:
+            roundId = data.get('params', {}).get('roundId')
+
         transactionId = data.get('transactionId', None)
+        if transactionId is None:
+            transactionId = data.get('params', {}).get('transactionId')
+        
+        amount = data.get('amount', 0.0)
+        if amount is None:
+            amount = data.get('params', {}).get('amount', 0.0)
+
+        token = data.get('token', None)
+        if token is None:
+            token = data.get('params', {}).get('token')
 
         session = request.env['casino.game.session'].sudo().search([('token', '=', token)], limit=1)
         _logger.info('api_lose called with session_id: %s, amount: %s, transactionId: %s', session.id, amount, transactionId)
-        result = self._apply_amount(session.id, amount, op='lose', token=token, transaction_id=transactionId)
+        result = self._apply_amount(session.id, product_id=gameId, amount=amount, op='lose', token=token, transaction_id=transactionId)
         # s = request.env['casino.game.session'].sudo().browse(int(session_id))
         
         # response = result.get("json_data")
+        base_url = request.httprequest.host_url.rstrip('/')
+        url = f'{base_url}/my/movimientos/balance'
+        response = requests.get(url, cookies=request.httprequest.cookies)
+        _logger.info('Balance response: %s', response.text)
+        balance = response.json().get('balance', 0.0)
+
         response = {
-            "balance": result.get("balance", 0.0),
+            "balance": balance,
             "transactionId": result.get("transaction_id"),
             "timestamp": int(time.time() * 1000) # now
         }
@@ -372,7 +451,7 @@ class GameController(http.Controller):
         """Jugada perdida: resta amount del balance."""
         data = request.get_json_data()
         token = data.get('token', None)
-        result = self._apply_amount(session_id, amount, op='lose', token=token, transaction_id=None)
+        result = self._apply_amount(session_id, 0, amount, op='lose', token=token, transaction_id=None)
         # s = request.env['casino.game.session'].sudo().browse(int(session_id))
         
         # response = result.get("json_data")
@@ -386,7 +465,7 @@ class GameController(http.Controller):
     @http.route('/api/v1/refund', type='json', auth='public', methods=['POST'], csrf=False)
     def api_refund(self, session_id, amount, **kwargs):
         """Devolución de plata: suma amount al balance (crédito)."""
-        return self._apply_amount(session_id, amount, op='refund', token="", transaction_id=None)
+        return self._apply_amount(session_id, product_id = 0, amount = amount, op='refund', token="", transaction_id=None)
 
     @http.route('/api/v1/balance', type='http', auth='public', methods=['POST'], csrf=False)
     def api_balance(self, **kwargs):
@@ -404,11 +483,17 @@ class GameController(http.Controller):
             # if not s.exists():
             #     return {'error': 'Sesión no encontrada'}
             # bal = s.final_balance if s.final_balance not in (None, False) else (s.initial_balance or 0.0)
-            result = self._apply_amount(session.id, 0.0, op='balance', token=token, transaction_id=None)
+            result = self._apply_amount(session.id, product_id = 0, amount = 0.0, op='balance', token=token, transaction_id=None)
             _logger.info('api_balance called with session_id: %s, amount: %s, result: %s', session.id, 0.0, result)
             # response = result.get("json_data")
+            base_url = request.httprequest.host_url.rstrip('/')
+            url = f'{base_url}/my/movimientos/balance'
+            response = requests.get(url, cookies=request.httprequest.cookies)
+            _logger.info('Balance response: %s', response.text)
+            balance = response.json().get('balance', 0.0)
+            
             response = {
-                "balance": result.get("balance", 0.0),
+                "balance": balance,
                 "timestamp": int(time.time() * 1000) # now
             }
             return Response(json.dumps(response), content_type='application/json')
@@ -424,7 +509,7 @@ class GameController(http.Controller):
 
 
     # ----------------- Helper interno -----------------
-    def _apply_amount(self, session_id, amount, op, token, transaction_id):
+    def _apply_amount(self, session_id, product_id, amount, op, token, transaction_id):
         """
         Ajusta el balance de la sesión y deja nota en description.
         op: 'win' | 'lose' | 'refund'

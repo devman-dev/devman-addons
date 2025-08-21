@@ -260,7 +260,7 @@ publicWidget.registry.ProductIframe = publicWidget.Widget.extend({
         };
 
         this._promptAndCall = async (sid, url) => {
-            if (!this._currentOverlay?.tracked || !sid) return alert('No hay sesión activa. Hacé Login.');
+            // if (!this._currentOverlay?.tracked || !sid) return alert('No hay sesión activa. Hacé Login.');
             const raw = prompt('Ingrese monto:');
             // const transactionID = prompt('Ingrese ID de transacción:');
             if (raw === null) return;
