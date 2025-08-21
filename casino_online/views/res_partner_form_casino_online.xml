@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data>
+        <record id="view_partner_form_casino_online" model="ir.ui.view">
+            <field name="name">res.partner.form.casino.online</field>
+            <field name="model">res.partner</field>
+            <field name="inherit_id" ref="base.view_partner_form" />
+            <field name="arch" type="xml">
+                <xpath expr="//sheet" position="inside">
+                    <group string="Casino Online">
+                        <field name="nickname" />
+                        <field name="token" />
+                    </group>
+                </xpath>
+            </field>
+        </record>
+    </data>
+</odoo>
