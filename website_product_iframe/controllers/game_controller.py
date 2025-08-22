@@ -43,7 +43,7 @@ class GameController(http.Controller):
             'json_data': json_data
         }
 
-    def _prepare_move_vals(self, token, product, account, debit, credit):
+    def _prepare_move_vals(self, token, product, account, debit, credit, op):
         """
         Devuelve los valores para crear un asiento contable balanceado en account.move con dos líneas (account.move.line).
         """
@@ -75,7 +75,7 @@ class GameController(http.Controller):
                     'credit': credit,
                 }),
                 (0, 0, {
-                    'name': f'Contrapartida: {product}',
+                    'name': 'Ganada' if op == 'win' else 'Perdida' if op == 'lose' else 'Deposito' if op == 'deposit' else 'Retiro',
                     'account_id': cuenta_contrapartida.id,
                     'partner_id': partner.id,
                     'debit': credit,
@@ -228,7 +228,7 @@ class GameController(http.Controller):
             # _logger.info('api_login called balance with session_id: %s, balance: %s', session.id if session else 'N/A', balance)
             response = {
                 "token": token,
-                "balance": balance,
+                "balance": int(balance * 100),
                 "currency": transaction_id,
                 "nickname": user.name,
                 "timestamp": int(time.time() * 1000),
@@ -244,36 +244,6 @@ class GameController(http.Controller):
             # return response
         except Exception as e:
             return {'error': f'Error en login: {str(e)}'}
-        
-    def api_login2(self, product_id, transaction_id, **kwargs):
-        """
-        Login del juego: alias de start_game. Devuelve también balance actual.
-        """
-        try:
-            token = uuid.uuid4().hex  # Genera un token único
-            result = self.start_game(product_id, transaction_id, token)
-            if result.get('error'):
-                return result
-            session = request.env['casino.game.session'].sudo().browse(result['session_id'])
-            balance = session.final_balance if session.final_balance not in (None, False) else (session.initial_balance or 0.0)
-            
-            response = {
-                "token": token,
-                "balance": result.get("balance", 0.0),
-                "currency": transaction_id,
-                "nickname": "Player1",
-                "timestamp": int(time.time() * 1000),
-                "country": "AR",
-
-                'success': True,
-                'session_id': result['session_id'],
-                'move_id': result['move_id'],
-                'iframe_url': result['iframe_url'],
-                'message': result['message']
-            }
-            return response
-        except Exception as e:
-            return {'error': f'Error en login: {str(e)}'}
 
     @http.route('/api/v1/credit', type='http', auth='public', methods=['POST'], csrf=False)
     def api_win(self, **kwargs):
@@ -282,7 +252,7 @@ class GameController(http.Controller):
         token = data.get('token', None)
         if token is None:
             token = data.get('params', {}).get('token')
-
+        
         gameId = data.get('gameId', None)
         if gameId is None:
             gameId = data.get('params', {}).get('gameId')
@@ -303,14 +273,11 @@ class GameController(http.Controller):
         if amount is None:
             amount = data.get('params', {}).get('amount', 0.0)
 
-        token = data.get('token', None)
-        if token is None:
-            token = data.get('params', {}).get('token')
-
         session = request.env['casino.game.session'].sudo().search([('token', '=', token)], limit=1)
 
         _logger.info('Casino Iframe: api_win called with session_id: %s, amount: %s, transactionId: %s', session.id, amount, transactionId)
         _logger.info('Casino Iframe: Actualizando balance del jugador: %s', json.dumps(kwargs, indent=2, ensure_ascii=False))
+        amount = amount / 100
         result = self._apply_amount(session.id, product_id = gameId, amount=amount, op='win', token=token, transaction_id=transactionId)
         # s = request.env['casino.game.session'].sudo().browse(int(session_id))
         # now = datetime.now().strftime('%H:%M:%S')
@@ -323,26 +290,11 @@ class GameController(http.Controller):
         balance = balance_response.json().get('balance', 0.0)
 
         response = {
-            "balance": result.get("balance", 0.00),
+            "balance": int(result.get("balance", 0.0) * 100),
             "transactionId": result.get("transaction_id", None),
             "timestamp": int(time.time() * 1000) # now
         }
         return Response(json.dumps(response), content_type='application/json')
-    
-    def api_win2(self, session_id, amount, **kwargs):
-        """Jugada ganada: suma amount al balance."""
-        _logger.info('Casino Iframe: api_win called with session_id: %s, amount: %s', session_id, amount)
-        result = self._apply_amount(session_id, 0, amount, op='win', token="", transaction_id=None)
-        # s = request.env['casino.game.session'].sudo().browse(int(session_id))
-        # now = datetime.now().strftime('%H:%M:%S')
-
-        # response = result.get("json_data")
-        response = {
-            "balance": result.get("balance", 0.0),
-            "transactionId": result.get("transaction_id", 0.0),
-            "timestamp": int(time.time() * 1000) # now
-        }
-        return response
         
     @http.route('/api/v1/debit', type='http', auth='public', methods=['POST'], csrf=False)
     def api_lose(self, **kwargs):
@@ -372,12 +324,9 @@ class GameController(http.Controller):
         if amount is None:
             amount = data.get('params', {}).get('amount', 0.0)
 
-        token = data.get('token', None)
-        if token is None:
-            token = data.get('params', {}).get('token')
-
         session = request.env['casino.game.session'].sudo().search([('token', '=', token)], limit=1)
         _logger.info('Casino Iframe: api_lose called with session_id: %s, amount: %s, transactionId: %s', session.id, amount, transactionId)
+        amount = amount / 100
         result = self._apply_amount(session.id, product_id=gameId, amount=amount, op='lose', token=token, transaction_id=transactionId)
         # s = request.env['casino.game.session'].sudo().browse(int(session_id))
         
@@ -389,26 +338,11 @@ class GameController(http.Controller):
         # balance = response.json().get('balance', 0.0)
 
         response = {
-            "balance": result.get("balance", 0.0),
+            "balance": int(result.get("balance", 0.0) * 100),
             "transactionId": result.get("transaction_id"),
             "timestamp": int(time.time() * 1000) # now
         }
         return Response(json.dumps(response), content_type='application/json')
-        return response
-    
-    def api_lose2(self, session_id, amount, **kwargs):
-        """Jugada perdida: resta amount del balance."""
-        data = request.get_json_data()
-        token = data.get('token', None)
-        result = self._apply_amount(session_id, 0, amount, op='lose', token=token, transaction_id=None)
-        # s = request.env['casino.game.session'].sudo().browse(int(session_id))
-        
-        # response = result.get("json_data")
-        response = {
-            "balance": result.get("balance", 0.0),
-            "transactionId": result.get("transaction_id"),
-            "timestamp": int(time.time() * 1000) # now
-        }
         return response
     
     @http.route('/api/v1/refund', type='json', auth='public', methods=['POST'], csrf=False)
@@ -432,8 +366,8 @@ class GameController(http.Controller):
             # if not s.exists():
             #     return {'error': 'Sesión no encontrada'}
             # bal = s.final_balance if s.final_balance not in (None, False) else (s.initial_balance or 0.0)
-            result = self._apply_amount(session.id, product_id = 0, amount = 0.0, op='balance', token=token, transaction_id=None)
-            _logger.info('Casino Iframe: api_balance called with session_id: %s, amount: %s, result: %s', session.id, 0.0, result)
+            # result = self._apply_amount(session.id, product_id = 0, amount = 0.0, op='balance', token=token, transaction_id=None)
+            # _logger.info('Casino Iframe: api_balance called with session_id: %s, amount: %s, result: %s', session.id, 0.0, result)
             # response = result.get("json_data")
             base_url = request.httprequest.host_url.rstrip('/')
             url = f'{base_url}/my/movimientos/balance'
@@ -442,12 +376,10 @@ class GameController(http.Controller):
             balance = response.json().get('balance', 0.0)
             
             response = {
-                "balance": balance,
+                "balance": int(balance * 100),
                 "timestamp": int(time.time() * 1000) # now
             }
             return Response(json.dumps(response), content_type='application/json')
-            return response
-            # return {'success': True, 'balance': bal, 'state': s.state}
         except Exception as e:
             return {'error': f'Error al obtener balance: {str(e)}'}
         
@@ -489,9 +421,12 @@ class GameController(http.Controller):
                 order='id desc',
                 limit=1
             )
-            
+
+            _logger.info("Casino Iframe: Token: %s", token)
             partner = request.env['res.partner'].sudo().search([('token', '=', token)], limit=1)
+            _logger.info('Casino Iframe: Partner encontrado: %s', partner)
             user = request.env['res.users'].sudo().search([('partner_id', '=', partner.id)], limit=1)
+            _logger.info('Casino Iframe: Usuario encontrado: %s', user)
             user_id = user.id
             # current = s.final_balance if s.final_balance not in (None, False) else (s.initial_balance or 0.0)
             # current = last_session.final_balance if last_session and last_session.final_balance not in (None, False) else (last_session.initial_balance or 0.0)
@@ -617,7 +552,7 @@ class GameController(http.Controller):
                 })
 
             _logger.info('Casino Iframe: Cuenta contable encontrada o creada: %s', account)
-            move_vals = self._prepare_move_vals(token, product_id, account, debit, credit)
+            move_vals = self._prepare_move_vals(token, product_id, account, debit, credit, op)
             try:
                 move = request.env['account.move'].sudo().create(move_vals)
                 _logger.info('Asiento contable creado correctamente: %s', move)
@@ -662,3 +597,42 @@ class GameController(http.Controller):
         except Exception as e:
             _logger.error('Casino Iframe: Error al aplicar monto: %s', str(e))
             return {'error': f'Error al aplicar monto: {str(e)}'}
+
+    @http.route('/api/v1/get_token', type='json', auth='public', methods=['GET', 'POST'], csrf=False)
+    def get_token(self, user_id=None, **kwargs):
+        """Obtención de token."""
+        # data = request.get_json_data()
+        # user_id = data.get('user_id', None)
+        # if user_id is None:
+        #     user_id = data.get('params', {}).get('user_id')
+
+        if not user_id:
+            return {"error": "user_id requerido"}
+
+        user = request.env['res.users'].sudo().browse(int(user_id))
+        if not user.exists():
+            return {"error": f"Usuario {user_id} no encontrado"}
+        
+        _logger.info('Casino Iframe: get_token called with user_id: %s', user_id)
+        _logger.info('Tipo de user_id: %s, valor: %r', type(user_id), user_id)
+        if user_id is not None:
+            user_id = int(user_id)
+
+        user = request.env['res.users'].sudo().browse(user_id)
+        
+        # Log completo de los datos del usuario
+        if user.exists():
+            user_data = user.read()[0]
+            # _logger.info('Casino Iframe: get_token - Datos completos de user_id %s: %s', user_id, json.dumps(user_data, indent=2, ensure_ascii=False))
+        else:
+            _logger.info('Casino Iframe: get_token - Usuario no encontrado para user_id %s', user_id)
+        partner = user.partner_id
+        _logger.info('Casino Iframe: get_token called with user_id: %s, partner: %s', user_id, partner)
+        token = partner.token
+        response = {
+            "token": token,
+        }
+        _logger.info('Casino Iframe: get_token called with user_id: %s, token: %s', user_id, token)
+        return {"token": token}
+        return Response(json.dumps(response), content_type='application/json')
+        

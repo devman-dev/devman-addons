@@ -93,6 +93,7 @@ publicWidget.registry.ProductIframe = publicWidget.Widget.extend({
         const userId = a.dataset.userId;
         const lang = a.dataset.lang || 'es';
         const iframeUrl = a.dataset.productUrl;
+
         console.log('Datos del producto:', { productId, agencyId, userId, lang, iframeUrl });
         if (!iframeUrl) return; // sin iframe_url -> navegación normal
         const baseIframeUrl = a.dataset.productUrl;
@@ -101,19 +102,26 @@ publicWidget.registry.ProductIframe = publicWidget.Widget.extend({
         ev.preventDefault();
         ev.stopPropagation();
 
-        let token = '';
-        try {
-            token = await this._generateTokenForUser();
-        } catch {
-            alert('No se pudo obtener el token de usuario');
-            return;
-        }
+        const res = await rpc('/api/v1/get_token', { user_id: userId });
+        const token = res.token;
+        console.log('Token obtenido:', token);
+        // const user = request.env['res.users'].sudo().browse(userId)
+        // const partner = user.partner_id;
+        // const token = partner.token;
+        // console.log('Datos del usuario:', { user, partner, token });
+        // try {
+        //     token = await this._generateTokenForUser();
+        // } catch {
+        //     alert('No se pudo obtener el token de usuario');
+        //     return;
+        // }
 
+        // Construir la URL con el token y otros parámetros
         const url = new URL(baseIframeUrl, window.location.origin);
-        url.searchParams.set('token', token);
+        url.searchParams.set('token', res.token);
         url.searchParams.set('agencyId', agencyId);
         url.searchParams.set('lang', lang);
-
+        console.log('URL construida para el iframe:', url.toString());
         // Realizar petición fetch y mostrar resultado en consola
         try {
             const response = await fetch(url.toString());
@@ -123,15 +131,15 @@ publicWidget.registry.ProductIframe = publicWidget.Widget.extend({
             console.error('Error en la petición:', error);
         }
 
-        // this._openOverlay(url.toString(), { productId, token, tracked: false });
+        // Abrir el overlay con la URL construida
         if (!this._overlayOpen) {
-            this._openOverlay(iframeUrl, { productId, token, tracked: false });
+            this._openOverlay(url.toString(), { productId, token, tracked: false });
         }
     },
 
     async _generateTokenForUser() {
         // return await rpc('/api/v1/get_token');
-        return 'db8f24d5bd25fc9f89a800bb7d396621';
+        return 'db8f24d5bd25fc9f89a800bb7d396624';
     },
 
     /* === Overlay fullscreen sin backdrop === */
