@@ -125,19 +125,20 @@ class CasinoHome(CustomerPortal):
                 'state': l.parent_state or l.move_id.state or '',
             })
 
-        # saldo progresivo sobre el subconjunto filtrado
+        # saldo progresivo sobre el subconjunto filtrado (ascendente para calcular balance)
         running = 0.0
         for mv in prepared:
             running += mv['amount']
             mv['balance'] = round(running, 2)
 
-        # paginación
-        total = len(prepared)
+        # === ORDENAR Y PAGINAR EN DESCENDENTE (últimos primero) ===
+        prepared_desc = list(reversed(prepared))  # respeta el orden original y lo invierte
+        total = len(prepared_desc)
         page_count = max(math.ceil(total / page_size), 1)
         if page > page_count:
             page = page_count
         offset = (page - 1) * page_size
-        rows = prepared[offset: offset + page_size]
+        rows = prepared_desc[offset: offset + page_size]
 
         values.update({
             'movements': rows,
@@ -151,6 +152,7 @@ class CasinoHome(CustomerPortal):
             'selected_types': selected_types,
         })
         return request.render("portal.portal_my_home", values)
+
 
 
 

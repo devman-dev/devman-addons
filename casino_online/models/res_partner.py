@@ -16,6 +16,5 @@ class ResPartner(models.Model):
     cbu = fields.Char('CBU')
     cuil = fields.Char('CUIL')
     nuevo_cbu = fields.Char('Nuevo CBU')
-
     token = fields.Char(string='Token', default=lambda self: str(uuid.uuid4()))
     nickname = fields.Char(string='Nickname')

@@ -7,8 +7,8 @@
              class="d-none d-md-flex align-items-center">
           <span class="me-1 text-muted">Saldo Actual:</span>
           <span t-att-class="'badge rounded-pill ' + ('bg-success' if saldo_final >= 0 else 'bg-danger')">
-            <t t-if="saldo_final >= 0">$<t t-esc="saldo_final"/></t>
-            <t t-else="">-$<t t-esc="abs(saldo_final)"/></t>
+            <t t-if="saldo_final >= 0">$<t t-esc="'%.2f' % saldo_final"/></t>
+            <t t-else="">-$<t t-esc="'%.2f' % abs(saldo_final)"/></t>
           </span>
         </div>
       </t>
