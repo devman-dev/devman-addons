@@ -2,7 +2,7 @@
 import json
 import math
 from datetime import date, datetime
-
+from odoo.addons.portal.controllers.portal import CustomerPortal
 from odoo import http, fields
 from odoo.http import request
 from odoo.addons.portal.controllers.portal import CustomerPortal
@@ -424,3 +424,6 @@ class MiPortalController(http.Controller):
             json.dumps({'balance': round(total, 2)}),
             content_type='application/json'
         )
+
+
+        
