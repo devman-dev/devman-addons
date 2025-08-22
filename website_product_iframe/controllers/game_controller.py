@@ -369,14 +369,10 @@ class GameController(http.Controller):
             # result = self._apply_amount(session.id, product_id = 0, amount = 0.0, op='balance', token=token, transaction_id=None)
             # _logger.info('Casino Iframe: api_balance called with session_id: %s, amount: %s, result: %s', session.id, 0.0, result)
             # response = result.get("json_data")
-            base_url = request.httprequest.host_url.rstrip('/')
-            url = f'{base_url}/my/movimientos/balance'
-            response = requests.get(url, cookies=request.httprequest.cookies)
-            _logger.info('Casino Iframe: api_balance Balance response: %s', response.text)
-            balance = response.json().get('balance', 0.0)
+            current_balance = self._get_balance_user(token)
             
             response = {
-                "balance": int(balance * 100),
+                "balance": int(current_balance * 100),
                 "timestamp": int(time.time() * 1000) # now
             }
             return Response(json.dumps(response), content_type='application/json')
