@@ -400,15 +400,18 @@ class MiPortalController(http.Controller):
 
         return request.render('casino_online.portal_registrar_bonus_form')
 
-    @http.route('/my/movimientos/balance', type='http', auth='public', website=True, methods=['GET', 'POST'], csrf=True)
+    @http.route('/my/movimientos/balance', type='http', auth='public', website=True, methods=['GET', 'POST'], csrf=False)
     def get_movements_balance(self, **kwargs):
         _logger.info("Calculating movements balance for user %s", request.env.user.partner_id.name)
         partner = request.env.user.partner_id.commercial_partner_id
         company = request.env.company
-        
+        token = kwargs.get('token')
+        partner = request.env['res.partner'].sudo().search([('token', '=', token)], limit=1)
+        _logger.info("Partner found: %s, token: %s", partner.name if partner else 'None', token)
+
         domain = [
             ('company_id', '=', company.id),
-            # ('partner_id', '=', partner.id),
+            ('partner_id', '=', partner.id),
             ('account_id.account_type', 'in', ['asset_receivable', 'liability_payable']),
             ('parent_state', 'in', ['draft', 'posted']),
         ]

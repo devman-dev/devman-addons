@@ -84,10 +84,10 @@ class GameController(http.Controller):
             ]
         }
 
-    def _get_balance_user(self):
+    def _get_balance_user(self, token):
         try:
             base_url = request.httprequest.host_url.rstrip('/')
-            url = f'{base_url}/my/movimientos/balance'
+            url = f'{base_url}/my/movimientos/balance?token={token}'
             response = requests.get(url, cookies=request.httprequest.cookies)
             _logger.info('Casino Iframe: Balance response: %s', response.text)
             balance = response.json().get('balance', 0.0)
@@ -222,7 +222,7 @@ class GameController(http.Controller):
             # response = requests.get(url, cookies=request.httprequest.cookies)
             # _logger.info('Casino Iframe: Balance response: %s', response.text)
             # balance = response.json().get('balance', 0.0)
-            balance = self._get_balance_user()
+            balance = self._get_balance_user(token)
             _logger.info('Casino Iframe: Balance obtenido: %s', balance)
             # balance = balance_data.get('balance', 0.00)
             # _logger.info('api_login called balance with session_id: %s, balance: %s', session.id if session else 'N/A', balance)
@@ -430,7 +430,7 @@ class GameController(http.Controller):
             user_id = user.id
             # current = s.final_balance if s.final_balance not in (None, False) else (s.initial_balance or 0.0)
             # current = last_session.final_balance if last_session and last_session.final_balance not in (None, False) else (last_session.initial_balance or 0.0)
-            current_balance = self._get_balance_user()
+            current_balance = self._get_balance_user(token)
             _logger.info('Casino Iframe: Balance actual del usuario: %s', current_balance)
 
             result = ''
