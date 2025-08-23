@@ -129,7 +129,7 @@ class GameController(http.Controller):
                 "token": token,
                 "balance": initial_balance,
                 "currency": transaction_id,
-                "nickname": user.name,
+                "nickname": user.nickname or user.name,
                 "timestamp": int(time.time() * 1000),
                 "country": "AR",
             }
@@ -230,7 +230,7 @@ class GameController(http.Controller):
                 "token": token,
                 "balance": int(balance * 100),
                 "currency": transaction_id,
-                "nickname": user.nickname,
+                "nickname": user.nickname or user.name,
                 "timestamp": int(time.time() * 1000),
                 "country": user.country_id.name if user.country_id else "AR",
 
