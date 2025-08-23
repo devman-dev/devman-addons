@@ -178,28 +178,42 @@ publicWidget.registry.ProductIframe = publicWidget.Widget.extend({
             if (!productId) return alert('Producto no identificado.');
             try {
                 console.log("Llamada a la api de login");
-                const token = prompt('Ingrese el Token:');
-                const res = await rpc('/api/v1/login', { token: token });
-                balance = res.balance;
-                console.log('ov 0:', balance);
-                if (res.error) return alert(res.error);
-                console.log('ov 1:');
-                ov.sessionId = res.session_id;
-                console.log('ov 2:', ov);
-                ov.tracked = true;
-                console.log('ov 3:', ov);
-                this._updateBadge(res.balance ?? 0);
-                console.log('ov:', ov);
-                // console.log(`Response Debit / Credit: ${JSON.stringify(res, null, 2)}`);
-                console.log('Login Exitoso:', {
-                    token: res.token,
-                    balance: res.balance,
-                    currency: res.currency,
-                    nickname: res.nickname,
-                    timestamp: res.timestamp,
-                    country: res.country,
+                // const token = prompt('Ingrese el Token:');
+                // const res = await rpc('/api/v1/login', { token: token });
+                const url = '/api/v1/login'
+                const res = await fetch(url, {
+                    method: 'POST',
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ token: token }),
                 });
-                alert(`Login Exitoso: ${JSON.stringify({ token: res.token }, null, 2)}`);
+                const data = await res.json();
+                console.log("Token obtenido:", data);
+
+                if (res.error) return alert(res.error);
+                console.log(`Response Login: ${JSON.stringify(res, null, 2)}`);
+                alert(`Respuesta: ${JSON.stringify(data, null, 2)}`);
+
+
+                // balance = res.balance;
+                // console.log('ov 0:', balance);
+                // if (res.error) return alert(res.error);
+                // console.log('ov 1:');
+                // ov.sessionId = res.session_id;
+                // console.log('ov 2:', ov);
+                // ov.tracked = true;
+                // console.log('ov 3:', ov);
+                // this._updateBadge(res.balance ?? 0);
+                // console.log('ov:', ov);
+                // // console.log(`Response Debit / Credit: ${JSON.stringify(res, null, 2)}`);
+                // console.log('Login Exitoso:', {
+                //     token: res.token,
+                //     balance: res.balance,
+                //     currency: res.currency,
+                //     nickname: res.nickname,
+                //     timestamp: res.timestamp,
+                //     country: res.country,
+                // });
+                // alert(`Login Exitoso: ${JSON.stringify({ token: res.token }, null, 2)}`);
 
             } catch { alert('Error de red'); }
         });
@@ -270,15 +284,23 @@ publicWidget.registry.ProductIframe = publicWidget.Widget.extend({
         this._promptAndCall = async (sid, url) => {
             // if (!this._currentOverlay?.tracked || !sid) return alert('No hay sesión activa. Hacé Login.');
             const raw = prompt('Ingrese monto:');
-            // const transactionID = prompt('Ingrese ID de transacción:');
+            const transactionId = prompt('Ingrese ID de transacción:');
             if (raw === null) return;
             const amount = parseFloat(String(raw).replace(',', '.'));
             if (Number.isNaN(amount) || amount < 0) return alert('Monto inválido');
             try {
-                const res = await rpc(url, { session_id: sid, amount });
+                // const res = await rpc(url, { session_id: sid, token, gameId: 4, transactionId, amount });
+                const res = await fetch(url, {
+                    method: 'POST',
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ session_id: sid, token: token, gameId: 4, transactionId: transactionId, amount: amount }),
+                });
+                const data = await res.json();
+                console.log("Token obtenido:", data);
+
                 if (res.error) return alert(res.error);
                 console.log(`Response Debit / Credit: ${JSON.stringify(res, null, 2)}`);
-                alert(`Response Debit/Credit: ${JSON.stringify(res, null, 2)}`);
+                alert(`Respuesta: ${JSON.stringify(data, null, 2)}`);
                 if (res.balance !== undefined) {
                     this._updateBadge(res.balance);
                 }
@@ -287,13 +309,40 @@ publicWidget.registry.ProductIframe = publicWidget.Widget.extend({
         };
 
         this._getBalance = async (sid, url) => {
-            if (!this._currentOverlay?.tracked || !sid) return alert('No hay sesión activa. Hacé Login.');
             try {
                 // const transactionID = prompt('Ingrese ID de transacción:');
-                const res = await rpc(url, { session_id: sid, amount: 0 });
-                if (res.error) return alert(res.error);
-                console.log(`Response Balance Actual: ${JSON.stringify(res, null, 2)}`);
-                alert(`Response Balance Actual: ${JSON.stringify(res, null, 2)}`)
+                // const res = await rpc(url, { session_id: sid, amount: 0 });
+                console.log('Get Balance - url: ', url);
+
+                // url = base_url + "/my/movimientos/balance?token={token}"
+                // response = requests.get(url, cookies = request.httprequest.cookies)
+                // _logger.info('Casino Iframe: Balance response: %s', response.text)
+                // balance = response.json().get('balance', 0.0)
+                // _logger.info('Casino Iframe: Balance obtenido: %s', balance)
+
+                // response = {
+                //     "balance": int(current_balance * 100),
+                //     "timestamp": int(time.time() * 1000)
+                // }
+
+                const res = await fetch(`/my/movimientos/balance?token=${encodeURIComponent(token)}`, {
+                    method: 'POST',
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ token: token }),
+                });
+                const data = await res.json();
+                console.log("Token obtenido:", data);
+
+                // console.log(`Response Balance Actual: ${JSON.stringify(res, null, 2)}`);
+                // alert(`Respuesta: ${JSON.stringify(data, null, 2)}`);
+                const timestamp = Date.now();
+                const enrichedData = {
+                    ...data,
+                    balance: Math.round(data.balance * 100),
+                    timestamp
+                };
+                alert(`Respuesta: ${JSON.stringify(enrichedData, null, 2)}`);
+
                 if (res.balance !== undefined) {
                     this._updateBadge(res.balance);
                 }
@@ -302,7 +351,8 @@ publicWidget.registry.ProductIframe = publicWidget.Widget.extend({
 
         this._endSession = async (sid, url) => {
             if (!this._currentOverlay?.tracked || !sid) {
-                alert('No hay sesión activa. El juego se cerrará.');
+                // alert('No hay sesión activa. El juego se cerrará.');
+                alert('El juego se cerrará.');
             }
             else {
                 const raw = prompt('Esta opción da por finalizado el juego. Ingrese monto:');
