@@ -696,7 +696,7 @@ class CollectionTransaction(models.Model):
         message = ('Se ha creado la siguiente transaccion: %s.') % (str(vals_list['transaction_name']))
         res.message_post(body=message)
 
-        res._create_account_move()
+        #res._create_account_move()
 
         return res
 
