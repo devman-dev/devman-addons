@@ -2,6 +2,8 @@
 import json
 import math
 from datetime import date, datetime
+
+from requests import post
 from odoo.addons.portal.controllers.portal import CustomerPortal
 from odoo import http, fields
 from odoo.http import request
@@ -140,6 +142,19 @@ class CasinoHome(CustomerPortal):
         offset = (page - 1) * page_size
         rows = prepared_desc[offset: offset + page_size]
 
+        # Mis Límites
+        daily_limit = partner.daily_deposit_limit
+        weekly_limit = partner.weekly_deposit_limit
+        monthly_limit = partner.monthly_deposit_limit
+
+        # Mis Datos Bancarios
+        account_number = partner.account_number
+        bank_name = partner.bank_name
+        account_type = partner.account_type
+        cbu = partner.cbu
+        cuil = partner.cuil
+        nuevo_cbu = partner.nuevo_cbu
+        
         values.update({
             'movements': rows,
             'saldo_final': round(saldo_total, 2),
@@ -150,6 +165,16 @@ class CasinoHome(CustomerPortal):
             'start_date': start_date_s,
             'end_date': end_date_s,
             'selected_types': selected_types,
+            'daily_limit': daily_limit,
+            'weekly_limit': weekly_limit,
+            'monthly_limit': monthly_limit,
+
+            'account_number': account_number,
+            'bank_name': bank_name,
+            'account_type': account_type,
+            'cbu': cbu,
+            'cuil': cuil,
+            'nuevo_cbu': nuevo_cbu
         })
         return request.render("portal.portal_my_home", values)
 
@@ -259,25 +284,40 @@ class MiPortalController(http.Controller):
 
         return request.render('casino_online.portal_medios_pagos', {'payment_methods': payment_methods})
 
-    @http.route('/my/mis_limites', type='http', auth='user', website=True, methods=['GET', 'POST'], csrf=True)
+    @http.route('/my/mis_limites', type='http', auth='user', methods=['POST'], website=True, csrf=True)
     def portal_mis_limites(self, **post):
+        partner = request.env.user.partner_id
+        partner.write({
+            'daily_deposit_limit': post.get('daily_limit'),
+            'weekly_deposit_limit': post.get('weekly_limit'),
+            'monthly_deposit_limit': post.get('monthly_limit'),
+        })
+
+        return request.redirect('/my/home#mis_limites_form')
+
+    @http.route('/my/mis_limites2', type='http', auth='user', website=True, methods=['GET', 'POST'], csrf=True)
+    def portal_mis_limites2(self, **post):
         partner = request.env.user.partner_id.sudo()
         if request.httprequest.method == 'POST':
             vals = {}
-            if post.get('daily_limit') is not None:
+            if post.get('daily_limit'):
                 vals['daily_deposit_limit'] = float(post.get('daily_limit'))
-            if post.get('weekly_limit') is not None:
+            if post.get('weekly_limit'):
                 vals['weekly_deposit_limit'] = float(post.get('weekly_limit'))
-            if post.get('monthly_limit') is not None:
+            if post.get('monthly_limit'):
                 vals['monthly_deposit_limit'] = float(post.get('monthly_limit'))
             partner.write(vals)
+            _logger.info(f"POST Updated limits for partner {partner.id}: {vals}")
             return request.redirect('/my/mis_limites')
 
-        return request.render('casino_online.portal_mis_limites', {
+        _logger.info(f"GET Render limits for partner {partner.id} \n%s\n%s\n%s", partner.daily_deposit_limit, partner.weekly_deposit_limit, partner.monthly_deposit_limit)
+        return request.redirect('/my/movimientos')
+        return request.render('casino_online.portal_mis_limites',  {
             'daily_limit': partner.daily_deposit_limit,
             'weekly_limit': partner.weekly_deposit_limit,
             'monthly_limit': partner.monthly_deposit_limit,
         })
+        # return request.redirect('/my/movimientos' + (f'?{qs}' if qs else ''))   
 
     @http.route('/my/datos_bank', type='http', auth='user', website=True, methods=['GET', 'POST'], csrf=True)
     def portal_datos_bancarios(self, **post):
@@ -292,7 +332,7 @@ class MiPortalController(http.Controller):
                 'nuevo_cbu': post.get('nuevo_cbu'),
             }
             partner.write(vals)
-            return request.redirect('/my/datos_bank')
+            return request.redirect('/my/home#datos_bank')
 
         return request.render('casino_online.portal_datos_bancarios', {
             'account_number': partner.account_number,
