@@ -88,6 +88,7 @@ class AccountPayment(models.Model):
     # Botón propio recomendado en Odoo 17
     def action_pagoflex_mark_sent_and_open(self):
         self.ensure_one()
-        if self.state != 'posted':
-            raise UserError(_("El pago debe estar en estado 'Publicado' para marcarlo como enviado."))
+        # Llamar al método original para marcar como enviado
+        self.mark_as_sent()
+        # Aquí tu lógica adicional (abrir el form de acreditación, etc.)
         return self._pagoflex_open_collection_transaction_form()

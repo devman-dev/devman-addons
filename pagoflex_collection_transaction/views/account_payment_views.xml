@@ -7,7 +7,7 @@
             <xpath expr="//form/header" position="inside">
                 <button
                     name="action_pagoflex_mark_sent_and_open"
-                    string="Marcar como enviado + Collection"
+                    string="Marcar como enviado + Registrar acreditación PagoFlex"
                     type="object"
                     class="btn-primary"
                     modifiers="{'invisible': [['state','!=','posted']]}"
