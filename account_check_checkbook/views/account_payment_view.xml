@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_account_payment_form" model="ir.ui.view">
+        <field name="name">account.payment.form.inherited</field>
+        <field name="model">account.payment</field>
+        <field name="inherit_id" ref="l10n_latam_check.view_account_payment_form_inherited"/>
+        <field name="arch" type="xml">
+            <field name="l10n_latam_check_id" position="attributes">
+                <attribute name="domain">
+                  [('payment_method_code', '=', 'new_third_party_checks'), ('l10n_latam_check_current_journal_id', '=', journal_id), ('state', '=', 'posted'), ('operation', '=', 'handed'), ('endosable', '=', True), ('company_id', '=', company_id)] if payment_type == 'outbound' else [('payment_method_code', 'in', ['new_third_party_checks', 'check_printing']), ('l10n_latam_check_current_journal_id', '=', journal_id), ('state', '=', 'posted'), ('company_id', '=', company_id)]
+                </attribute>
+            </field>
+
+          <label for="l10n_latam_check_current_journal_id" position="attributes">
+            <attribute name="invisible">state != 'posted' or payment_method_code not in ['new_third_party_checks', 'check_printing']</attribute>
+          </label>
+          <div class="oe_inline" position="attributes">
+            <attribute name="invisible">state != 'posted' or payment_method_code not in ['new_third_party_checks', 'check_printing']</attribute>
+          </div>
+        </field>
+    </record>
+
+    <record id="view_account_third_party_check_operations_tree_inherit" model="ir.ui.view">
+        <field name="name">account.payment.check.operation.tree</field>
+        <field name="model">account.payment</field>
+        <field name="inherit_id" ref="l10n_latam_check.view_account_third_party_check_operations_tree"/>
+        <field name="arch" type="xml">
+        <xpath expr="//field[@name='partner_id']" position="after">
+               <field name="operation" widget="badge"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_account_payment_third_party_checks_tree_inherit" model="ir.ui.view">
+        <field name="name">account.payment.check.tree</field>
+        <field name="model">account.payment</field>
+        <field name="inherit_id" ref="l10n_latam_check.view_account_third_party_check_tree"/>
+        <field name="arch" type="xml">
+            <tree position="inside">
+                <header>
+                  <button
+                    name="%(account_check_checkbook.action_view_l10n_latam_payment_mass_transfer_inherit)d"
+                    type="action"
+                    string="Operar Cheques"
+                    groups="account.group_account_user"/>
+                </header>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_account_own_check_tree" model="ir.ui.view">
+    <field name="name">account.check.checkbook.view.account.own.check.tree</field>
+      <field name="model">account.payment</field>
+      <field name="inherit_id" ref="l10n_latam_check.view_account_own_check_tree"/>
+      <field name="arch" type="xml">
+        <xpath expr="//field[@name='state']" position="after">
+          <field name="operation" widget="badge"/>
+        </xpath>
+            
+        <tree position="inside">
+          <header>
+            <button 
+              name="%(account_check_checkbook.action_view_l10n_latam_payment_mass_transfer_inherit)d"
+              type="action"
+              string="Operar Cheques"
+              groups="account.group_account_user"/>
+          </header>
+        </tree>
+      </field>
+    </record>
+
+    <record id="view_account_payment_search" model="ir.ui.view">
+      <field name="name">account.check.checkbook.view.account.payment.search</field>
+      <field name="model">account.payment</field>
+      <field name="inherit_id" ref="l10n_latam_check.view_account_payment_search"/>
+      <field name="arch" type="xml">
+        <xpath expr="//filter[@name='groupby_date']" position="after">
+          <separator/>
+          <filter string="Cheques en mano" name="operation" domain="[('operation', '=', 'handed'), ('payment_method_code', '=', 'new_third_party_checks')]"/>
+          <filter string="Recibido" name="holding" domain="[('operation', '=', 'holding'), ('payment_method_code', '=', 'new_third_party_checks')]"/>
+          <filter string="Depositado" name="deposited" domain="[('operation', '=', 'deposited'), ('payment_method_code', '=', 'new_third_party_checks')]"/>
+          <filter string="Vendido" name="selled" domain="[('operation', '=', 'selled'), ('payment_method_code', '=', 'new_third_party_checks')]"/>
+          <filter string="Entregado" name="delivered" domain="[('operation', '=', 'delivered'), ('payment_method_code', '=', 'new_third_party_checks')]"/>
+          <filter string="Transferido" name="transfered" domain="[('operation', '=', 'transfered'), ('payment_method_code', '=', 'new_third_party_checks')]"/>
+          <filter string="Retirado" name="withdrawed" domain="[('operation', '=', 'withdrawed'), ('payment_method_code', '=', 'new_third_party_checks')]"/>
+          <filter string="Reclamado" name="reclaimed" domain="[('operation', '=', 'reclaimed'), ('payment_method_code', '=', 'new_third_party_checks')]"/>
+          <filter string="Rechazado" name="rejected" domain="[('operation', '=', 'rejected'), ('payment_method_code', '=', 'new_third_party_checks')]"/>
+          <filter string="Debitado" name="debited" domain="[('operation', '=', 'debited'), ('payment_method_code', '=', 'new_third_party_checks')]"/>
+          <filter string="Devuelto" name="returned" domain="[('operation', '=', 'returned'), ('payment_method_code', '=', 'new_third_party_checks')]"/>
+          <filter string="Cambiado" name="changed" domain="[('operation', '=', 'changed'), ('payment_method_code', '=', 'new_third_party_checks')]"/>
+          <filter string="Usado" name="used" domain="[('operation', '=', 'used'), ('payment_method_code', '=', 'new_third_party_checks')]"/>
+          <filter string="Cancelado" name="cancel" domain="[('operation', '=', 'cancel'), ('payment_method_code', '=', 'new_third_party_checks')]"/>
+          <separator/>
+        </xpath>
+      </field>
+    </record>
+
+    <record id="view_account_payment_third_party_checks_search_inherit" model="ir.ui.view">
+        <field name="name">account.payment.check.search</field>
+        <field name="model">account.payment</field>
+        <field name="inherit_id" ref="l10n_latam_check.view_account_payment_third_party_checks_search"/>
+        <field name="arch" type="xml">
+            <xpath expr="//filter[@name='checks_on_hand']" position="replace">
+                <filter string="Cheques en mano" name="operation" domain="[('operation', '=', 'handed'), ('payment_method_code', '=', 'new_third_party_checks')]"/>
+                <filter string="Recibido" name="holding" domain="[('operation', '=', 'holding'), ('payment_method_code', '=', 'new_third_party_checks')]"/>
+                <filter string="Depositado" name="deposited" domain="[('operation', '=', 'deposited'), ('payment_method_code', '=', 'new_third_party_checks')]"/>
+                <filter string="Vendido" name="selled" domain="[('operation', '=', 'selled'), ('payment_method_code', '=', 'new_third_party_checks')]"/>
+                <filter string="Entregado" name="delivered" domain="[('operation', '=', 'delivered'), ('payment_method_code', '=', 'new_third_party_checks')]"/>
+                <filter string="Transferido" name="transfered" domain="[('operation', '=', 'transfered'), ('payment_method_code', '=', 'new_third_party_checks')]"/>
+                <filter string="Retirado" name="withdrawed" domain="[('operation', '=', 'withdrawed'), ('payment_method_code', '=', 'new_third_party_checks')]"/>
+                <filter string="Reclamado" name="reclaimed" domain="[('operation', '=', 'reclaimed'), ('payment_method_code', '=', 'new_third_party_checks')]"/>
+                <filter string="Rechazado" name="rejected" domain="[('operation', '=', 'rejected'), ('payment_method_code', '=', 'new_third_party_checks')]"/>
+                <filter string="Debitado" name="debited" domain="[('operation', '=', 'debited'), ('payment_method_code', '=', 'new_third_party_checks')]"/>
+                <filter string="Devuelto" name="returned" domain="[('operation', '=', 'returned'), ('payment_method_code', '=', 'new_third_party_checks')]"/>
+                <filter string="Cambiado" name="changed" domain="[('operation', '=', 'changed'), ('payment_method_code', '=', 'new_third_party_checks')]"/>
+                <filter string="Usado" name="used" domain="[('operation', '=', 'used'), ('payment_method_code', '=', 'new_third_party_checks')]"/>
+                <filter string="Cancelado" name="cancel" domain="[('operation', '=', 'cancel'), ('payment_method_code', '=', 'new_third_party_checks')]"/>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>

@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="checkbook_payment_category_form" model="ir.ui.view">
+            <field name="name">view.checkbook.payment.form</field>
+            <field name="model">account.payment</field>
+            <field name="inherit_id" ref="account.view_account_payment_form"></field>
+            <field name="arch" type="xml">
+                <field name="payment_method_line_id" position="after">
+                    <field name="category_check" string="Cat. Cheque"
+                        invisible="display_checkbook_type == False"
+                        readonly="state == 'posted' and payment_method_code in ('check_printing','new_third_party_checks')"
+                        required="payment_method_code == 'new_third_party_checks' or payment_method_code in ('check_printing', 'new_third_party_checks')"/>
+                </field>
+
+                <field name="l10n_latam_check_number" position="after">
+                    <field name="check_issue_date" string="Fecha de emisión"
+                        invisible="display_checkbook_type == False or category_check != 'deferred'"
+                        required="category_check == 'deferred' and payment_method_code in ('check_printing', 'new_third_party_checks')"/>
+                </field>
+
+                <field name="checkbook_type" position="attributes">
+                    <attribute name="invisible">display_checkbook_type == False</attribute>
+                    <attribute name="readonly">payment_method_code == 'check_printing' and state == 'posted' and payment_method_code not in ('check_printing', 'new_third_party_checks')</attribute>
+                    <attribute name="required">payment_method_code == 'new_third_party_checks' or payment_method_code in ('check_printing', 'new_third_party_checks')</attribute>
+                </field>
+
+
+                <field name="l10n_latam_check_payment_date" position="attributes">
+                    <attribute name="required">payment_method_code in ('check_printing', 'new_third_party_checks')</attribute>
+                    <attribute name="invisible">payment_method_code not in ('check_printing', 'new_third_party_checks')</attribute>
+                    <attribute name="readonly">category_check == 'common'</attribute>
+                </field>
+
+                <field name="l10n_latam_check_bank_id" position="attributes">
+                    <attribute name="required">payment_method_code == 'new_third_party_checks'</attribute>
+                    <attribute name="invisible">payment_method_code != 'new_third_party_checks'</attribute>
+                </field>
+
+            </field>
+        </record>
+    </data>
+
+</odoo>

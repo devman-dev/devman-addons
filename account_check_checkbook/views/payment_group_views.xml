@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_account_payment_group_form" model="ir.ui.view">
+        <field name="name">account.check.checkbook.view.account.payment.group.form</field>
+        <field name="model">account.payment.group</field>
+        <field name="inherit_id" ref="account_payment_group.view_account_payment_group_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='payment_ids']" position="attributes">
+                <attribute name="context">
+                    {
+                        'form_view_ref': 'account_payment_group.view_account_payment_from_group_form',
+                        'tree_view_ref': 'account_check_checkbook.view_account_payment_from_group_tree',
+                        'kanban_view_ref': 'account_payment_group.view_account_payment_kanban_mobile',
+                        'default_move_journal_types': ('bank', 'cash'),
+                        'default_company_id': company_id
+                    }
+                </attribute>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>

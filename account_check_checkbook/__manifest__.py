@@ -1,0 +1,27 @@
+{
+    "name": "Account Check Checkbook",
+    "author": "NTSW - OnlyOne",
+    "mainteiner": "onlyone-odoo",
+    "category": "Sales",
+    "sequence": 14,
+    "summary": "",
+    "version": "17.0.5.8.2",
+    "license": "AGPL-3",
+    "images": [],
+    "depends": [
+        "account",
+        "l10n_latam_check",
+    ],
+    "data": [
+        "data/ir_cron.xml",
+        "security/ir.model.access.csv",
+        "wizard/l10n_latam_payment_mass_transfer_views.xml",
+        "views/journal_view.xml",
+        "views/payment_view.xml",
+        "views/res_config_settings_views.xml",
+        "views/account_payment_tree_view.xml",
+        "views/account_payment_view.xml",
+        "wizard/payment_register_view.xml",
+        "wizard/change_account_payment_checks_views.xml",
+    ],
+}

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <record id="checkbook_view_account_payment_register_form" model="ir.ui.view">
+            <field name="name">checkbook.account.payment.register.form</field>
+	    <field name="model">account.payment.register</field>
+	    <field name="inherit_id" ref="account.view_account_payment_register_form" ></field>
+	    <field name="arch" type="xml">
+		    <field name="group_payment" position="after">
+			    <field name="show_checkbook" invisible="True"/>
+
+			    <field name="show_check_info" invisible="True"/>
+
+			    <field name="checkbook_type" invisible="show_check_info == False"/>
+
+			    <field name="endosable" invisible="show_check_info == False"/>
+		    </field>
+	    </field>
+	</record>
+
+    </data>
+</odoo>

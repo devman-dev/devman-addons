@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="view_account_payment_tree_inherit_view" model="ir.ui.view">
+            <field name="name">account.payment.tree.inherit.view</field>
+            <field name="model">account.payment</field>
+            <field name="inherit_id" ref="account.view_account_payment_tree"></field>
+            <field name="arch" type="xml">
+                <field name="state" position="after">
+                    <field name="check_issue_date" />
+                    <field name="category_check"/>
+                    <field name="l10n_latam_check_payment_date" />
+                    <field name="checkbook_type"/>
+                    <field name="l10n_latam_check_bank_id"/>
+                </field>
+            </field>
+        </record>
+    </data>
+</odoo>

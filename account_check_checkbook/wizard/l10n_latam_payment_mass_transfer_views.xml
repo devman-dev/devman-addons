@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="action_view_l10n_latam_payment_mass_transfer_inherit" model="ir.actions.act_window">
+        <field name="name">Operaciones Cheques</field>
+        <field name="res_model">l10n_latam.payment.mass.transfer</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+
+    <record id="view_l10n_latam_payment_mass_transfer_form_inherit" model="ir.ui.view">
+        <field name="name">l10n_latam.payment.mass.transfer.form.inherit</field>
+        <field name="model">l10n_latam.payment.mass.transfer</field>
+        <field name="inherit_id" ref="l10n_latam_check.view_l10n_latam_payment_mass_transfer_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='destination_journal_id']" position="before">
+                    <field name="operation" 
+       widget="selection" 
+       options="{'values': [{'value': 'deposited', 'label': 'Depositado'}, {'value': 'selled', 'label': 'Vendido'}, {'value': 'rejected', 'label': 'Rechazado'}]}" 
+       required="True"/>
+            </xpath>
+
+            <xpath expr="//field[@name='communication']" position="after">
+                <field name="total_amount_of_selected_checks"/>
+            </xpath>
+
+            <xpath expr="//field[@name='destination_journal_id']" position="replace">
+                <field name="destination_journal_id" invisible="operation in ('deposited', 'rejected')"/>
+                <field name="destination_journal_bank_id" invisible="operation != 'deposited'"/>
+            </xpath>
+            
+            <xpath expr="//button[@name='action_create_payments']" position="replace">
+                <button string="Confirmar"
+                        name="action_create_payments"
+                        type="object"
+                        class="oe_highlight"
+                        data-hotkey="q"/>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>

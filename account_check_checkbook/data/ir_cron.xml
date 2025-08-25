@@ -1,0 +1,30 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<odoo>
+  <data noupdate="1">
+
+    <record model="ir.cron" id="set_handed_to_empty_operation_state_checks">
+      <field name="name">Cambiar estado a "En Mano" a Cheques Propios</field>
+      <field name="interval_number">1</field>
+      <field name="interval_type">days</field>
+      <field name="numbercall">-1</field>
+      <field name="doall" eval="False"/>
+      <field name="active" eval="False"/>
+      <field name="model_id" ref="model_account_payment"/>
+      <field name="state">code</field>
+      <field name="code">model._set_operation_state_to_check('handed', 'check_printing')</field>
+    </record>
+
+    <record model="ir.cron" id="set_empty_check_current_journal">
+      <field name="name">Actualizar "Diario del Cheque" en Cheques propios existentes</field>
+      <field name="interval_number">1</field>
+      <field name="interval_type">days</field>
+      <field name="numbercall">-1</field>
+      <field name="doall" eval="False"/>
+      <field name="active" eval="False"/>
+      <field name="model_id" ref="model_account_payment"/>
+      <field name="state">code</field>
+      <field name="code">model._set_check_current_journal_in_payment('check_printing')</field>
+    </record>
+
+  </data>
+</odoo>

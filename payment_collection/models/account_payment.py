@@ -11,7 +11,9 @@ class AccountPayment(models.Model):
     def create(self, vals):
         payment = super().create(vals)
 
-        if vals['check_origin_collection']:
+        #if vals['check_origin_collection']:
+        if vals.get('check_origin_collection'):
+
             transaction = self.env['collection.transaction'].sudo().search([('id','=', vals['id_transaction'])])
             if transaction:
                 transaction.payment_id = payment.id

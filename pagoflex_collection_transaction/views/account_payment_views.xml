@@ -1,0 +1,18 @@
+<odoo>
+    <record id="view_account_payment_form_pagoflex" model="ir.ui.view">
+        <field name="name">account.payment.form.pagoflex.collection.transaction</field>
+        <field name="model">account.payment</field>
+        <field name="inherit_id" ref="account.view_account_payment_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//form/header" position="inside">
+                <button
+                    name="action_pagoflex_mark_sent_and_open"
+                    string="Marcar como enviado + Collection"
+                    type="object"
+                    class="btn-primary"
+                    modifiers="{'invisible': [['state','!=','posted']]}"
+                />
+            </xpath>
+        </field>
+    </record>
+</odoo>

@@ -1,0 +1,15 @@
+1) (listo) se desaparecen los datos del campo tipo de cheque.
+2) en el listado de cheques rechazados aparecen los cheques que no se rechazaron.
+3) el wizard de transferir cheque no tomó el cambio de nombre a "Operar cheques".
+4) al transferir un cheque y luego voverlo a borrador el campo operation se vuelve en mano y no debería pasar, ademas al querer hacer una operacion sobre este error responde que deben estar los cheques en el mismo diario con solo un cheque seleccionado.
+
+
+
+ ('l10n_latam_check_current_journal_id', '=', journal_id),
+
+
+
+
+
+
+ l10n_latam_check_id == l10n_latam_check_id.l10n_latam_check_id
