@@ -68,6 +68,10 @@
                         <field name="description"/>
                         <field name="duplicate" invisible="1"/>
                         <field name="previous_month" invisible="1"/>
+                        <field name="previous_month_pesos" invisible="1"/>
+                        <field name="previous_month_usd" invisible="1"/>
+                        <field name="previous_month_euros" invisible="1"/>
+                        <field name="previous_month_reales" invisible="1"/>
                     </group>
                 </sheet>
                  <!-- Chatter -->

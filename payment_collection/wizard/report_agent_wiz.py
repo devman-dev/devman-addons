@@ -18,15 +18,51 @@ class ReportAgentWiz(models.TransientModel):
         end_date = self.end_date
         agent = self.agent
 
+        previous_month_pesos = 0
+        previous_month_usd = 0
+        previous_month_euros = 0
+        previous_month_reales = 0
+
         domain = [('date', '<', start_date), ('agent', '=', agent.id)]
         previous_months = self.env['collection.transaction.commission'].search(domain)
-
         self.previous_balance = sum([pm.commission_amount for pm in previous_months])
+
+        if previous_months:
+            for rec in previous_months:
+                if rec.currency_id.name == "ARS":
+                    domain = [('date', '<', start_date), ('agent', '=', agent.id),
+                              ('currency_id', '=', rec.currency_id.id)]
+                    previous_months = self.env['collection.transaction.commission'].search(domain)
+                    previous_month_pesos = sum([pm.commission_amount for pm in previous_months])
+
+                if rec.currency_id.name == "USD":
+                    domain = [('date', '<', start_date), ('agent', '=', agent.id),
+                              ('currency_id', '=', rec.currency_id.id)]
+                    previous_months = self.env['collection.transaction.commission'].search(domain)
+                    previous_month_usd = sum([pm.commission_amount for pm in previous_months])
+
+                if rec.currency_id.name == "EUR":
+                    domain = [('date', '<', start_date), ('agent', '=', agent.id),
+                              ('currency_id', '=', rec.currency_id.id)]
+                    previous_months = self.env['collection.transaction.commission'].search(domain)
+                    previous_month_euros = sum([pm.commission_amount for pm in previous_months])
+
+                if rec.currency_id.name == "BRL":
+                    domain = [('date', '<', start_date), ('agent', '=', agent.id),
+                              ('currency_id', '=', rec.currency_id.id)]
+                    previous_months = self.env['collection.transaction.commission'].search(domain)
+                    previous_month_reales = sum([pm.commission_amount for pm in previous_months])
+
+
 
         domain_2 = [('date', '>=', start_date), ('date', '<=', end_date),('agent', '=', agent.id)]
         filtered_records = self.env['collection.transaction.commission'].search(domain_2)
         if filtered_records:
             filtered_records[0].previous_month = self.previous_balance
+            filtered_records[0].previous_month_pesos = previous_month_pesos
+            filtered_records[0].previous_month_usd = previous_month_usd
+            filtered_records[0].previous_month_euros = previous_month_euros
+            filtered_records[0].previous_month_reales = previous_month_reales
 
             return self.env.ref('payment_collection.action_report_collection_transaction_commission').report_action(filtered_records)
 

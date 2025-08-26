@@ -37,6 +37,12 @@ class CollectionTransactionCommission(models.Model):
     currency_real = fields.Float(string='Real')
     currency_crypto = fields.Float(string='Crypto')
 
+    # MESES PREVIOS
+    previous_month_pesos = fields.Float('Mes Anterior Pesos')
+    previous_month_usd = fields.Float('Mes Anterior Dolares')
+    previous_month_euros = fields.Float('Mes Anterior Euros')
+    previous_month_reales = fields.Float('Mes Anterior Reales')
+
     @api.model
     def create(self, vals):
 

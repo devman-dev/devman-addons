@@ -15,8 +15,18 @@
                         border: 2px solid black;
                         }
                     </style>
-                    <table class="table"
-                        style="width: 100%; border:none; font-size: 13px;">
+                    <table class="table-borderless" style="border:none; font-size: 13px;">
+                         <thead>
+                            <tr>
+                                <td style="background-color: #adf58c; width:70px;">Agente:</td>
+                                <td style="background-color: #adf58c;">
+                                    <span t-field="docs[0].agent.name" />
+                                </td>
+                                <td style="background-color: #adf58c; width:10px;"></td>
+                            </tr>
+                        </thead>    
+                    </table>
+                    <table class="table" style="width: 100%; border:none; font-size: 13px;">
                         <thead class="border" style="background-color: #8dd0f0;">
                             <tr class="border">
                                 <th class="border" style="text-align: left;">Fecha</th>
@@ -32,23 +42,111 @@
                         <tbody style="font-size: 10px;">
                             <t t-set="total_amount" t-value="0" />
                             <t t-set="total_op_amount" t-value="0" />
-                            <tr>
-                                <td colspan="5"></td>
-                                <td style="background-color: #8dd0f0; text-align: left;">Saldo
-                                    Anterior:</td>
-                                <td style="background-color: #8dd0f0; text-align: right;">
-                                    <b>
-                                        <span t-field="docs[0].previous_month"
-                                            t-options="{'widget': 'float', 'precision': 2}" />
-                                    </b>
-                                </td>
-                                <td></td>
-                            </tr>
+
+                            <t t-set="total_amount_pesos" t-value="0" />
+                            <t t-set="total_amount_usd" t-value="0" />
+                            <t t-set="total_amount_euro" t-value="0" />
+                            <t t-set="total_amount_real" t-value="0" />
+
+
+                            <t t-set="pesos_true" t-value="False"/>
+                            <t t-set="dolar_true" t-value="False"/>
+                            <t t-set="euro_true" t-value="False"/>
+                            <t t-set="real_true" t-value="False"/>
+
                             <t t-foreach="docs" t-as="o">
-                                <t t-set="total_amount"
-                                    t-value="total_amount + o.commission_amount" />
-                                <t t-set="total_op_amount"
-                                    t-value="total_op_amount + o.operation_amount" />
+                                <t t-if="o.currency_id.name == 'ARS' or docs[0].previous_month_pesos">
+                                     <t t-set="pesos_true" t-value="True"/>
+                                </t>
+                                <t t-if="o.currency_id.name == 'USD' or docs[0].previous_month_usd">
+                                     <t t-set="dolar_true" t-value="True"/>
+                                </t>
+                                <t t-if="o.currency_id.name == 'EUR' or docs[0].previous_month_euros">
+                                     <t t-set="euro_true" t-value="True"/>
+                                </t>
+                                <t t-if="o.currency_id.name == 'BRL' or docs[0].previous_month_reales">
+                                     <t t-set="real_true" t-value="True"/>
+                                </t>
+                            </t>
+
+                            <t t-if="pesos_true">
+                                <tr>
+                                    <td class="pt-1 pb-0" colspan="5"></td>
+                                    <td class="pt-1 pb-0" style="background-color: #8dd0f0; text-align: left;">Saldo
+                                        Anterior Pesos:</td>
+                                    <td class="pt-1 pb-0" style="background-color: #8dd0f0; text-align: right;">
+                                        <b>
+                                            <span t-field="docs[0].previous_month_pesos"
+                                                t-options="{'widget': 'float', 'precision': 2}" />
+                                        </b>
+                                    </td>
+                                    <td class="pt-1 pb-0"></td>
+                                </tr>
+                            </t>
+
+                            <t t-if="dolar_true">
+                                <tr>
+                                    <td class="pt-1 pb-0" colspan="5"></td>
+                                    <td class="pt-1 pb-0" style="background-color: #8dd0f0; text-align: left;">Saldo
+                                        Anterior Dolares:</td>
+                                    <td class="pt-1 pb-0" style="background-color: #8dd0f0; text-align: right;">
+                                        <b>
+                                            <span t-field="docs[0].previous_month_usd"
+                                                t-options="{'widget': 'float', 'precision': 2}" />
+                                        </b>
+                                    </td>
+                                    <td class="pt-1 pb-0"></td>
+                                </tr>
+                            </t>
+
+                            <t t-if="euro_true">
+                                <tr>
+                                    <td class="pt-1 pb-0" colspan="5"></td>
+                                    <td class="pt-1 pb-0" style="background-color: #8dd0f0; text-align: left;">Saldo
+                                        Anterior Euros:</td>
+                                    <td class="pt-1 pb-0" style="background-color: #8dd0f0; text-align: right;">
+                                        <b>
+                                            <span t-field="docs[0].previous_month_euros"
+                                                t-options="{'widget': 'float', 'precision': 2}" />
+                                        </b>
+                                    </td>
+                                    <td class="pt-1 pb-0"></td>
+                                </tr>
+                            </t>
+
+                            <t t-if="real_true">
+                                <tr>
+                                    <td class="pt-1 pb-0" colspan="5"></td>
+                                    <td class="pt-1 pb-0" style="background-color: #8dd0f0; text-align: left;">Saldo
+                                        Anterior Reales:</td>
+                                    <td class="pt-1 pb-0" style="background-color: #8dd0f0; text-align: right;">
+                                        <b>
+                                            <span t-field="docs[0].previous_month_reales"
+                                                t-options="{'widget': 'float', 'precision': 2}" />
+                                        </b>
+                                    </td>
+                                    <td class="pt-1 pb-0"></td>
+                                </tr>
+                            </t>
+
+                            <t t-foreach="docs" t-as="o">
+                                <t t-set="total_amount" t-value="total_amount + o.commission_amount" />
+
+                                <t t-set="total_op_amount" t-value="total_op_amount + o.commission_amount" />
+
+                                <t t-if="o.currency_id.name == 'ARS'">
+                                    <t t-set="total_amount_pesos" t-value="total_amount_pesos + o.commission_amount" />
+                                </t>
+                                <t t-if="o.currency_id.name == 'USD'">
+                                    <t t-set="total_amount_usd" t-value="total_amount_usd + o.commission_amount" />
+                                </t>
+                                <t t-if="o.currency_id.name == 'EUR'">
+                                    <t t-set="total_amount_euro" t-value="total_amount_euro + o.commission_amount" />
+                                </t>
+                                <t t-if="o.currency_id.name == 'BRL'">
+                                    <t t-set="total_amount_euro" t-value="total_amount_real + o.commission_amount" />
+                                </t>
+
                                 <t t-if="o == docs[-1]">
                                     <tr class="border">
                                         <td class="border">
@@ -81,21 +179,71 @@
                                                 t-options="{'widget': 'float', 'precision': 2}" />
                                         </td>
                                     </tr>
-                                    <tr>
-                                        <td style="background-color: #adf58c;">Agente:</td>
-                                        <td style="background-color: #adf58c;">
-                                            <span t-field="docs[0].agent.name" />
-                                        </td>
-                                        <td colspan="3"></td>
-                                        <td style="background-color: #adf58c;">Total:</td>
-                                        <td style="background-color: #adf58c; text-align: right;">
-                                            <b>
-                                                <span t-esc="total_amount + docs[0].previous_month"
-                                                    t-options="{'widget': 'float', 'precision': 2}" />
-                                            </b>
-                                        </td>
-                                        <td></td>
-                                    </tr>
+
+                                    <t t-if="(total_amount_pesos + docs[0].previous_month_pesos) != 0">
+                                        <tr>
+                                            <td class="pt-1 pb-0"></td>
+                                            <td class="pt-1 pb-0"></td>
+                                            <td class="pt-1 pb-0" colspan="3"></td>
+                                            <td class="pt-1 pb-0" style="background-color: #adf58c;">Total Pesos:</td>
+                                            <td class="pt-1 pb-0" style="background-color: #adf58c; text-align: right;">
+                                                <b>
+                                                    <span t-esc="total_amount_pesos + docs[0].previous_month_pesos"
+                                                        t-options="{'widget': 'float', 'precision': 2}" />
+                                                </b>
+                                            </td>
+                                            <td class="pt-1 pb-0"></td>
+                                        </tr>
+                                    </t>
+
+                                    <t t-if="(total_amount_usd + docs[0].previous_month_usd) != 0">
+                                        <tr>
+                                            <td class="pt-1 pb-0"></td>
+                                            <td class="pt-1 pb-0"></td>
+                                            <td class="pt-1 pb-0" colspan="3"></td>
+                                            <td class="pt-1 pb-0" style="background-color: #adf58c;">Total Dolares:</td>
+                                            <td class="pt-1 pb-0" style="background-color: #adf58c; text-align: right;">
+                                                <b>
+                                                    <span t-esc="total_amount_usd + docs[0].previous_month_usd"
+                                                        t-options="{'widget': 'float', 'precision': 2}" />
+                                                </b>
+                                            </td>
+                                            <td class="pt-1 pb-0"></td>
+                                        </tr>
+                                    </t>
+
+                                    <t t-if="(total_amount_euro + docs[0].previous_month_euros) != 0">
+                                        <tr>
+                                            <td class="pt-1 pb-0"></td>
+                                            <td class="pt-1 pb-0"></td>
+                                            <td class="pt-1 pb-0" colspan="3"></td>
+                                            <td class="pt-1 pb-0" style="background-color: #adf58c;">Total Euros:</td>
+                                            <td class="pt-1 pb-0" style="background-color: #adf58c; text-align: right;">
+                                                <b>
+                                                    <span t-esc="total_amount_euro + docs[0].previous_month_euros"
+                                                        t-options="{'widget': 'float', 'precision': 2}" />
+                                                </b>
+                                            </td>
+                                            <td class="pt-1 pb-0"></td>
+                                        </tr>
+                                    </t>
+
+                                    <t t-if="(total_amount_real + docs[0].previous_month_reales) != 0">
+                                        <tr>
+                                            <td class="pt-1 pb-0"></td>
+                                            <td class="pt-1 pb-0"></td>
+                                            <td class="pt-1 pb-0" colspan="3"></td>
+                                            <td class="pt-1 pb-0" style="background-color: #adf58c;">Total Reales:</td>
+                                            <td class="pt-1 pb-0" style="background-color: #adf58c; text-align: right;">
+                                                <b>
+                                                    <span t-esc="total_amount_real + docs[0].previous_month_reales"
+                                                        t-options="{'widget': 'float', 'precision': 2}" />
+                                                </b>
+                                            </td>
+                                            <td class="pt-1 pb-0"></td>
+                                        </tr>
+                                    </t>
+
                                 </t>
                                 <t t-else="">
                                     <tr class="border">
