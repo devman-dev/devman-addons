@@ -1,50 +1,61 @@
 <odoo>
     <template t-name="casino_online.portal_mis_limites_partial">
-        <div id="mis_limites">
-            <form action="/my/mis_limites" method="post" class="o_portal_form">
-                <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()" />
-                <div class="mb-4">
-                    <label for="daily_limit" class="form-label fw-bold">Límite diario de depósito</label>
-                    <input type="number" step="1" min="0" name="daily_limit" id="daily_limit"
-                        inputmode="numeric" pattern="\d*"
-                        class="form-control"
-                        t-att-value="int(daily_limit) if daily_limit else ''" />
-                </div>
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h3 class="card-title mb-0">Límites de Depósito</h3>
+            </div>
 
-                <div class="mb-4">
-                    <label for="weekly_limit" class="form-label fw-bold">Límite semanal de depósito</label>
-                    <input type="number" step="1" min="0" name="weekly_limit" id="weekly_limit"
-                        inputmode="numeric" pattern="\d*"
-                        class="form-control"
-                        t-att-value="int(weekly_limit) if weekly_limit else ''" />
-                </div>
+            <div class="card-body">
+                <form action="/my/mis_limites" method="post" class="oe_portal_form">
+                    <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()" />
+                    <div class="form-group mb-4">
+                        <label for="daily_limit" class="form-label">Límite diario de depósito (USD)</label>
+                        <div class="input-group">
+                            <span class="input-group-text">$</span>
+                            <input type="number" step="1" min="10"
+                                name="daily_limit" id="daily_limit"
+                                inputmode="numeric" pattern="\d*"
+                                class="form-control"
+                                required="required"
+                                t-att-value="int(daily_limit) if daily_limit else ''" />
+                        </div>
+                    </div>
 
-                <div class="mb-4">
-                    <label for="monthly_limit" class="form-label fw-bold">Límite mensual de depósito</label>
-                    <input type="number" step="1" min="0" name="monthly_limit" id="monthly_limit"
-                        inputmode="numeric" pattern="\d*"
-                        class="form-control"
-                        t-att-value="int(monthly_limit) if monthly_limit else ''" />
-                </div>
-                <!-- <div>
-                    <label>Límite Depósito Diario</label>
-                    <input type="number" name="limite_deposito_diario"
-                        t-att-value="partner.limite_deposito_diario" />
-                </div>
+                    <div class="form-group mb-4">
+                        <label for="weekly_limit" class="form-label">Límite semanal de depósito
+                            (USD)</label>
+                        <div class="input-group">
+                            <span class="input-group-text">$</span>
+                            <input type="number" step="1" min="10"
+                                name="weekly_limit" id="weekly_limit"
+                                inputmode="numeric" pattern="\d*"
+                                class="form-control"
+                                required="required"
+                                t-att-value="int(weekly_limit) if weekly_limit else ''" />
+                        </div>
+                    </div>
 
-                <div>
-                    <label>Límite Pérdida Semanal</label>
-                    <input type="number" name="limite_perdida_semanal"
-                        t-att-value="partner.limite_perdida_semanal" />
-                </div>
-                <div>
-                    <label>Tiempo de Sesión (min)</label>
-                    <input type="number" name="tiempo_sesion"
-                        t-att-value="partner.tiempo_sesion" />
-                </div> -->
-                <button type="submit" class="btn btn-primary">Guardar Límites</button>
+                    <div class="form-group mb-4">
+                        <label for="monthly_limit" class="form-label">Límite mensual de depósito
+                            (USD)</label>
+                        <div class="input-group">
+                            <span class="input-group-text">$</span>
+                            <input type="number" step="1" min="10"
+                                name="monthly_limit" id="monthly_limit"
+                                inputmode="numeric" pattern="\d*"
+                                class="form-control"
+                                required="required"
+                                t-att-value="int(monthly_limit) if monthly_limit else ''" />
+                        </div>
+                    </div>
 
-            </form>
+                    <div class="text-center mt-4">
+                        <button type="submit" class="btn btn-primary btn-lg px-5">
+                            Guardar Límites
+                        </button>
+                    </div>
+                </form>
+            </div>
         </div>
     </template>
 </odoo>

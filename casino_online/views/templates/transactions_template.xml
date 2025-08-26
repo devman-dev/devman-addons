@@ -303,57 +303,95 @@
     </template>
 
     <template id="portal_mis_limites" name="Wrapper Mis Límites">
-        <div id="portal_mis_limites_wrapper">
-            <t t-call="casino_online.portal_mis_limites_partial" />
+        <div class="container mt-4">
+            <div class="row justify-content-center">
+                <div id="portal_mis_limites_wrapper" class="col-lg-8">
+                    <t t-call="casino_online.portal_mis_limites_partial" />
+                </div>
+            </div>
         </div>
     </template>
 
     <template id="portal_datos_bancarios" name="Mis Datos Bancarios">
-        <div class="container  ">
-            <h2>MIS DATOS BANCARIOS</h2>
+        <div class="container mt-4">
+            <div class="row justify-content-center">
+                <div class="col-lg-8">
+                    <div class="container card">
+                        <div class="card-header bg-primary text-white">
+                            <h3 class="card-title mb-0">Mis Datos Bancarios</h3>
+                        </div>
 
-            <form action="/my/datos_bank" method="post">
-                <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()" />
+                        <div class="card-body">
+                            <form action="/my/datos_bank" method="post" class="oe_bancarios_form">
+                                <input type="hidden" name="csrf_token"
+                                    t-att-value="request.csrf_token()" />
 
-                <div class="mb-3">
-                    <label for="account_number" class="form-label">Cuenta Bancaria</label>
-                    <input type="text" name="account_number" id="account_number"
-                        class="form-control"
-                        t-att-value="account_number or ''" />
+                                <div class="form-group mb-4">
+                                    <label for="account_number" class="form-label">Cuenta Bancaria</label>
+                                    <div class="input-group">
+                                        <input type="text"
+                                            name="account_number" id="account_number"
+                                            class="form-control"
+                                            required="required" t-att-value="account_number" />
+                                    </div>
+                                </div>
+
+                                <div class="form-group mb-4">
+                                    <label for="bank_name" class="form-label">Banco</label>
+                                    <div class="input-group">
+                                        <input type="text"
+                                            name="bank_name" id="bank_name" class="form-control"
+                                            required="required" t-att-value="bank_name" />
+                                    </div>
+                                </div>
+
+                                <div class="form-group mb-4">
+                                    <label for="account_type" class="form-label">Tipo de Cuenta</label>
+                                    <div class="input-group">
+                                        <input type="text"
+                                            name="account_type" id="account_type"
+                                            class="form-control"
+                                            required="required" t-att-value="account_type" />
+                                    </div>
+                                </div>
+
+                                <div class="form-group mb-4">
+                                    <label for="cbu" class="form-label">CBU</label>
+                                    <div class="input-group">
+                                        <input type="text"
+                                            name="cbu" id="cbu" class="form-control"
+                                            required="required" t-att-value="cbu" />
+                                    </div>
+                                </div>
+
+                                <div class="form-group mb-4">
+                                    <label for="cuil" class="form-label">CUIL</label>
+                                    <div class="input-group">
+                                        <input type="text"
+                                            name="cuil" id="cuil" class="form-control"
+                                            required="required" t-att-value="cuil" />
+                                    </div>
+                                </div>
+
+                                <div class="form-group mb-4">
+                                    <label for="nuevo_cbu" class="form-label">Nuevo CBU</label>
+                                    <div class="input-group">
+                                        <input type="text"
+                                            name="nuevo_cbu" id="nuevo_cbu" class="form-control"
+                                            required="required" t-att-value="nuevo_cbu" />
+                                    </div>
+                                </div>
+
+                                <div class="text-center mt-4">
+                                    <button type="submit" class="btn btn-primary btn-lg px-5">
+                                        Guardar Datos
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
                 </div>
-
-                <div class="mb-3">
-                    <label for="bank_name" class="form-label">Banco</label>
-                    <input type="text" name="bank_name" id="bank_name" class="form-control"
-                        t-att-value="bank_name or ''" />
-                </div>
-
-                <div class="mb-3">
-                    <label for="account_type" class="form-label">Tipo de Cuenta</label>
-                    <input type="text" name="account_type" id="account_type" class="form-control"
-                        t-att-value="account_type or ''" />
-                </div>
-
-                <div class="mb-3">
-                    <label for="cbu" class="form-label">CBU</label>
-                    <input type="text" name="cbu" id="cbu" class="form-control"
-                        t-att-value="cbu or ''" />
-                </div>
-
-                <div class="mb-3">
-                    <label for="cuil" class="form-label">CUIL</label>
-                    <input type="text" name="cuil" id="cuil" class="form-control"
-                        t-att-value="cuil or ''" />
-                </div>
-
-                <div class="mb-3">
-                    <label for="nuevo_cbu" class="form-label">Nuevo CBU</label>
-                    <input type="text" name="nuevo_cbu" id="nuevo_cbu" class="form-control"
-                        t-att-value="nuevo_cbu or ''" />
-                </div>
-
-                <button type="submit" class="btn btn-primary">Guardar Datos</button>
-            </form>
+            </div>
         </div>
     </template>
 </odoo>
