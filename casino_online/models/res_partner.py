@@ -1,6 +1,7 @@
 import uuid
 
-from odoo import models, fields
+from odoo import fields, models
+
 
 class ResPartner(models.Model):
     _inherit = 'res.partner'
@@ -18,3 +19,24 @@ class ResPartner(models.Model):
     nuevo_cbu = fields.Char('Nuevo CBU')
     token = fields.Char(string='Token', default=lambda self: str(uuid.uuid4()))
     nickname = fields.Char(string='Nickname')
+
+    def _deposit_payments_fields(self):
+        return [
+            "date",
+            "memo",
+            "amount",
+            "payment_total",
+            "currency_id",
+            "state",
+        ]
+
+    def get_deposit_payments(self):
+        AccountPayment = self.env["account.payment"].sudo()
+        self_sudo = self.sudo()
+        domain = [
+            ("payment_type", "=", "inbound"),
+            ("state", "in", ("in_process", "paid")),
+            ("partner_id", "=", self_sudo.id),
+            ("move_id", "!=", False)
+        ]
+        return AccountPayment.search_read(domain, self._deposit_payments_fields())

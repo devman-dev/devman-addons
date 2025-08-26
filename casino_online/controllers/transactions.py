@@ -516,6 +516,3 @@ class MiPortalController(http.Controller):
             json.dumps({'balance': round(total, 2)}),
             content_type='application/json'
         )
-
-
-        
