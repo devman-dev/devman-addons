@@ -1,17 +1,21 @@
 # controllers/transactions.py
 import json
+import logging
 import math
+import urllib
 from datetime import date, datetime
 
+import werkzeug
 from requests import post
-from odoo.addons.portal.controllers.portal import CustomerPortal
-from odoo import http, fields
-from odoo.http import request
-from odoo.addons.portal.controllers.portal import CustomerPortal
-from odoo.addons.payment import utils as payment_utils
-from odoo.exceptions import UserError, ValidationError
 
-import logging
+from odoo import fields, http
+from odoo.exceptions import UserError, ValidationError
+from odoo.http import request
+
+from odoo.addons.payment import utils as payment_utils
+from odoo.addons.payment.controllers.portal import PaymentPortal
+from odoo.addons.portal.controllers.portal import CustomerPortal
+
 _logger = logging.getLogger(__name__)
 
 class CasinoHome(CustomerPortal):
@@ -174,7 +178,8 @@ class CasinoHome(CustomerPortal):
             'account_type': account_type,
             'cbu': cbu,
             'cuil': cuil,
-            'nuevo_cbu': nuevo_cbu
+            'nuevo_cbu': nuevo_cbu,
+            'currency': company.currency_id
         })
         return request.render("portal.portal_my_home", values)
 
@@ -343,69 +348,113 @@ class MiPortalController(http.Controller):
             'nuevo_cbu': partner.nuevo_cbu,
         })
 
-    @http.route('/my/depositar', type='http', auth='user', website=True)
-    def depositar_form(self, **kwargs):
-        try:
-            partner = request.env.user.partner_id
-            amount = float(kwargs.get('amount', 10.0))  # Monto mínimo de $10
+    @http.route('/my/depositar', type='http', auth='user', website=True, methods=["GET", "POST"], crsf=True)
+    def depositar_form(self, amount=False, currency_id=False, partner_id=False, company_id=False, access_token=False, **kwargs):
+        PaymentProvider = request.env["payment.provider"].sudo()
+        PaymentMethod = request.env["payment.method"].sudo()
+        PaymentToken = request.env["payment.token"].sudo()
+        ResCurrency = request.env["res.currency"].sudo()
+        ResCompany = request.env["res.company"].sudo()
+        ResPartner = request.env["res.partner"].sudo()
 
-            # Configuración base
-            availability_report = {}
-            currency = request.env.company.currency_id
+        currency_id, partner_id, company_id = tuple(
+            map(
+                PaymentPortal._cast_as_int,
+                (currency_id, partner_id, company_id),
+            ),
+        )
+        amount = PaymentPortal._cast_as_float(amount)
 
-            # Obtener proveedores compatibles con manejo seguro
-            providers = request.env['payment.provider'].sudo()._get_compatible_providers(
-                request.env.company.id,
-                partner.id,
-                amount,
-                report=availability_report,
-            ) or request.env['payment.provider']  # Lista vacía si es None
+        if partner_id:
+            if not payment_utils.check_access_token(access_token, partner_id, amount, currency_id):
+                raise werkzeug.exceptions.NotFound()
 
-            # Obtener métodos de pago con manejo seguro
-            payment_methods = request.env['payment.method'].sudo()._get_compatible_payment_methods(
-                providers.ids,
-                partner.id,
-                report=availability_report,
-            ) or request.env['payment.method']  # Lista vacía si es None
+        user_sudo = request.env.user
+        logged_in = not user_sudo._is_public()
 
-            # Obtener tokens con manejo seguro
-            tokens = request.env['payment.token'].sudo()._get_available_tokens(
-                None, partner.id
-            ) or request.env['payment.token']  # Lista vacía si es None
+        partner_is_different = False
+        if logged_in:
+            partner_is_different = partner_id and partner_id != user_sudo.partner_id.id
+            partner_sudo = user_sudo.partner_id
+        else:
+            partner_sudo = ResPartner.browse(partner_id).exists()
+            if not partner_sudo:
+                return request.redirect(
+                    f"/web/login?redirect={urllib.parse.quote(request.httprequest.full_path)}"
+                )
 
-            # Contexto completo para el template
-            rendering_context = {
-                # Datos del formulario
-                'amount': amount,
-                'mode': 'form',
-                'allow_token_selection': True,
-                'allow_token_deletion': False,
+        amount = amount or 10.0
+        company_id = company_id or partner_sudo.company_id.id or user_sudo.company_id.id
+        company = ResCompany.browse(company_id)
+        currency_id = currency_id or company.currency_id.id
 
-                # Contexto de pago
-                'partner_id': partner.id,
-                'currency_id': currency.id,
-                'reference_prefix': payment_utils.singularize_reference_prefix(prefix='DEP'),
-                'providers_sudo': providers,
-                'payment_methods_sudo': payment_methods,
-                'tokens_sudo': tokens,
-                'availability_report': availability_report,
+        currency = ResCurrency.browse(currency_id).exists()
+        if not currency or not currency.active:
+            raise werkzeug.exceptions.NotFound()
 
-                # Rutas y seguridad
-                'transaction_route': '/payment/transaction',
-                'landing_route': '/my/depositar',
-                'access_token': payment_utils.generate_access_token(partner.id, None, None),
+        availability_report = {}
 
-                # Valores por defecto para evitar None
-                'selected_token_id': None,
-                'selected_provider_id': None,
-            }
+        # Obtener proveedores compatibles con manejo seguro
+        providers_sudo = PaymentProvider._get_compatible_providers(
+            company_id,
+            partner_sudo.id,
+            amount,
+            currency_id=currency.id,
+            report=availability_report,
+            **kwargs,
+        )
+        # Obtener métodos de pago con manejo seguro
+        payment_methods_sudo = PaymentMethod._get_compatible_payment_methods(
+            providers_sudo.ids,
+            partner_sudo.id,
+            currency_id=currency.id,
+            report=availability_report,
+        )
+        # Obtener tokens con manejo seguro
+        tokens_sudo = PaymentToken._get_available_tokens(providers_sudo.ids, partner_sudo.id)
 
-            return request.render('casino_online.portal_depositar_form', rendering_context)
+        company_mismatch = not PaymentPortal._can_partner_pay_in_company(partner_sudo, company)
+        access_token = payment_utils.generate_access_token(partner_sudo.id, amount, currency.id)
 
-        except Exception as e:
-            # Manejo de errores para diagnóstico
-            # _logger.error("Error rendering deposit form: %s", str(e))
-            raise
+        portal_page_values = {
+            "res_company": company,
+            "company_mismatch": company_mismatch,
+            "expected_company": company,
+            "partner_is_different": partner_is_different,
+        }
+        payment_form_values = {
+            "show_tokenize_input_mapping": PaymentPortal._compute_show_tokenize_input_mapping(
+                providers_sudo,
+                **kwargs,
+            )
+        }
+        payment_context = {
+            "reference_prefix": payment_utils.singularize_reference_prefix(prefix="DEP"),
+            "amount": amount,
+            "currency": currency,
+            "partner_id": partner_sudo.id,
+            "providers_sudo": providers_sudo,
+            "payment_methods_sudo": payment_methods_sudo,
+            "tokens_sudo": tokens_sudo,
+            "availability_report": availability_report,
+            "transaction_route": "/payment/transaction",
+            "landing_route": "/payment/confirmation",
+            "access_token": access_token
+        }
+
+        rendering_context = {
+            **portal_page_values,
+            **payment_form_values,
+            **payment_context,
+            "display_submit_button": False
+            # **PaymentPortal._get_extra_payment_form_values(
+            #     **payment_context,
+            #     currency_id=currency.id,
+            #     **kwargs,
+            # ),
+        }
+
+        return request.render("casino_online.portal_depositar_form", rendering_context)
 
     @http.route('/my/retirar', type='http', auth='user', website=True, methods=['GET', 'POST'], csrf=True)
     def portal_retirar(self, **post):

@@ -22,5 +22,10 @@
         'views/templates/portal_mis_limites_partial.xml',
         'views/res_partner_form_casino_online.xml'
     ],
+    "assets": {
+        "web.assets_frontend": [
+            "casino_online/static/src/**/*",
+        ]
+    },
     'installable': True,
 }
