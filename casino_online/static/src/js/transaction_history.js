@@ -22,7 +22,7 @@ publicWidget.registry.TransactionHistory = publicWidget.Widget.extend({
     this._super(...arguments);
     this.orm = this.bindService("orm");
 
-    this.maxPageContent = 4;
+    this.maxPageContent = 8;
     this.pageOffset = 0;
   },
   async start() {
@@ -78,11 +78,6 @@ publicWidget.registry.TransactionHistory = publicWidget.Widget.extend({
               transactions[i].amount,
               this.currencyId
             )}</td>
-            <td class="text-center ">
-              <span class="badge ${paymentState[transactions[i].state][1]}">${
-            paymentState[transactions[i].state][0]
-          }</span>
-            </td>
           </tr>`
         );
       }

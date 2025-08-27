@@ -27,7 +27,6 @@ class ResPartner(models.Model):
             "amount",
             "payment_total",
             "currency_id",
-            "state",
         ]
 
     def get_deposit_payments(self):
@@ -39,4 +38,7 @@ class ResPartner(models.Model):
             ("partner_id", "=", self_sudo.id),
             ("move_id", "!=", False)
         ]
-        return AccountPayment.search_read(domain, self._deposit_payments_fields())
+        payments = AccountPayment.search_read(domain, self._deposit_payments_fields())
+        for payment in payments:
+            payment["date"] = payment["date"].strftime("%d-%m-%Y")
+        return payments
