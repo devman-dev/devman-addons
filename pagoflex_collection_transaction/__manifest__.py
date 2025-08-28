@@ -6,11 +6,11 @@
     'license': 'LGPL-3',
     'category': 'Accounting',
     'summary': 'Odoo 17: abre collection.transaction al marcar pago como enviado',
-    'depends': [
-        'account',
-    ],
+    'depends': ['account','payment_collection'],
     'data': [
+        'security/ir.model.access.csv',
         'views/account_payment_views.xml',
+        'wizard/open_colection_transaction.xml',
     ],
     'installable': True,
     'application': False,
