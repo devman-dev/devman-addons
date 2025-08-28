@@ -37,6 +37,7 @@ class CasinoGameSession(models.Model):
     description = fields.Text(string='Descripción')
     move_ids = fields.One2many('account.move', 'game_session_id', string='Movimientos')
     json_data = fields.Text(string='JSON Recibido')
+    internal_transaction_id = fields.Text(string='Transacción Interna')
 
     group_display_name = fields.Char(
         string="Agrupación Detallada",

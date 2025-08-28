@@ -21,7 +21,13 @@ _logger = logging.getLogger(__name__)
 class CasinoHome(CustomerPortal):
     @http.route(['/my', '/my/home'], type='http', auth='user', website=True)
     def home(self, **kw):
-        values = self._prepare_portal_layout_values()
+        res = super().home(**kw)
+        partner_sudo = request.env.user.partner_id.sudo()
+        res.qcontext['partner_sudo'] = partner_sudo
+        _logger.warning("Entered custom home method with kw: %s", res.qcontext)
+        
+        # values = self._prepare_portal_layout_values()
+        values = res.qcontext
 
         # === usar MultiDict para soportar getlist ===
         args = request.httprequest.args
@@ -181,7 +187,10 @@ class CasinoHome(CustomerPortal):
             'nuevo_cbu': nuevo_cbu,
             'currency': company.currency_id
         })
-        return request.render("portal.portal_my_home", values)
+        res.qcontext.update(values)
+        _logger.info("Rendering portal home for partner %s", values)
+        # return request.render("portal.portal_my_home", values)
+        return res
 
 
 

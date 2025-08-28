@@ -105,16 +105,6 @@ publicWidget.registry.ProductIframe = publicWidget.Widget.extend({
         const res = await rpc('/api/v1/get_token', { user_id: userId });
         const token = res.token;
         console.log('Token obtenido:', token);
-        // const user = request.env['res.users'].sudo().browse(userId)
-        // const partner = user.partner_id;
-        // const token = partner.token;
-        // console.log('Datos del usuario:', { user, partner, token });
-        // try {
-        //     token = await this._generateTokenForUser();
-        // } catch {
-        //     alert('No se pudo obtener el token de usuario');
-        //     return;
-        // }
 
         // Construir la URL con el token y otros parámetros
         const url = new URL(baseIframeUrl, window.location.origin);
@@ -192,29 +182,6 @@ publicWidget.registry.ProductIframe = publicWidget.Widget.extend({
                 if (res.error) return alert(res.error);
                 console.log(`Response Login: ${JSON.stringify(res, null, 2)}`);
                 alert(`Respuesta: ${JSON.stringify(data, null, 2)}`);
-
-
-                // balance = res.balance;
-                // console.log('ov 0:', balance);
-                // if (res.error) return alert(res.error);
-                // console.log('ov 1:');
-                // ov.sessionId = res.session_id;
-                // console.log('ov 2:', ov);
-                // ov.tracked = true;
-                // console.log('ov 3:', ov);
-                // this._updateBadge(res.balance ?? 0);
-                // console.log('ov:', ov);
-                // // console.log(`Response Debit / Credit: ${JSON.stringify(res, null, 2)}`);
-                // console.log('Login Exitoso:', {
-                //     token: res.token,
-                //     balance: res.balance,
-                //     currency: res.currency,
-                //     nickname: res.nickname,
-                //     timestamp: res.timestamp,
-                //     country: res.country,
-                // });
-                // alert(`Login Exitoso: ${JSON.stringify({ token: res.token }, null, 2)}`);
-
             } catch { alert('Error de red'); }
         });
         const btnWin = this._makeBtn('✅ Ganada', () => this._promptAndCall(sessionIdGetter(), '/api/v1/credit'));
@@ -310,21 +277,7 @@ publicWidget.registry.ProductIframe = publicWidget.Widget.extend({
 
         this._getBalance = async (sid, url) => {
             try {
-                // const transactionID = prompt('Ingrese ID de transacción:');
-                // const res = await rpc(url, { session_id: sid, amount: 0 });
-                console.log('Get Balance - url: ', url);
-
-                // url = base_url + "/my/movimientos/balance?token={token}"
-                // response = requests.get(url, cookies = request.httprequest.cookies)
-                // _logger.info('Casino Iframe: Balance response: %s', response.text)
-                // balance = response.json().get('balance', 0.0)
-                // _logger.info('Casino Iframe: Balance obtenido: %s', balance)
-
-                // response = {
-                //     "balance": int(current_balance * 100),
-                //     "timestamp": int(time.time() * 1000)
-                // }
-
+                // console.log('Get Balance - url: ', url);
                 const res = await fetch(`/my/movimientos/balance?token=${encodeURIComponent(token)}`, {
                     method: 'POST',
                     headers: { "Content-Type": "application/json" },

@@ -25,7 +25,6 @@ class ResPartner(models.Model):
             "date",
             "memo",
             "amount",
-            "payment_total",
             "currency_id",
         ]
 

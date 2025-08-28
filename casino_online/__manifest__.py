@@ -15,12 +15,12 @@
     'depends': ['website_sale', 'portal', 'account', 'payment', 'web'],
     'data': [
         'security/ir.model.access.csv',
-        'views/templates/user_options_template.xml',
         'views/templates/transactions_template.xml',
         'views/templates/website_header.xml',
         'views/templates/strip_template.xml',
         'views/templates/portal_mis_limites_partial.xml',
-        'views/res_partner_form_casino_online.xml'
+        'views/res_partner_form_casino_online.xml',
+        'views/templates/user_options_template.xml',
     ],
     "assets": {
         "web.assets_frontend": [

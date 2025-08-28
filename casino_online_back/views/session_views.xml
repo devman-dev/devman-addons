@@ -6,6 +6,7 @@
             <form string="Sesión de Juego">
                 <group>
                     <field name="transaction_id" />
+                    <field name="internal_transaction_id" string="ID Transacción Interna" />
                     <field name="game_id" />
                     <field name="user_id" />
                     <field name="token" />
@@ -44,6 +45,8 @@
                 <field name="end_datetime" string="Fin" optional="show" />
                 <field name="result" string="Resultado" />
                 <field name="state" string="Estado" />
+                <field name="internal_transaction_id" string="ID Transacción Interna"
+                    optional="show" />
                 <field name="id" string="ID" optional="hide" />
             </list>
         </field>
