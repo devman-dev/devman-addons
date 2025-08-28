@@ -10,7 +10,6 @@ class ResPartner(models.Model):
     weekly_deposit_limit = fields.Float(string='Límite semanal de depósito')
     monthly_deposit_limit = fields.Float(string='Límite mensual de depósito')
     
-    
     account_number = fields.Char('Cuenta Bancaria')
     bank_name = fields.Char('Banco')
     account_type = fields.Char('Tipo de Cuenta')
@@ -19,6 +18,7 @@ class ResPartner(models.Model):
     nuevo_cbu = fields.Char('Nuevo CBU')
     token = fields.Char(string='Token', default=lambda self: str(uuid.uuid4()))
     nickname = fields.Char(string='Nickname')
+    balance_game = fields.Float(string='Balance de los Juego')
 
     def _deposit_payments_fields(self):
         return [
