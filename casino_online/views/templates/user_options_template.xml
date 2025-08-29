@@ -284,6 +284,12 @@
                                                         t-att-checked="'checked' if (selected_types and 'ajuste' in selected_types) else None" />
                                                     <label class="form-check-label">Ajustes</label>
                                                 </div>
+                                                <!-- Botón Filtrar -->
+                                                <div class="d-flex justify-content-end">
+                                                    <button type="submit" class="btn btn-primary">
+                                                        Filtrar
+                                                    </button>
+                                                </div>
                                             </div>
                                         </div>
 
@@ -292,12 +298,6 @@
                                         <input type="hidden" name="page_size"
                                             t-att-value="page_size or 10" />
 
-                                        <!-- Botón Filtrar -->
-                                        <div class="d-flex justify-content-end mt-3">
-                                            <button type="submit" class="btn btn-primary">
-                                                Filtrar
-                                            </button>
-                                        </div>
                                     </form>
                                 </div>
                             </div>
@@ -314,7 +314,8 @@
                                 <div class="card-body p-0">
 
                                     <div class="table-responsive">
-                                        <table class="table table-striped mb-0">
+                                        <table
+                                            class="table table-sm table-hover mb-0 o_transaction_list_table">
                                             <thead>
                                                 <tr>
                                                     <th>Fecha</th>

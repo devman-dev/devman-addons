@@ -127,9 +127,14 @@ class CasinoHome(CustomerPortal):
             if selset and key not in selset:
                 continue
             amt = l.amount_signed if l.amount_signed is not None else l.balance
+
+            iso_date = _eff_date(l).isoformat()
+            date_obj = datetime.strptime(iso_date, '%Y-%m-%d')
+            formatted_date = date_obj.strftime('%d-%m-%Y')
+            _logger.info("Fecha formateada Transaction.py: %s", formatted_date)
             prepared.append({
                 'id': l.id,
-                'date': _eff_date(l).isoformat(),
+                'date': formatted_date, #_eff_date(l).isoformat(),
                 'description': l.name or l.move_id.ref or l.move_id.name or 'Movimiento contable',
                 'type_display': label,
                 'type_key': key,
@@ -214,6 +219,7 @@ class MiPortalController(http.Controller):
     # Puedes dejar esto o eliminarlo. El form ya no lo usa.
     @http.route('/my/movimientos', type='http', auth='user', website=True)
     def portal_movements(self, **kwargs):
+        _logger.info("PORTAL MOVEMENTS:")
         partner = request.env.user.partner_id.commercial_partner_id
         company = request.env.company
         domain = [
@@ -245,6 +251,7 @@ class MiPortalController(http.Controller):
             iso_date = dval.isoformat()
             date_obj = datetime.strptime(iso_date, '%Y-%m-%d')
             formatted_date = date_obj.strftime('%d-%m-%Y')
+            _logger.info("Fecha formateada: %s", formatted_date)
             all_movements.append({
                 'date': formatted_date,
                 'datetime_obj': dval or datetime.min,
