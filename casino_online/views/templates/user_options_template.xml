@@ -361,16 +361,17 @@
                                                         <t t-set="signed_balance"
                                                             t-value="(-movement['balance']) if is_fact else movement['balance']" />
                                                         <t t-set="signed_balance_fmt"
-                                                            t-value="'{:.2f}'.format(abs(signed_balance))" />
+                                                            t-value="signed_balance" />
 
                                                         <td class="text-end">
                                                             <strong>
                                                                 <span t-if="signed_balance &gt;= 0"
                                                                     class="text-success"> $<t
-                                                                        t-esc="signed_balance_fmt" />
+                                                                        t-esc="'{:.2f}'.format(signed_balance_fmt)" />
                                                                 </span>
                                                                 <span t-else="" class="text-danger">
-                                                                    -$<t t-esc="signed_balance_fmt" />
+                                                                    -$<t
+                                                                        t-esc="'{:.2f}'.format(signed_balance_fmt)" />
                                                                 </span>
                                                             </strong>
                                                         </td>
