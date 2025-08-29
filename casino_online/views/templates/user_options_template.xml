@@ -371,7 +371,7 @@
                                                                 </span>
                                                                 <span t-else="" class="text-danger">
                                                                     -$<t
-                                                                        t-esc="'{:.2f}'.format(signed_balance_fmt)" />
+                                                                        t-esc="'{:.2f}'.format(abs(signed_balance_fmt))" />
                                                                 </span>
                                                             </strong>
                                                         </td>
