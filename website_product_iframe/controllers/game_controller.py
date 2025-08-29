@@ -42,22 +42,22 @@ class CasinoErrorCodes:
 def error_response(error: CasinoError):
     return Response(json.dumps(error.to_dict()), content_type='application/json', status=error.http_status)
 class GameController(http.Controller):
-    def _prepare_session_vals(self, product_id, round_id, user_id, token, initial_balance, final_balance, amount, state, result, transaction_id, internal_transaction_id, json_data):
+    def _prepare_session_vals(self, game_id, round_id, user_id, token, initial_balance, final_balance, amount, state, result, transaction_id, internal_transaction_id, json_data):
         """
         Devuelve los valores para crear una sesión de juego.
         """
         product_name = ""
         # if not product_id is None and product_id != 0:
-        #     product = request.env['product.template'].sudo().browse(product_id)
+        product = request.env['product.product'].sudo().search([('game_id', '=', game_id)], limit=1)
         #     product_name = product.name
 
         partner = request.env['res.partner'].sudo().search([('token', '=', token)], limit=1)
         user = request.env['res.users'].sudo().search([('partner_id', '=', partner.id)], limit=1)
         user_id = user.id
 
-        _logger.info(f"Casino Iframe: Starting game session for product: {product_id} - {product_name}")
+        _logger.info(f"Casino Iframe: Starting game session for product: {product.id} - {product.name}")
         return {
-            'game_id': product_id,
+            'game_id': product.id,
             'round_id': round_id,
             'user_id': user_id,
             'token': token,

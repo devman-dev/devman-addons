@@ -242,8 +242,11 @@ class MiPortalController(http.Controller):
         for l in lines:
             dval = l.date
             amt = l.amount_signed if l.amount_signed is not None else l.balance
+            iso_date = dval.isoformat()
+            date_obj = datetime.strptime(iso_date, '%Y-%m-%d')
+            formatted_date = date_obj.strftime('%d-%m-%Y')
             all_movements.append({
-                'date': dval.isoformat(),
+                'date': formatted_date,
                 'datetime_obj': dval or datetime.min,
                 'description': describe_line(l),
                 'type_display': classify_line(l),
