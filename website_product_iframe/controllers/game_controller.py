@@ -339,7 +339,7 @@ class GameController(http.Controller):
             if not isinstance(amount, (int, float)) or amount <= 0:
                 raise CasinoError(*CasinoErrorCodes.INVALID_AMOUNT)
 
-            internal_transaction_id = token #uuid.uuid4().hex
+            internal_transaction_id = uuid.uuid4().hex
 
             session = request.env['casino.game.session'].sudo().search([('token', '=', token)], limit=1)
             # if not session:
@@ -424,7 +424,7 @@ class GameController(http.Controller):
             if amount / 100 > current_balance:
                 raise CasinoError(*CasinoErrorCodes.INSUFFICIENT_FUNDS)
 
-            internal_transaction_id = token #uuid.uuid4().hex
+            internal_transaction_id = uuid.uuid4().hex
 
             session = request.env['casino.game.session'].sudo().search([('token', '=', token)], limit=1)
             # if not session:
