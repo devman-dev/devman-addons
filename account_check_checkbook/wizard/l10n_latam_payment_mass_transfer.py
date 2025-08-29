@@ -150,6 +150,7 @@ class L10nLatamPaymentMassTransfer(models.TransientModel):
                 "l10n_latam_check_id": check.id,
                 "amount": check.amount,
                 "payment_type": "outbound",
+                "partner_id": check.partner_id.id,
                 "ref": self.communication,
                 "journal_id": self.journal_id.id,
                 "currency_id": check.currency_id.id,
