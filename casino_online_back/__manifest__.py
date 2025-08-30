@@ -9,6 +9,7 @@
         'views/player_views.xml',
         'views/game_views.xml',
         'views/session_views.xml',
+        'views/withdrawals_views.xml',
         'views/player_signup_visibility.xml',
         'views/account_move.xml',
         'views/menus.xml',

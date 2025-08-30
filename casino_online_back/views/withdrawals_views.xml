@@ -1,0 +1,78 @@
+<odoo>
+    <record id="view_casino_game_withdrawals_form" model="ir.ui.view">
+        <field name="name">casino.game.withdrawals.form</field>
+        <field name="model">casino.game.withdrawals</field>
+        <field name="arch" type="xml">
+            <form string="Sesión de Juego">
+                <header>
+                    <button name="action_change_state" type="object" string="Aprobar"
+                        class="btn-primary"
+                        context="{'new_state': 'approved'}"
+                        state="pending,rejected" />
+
+                    <button name="action_change_state" type="object" string="Desaprobar"
+                        class="btn-secondary"
+                        context="{'new_state': 'rejected'}"
+                        state="pending"
+                        confirm="¿Seguro que quieres desaprobar este retiro?" />
+
+                    <field name="state" widget="statusbar"
+                        statusbar_visible="pending,approved,rejected" />
+                </header>
+
+                <group>
+                    <field name="transaction_id" />
+                    <field name="date" />
+                    <field name="description" />
+                    <field name="amount" />
+                    <field name="state" />
+                </group>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_casino_game_withdrawals_tree" model="ir.ui.view">
+        <field name="name">casino.game.withdrawals.tree</field>
+        <field name="model">casino.game.withdrawals</field>
+        <field name="arch" type="xml">
+            <list string="Sesiones de Juego">
+                <!-- decoration-success="state=='finished'"
+                decoration-warning="state=='in_progress'"
+                decoration-muted="state=='pending'"
+                default_order="id desc, round_id desc" -->
+                <field name="transaction_id" string="ID Transacción" />
+                <field name="date" string="Fecha" />
+                <field name="description" string="Descripción" />
+                <field name="amount" string="Monto" />
+                <field name="state" string="Estado" />
+                <field name="approved_by_id" string="Aprobado por" />
+                <field name="approved_date" string="Fecha de Aprobación" />
+            </list>
+        </field>
+    </record>
+
+    <!-- Vista de búsqueda con agrupación por transaction_id -->
+    <record id="view_casino_game_withdrawals_search" model="ir.ui.view">
+        <field name="name">casino.game.withdrawals.search</field>
+        <field name="model">casino.game.withdrawals</field>
+        <field name="arch" type="xml">
+            <search string="Buscar Sesiones de Juego">
+                <field name="transaction_id" />
+                <field name="date" />
+                <field name="description" />
+                <field name="amount" />
+                <field name="state" />
+            </search>
+        </field>
+    </record>
+
+    <!-- Acción con agrupamiento por defecto en transaction_id -->
+    <record id="action_casino_game_withdrawals" model="ir.actions.act_window">
+        <field name="name">Retiros de Dinero</field>
+        <field name="res_model">casino.game.withdrawals</field>
+        <field name="view_mode">list,form</field>
+        <field name="view_id" ref="view_casino_game_withdrawals_tree" />
+        <!-- <field name="search_view_id" ref="view_casino_game_withdrawals_search" /> -->
+        <!-- <field name="context">{'search_default_group_by_group_display_name': 1}</field> -->
+    </record>
+</odoo>

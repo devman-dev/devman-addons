@@ -448,8 +448,63 @@
                         <t t-call="casino_online.portal_mis_limites" />
                     </div>
 
-                    <div id="datos_bancarios_form" class="d-none">
+                    <div id="datos_bancarios_form" class="d-none"
+                        t-att-data-partner-id="user_id.partner_id.id">
                         <t t-call="casino_online.portal_datos_bancarios" />
+
+                        <!-- Contenedor del widget -->
+                        <div name="o_casino_bank_list_container"
+                            t-att-data-partner-id="user_id.partner_id.id">
+
+                            <div class="card-header bg-primary text-white">
+                                <strong>Mis Datos Bancarios</strong>
+                            </div>
+
+                            <!-- FORMULARIO -->
+                            <form class="o_casino_bank_form mb-4">
+                                <div class="row g-2">
+                                    <div class="col-md-3">
+                                        <input type="text" name="bank_name" class="form-control"
+                                            placeholder="Banco" required="required" />
+                                    </div>
+                                    <div class="col-md-3">
+                                        <input type="text" name="cbu" class="form-control"
+                                            placeholder="CBU" required="required" />
+                                    </div>
+                                    <div class="col-md-3">
+                                        <input type="text" name="cuil" class="form-control"
+                                            placeholder="CUIL" required="required" />
+                                    </div>
+                                    <div class="col-md-3">
+                                        <button type="submit" class="btn btn-primary w-100">
+                                            Agregar Banco
+                                        </button>
+                                    </div>
+                                </div>
+                            </form>
+
+                            <div class="card-header bg-info text-white">
+                                <strong>Mis Cuentas Activas</strong>
+                            </div>
+                            <p class="text-muted mb-2">
+                                La primera transferencia puede demorar más de lo habitual hasta
+                                tanto
+                                validemos la información.
+                            </p>
+
+                            <!-- TABLA -->
+                            <table class="table table-striped table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Titular</th>
+                                        <th>CUIL</th>
+                                        <th>Banco</th>
+                                        <th>CBU</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="o_casino_bank_table_body"></tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
             </div>

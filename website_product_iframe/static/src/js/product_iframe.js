@@ -186,7 +186,7 @@ publicWidget.registry.ProductIframe = publicWidget.Widget.extend({
         });
         const btnWin = this._makeBtn('✅ Ganada', () => this._promptAndCall(sessionIdGetter(), '/api/v1/credit'));
         const btnLose = this._makeBtn('❌ Perdida', () => this._promptAndCall(sessionIdGetter(), '/api/v1/debit'));
-        const btnRefund = this._makeBtn('↩️ Devolución', () => this._promptAndCall(sessionIdGetter(), '/api/v1/refund'));
+        // const btnRefund = this._makeBtn('↩️ Devolución', () => this._promptAndCall(sessionIdGetter(), '/api/v1/refund'));
         const btnBalance = this._makeBtn('💰 Balance', () => this._getBalance(sessionIdGetter(), '/api/v1/balance'));
         const btnEnd = this._makeBtn('🛑 Terminar', () => this._endSession(sessionIdGetter(), '/api/v1/end_game'));
 

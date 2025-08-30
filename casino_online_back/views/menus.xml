@@ -24,4 +24,10 @@
         parent="menu_casino_root"
         action="action_casino_account_move_line"
         sequence="4" />
+
+    <menuitem id="menu_casino_withdrawals"
+        name="Retiros"
+        parent="menu_casino_root"
+        action="action_casino_game_withdrawals"
+        sequence="5" />
 </odoo>
