@@ -1,0 +1,12 @@
+
+<odoo>
+  <data noupdate="1">
+    <record id="seq_currency_exchange_operation" model="ir.sequence">
+      <field name="name">Currency Exchange Operation</field>
+      <field name="code">currency.exchange.operation</field>
+      <field name="prefix">FX-</field>
+      <field name="padding">6</field>
+      <field name="company_id" eval="False"/>
+    </record>
+  </data>
+</odoo>

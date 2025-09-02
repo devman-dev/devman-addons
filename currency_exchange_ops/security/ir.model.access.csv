@@ -1,0 +1,3 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_currency_exchange_operation,currency.exchange.operation,model_currency_exchange_operation,base.group_user,1,1,1,0
+access_res_company,res.company,model_res_company,base.group_user,1,0,0,0

@@ -1,0 +1,26 @@
+<odoo>
+  <record id="view_res_company_form_inherit_fx" model="ir.ui.view">
+    <field name="name">res.company.form.inherit.fx</field>
+    <field name="model">res.company</field>
+    <field name="inherit_id" ref="base.view_company_form"/>
+    <field name="arch" type="xml">
+      <xpath expr="//group[1]" position="after">
+        <group string="Cambio de Divisas (defaults)">
+          <field name="exchange_default_account_cash_id" domain="[('company_id','=',id)]"/>
+          <field name="exchange_default_account_inventory_id" domain="[('company_id','=',id)]"/>
+          <field name="exchange_default_account_spread_income_id" domain="[('company_id','=',id)]"/>
+          <field name="exchange_default_account_spread_expense_id" domain="[('company_id','=',id)]"/>
+        </group>
+        <group string="A. Cuentas de registro de compras:">
+          <field name="exchange_account_buy_id"/>
+          <field name="exchange_account_buy_counterpart_id"/>
+        </group>
+        <group string="B. Cuentas de registro de pagos:">
+          <field name="exchange_account_pay_id"/>
+          <field name="exchange_account_spread_income_id"/>
+          <field name="exchange_account_pay_counterpart_id"/>
+        </group>
+      </xpath>
+    </field>
+  </record>
+</odoo>

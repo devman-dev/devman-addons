@@ -1,0 +1,115 @@
+<odoo>
+  <record id="view_currency_exchange_operation_form" model="ir.ui.view">
+    <field name="name">currency.exchange.operation.form</field>
+    <field name="model">currency.exchange.operation</field>
+    <field name="arch" type="xml">
+      <form string="Operación de cambio de divisas">
+        <sheet>
+
+          <header>
+                  <button name="action_create_account_moves" string="Crear asientos contables" type="object" class="btn-primary"/>
+                  <button name="action_post" string="Asentar" type="object" class="btn-primary" modifiers="{'invisible': [['state', '!=', 'draft']]}"/>
+                  <button name="action_reset_to_draft" string="Volver a borrador" type="object" modifiers="{'invisible': [['state', '!=', 'posted']]}"/>
+                  <button name="action_cancel" string="Cancelar" type="object" modifiers="{'invisible': [['state', '!=', 'posted']]}"/>
+        </header>
+          <!-- Campos principales al inicio -->
+          <group>
+            <field name="date"/>
+            <field name="partner_id"/>
+            <field name="price_seller"/>
+            <field name="price_buyer"/>
+            <field name="spread_amount"/>
+            <field name="description"/>
+            
+            <!-- <field name="currency_sell_id"/> --> 
+
+          </group>
+          <!-- Dos columnas con títulos -->
+          <group col="2">
+            <!-- Columna izquierda: Compra -->
+            <group string="A. Quiero comprar:">
+              <field name="currency_buy_id"/>
+              <field name="amount_to_buy"/>
+              <field name="journal_buy_id"/>
+            </group>
+            <!-- Columna derecha: Pago -->
+            <group string="B. Debe pagar:">
+              <field name="currency_pay_id"/>
+              <field name="journal_pay_id"/>
+              <field name="amount_to_pay"/>
+            </group>
+          </group>
+          <!-- Campos contables configurables (editables) -->
+          <group string="Cuentas contables de la operación" col="2">
+                
+              
+                    <group string="A. Cuentas de registro de compras:">
+                            <field name="exchange_account_buy_id"/>
+                            <field name="exchange_account_buy_counterpart_id"/>
+                    </group>
+              
+              
+                  <group string="B. Cuentas de registro de pagos:">
+                            <field name="exchange_account_pay_id"/>
+                            <field name="exchange_account_spread_income_id"/>
+                            <field name="exchange_account_pay_counterpart_id"/>
+                  </group>
+
+                
+
+          </group>
+          
+        
+
+        </sheet>
+
+
+      </form>
+    </field>
+  </record>
+
+  <record id="view_currency_exchange_operation_tree" model="ir.ui.view">
+    <field name="name">currency.exchange.operation.tree</field>
+    <field name="model">currency.exchange.operation</field>
+    <field name="arch" type="xml">
+      <tree>
+        <field name="date"/>
+        <field name="partner_id"/>
+        <field name="price_seller"/>
+        <field name="price_buyer"/>
+        <field name="spread_amount"/>
+        <field name="description"/>
+        <field name="currency_buy_id"/>
+        <field name="amount_to_buy"/>
+        <field name="journal_buy_id"/>
+        <field name="currency_pay_id"/>
+        <field name="journal_pay_id"/>
+        <field name="amount_to_pay"/>
+        
+        <field name="state"/>
+      </tree>
+    </field>
+  </record>
+
+  <record id="view_currency_exchange_operation_search" model="ir.ui.view">
+    <field name="name">currency.exchange.operation.search</field>
+    <field name="model">currency.exchange.operation</field>
+    <field name="arch" type="xml">
+      <search>
+        <field name="name"/>
+        <field name="partner_id"/>
+        
+        <filter name="draft" string="Borrador" domain="[('state','=','draft')]"/>
+        <filter name="posted" string="Asentado" domain="[('state','=','posted')]"/>
+        <filter name="cancel" string="Cancelado" domain="[('state','=','cancel')]"/>
+      </search>
+    </field>
+  </record>
+
+  <record id="action_currency_exchange_operation" model="ir.actions.act_window">
+    <field name="name">Operaciones de Cambio</field>
+    <field name="res_model">currency.exchange.operation</field>
+    <field name="view_mode">tree,form</field>
+    <field name="context">{}</field>
+  </record>
+</odoo>

@@ -1,0 +1,18 @@
+<odoo>
+    <!-- Acción para la vista tree/form -->
+    <record id="action_currency_exchange_operation" model="ir.actions.act_window">
+        <field name="name">Operaciones de Cambio</field>
+        <field name="res_model">currency.exchange.operation</field>
+        <field name="view_mode">tree,form</field>
+        <field name="help" type="html">
+            <p>Gestione las operaciones de cambio de moneda.</p>
+        </field>
+    </record>
+
+    <!-- Menú raíz -->
+    <menuitem id="menu_currency_exchange_root" name="Cambio de Moneda" sequence="1"/>
+
+    <!-- Menú secundario con acción -->
+    <menuitem id="menu_currency_exchange_ops" name="Operaciones" parent="menu_currency_exchange_root" sequence="10" action="action_currency_exchange_operation"/>
+    <menuitem id="menu_currency_exchange_config" name="Configuración" parent="menu_currency_exchange_root" sequence="90"/>
+</odoo>
