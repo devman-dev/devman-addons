@@ -30,3 +30,9 @@ class ResCompany(models.Model):
     exchange_default_account_spread_expense_id = fields.Many2one(
         "account.account", string="Cuenta Gasto Spread por defecto"
     )
+    price_seller_default = fields.Float(
+        string="Precio vendedor por defecto"
+    )
+    price_buyer_default = fields.Float(
+        string="Precio comprador por defecto"
+    )

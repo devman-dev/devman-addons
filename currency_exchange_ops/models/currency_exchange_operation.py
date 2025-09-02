@@ -101,10 +101,12 @@ class CurrencyExchangeOperation(models.Model):
         currency_field="currency_pay_id"
     )
     price_seller = fields.Float(
-        string="Precio vendedor"
+        string="Precio vendedor",
+        default=lambda self: self.env.company.price_seller_default
     )
     price_buyer = fields.Float(
-        string="Precio comprador"
+        string="Precio comprador",
+        default=lambda self: self.env.company.price_buyer_default
     )
     spread_amount = fields.Float(
         string="Spread",
@@ -136,6 +138,11 @@ class CurrencyExchangeOperation(models.Model):
         "account.account",
         string="Cuenta contrapartida pago",
         default=lambda self: self.env.company.exchange_account_pay_counterpart_id.id
+    )
+
+    account_moves_created = fields.Boolean(
+        string="Asientos contables creados",
+        default=False
     )
 
     @api.depends('price_seller', 'price_buyer')
@@ -468,3 +475,5 @@ class CurrencyExchangeOperation(models.Model):
                     }),
                 ]
             })
+
+            self.account_moves_created = True
