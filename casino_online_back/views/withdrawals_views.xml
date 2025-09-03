@@ -25,7 +25,13 @@
                     <field name="date" />
                     <field name="description" />
                     <field name="amount" />
-                    <field name="state" />
+                    <field name="state" widget="badge"
+                        options="{
+                        'badge_secondary': [('state','=','pending')],
+                        'badge_success':   [('state','=','approved')],
+                        'badge_danger':    [('state','=','rejected')],
+                        'rounded-pill':    True
+                    }" />
                 </group>
             </form>
         </field>
@@ -36,17 +42,29 @@
         <field name="model">casino.game.withdrawals</field>
         <field name="arch" type="xml">
             <list string="Sesiones de Juego">
-                <!-- decoration-success="state=='finished'"
-                decoration-warning="state=='in_progress'"
-                decoration-muted="state=='pending'"
-                default_order="id desc, round_id desc" -->
                 <field name="transaction_id" string="ID Transacción" />
                 <field name="date" string="Fecha" />
                 <field name="description" string="Descripción" />
                 <field name="amount" string="Monto" />
-                <field name="state" string="Estado" />
-                <field name="approved_by_id" string="Aprobado por" />
-                <field name="approved_date" string="Fecha de Aprobación" />
+
+                <!-- Botones rápidos -->
+                <button name="action_change_state" type="object" string="Aprobar"
+                    icon="fa-check" class="text-success o-withdraw-approve"
+                    context="{'new_state': 'approved'}"
+                    invisible="state != 'pending'" />
+
+                <button name="action_change_state" type="object" string="Rechazar"
+                    icon="fa-times" class="text-danger o-withdraw-reject"
+                    context="{'new_state': 'rejected'}"
+                    invisible="state != 'pending'"
+                    confirm="¿Rechazar este retiro?" />
+
+                <field name="state" string="Estado" widget="badge"
+                    decoration-success="state == 'approved'"
+                    decoration-danger="state == 'rejected'"
+                    decoration-muted="state == 'pending'" />
+                <field name="approved_by_id" string="Resuelto por" />
+                <field name="approved_date" string="Fecha Resolución" />
             </list>
         </field>
     </record>
@@ -56,12 +74,19 @@
         <field name="name">casino.game.withdrawals.search</field>
         <field name="model">casino.game.withdrawals</field>
         <field name="arch" type="xml">
-            <search string="Buscar Sesiones de Juego">
+            <search string="Buscar Retiros">
                 <field name="transaction_id" />
                 <field name="date" />
                 <field name="description" />
                 <field name="amount" />
                 <field name="state" />
+                <!-- Filtro Pendientes -->
+                <filter name="pending" string="Pendientes"
+                    domain="[('state', '=', 'pending')]" />
+                <filter name="approved" string="Aprobados"
+                    domain="[('state', '=', 'approved')]" />
+                <filter name="rejected" string="Rechazados"
+                    domain="[('state', '=', 'rejected')]" />
             </search>
         </field>
     </record>
@@ -72,7 +97,7 @@
         <field name="res_model">casino.game.withdrawals</field>
         <field name="view_mode">list,form</field>
         <field name="view_id" ref="view_casino_game_withdrawals_tree" />
-        <!-- <field name="search_view_id" ref="view_casino_game_withdrawals_search" /> -->
-        <!-- <field name="context">{'search_default_group_by_group_display_name': 1}</field> -->
+        <field name="search_view_id" ref="view_casino_game_withdrawals_search" />
+        <field name="context">{'search_default_pending': 1}</field>
     </record>
 </odoo>

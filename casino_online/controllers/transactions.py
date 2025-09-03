@@ -492,7 +492,13 @@ class MiPortalController(http.Controller):
         payment_methods = request.env['payment.provider'].sudo().search([
             ('state', '=', 'test'), ('is_published', '=', True)
         ])
-        return request.render('casino_online.portal_retirar_form', {'payment_providers': payment_methods})
+        withdrawals = request.env["casino.game.withdrawals"].sudo().search(
+                [("partner_id", "=", request.env.user.partner_id.id)],
+                order="date desc",
+                limit=20
+            )
+
+        return request.render('casino_online.portal_retirar_form', {'payment_providers': payment_methods, "withdrawals": withdrawals})
 
     @http.route('/my/registrar_bonus', type='http', auth='user', website=True, methods=['GET', 'POST'], csrf=True)
     def portal_registrar_bonus(self, **post):

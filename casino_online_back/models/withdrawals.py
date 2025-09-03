@@ -16,16 +16,16 @@ class CasinoGameWithdrawals(models.Model):
     ], string='Estado', default='pending')
     approved_by_id = fields.Many2one(
         comodel_name='res.users',
-        string="Aprobado por",
+        string="Resuelto por",
         readonly=True
     )
     approved_date = fields.Datetime(
-        string="Fecha de Aprobación",
+        string="Fecha Resolución",
         readonly=True
     )
 
     partner_id = fields.Many2one("res.partner", string="Cliente", required=True)
-    bank_id = fields.Many2one("casino.game.bank", string="Cuenta Bancaria", required=True)
+    bank_id = fields.Many2one("casino.game.bank", string="Cuenta Bancaria")
     
     def action_change_state(self):
         new_state = self.env.context.get('new_state')
@@ -34,16 +34,9 @@ class CasinoGameWithdrawals(models.Model):
 
         vals = {'state': new_state}
 
-        if new_state == 'approved':
+        if new_state == 'approved' or new_state == 'rejected':
             vals.update({
                 'approved_by_id': self.env.uid,
                 'approved_date': fields.Datetime.now(),
             })
-        else:
-            # Si lo desaprueban, limpiamos usuario y fecha
-            vals.update({
-                'approved_by_id': False,
-                'approved_date': False,
-            })
-
-        self.write(vals)
+            self.write(vals)

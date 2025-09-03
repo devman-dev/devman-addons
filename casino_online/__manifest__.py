@@ -26,6 +26,7 @@
     "assets": {
         "web.assets_frontend": [
             "casino_online/static/src/**/*",
+            "casino_online/static/src/scss/withdrawals.scss",
         ]
     },
     'installable': True,

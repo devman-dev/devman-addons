@@ -62,6 +62,34 @@ publicWidget.registry.ProductIframe = publicWidget.Widget.extend({
         'click a[data-product-url]': '_onProductCardClick',
     },
 
+    start: function () {
+        // Sniper para esperar productos
+        console.log('Iniciando ProductIframe...');
+        const productContainer = document.querySelector('.oe_website_sale .products_grid');
+        if (productContainer) {
+            // setTimeout(() => {
+            //     // Simula la carga de productos después de 3 segundos
+            //     const fakeProduct = document.createElement('div');
+            //     fakeProduct.setAttribute('data-product-id', '999');
+            //     productContainer.appendChild(fakeProduct);
+            // }, 3000);
+            const observer = new MutationObserver((mutations, obs) => {
+                const products = productContainer.querySelectorAll('[data-product-id]');
+                if (products.length > 0) {
+                    console.log('Todos los productos cargados:', products.length);
+                    document.querySelectorAll('a[data-product-url]').forEach(a => {
+                        a.classList.remove('disabled');
+                        a.style.pointerEvents = '';
+                        a.style.opacity = '';
+                    });
+                    obs.disconnect();
+                }
+            });
+            observer.observe(productContainer, { childList: true, subtree: true });
+        }
+        return this._super.apply(this, arguments);
+    },
+
     // ======= Flags de control =======
     _overlayOpen: false,
     _squelchUntil: 0,

@@ -22,6 +22,7 @@ publicWidget.registry.CasinoBankList = publicWidget.Widget.extend({
             await this._fetchBankData();
             this._renderBankTable();
             this._bindFormEvents();
+
         } catch (error) {
             console.error("Error en start():", error);
         }
@@ -50,6 +51,7 @@ publicWidget.registry.CasinoBankList = publicWidget.Widget.extend({
       `);
             return;
         }
+        console.log("Banks Data _renderBankTable:", this.bankData);
 
         for (const bank of this.bankData) {
             container.append(`

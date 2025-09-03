@@ -17,6 +17,11 @@
         
         #'data/assign_signup_group.xml',
     ],
+    'assets': {
+        'web.assets_backend': [
+            "casino_online_back/static/src/**/*",
+        ],
+    },
     'installable': True,
     'application': True,
 }

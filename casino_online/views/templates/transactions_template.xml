@@ -43,29 +43,8 @@
     </template>
 
     <template id="portal_retirar_form" name="Formulario Retirar">
-        <!-- <div class="container">
-            <h2>Retirar Dinero</h2>
-            <form action="/my/retirar" method="post">
-                <div class="mb-3">
-                    <label class="form-label">Selecciona un método de pago:</label>
-                    <t t-foreach="payment_providers" t-as="provider">
-                        <label class="list-group-item">
-                            <input type="radio" name="payment_provider_id" t-att-value="provider.id"
-                                class="form-check-input me-2" required="required" />
-                            <t t-esc="provider.name" />
-                        </label>
-                    </t>
-                </div>
-                <div class="mb-3">
-                    <label for="amount" class="form-label">Monto a retirar</label>
-                    <input type="number" step="0.01" min="0" name="amount" id="amount"
-                        class="form-control"
-                        required="required" />
-                </div>
-                <button type="submit" class="btn btn-primary">Retirar</button>
-            </form>
-        </div> -->
         <div id="withdrawal_methods_container"
+            name="o_casino_withdrawal_list_container"
             t-att-data-partner-id="user_id.partner_id.id">
 
             <p class="text-center mb-4">
@@ -78,61 +57,70 @@
                     role="button"
                     data-bs-toggle="modal"
                     data-bs-target="#withdrawalTransferModal"
-                    style="width: 200px; cursor: pointer;">
+                    data-method="transfer"
+                    style="width: 120px; height: 120px; cursor: pointer;">
                     <div class="card-body">
-                        <img src="casino_online.static/src/img/transfer_icon.png"
+                        <img src="/casino_online/static/src/img/transfer_icon.png"
                             alt="Transferencia Bancaria" class="img-fluid mb-2"
-                            style="max-height: 80px;" />
-                        <h5 class="card-title">TRANSFERENCIA BANCARIA</h5>
+                            style="max-height: 40px;" />
+                        <p class="card-title" style="font-size: .8rem;">Transferencia Bancaria</p>
                     </div>
                 </div>
 
-                <!-- Otra opción (ejemplo CityCenter)
+                <!-- Otra opción (ejemplo CityCenter) -->
                 <div class="card withdrawal-option text-center"
-                    style="width: 200px; cursor: not-allowed; opacity: 0.6;">
+                    role="button"
+                    data-bs-toggle="modal"
+                    data-bs-target="#withdrawalTransferModal"
+                    data-method="cashier"
+                    style="width: 120px; height: 120px; cursor: pointer;">
                     <div class="card-body">
-                        <img src="../../static/src/img/citycenter_icon.png"
-                            alt="CityCenter" class="img-fluid mb-2"
-                            style="max-height: 80px;" />
-                        <h5 class="card-title">CityCenter Rosario</h5>
+                        <img src="/casino_online/static/src/img/casa_central.png"
+                            alt="Casa Central" class="img-fluid mb-2"
+                            style="max-height: 40px;" />
+                        <p class="card-title" style="font-size: .8rem;">Retiro en Casa Central</p>
                     </div>
-                </div> -->
+                </div>
             </div>
 
             <!-- DETALLE DE ÚLTIMOS RETIROS -->
             <div>
-                <h4 class="text-warning mb-3">DETALLE DE ÚLTIMOS RETIROS</h4>
-                <table class="table table-striped table-hover text-center align-middle">
-                    <thead class="bg-primary text-white">
-                        <tr>
-                            <th>Fecha</th>
-                            <th>Descripción</th>
-                            <th>Tipo</th>
-                            <th>Monto</th>
-                            <th>Estado</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <t t-foreach="withdrawals" t-as="w">
-                            <tr>
-                                <td>
-                                    <t t-esc="w.date" />
-                                </td>
-                                <td>
-                                    <t t-esc="w.description" />
-                                </td>
-                                <td>Débito</td>
-                                <td>
-                                    <t t-esc="w.amount" />
-                                </td>
-                                <td>
-                                    <t t-esc="w.state" />
-                                </td>
-                            </tr>
-                        </t>
-                    </tbody>
-                </table>
+                <div class="card shadow-sm">
+                    <div class="card-header bg-info text-white">
+                        <strong>Detalle de últimos retiros</strong>
+                    </div>
+
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-sm table-hover mb-0 o_withdrawals_list_table">
+                                <thead style="font-size:0.9rem;">
+                                    <tr>
+                                        <!-- <th>Titular</th> -->
+                                        <th>Cuil</th>
+                                        <th>Descripción</th>
+                                        <th>CBU</th>
+                                        <th>Monto</th>
+                                        <th>Fecha</th>
+                                        <th class="text-center">Estado</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="o_casino_withdrawals_table_body"
+                                    style="font-size:0.9rem;"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="card-footer" style="font-size: 0.9rem;">
+                        <div
+                            class="o_withdrawal_list_pagination_info text-muted me-auto" />
+                    </div>
+                </div>
             </div>
+            <!-- ===== Paginación ===== -->
+            <nav class="align-self-center mt-2"
+                aria-label="Navegación de Retiros">
+                <ul
+                    class="pagination justify-content-end o_withdrawal_list_pagination" />
+            </nav>
         </div>
 
         <div class="modal fade" id="withdrawalTransferModal" tabindex="-1"
@@ -163,33 +151,39 @@
                                         class="form-control" required="required" />
                                 </div>
 
-                                <div class="mb-3">
+                                <div class="mb-3 o_bank_row">
                                     <label class="form-label">Cuenta Destino *</label>
-                                    <select name="bank_account" class="form-select">
+                                    <select name="bank_account" class="form-select"
+                                        id="bank_account_select">
                                         <option value="">Seleccione una cuenta</option>
-                                        <option value="1">Banco A</option>
-                                        <t t-foreach="bank_accounts" t-as="bank">
-                                            <option t-att-value="bank.id">
-                                                <t t-esc="bank.bank_name" /> - <t t-esc="bank.cbu" />
-                                            </option>
-                                        </t>
                                     </select>
+                                </div>
+                                <div
+                                    class="d-flex justify-content-center justify-content-md-end gap-2 flex-wrap">
+                                    <button class="btn btn-outline-secondary"
+                                        data-bs-dismiss="modal">
+                                        Cancelar
+                                    </button>
+                                    <button class="btn btn-primary o_withdrawal_submit">
+                                        Solicitar Retiro
+                                    </button>
                                 </div>
                             </form>
                         </div>
                     </t>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                            Cancelar
-                        </button>
-                        <button type="submit" class="btn btn-success w-100 o_withdrawal_submit">
-                            Solicitar Retiro
-                        </button>
-                    </div>
                 </div>
             </div>
         </div>
-
+        <script type="text/javascript"> document.addEventListener('DOMContentLoaded', function() {
+            var modal = document.getElementById('withdrawalTransferModal');
+            modal.addEventListener('show.bs.modal', function () { var select =
+            document.getElementById('bank_account_select'); select.innerHTML = '<option
+                value="">Seleccione una cuenta</option>'; fetch('/casino/withdrawal/banks', {
+            method: 'POST', headers: {'Content-Type': 'application/json'}, body: '{}' })
+            .then(response => response.json()) .then(data => { (data.result ||
+            []).forEach(function(bank) { var option = document.createElement('option'); option.value
+            = bank.id; option.textContent = bank.name + ' - ' + bank.cbu;
+            select.appendChild(option); }); }); }); }); </script>
     </template>
 
     <template id="portal_registrar_bonus_form" name="Formulario Registrar Bonus">
@@ -259,7 +253,7 @@
     <template id="portal_movimientos_inner">
         <div class="table-responsive">
             <table class="table table-striped">
-                <thead>
+                <thead style="font-size:0.9rem;">
                     <tr>
                         <th>Fecha</th>
                         <th>Descripción</th>
@@ -269,7 +263,7 @@
                         <th class="text-end">Saldo</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody style="font-size:0.9rem;">
                     <t t-foreach="movements" t-as="movement">
                         <tr>
                             <td>
@@ -318,14 +312,14 @@
 
             <form action="/my/medios_pagos" method="post">
                 <table class="table table-bordered">
-                    <thead>
+                    <thead style="font-size:0.9rem;">
                         <tr>
                             <th>Método de Pago</th>
                             <th>Usar para Depósito</th>
                             <th>Usar para Retiro</th>
                         </tr>
                     </thead>
-                    <tbody>
+                    <tbody style="font-size:0.9rem;">
                         <t t-foreach="payment_methods" t-as="pm">
                             <tr>
                                 <td>
@@ -362,82 +356,6 @@
     <template id="portal_datos_bancarios" name="Mis Datos Bancarios">
         <div class="container mt-4">
             <div class="row justify-content-center">
-                <!-- <div class="col-lg-8">
-                    <div class="container card">
-                        <div class="card-header bg-primary text-white">
-                            <h3 class="card-title mb-0">Mis Datos Bancarios</h3>
-                        </div>
-
-                        <div class="card-body">
-                            <form action="/my/datos_bank" method="post" class="oe_bancarios_form">
-                                <input type="hidden" name="csrf_token"
-                                    t-att-value="request.csrf_token()" />
-
-                                <div class="form-group mb-4">
-                                    <label for="account_number" class="form-label">Cuenta Bancaria</label>
-                                    <div class="input-group">
-                                        <input type="text"
-                                            name="account_number" id="account_number"
-                                            class="form-control"
-                                            required="required" t-att-value="account_number" />
-                                    </div>
-                                </div>
-
-                                <div class="form-group mb-4">
-                                    <label for="bank_name" class="form-label">Banco</label>
-                                    <div class="input-group">
-                                        <input type="text"
-                                            name="bank_name" id="bank_name" class="form-control"
-                                            required="required" t-att-value="bank_name" />
-                                    </div>
-                                </div>
-
-                                <div class="form-group mb-4">
-                                    <label for="account_type" class="form-label">Tipo de Cuenta</label>
-                                    <div class="input-group">
-                                        <input type="text"
-                                            name="account_type" id="account_type"
-                                            class="form-control"
-                                            required="required" t-att-value="account_type" />
-                                    </div>
-                                </div>
-
-                                <div class="form-group mb-4">
-                                    <label for="cbu" class="form-label">CBU</label>
-                                    <div class="input-group">
-                                        <input type="text"
-                                            name="cbu" id="cbu" class="form-control"
-                                            required="required" t-att-value="cbu" />
-                                    </div>
-                                </div>
-
-                                <div class="form-group mb-4">
-                                    <label for="cuil" class="form-label">CUIL</label>
-                                    <div class="input-group">
-                                        <input type="text"
-                                            name="cuil" id="cuil" class="form-control"
-                                            required="required" t-att-value="cuil" />
-                                    </div>
-                                </div>
-
-                                <div class="form-group mb-4">
-                                    <label for="nuevo_cbu" class="form-label">Nuevo CBU</label>
-                                    <div class="input-group">
-                                        <input type="text"
-                                            name="nuevo_cbu" id="nuevo_cbu" class="form-control"
-                                            required="required" t-att-value="nuevo_cbu" />
-                                    </div>
-                                </div>
-
-                                <div class="text-center mt-4">
-                                    <button type="submit" class="btn btn-primary btn-lg px-5">
-                                        Guardar Datos
-                                    </button>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-                </div> -->
             </div>
         </div>
     </template>

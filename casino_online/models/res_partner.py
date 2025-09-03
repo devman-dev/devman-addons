@@ -17,6 +17,7 @@ class ResPartner(models.Model):
     cuil = fields.Char('CUIL')
     nuevo_cbu = fields.Char('Nuevo CBU')
     token = fields.Char(string='Token', default=lambda self: str(uuid.uuid4()))
+    secret_token = fields.Char(string='Token Secreto', default=lambda self: str(uuid.uuid4()))
     nickname = fields.Char(string='Nickname')
     balance_game = fields.Float(string='Balance de los Juego')
 

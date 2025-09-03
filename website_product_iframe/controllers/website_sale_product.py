@@ -36,8 +36,8 @@ class WebsiteShop(WebsiteSale):
 
             partner = user.partner_id
 
-            if not product.property_account_income_id:
-                raise UserError("El producto debe tener precio y cuenta de ingreso configurados.")
+            # if not product.property_account_income_id:
+            #     raise UserError("El producto debe tener precio y cuenta de ingreso configurados.")
 
             # Mantengo creación y posteo de factura
             doc_type = request.env['l10n_latam.document.type'].sudo().search([

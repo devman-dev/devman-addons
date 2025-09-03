@@ -11,6 +11,7 @@ odoo.define('casino_online.withdrawal_modal', function (require) {
         },
 
         _onClick: function (ev) {
+            console.log("PABLO --- _onClick --- Botón de retiro clickeado");
             ev.preventDefault();
             var self = this;
             $.get("/casino/withdrawal/form").then(function (modalHtml) {
