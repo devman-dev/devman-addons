@@ -8,9 +8,17 @@
 
           <header>
                   <button name="action_create_account_moves" string="Crear asientos contables" type="object" class="btn-primary"/>
+
                   <button name="action_post" string="Asentar" type="object" class="btn-primary" modifiers="{'invisible': [['state', '!=', 'draft']]}"/>
+                  
                   <button name="action_reset_to_draft" string="Volver a borrador" type="object" modifiers="{'invisible': [['state', '!=', 'posted']]}"/>
+                  
                   <button name="action_cancel" string="Cancelar" type="object" modifiers="{'invisible': [['state', '!=', 'posted']]}"/>
+
+                  <button name="action_transfer_to_collection" string="Transferir a Collection  Transaction" type="object"
+                  class="btn-primary"
+                  modifiers="{'invisible': [['transferred_to_collection', '=', True]]}"/>
+
         </header>
           <!-- Campos principales al inicio -->
           <group>
@@ -59,6 +67,7 @@
 
           </group>
           <field name="account_moves_created"/>
+          <field name="transferred_to_collection"/>
 
         </sheet>
 

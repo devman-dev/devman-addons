@@ -144,6 +144,10 @@ class CurrencyExchangeOperation(models.Model):
         string="Asientos contables creados",
         default=False
     )
+    transferred_to_collection = fields.Boolean(
+        string="Transferido a Collection Transaction",
+        default=False
+    )
 
     @api.depends('price_seller', 'price_buyer')
     def _compute_spread_amount(self):
@@ -241,7 +245,7 @@ class CurrencyExchangeOperation(models.Model):
                         "account_id": rec.company_id.exchange_account_buy_id.id,
                         "debit": rec.amount_to_buy,
                         "credit": 0.0,
-                        "currency_id": rec.currency_buy_id.id,
+                        "currency_id": rec.currency_buy_id.id,  # Agrega esto en ambas líneas
                         "partner_id": rec.partner_id.id,
                     }),
                     (0, 0, {
@@ -249,7 +253,7 @@ class CurrencyExchangeOperation(models.Model):
                         "account_id": rec.company_id.exchange_account_buy_counterpart_id.id,
                         "debit": 0.0,
                         "credit": rec.amount_to_buy,
-                        "currency_id": rec.currency_buy_id.id,
+                        "currency_id": rec.currency_buy_id.id,  # Agrega esto en ambas líneas
                         "partner_id": rec.partner_id.id,
                     }),
                 ],
@@ -435,12 +439,14 @@ class CurrencyExchangeOperation(models.Model):
                         'debit': rec.amount_to_buy,
                         'credit': 0,
                         'name': 'Compra divisa',
+                        'currency_id': rec.currency_buy_id.id,  # <-- Agrega esto
                     }),
                     (0, 0, {
                         'account_id': rec.exchange_account_buy_counterpart_id.id,
                         'debit': 0,
                         'credit': rec.amount_to_buy,
                         'name': 'Contrapartida compra',
+                        'currency_id': rec.currency_buy_id.id,  # <-- Agrega esto
                     }),
                 ]
             })
@@ -460,20 +466,48 @@ class CurrencyExchangeOperation(models.Model):
                         'debit': rec.amount_to_pay,
                         'credit': 0,
                         'name': 'Pago divisa',
+                        'currency_id': rec.currency_pay_id.id,  # <-- Agrega esto
                     }),
                     (0, 0, {
                         'account_id': rec.exchange_account_spread_income_id.id,
                         'debit': 0,
                         'credit': spread,
                         'name': 'Ingreso spread',
+                        'currency_id': rec.currency_pay_id.id,  # <-- Agrega esto
                     }),
                     (0, 0, {
                         'account_id': rec.exchange_account_pay_counterpart_id.id,
                         'debit': 0,
                         'credit': resto,
                         'name': 'Contrapartida pago',
+                        'currency_id': rec.currency_pay_id.id,  # <-- Agrega esto
                     }),
                 ]
             })
 
             self.account_moves_created = True
+
+    def action_transfer_to_collection(self):
+        for rec in self:
+            if rec.transferred_to_collection:
+                raise UserError(_("Este registro ya fue transferido a Collection Transaction."))
+
+            vals = {
+                'amount': rec.amount_to_pay,
+                'partner_id': rec.partner_id.id,
+                'currency_id': rec.currency_pay_id.id,
+                'date': rec.date,
+                'description': rec.description or rec.name,
+                # Agrega aquí otros campos que quieras transferir
+            }
+            collection = self.env['collection.transaction'].create(vals)
+            rec.transferred_to_collection = True
+            # Opcional: puedes mostrar el registro creado
+            return {
+                'type': 'ir.actions.act_window',
+                'name': _('Collection Transaction'),
+                'res_model': 'collection.transaction',
+                'view_mode': 'form',
+                'res_id': collection.id,
+                'target': 'current',
+            }

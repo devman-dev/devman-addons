@@ -5,12 +5,15 @@
     <field name="inherit_id" ref="base.view_company_form"/>
     <field name="arch" type="xml">
       <xpath expr="//group[1]" position="after">
-        <group string="Cambio de Divisas (defaults)">
+
+      <!--  <group string="Cambio de Divisas (defaults)">
           <field name="exchange_default_account_cash_id" domain="[('company_id','=',id)]"/>
           <field name="exchange_default_account_inventory_id" domain="[('company_id','=',id)]"/>
           <field name="exchange_default_account_spread_income_id" domain="[('company_id','=',id)]"/>
           <field name="exchange_default_account_spread_expense_id" domain="[('company_id','=',id)]"/>
         </group>
+      -->
+
         <group string="A. Cuentas de registro de compras:">
           <field name="exchange_account_buy_id"/>
           <field name="exchange_account_buy_counterpart_id"/>
@@ -20,6 +23,12 @@
           <field name="exchange_account_spread_income_id"/>
           <field name="exchange_account_pay_counterpart_id"/>
         </group>
+
+        <group string="Valores por defecto de precios">
+          <field name="price_seller_default"/>
+          <field name="price_buyer_default"/>
+        </group>
+
       </xpath>
     </field>
   </record>
