@@ -245,7 +245,7 @@ class CurrencyExchangeOperation(models.Model):
                         "account_id": rec.company_id.exchange_account_buy_id.id,
                         "debit": rec.amount_to_buy,
                         "credit": 0.0,
-                        "currency_id": rec.currency_buy_id.id,  # Agrega esto en ambas líneas
+                        "currency_id": rec.currency_buy_id.id,
                         "partner_id": rec.partner_id.id,
                     }),
                     (0, 0, {
@@ -253,7 +253,7 @@ class CurrencyExchangeOperation(models.Model):
                         "account_id": rec.company_id.exchange_account_buy_counterpart_id.id,
                         "debit": 0.0,
                         "credit": rec.amount_to_buy,
-                        "currency_id": rec.currency_buy_id.id,  # Agrega esto en ambas líneas
+                        "currency_id": rec.currency_buy_id.id,
                         "partner_id": rec.partner_id.id,
                     }),
                 ],
@@ -303,8 +303,9 @@ class CurrencyExchangeOperation(models.Model):
             move_pay = self.env["account.move"].create(move_pay_vals)
             move_pay.action_post()
 
-            rec.move_id = move_buy.id  # Puedes guardar ambos si lo necesitas
+            rec.move_id = move_buy.id
             rec.state = "posted"
+            rec.account_moves_created = True  # <-- Agrega esta línea
 
     def action_reset_to_draft(self):
         for rec in self:
@@ -494,15 +495,25 @@ class CurrencyExchangeOperation(models.Model):
 
             vals = {
                 'amount': rec.amount_to_pay,
-                'partner_id': rec.partner_id.id,
-                'currency_id': rec.currency_pay_id.id,
                 'date': rec.date,
                 'description': rec.description or rec.name,
-                # Agrega aquí otros campos que quieras transferir
+                'count': 1,
+                'customer': rec.partner_id.id,
+                'customer_destination': rec.partner_id.id,
+                'collection_trans_type': 'movimiento_interno',
+                'collection_trans_type_dest': 'movimiento_recaudacion',
+                'service_dest': 1,
+                'commission_dest': 0.0,
+                'transaction_name': rec.name or f'Cambio de divisa {rec.id}',  # <-- Agrega este campo obligatorio
             }
+            
+            # Agrega campos opcionales solo si existen
+            if hasattr(self.env['collection.transaction'], 'currency_id'):
+                vals['currency_id'] = rec.currency_pay_id.id
+                
             collection = self.env['collection.transaction'].create(vals)
             rec.transferred_to_collection = True
-            # Opcional: puedes mostrar el registro creado
+            
             return {
                 'type': 'ir.actions.act_window',
                 'name': _('Collection Transaction'),

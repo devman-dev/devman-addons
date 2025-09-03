@@ -4,22 +4,33 @@
     <field name="model">currency.exchange.operation</field>
     <field name="arch" type="xml">
       <form string="Operación de cambio de divisas">
-        <sheet>
+        <header>
+                 <!-- 
+                  <button name="action_create_account_moves" string="Crear asientos contables" type="object" class="btn-primary"/> 
+                 -->
 
-          <header>
-                  <button name="action_create_account_moves" string="Crear asientos contables" type="object" class="btn-primary"/>
-
-                  <button name="action_post" string="Asentar" type="object" class="btn-primary" modifiers="{'invisible': [['state', '!=', 'draft']]}"/>
+                    <button name="action_post" string="Asentar" type="object" class="btn-primary" 
+                    invisible="account_moves_created"/>
                   
                   <button name="action_reset_to_draft" string="Volver a borrador" type="object" modifiers="{'invisible': [['state', '!=', 'posted']]}"/>
                   
                   <button name="action_cancel" string="Cancelar" type="object" modifiers="{'invisible': [['state', '!=', 'posted']]}"/>
 
-                  <button name="action_transfer_to_collection" string="Transferir a Collection  Transaction" type="object"
-                  class="btn-primary"
-                  modifiers="{'invisible': [['transferred_to_collection', '=', True]]}"/>
+                  <button name="action_transfer_to_collection" string="Transferir a Collection Transaction" type="object"
+                          class="btn-primary"
+                          invisible="transferred_to_collection"/>
 
+                  <table style="display: inline-table; margin-left: 20px;">
+                    <tr>
+                      <td>Asientos Creados:</td>
+                      <td><field name="account_moves_created" widget="boolean_toggle" readonly="1" nolabel="1"/></td>
+                      <td style="padding-left: 15px;">Transferido:</td>
+                      <td><field name="transferred_to_collection" widget="boolean_toggle" readonly="1" nolabel="1"/></td>
+                    </tr>
+                  </table>
         </header>
+        <sheet>
+
           <!-- Campos principales al inicio -->
           <group>
             <field name="date"/>
