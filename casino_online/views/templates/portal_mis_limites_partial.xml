@@ -65,80 +65,84 @@
             <div class="card-header bg-primary text-white">
                 <strong>Límites de Depósito</strong>
             </div>
+            <div>
+                <form class="card-body mx-auto" style="width:80%; max-width:700px"
+                    action="/my/mis_limites" method="post"
+                    id="bet_limits_form" novalidate="novalidate">
+                    <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()" />
+                    <!-- Ayuda a identificar el registro (opcional, el servidor igual puede usar
+                    get_or_create) -->
+                    <input type="hidden" name="bet_limits_id" t-att-value="bl and bl.id or 0" />
 
-            <form class="card-body" action="/my/mis_limites" method="post"
-                id="bet_limits_form" novalidate="novalidate">
-                <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()" />
-                <!-- Ayuda a identificar el registro (opcional, el servidor igual puede usar
-                get_or_create) -->
-                <input type="hidden" name="bet_limits_id" t-att-value="bl and bl.id or 0" />
-
-                <!-- Diario -->
-                <div class="row align-items-center mb-3">
-                    <label for="limit_daily" class="col-12 col-md-3 col-form-label"> Límite diario (<t
-                            t-esc="bl and bl.currency_id and bl.currency_id.name or 'USD'" />) </label>
-                    <div class="col-12 col-md-7">
-                        <div class="input-group">
-                            <span class="input-group-text">
-                                <t t-esc="currency_symbol" />
-                            </span>
-                            <input type="number" min="0" step="0.01"
-                                class="form-control limit-input"
-                                id="limit_daily" name="limit_daily"
-                                t-att-value="('%.2f' % (bl.limit_daily or 0.0))"
-                                t-att-data-original="('%.2f' % (bl.limit_daily or 0.0))"
-                                placeholder="0.00" required="required" />
+                    <!-- Diario -->
+                    <div class="row align-items-center mb-3">
+                        <label for="limit_daily" class="col-12 col-md-4 col-form-label"> Límite
+                            diario (<t
+                                t-esc="bl and bl.currency_id and bl.currency_id.name or 'USD'" />) </label>
+                        <div class="col-12 col-md-7">
+                            <div class="input-group">
+                                <span class="input-group-text">
+                                    <t t-esc="currency_symbol" />
+                                </span>
+                                <input type="number" min="0" step="0.01"
+                                    class="form-control limit-input"
+                                    id="limit_daily" name="limit_daily"
+                                    t-att-value="('%.2f' % (bl.limit_daily or 0.0))"
+                                    t-att-data-original="('%.2f' % (bl.limit_daily or 0.0))"
+                                    placeholder="0.00" required="required" />
+                            </div>
                         </div>
                     </div>
-                </div>
 
-                <!-- Semanal -->
-                <div class="row align-items-center mb-3">
-                    <label for="limit_weekly" class="col-12 col-md-3 col-form-label"> Límite semanal
-                        (<t
-                            t-esc="bl and bl.currency_id and bl.currency_id.name or 'USD'" />) </label>
-                    <div class="col-12 col-md-7">
-                        <div class="input-group">
-                            <span class="input-group-text">
-                                <t t-esc="currency_symbol" />
-                            </span>
-                            <input type="number" min="0" step="0.01"
-                                class="form-control limit-input"
-                                id="limit_weekly" name="limit_weekly"
-                                t-att-value="('%.2f' % (bl.limit_weekly or 0.0))"
-                                t-att-data-original="('%.2f' % (bl.limit_weekly or 0.0))"
-                                placeholder="0.00" required="required" />
+                    <!-- Semanal -->
+                    <div class="row align-items-center mb-3">
+                        <label for="limit_weekly" class="col-12 col-md-4 col-form-label"> Límite
+                            semanal (<t
+                                t-esc="bl and bl.currency_id and bl.currency_id.name or 'USD'" />) </label>
+                        <div class="col-12 col-md-7">
+                            <div class="input-group">
+                                <span class="input-group-text">
+                                    <t t-esc="currency_symbol" />
+                                </span>
+                                <input type="number" min="0" step="0.01"
+                                    class="form-control limit-input"
+                                    id="limit_weekly" name="limit_weekly"
+                                    t-att-value="('%.2f' % (bl.limit_weekly or 0.0))"
+                                    t-att-data-original="('%.2f' % (bl.limit_weekly or 0.0))"
+                                    placeholder="0.00" required="required" />
+                            </div>
                         </div>
                     </div>
-                </div>
 
-                <!-- Mensual -->
-                <div class="row align-items-center mb-3">
-                    <label for="limit_monthly" class="col-12 col-md-3 col-form-label"> Límite
-                        mensual (<t
-                            t-esc="bl and bl.currency_id and bl.currency_id.name or 'USD'" />) </label>
-                    <div class="col-12 col-md-7">
-                        <div class="input-group">
-                            <span class="input-group-text">
-                                <t t-esc="currency_symbol" />
-                            </span>
-                            <input type="number" min="0" step="0.01"
-                                class="form-control limit-input"
-                                id="limit_monthly" name="limit_monthly"
-                                t-att-value="('%.2f' % (bl.limit_monthly or 0.0))"
-                                t-att-data-original="('%.2f' % (bl.limit_monthly or 0.0))"
-                                placeholder="0.00" required="required" />
+                    <!-- Mensual -->
+                    <div class="row align-items-center mb-3">
+                        <label for="limit_monthly" class="col-12 col-md-4 col-form-label"> Límite
+                            mensual (<t
+                                t-esc="bl and bl.currency_id and bl.currency_id.name or 'USD'" />) </label>
+                        <div class="col-12 col-md-7">
+                            <div class="input-group">
+                                <span class="input-group-text">
+                                    <t t-esc="currency_symbol" />
+                                </span>
+                                <input type="number" min="0" step="0.01"
+                                    class="form-control limit-input"
+                                    id="limit_monthly" name="limit_monthly"
+                                    t-att-value="('%.2f' % (bl.limit_monthly or 0.0))"
+                                    t-att-data-original="('%.2f' % (bl.limit_monthly or 0.0))"
+                                    placeholder="0.00" required="required" />
+                            </div>
                         </div>
                     </div>
-                </div>
 
-                <div class="text-center mt-4">
-                    <button type="submit" class="btn text-white px-4" id="btn_save_limits"
-                        style="background-color:#6b4a63; border-radius:2rem;" disabled="disabled">
-                        Guardar Límites
-                    </button>
-                </div>
-            </form>
+                    <div class="text-center mt-4">
+                        <button type="submit" class="btn text-white px-4" id="btn_save_limits"
+                            style="background-color:#6b4a63; border-radius:2rem;"
+                            disabled="disabled">
+                            Guardar Límites
+                        </button>
+                    </div>
+                </form>
+            </div>
         </div>
         <!-- <xpath expr="." position="inside">
             <script type="text/javascript" src="/casino_online/static/src/js/limits_form.js"></script>
