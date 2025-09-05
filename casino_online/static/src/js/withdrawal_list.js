@@ -154,7 +154,7 @@ publicWidget.registry.CasinoWithdrawalList = publicWidget.Widget.extend({
                 <td>${withdrawal.bank_cuil}</td>
                 <td>${withdrawal.description}</td>
                 <td>${withdrawal.bank_cbu}</td>
-                <td>${this._formatAmount(withdrawal.amount)}</td>
+                <td class="text-end">${this._formatAmount(withdrawal.amount)}</td>
                 <td>${this._formatDate(withdrawal.date)}</td>
                 <td class="text-center">${this._stateBadgeHTML(withdrawal.state)}</td>
             </tr>
