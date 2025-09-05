@@ -1,13 +1,17 @@
 # -*- coding: utf-8 -*-
 from odoo import api, fields, models, _
-from odoo.exceptions import UserError
+from odoo.exceptions import UserError, ValidationError
+
 
 class AccountPayment(models.Model):
     _inherit = "account.payment"
 
+    conciliado = fields.Selection([('conciliado','Conciliado'),('no_conciliado','No conciliado')], default="no_conciliado")
+
     def _pagoflex_prepare_collection_ctx(self):
         """Valores por defecto para el form de collection.transaction (Odoo 17)."""
         self.ensure_one()
+
 
         partner = self.partner_id
         amount = abs(self.amount)
@@ -72,23 +76,24 @@ class AccountPayment(models.Model):
         }
         return ctx
 
-    def _pagoflex_open_collection_transaction_form(self):
+
+    def pagoflex_open_collection_transaction_form(self):
         """Devuelve la acción que abre el form de collection.transaction como wizard."""
         self.ensure_one()
+        collect_domain = [('customer', '=', self.partner_id.id),('payment_id','=', self.id)]
+
+        pago_creado = self.env['collection.transaction'].sudo().search(collect_domain)
+        if pago_creado:
+            raise ValidationError('Ya existe la acreditación del cheque en PagoFlex, para volver a acreditarlo elimine el movimiento existente en PagoFlex.')
+
         ctx = self._pagoflex_prepare_collection_ctx()
         return {
             'name': _('Conciliación de Transacciones'),
             'type': 'ir.actions.act_window',
-            'res_model': 'collection.transaction',
+            'res_model': 'collec.trans.wiz',
+            'view_type': 'form',
             'view_mode': 'form',
             'target': 'new',
             'context': ctx,
         }
 
-    # Botón propio recomendado en Odoo 17
-    def action_pagoflex_mark_sent_and_open(self):
-        self.ensure_one()
-        # Llamar al método original para marcar como enviado
-        self.mark_as_sent()
-        # Aquí tu lógica adicional (abrir el form de acreditación, etc.)
-        return self._pagoflex_open_collection_transaction_form()

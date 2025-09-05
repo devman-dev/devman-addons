@@ -60,24 +60,62 @@
                     <group>
                         <group>
                             <field name="collection_trans_type" widget="radio" options="{'horizontal': True}" />
+                            <field name="compra_venta" string="Compra/Venta de Divisas" invisible="collection_trans_type != 'movimiento_interno'"/>
+                            <field name="check_compra_venta" invisible="1"/>
                             <field name="customer" options="{'no_create': True, 'no_create_edit': True,'no_quick_create': True}" />
                             <!-- <field name="account_bank"/> -->
-                            <field name="service" required="1" domain="[('services.collection_type', '=', 'service'), ('customer', '=', customer)]" context="{'show_servicio_name': True}" options="{'no_create': True, 'no_create_edit': True,'no_quick_create': True}" />
-                            <field name="categories" widget="many2many_tags"/>
+                            <field name="service" required="compra_venta == False or check_compra_venta != True" invisible="compra_venta == True" domain="[('services.collection_type', '=', 'service'), ('customer', '=', customer)]" context="{'show_servicio_name': True}" options="{'no_create': True, 'no_create_edit': True,'no_quick_create': True}" />
+                            <field name="categories" invisible="compra_venta == True" widget="many2many_tags"/>
                             <field name="commission" invisible="collection_trans_type == 'movimiento_interno'" />
+
+                            <!-- COMISIONISTAS COMPRA VENTA-->
+
+                            <field name="commission_agent_1" invisible="compra_venta == False"/>
+
+                            <label for="commision_sel_1" string="Comisión 1" invisible="compra_venta == False"/>
+                            <div style="display: flex; gap: 8px; align-items: center;" invisible="compra_venta == False">
+                                <field name="commision_sel_1" widget="radio" options="{'horizontal': True}" nolabel="1"/>
+                                <field name="commision_1" nolabel="1"/>
+                            </div>
+
+                            <field name="commission_agent_2" invisible="compra_venta == False"/>
+
+                            <label for="commision_sel_2" string="Comisión 2" invisible="compra_venta == False"/>
+                            <div style="display: flex; gap: 8px; align-items: center;" invisible="compra_venta == False">
+                                <field name="commision_sel_2" widget="radio" options="{'horizontal': True}" nolabel="1"/>
+                                <field name="commision_2" nolabel="1"/>
+                            </div>
+
+                            <!-- FIN COMISIONISTAS COMPRA VENTA-->
+
                             <field name="operation" domain="[('id', 'in', withdrawal_operations)]" options="{'no_create': True, 'no_create_edit': True,'no_quick_create': True}" />
                             <field name="withdrawal_operations" invisible="1" />
                             <field name="date" />
                             <field name="related_customer" invisible="collection_trans_type == 'retiro'" />
+
                             <label for="amount">Monto</label>
                             <div style="display: flex; gap: 8px; align-items: center;">
                                 <field name="amount" nolabel="1"/>
                                 <field name="currency_id" nolabel="1"/>
                             </div>
+
+                            <!-- TIPO DE CAMBIO -->
+
+                            <label for="change_amount" string="Tipo de cambio" invisible="compra_venta == False"/>
+                            <div style="display: flex; gap: 8px; align-items: center;" invisible="compra_venta == False">
+                                <field name="change_amount" nolabel="1"/>
+                                <field name="change_currency_id" nolabel="1"/>
+                            </div>
+                            <field name="amount" invisible="1"/>
+                            <field name="currency_id" invisible="1"/>
+                            <field name="change_amount" invisible="1"/>
+                            <field name="change_currency_id" invisible="1"/>
+
+
                             <label for="payment_id">Cheque</label>
                             <div style="display: flex; gap: 8px; align-items: center;">
                                 <field name="payment_id" readonly="1" force_save="1" string="Cheque" nolabel="1" options="{'no_create': True, 'no_create_edit': True,'no_quick_create': True}"/>
-                                <button name="open_create_check" type="object" string="Cargar"/>
+<!--                                <button name="open_create_check" type="object" string="Cargar"/>-->
                             </div>
 
                             <separator/>
@@ -95,7 +133,7 @@
 
 
                         <!-- Acreditacion -->
-                        <group invisible="collection_trans_type != 'movimiento_recaudacion'">
+                        <group invisible="collection_trans_type not in ['movimiento_recaudacion','compra_venta']">
                             <field name="destination_account" domain="[('customer','=', customer)]" options="{'no_create': True, 'no_create_edit': True,'no_quick_create': True}" context="{'show_account_name': True}" />
                             <field name="cuit_destination_account" readonly="1" force_save="1" />
                             <field name="cbu_destination_account" readonly="1" force_save="1" />
@@ -162,10 +200,11 @@
                             <separator />
 
                             <field name="customer_destination" options="{'no_create': True, 'no_create_edit': True, 'no_quick_create': True}" required="collection_trans_type == 'movimiento_interno'" />
-
-                            <field name="destination_account" domain="[('customer','=',customer_destination)]" context="{'show_account_name': True}" options="{'no_create': True, 'no_create_edit': True,'no_quick_create': True}" required="collection_trans_type == 'movimiento_interno'" />
+                            <field name="destination_account" domain="[('customer','=',customer_destination)]" context="{'show_account_name': True}" options="{'no_create': True, 'no_create_edit': True,'no_quick_create': True}" required="collection_trans_type == 'movimiento_interno'" invisible="compra_venta == True"/>
+                            <field name="destination_account" domain="[('customer','=',customer_destination)]" context="{'show_account_name': True}" options="{'no_create': True, 'no_create_edit': True,'no_quick_create': True}" required="collection_trans_type == 'movimiento_interno'" invisible="compra_venta == False" string="Acreditación en cuenta destino"/>
+                            <field name="retirement_account" domain="[('customer','=',customer_destination)]" context="{'show_account_name': True}" options="{'no_create': True, 'no_create_edit': True,'no_quick_create': True}" required="compra_venta == True" invisible="compra_venta == False"/>
                             <field name="collection_trans_type_dest" widget="radio" invisible="customer_destination == False" options="{'horizontal': True}" />
-                            <field name="service_dest" required="collection_trans_type == 'movimiento_interno', customer_destination != False" invisible="customer_destination == False" domain="[('services.collection_type', '=', 'service'), ('customer', '=', customer_destination)]" context="{'show_servicio_name': True}" options="{'no_create': True, 'no_create_edit': True,'no_quick_create': True}" />
+                            <field name="service_dest" required="collection_trans_type == 'movimiento_interno' and customer_destination != False and compra_venta == False" invisible="customer_destination == False" domain="[('services.collection_type', '=', 'service'), ('customer', '=', customer_destination)]" context="{'show_servicio_name': True}" options="{'no_create': True, 'no_create_edit': True,'no_quick_create': True}" />
                             <field name="commission_dest" invisible="customer_destination == False or collection_trans_type_dest == 'retiro'" />
                             <field name="cuit_destination_account" readonly="1" force_save="1" />
                             <field name="cbu_destination_account" readonly="1" force_save="1" />

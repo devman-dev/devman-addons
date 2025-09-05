@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="collection_transaction_view_form_wiz" model="ir.ui.view">
+        <field name="name">collec.trans.wiz.view.form.wiz</field>
+        <field name="model">collec.trans.wiz</field>
+        <field name="arch" type="xml">
+            <form string="Transacción de cobro" duplicate="0">
+                <sheet>
+                    <h1>
+                        <field name="transaction_name" readonly="True" />
+                    </h1>
+                    <group>
+                        <group>
+                            <field name="collection_trans_type" widget="radio" options="{'horizontal': True}" />
+                            <field name="customer" options="{'no_create': True, 'no_create_edit': True,'no_quick_create': True}" />
+                            <!-- <field name="account_bank"/> -->
+                            <field name="service" required="1" domain="[('services.collection_type', '=', 'service'), ('customer', '=', customer)]" context="{'show_servicio_name': True}" options="{'no_create': True, 'no_create_edit': True,'no_quick_create': True}" />
+                            <field name="categories" widget="many2many_tags"/>
+                            <field name="commission" invisible="collection_trans_type == 'movimiento_interno'" />
+                            <field name="operation" domain="[('id', 'in', withdrawal_operations)]" options="{'no_create': True, 'no_create_edit': True,'no_quick_create': True}" />
+                            <field name="withdrawal_operations" invisible="1" />
+                            <field name="date" />
+                            <field name="related_customer" invisible="collection_trans_type == 'retiro'" />
+                            <label for="amount">Monto</label>
+                            <div style="display: flex; gap: 8px; align-items: center;">
+                                <field name="amount" nolabel="1"/>
+                                <field name="currency_id" nolabel="1"/>
+                            </div>
+                            <label for="payment_id">Cheque</label>
+                            <div style="display: flex; gap: 8px; align-items: center;">
+                                <field name="payment_id" readonly="1" force_save="1" string="Cheque" nolabel="1" options="{'no_create': True, 'no_create_edit': True,'no_quick_create': True}"/>
+<!--                                <button name="open_create_check" type="object" string="Cargar"/>-->
+                            </div>
+
+                            <separator/>
+                            <!-- <field name="available_balance" readonly="1" force_save="1" /> -->
+                            <field name="total_balance_customer" readonly="1" force_save="1" />
+                            <field name="real_balance" readonly="1" force_save="1" groups="payment_collection.groups_payment_collection_admin" />
+                            <field name="date_available_amount" readonly="1" force_save="1" />
+                            <field name="is_commission" invisible="1" />
+                            <field name="destination_name" force_save="1" invisible="1" />
+                            <field name="is_concilied" readonly="1" force_save="1" />
+                            <field name="concilied_id" widget="many2one" readonly="1" force_save="1" domain="[('is_concilied','=',False)]" />
+                            <field name="previous_month" invisible="1"/>
+                            <field name="account_move_id"/>
+                        </group>
+
+
+                        <!-- Acreditacion -->
+                        <group invisible="collection_trans_type != 'movimiento_recaudacion'">
+                            <field name="destination_account" domain="[('customer','=', customer)]" options="{'no_create': True, 'no_create_edit': True,'no_quick_create': True}" context="{'show_account_name': True}" />
+                            <field name="cuit_destination_account" readonly="1" force_save="1" />
+                            <field name="cbu_destination_account" readonly="1" force_save="1" />
+                            <field name="cvu_destination_account" readonly="1" force_save="1" />
+                            <field name="alias_destination_account" readonly="1" force_save="1" />
+
+                            <separator />
+
+                            <field name="origin_type" help="Seleccione Interno si el cliente pertenece a PagoFlex" widget="radio" options="{'horizontal': True}" />
+
+                            <field name="customer_origin" options="{'no_create': True, 'no_create_edit': True,'no_quick_create': True}" invisible="origin_type == 'externo'" />
+                            <field name="origin_account" domain="[('customer','=',customer_origin)]" context="{'show_account_name': True}" options="{'no_create': True, 'no_create_edit': True,'no_quick_create': True}" invisible="origin_type == 'externo'" />
+                            <field name="origen_name_account_extern" invisible="origin_type == 'interno'" />
+                            <field name="origin_account_cuit" readonly="origin_type == 'interno'" />
+                            <field name="origin_account_cvu" readonly="origin_type == 'interno'" force_save="1" />
+                            <field name="origin_account_cbu" readonly="origin_type == 'interno'" force_save="1" />
+                            <field name="alias_origen" readonly="origin_type == 'interno'" force_save="1" />
+
+
+                            <field name="commission_app_rate" readonly="1" force_save="1" />
+                            <field name="commission_app_amount" readonly="1" force_save="1" />
+                            <field name="transaction_state" />
+                            <field name="previous_month" invisible="1" />
+                        </group>
+
+                        <!--Retiro -->
+                        <group invisible="collection_trans_type != 'retiro'">
+
+                            <field name="origin_account" domain="[('id','in',origin_account_table)]" context="{'show_account_name': True}" options="{'no_create': True, 'no_create_edit': True, 'no_quick_create': True}" />
+                            <field name="origin_account_cuit" readonly="1" force_save="1" />
+                            <field name="origin_account_cvu" readonly="1" force_save="1" />
+                            <field name="origin_account_cbu" readonly="1" force_save="1" />
+                            <field name="alias_origen" readonly="1" force_save="1" />
+
+                            <separator />
+
+                            <field name="origin_type" string="Tipo de Destino" help="Seleccione Interno si el cliente pertenece a PagoFlex" widget="radio" options="{'horizontal': True}" />
+                            <field name="customer_destination" invisible="origin_type == 'externo'" options="{'no_create': True, 'no_create_edit': True, 'no_quick_create': True}" />
+
+                            <field name="destination_account" domain="[('customer','=',customer_destination)]" context="{'show_account_name': True}" options="{'no_create': True, 'no_create_edit': True,'no_quick_create': True}" invisible="origin_type == 'externo'" />
+
+                            <field name="name_destination_account" invisible="origin_type == 'interno'" />
+
+                            <field name="cuit_destination_account" readonly="origin_type == 'interno'" force_save="1" />
+                            <field name="cbu_destination_account" readonly="origin_type == 'interno'" force_save="1" />
+                            <field name="cvu_destination_account" readonly="origin_type == 'interno'" force_save="1" />
+                            <field name="alias_destination_account" readonly="origin_type == 'interno'" force_save="1" />
+
+
+                            <field name="commission_app_rate" readonly="1" force_save="1" />
+                            <field name="commission_app_amount" readonly="1" force_save="1" />
+                            <field name="transaction_state" />
+                            <field name="previous_month" invisible="1" />
+                        </group>
+
+                        <!-- Interno -->
+                        <group invisible="collection_trans_type != 'movimiento_interno'">
+                            <field name="origin_account" domain="[('customer','=',customer)]" context="{'show_account_name': True}" options="{'no_create': True, 'no_create_edit': True,'no_quick_create': True}" required="collection_trans_type == 'movimiento_interno'" />
+                            <field name="origin_account_cuit" readonly="1" force_save="1" />
+                            <field name="origin_account_cvu" readonly="1" force_save="1" />
+                            <field name="origin_account_cbu" readonly="1" force_save="1" />
+                            <field name="alias_origen" readonly="1" force_save="1" />
+
+                            <separator />
+
+                            <field name="customer_destination" options="{'no_create': True, 'no_create_edit': True, 'no_quick_create': True}" required="collection_trans_type == 'movimiento_interno'" />
+
+                            <field name="destination_account" domain="[('customer','=',customer_destination)]" context="{'show_account_name': True}" options="{'no_create': True, 'no_create_edit': True,'no_quick_create': True}" required="collection_trans_type == 'movimiento_interno'" />
+                            <field name="collection_trans_type_dest" widget="radio" invisible="customer_destination == False" options="{'horizontal': True}" />
+                            <field name="service_dest" required="collection_trans_type == 'movimiento_interno', customer_destination != False" invisible="customer_destination == False" domain="[('services.collection_type', '=', 'service'), ('customer', '=', customer_destination)]" context="{'show_servicio_name': True}" options="{'no_create': True, 'no_create_edit': True,'no_quick_create': True}" />
+                            <field name="commission_dest" invisible="customer_destination == False or collection_trans_type_dest == 'retiro'" />
+                            <field name="cuit_destination_account" readonly="1" force_save="1" />
+                            <field name="cbu_destination_account" readonly="1" force_save="1" />
+                            <field name="cvu_destination_account" readonly="1" force_save="1" />
+                            <field name="alias_destination_account" readonly="1" force_save="1" />
+                            <field name="commission_app_rate" readonly="1" force_save="1" />
+                            <field name="commission_app_amount" readonly="1" force_save="1" />
+                            <field name="transaction_state" />
+                            <field name="previous_month" invisible="1"/>
+
+                        </group>
+
+
+                        <div id="alertWithdrawal" role="alert" class="alert alert-danger" style="height: 40px; width: 90%; margin-bottom: 20px;" invisible="alert_withdrawal != True">
+                            AVISO! Estas retirando mas de lo disponible.
+                        </div>
+                        <field name="description" />
+                        <field name="internal_notes" placeholder="Notas Internas del Cliente..." widget="html" />
+                        <field name="count" invisible="1" />
+                        <field name="alert_withdrawal" invisible="1" />
+                        <field name="origin_account_table" invisible="1" />
+                    </group>
+                </sheet>
+                <footer>
+                    <button string="Confirmar" type="object" name="create_collection_transaction" confirm="Esta seguro de registrar la acreditacion en PagoFlex?" class="btn-primary"/>
+                    <button string="Cancelar" special="cancel" class="btn-secondary"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+</odoo>

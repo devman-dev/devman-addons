@@ -1,18 +1,62 @@
 <odoo>
-    <record id="view_account_payment_form_pagoflex" model="ir.ui.view">
-        <field name="name">account.payment.form.pagoflex.collection.transaction</field>
+
+    <record id="view_account_payment_form_pago_bancos" model="ir.ui.view">
+        <field name="name">account.payment.form.pago.bancos</field>
         <field name="model">account.payment</field>
-        <field name="inherit_id" ref="account.view_account_payment_form"/>
+        <field name="inherit_id" ref="account.view_account_payment_form"/> <!-- vista base -->
+        <field name="priority">50</field>
+        <field name="mode">primary</field>
         <field name="arch" type="xml">
-            <xpath expr="//form/header" position="inside">
+            <xpath expr="//header" position="inside">
                 <button
-                    name="action_pagoflex_mark_sent_and_open"
+                    name="pagoflex_open_collection_transaction_form"
                     string="Marcar como enviado + Registrar acreditación PagoFlex"
                     type="object"
                     class="btn-primary"
-                    modifiers="{'invisible': [['state','!=','posted']]}"
+                    invisible="is_move_sent == True"
                 />
+                <field name="conciliado" invisible="1"/>
             </xpath>
         </field>
     </record>
+
+    <record id="view_account_payment_tree_inherit" model="ir.ui.view">
+        <field name="name">account.payment.tree.inherit</field>
+        <field name="model">account.payment</field>
+        <field name="inherit_id" ref="account.view_account_payment_tree"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='state']" position="after">
+                <field name="conciliado" widget="badge" decoration-info="conciliado == 'conciliado'" decoration-danger="conciliado == 'no_conciliado'"
+                    />
+            </xpath>
+        </field>
+    </record>
+
+
+
+
+    <record id="account.action_account_all_payments" model="ir.actions.act_window">
+        <field name="name">Pagos</field>
+        <field name="res_model">account.payment</field>
+        <field name="view_mode">tree,form,calendar,graph,pivot</field>
+        <field name="mobile_view_mode">kanban</field>
+        <field name="context">{}</field>
+        <field name="domain">[]</field>
+    </record>
+
+    <record id="action_account_all_payments_tree" model="ir.actions.act_window.view">
+        <field name="sequence" eval="1"/>
+        <field name="view_mode">tree</field>
+        <field name="view_id" ref="account.view_account_payment_tree"/>
+        <field name="act_window_id" ref="account.action_account_all_payments"/>
+    </record>
+
+    <record id="action_account_all_payments_form" model="ir.actions.act_window.view">
+        <field name="sequence" eval="2"/>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="pagoflex_collection_transaction.view_account_payment_form_pago_bancos"/>
+        <field name="act_window_id" ref="account.action_account_all_payments"/>
+    </record>
+
+
 </odoo>
