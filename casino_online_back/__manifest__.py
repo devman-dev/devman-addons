@@ -6,14 +6,17 @@
     'author': 'Tu Empresa',
     'depends': ['base', 'product', 'account'],
     'data': [
-        'views/player_views.xml',
+        # 'views/player_views.xml',
         'views/game_views.xml',
         'views/session_views.xml',
         'views/withdrawals_views.xml',
-        'views/player_signup_visibility.xml',
+        # 'views/player_signup_visibility.xml',
         'views/account_move.xml',
+        'views/bet_limits_views.xml',
+        'views/res_company_views.xml',
         'views/menus.xml',
-        'security/ir.model.access.csv'
+        'security/ir.model.access.csv',
+        'data/ir_cron.xml'
         
         #'data/assign_signup_group.xml',
     ],
@@ -22,6 +25,7 @@
             "casino_online_back/static/src/**/*",
         ],
     },
+    "post_init_hook": "create_bet_limits_for_all_partners",
     'installable': True,
     'application': True,
 }

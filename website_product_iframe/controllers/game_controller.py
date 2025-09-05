@@ -42,6 +42,158 @@ class CasinoErrorCodes:
 def error_response(error: CasinoError):
     return Response(json.dumps(error.to_dict()), content_type='application/json', status=error.http_status)
 class GameController(http.Controller):
+    def _raise_casino_error(self, code_tuple_or_code, override_msg=None):
+        """
+        Lanza CasinoError reemplazando el mensaje del tuple si corresponde.
+        Soporta tuplas (code, msg) y (code, msg, http_status) o un code suelto.
+        """
+        ct = code_tuple_or_code
+        if isinstance(ct, tuple):
+            if len(ct) == 3:
+                code, _msg, status = ct
+                raise CasinoError(code, override_msg or _msg, status)
+            elif len(ct) == 2:
+                code, _msg = ct
+                raise CasinoError(code, override_msg or _msg)
+            else:
+                # forma inesperada: pásala tal cual
+                raise CasinoError(*ct)
+        else:
+            # code suelto
+            raise CasinoError(ct, override_msg or "Error")
+        
+    def _update_limits_softcap(self, partner, company, amount):
+        """
+        Imputa 'amount' a los acumulados de casino.game.bet.limits (diario/semanal/mensual)
+        con política soft-cap:
+          - Permite si (para todos los períodos con límite > 0) spent <= limit (antes del update).
+            Esto deja cruzar el límite en esta jugada.
+          - Rechaza si alguno ya estaba spent > limit (antes del update).
+        Devuelve dict:
+          allowed: bool
+          crossed: set de períodos {"daily","weekly","monthly"} que cruzaron/alcan-zaron el límite
+          message_map: período->mensaje (desde res.company)
+        """
+        Bet = request.env['casino.game.bet.limits'].sudo()
+        _logger.info(
+            'SoftCap: partner=%s company=%s amount=%.6f',
+            partner.id, company.id, amount
+        )
+
+        # get-or-create, robusto ante concurrencia (unique(partner_id, company_id))
+        bl = Bet.search([('partner_id', '=', partner.id), ('company_id', '=', company.id)], limit=1)
+        if not bl:
+            try:
+                with request.env.cr.savepoint():
+                    bl = Bet.create({
+                        'partner_id': partner.id,
+                        'company_id': company.id,
+                        'limit_daily': 0.0, 'limit_weekly': 0.0, 'limit_monthly': 0.0,
+                        'spent_daily': 0.0, 'spent_weekly': 0.0, 'spent_monthly': 0.0,
+                    })
+            except IntegrityError:
+                request.env.cr.rollback()
+                bl = Bet.search([('partner_id', '=', partner.id), ('company_id', '=', company.id)], limit=1)
+
+        # Opcional: ventanas rodantes
+        try:
+            bl._maybe_roll_windows()
+        except Exception:
+            pass
+
+        cr = request.env.cr
+        _logger.info('SoftCap: UPDATE id=%s amount=%.6f', bl.id, amount)
+
+        # UPDATE atómico: permite cruzar el límite; bloquea si YA estaba excedido (spent > limit)
+        cr.execute("""
+            UPDATE casino_game_bet_limits bl
+               SET spent_daily   = COALESCE(bl.spent_daily,   0) + %(amt)s,
+                   spent_weekly  = COALESCE(bl.spent_weekly,  0) + %(amt)s,
+                   spent_monthly = COALESCE(bl.spent_monthly, 0) + %(amt)s,
+                   last_reset_daily   = COALESCE(bl.last_reset_daily,   NOW()),
+                   last_reset_weekly  = COALESCE(bl.last_reset_weekly,  NOW()),
+                   last_reset_monthly = COALESCE(bl.last_reset_monthly, NOW())
+             WHERE bl.id = %(id)s
+               AND (COALESCE(bl.limit_daily,  0) = 0 OR COALESCE(bl.spent_daily,   0) <= COALESCE(bl.limit_daily,  0))
+               AND (COALESCE(bl.limit_weekly, 0) = 0 OR COALESCE(bl.spent_weekly,  0) <= COALESCE(bl.limit_weekly, 0))
+               AND (COALESCE(bl.limit_monthly,0) = 0 OR COALESCE(bl.spent_monthly, 0) <= COALESCE(bl.limit_monthly,0))
+         RETURNING
+               COALESCE(bl.spent_daily,   0)             AS new_daily,
+               COALESCE(bl.spent_weekly,  0)             AS new_weekly,
+               COALESCE(bl.spent_monthly, 0)             AS new_monthly,
+               COALESCE(bl.limit_daily,   0)             AS limit_daily,
+               COALESCE(bl.limit_weekly,  0)             AS limit_weekly,
+               COALESCE(bl.limit_monthly, 0)             AS limit_monthly,
+               COALESCE(bl.spent_daily,   0) - %(amt)s   AS prev_daily,
+               COALESCE(bl.spent_weekly,  0) - %(amt)s   AS prev_weekly,
+               COALESCE(bl.spent_monthly, 0) - %(amt)s   AS prev_monthly
+        """, {"id": bl.id, "amt": float(amount)})
+
+        if cr.rowcount == 0:
+            # Ya estaba excedido antes: identificar período bloqueante (todo coalesceado)
+            cr.execute("""
+                SELECT
+                  COALESCE(spent_daily,   0) AS sd, COALESCE(limit_daily,   0) AS ld,
+                  COALESCE(spent_weekly,  0) AS sw, COALESCE(limit_weekly,  0) AS lw,
+                  COALESCE(spent_monthly, 0) AS sm, COALESCE(limit_monthly, 0) AS lm
+                FROM casino_game_bet_limits
+                WHERE id = %s
+            """, (bl.id,))
+            row = cr.fetchone()
+            if not row:
+                return {"allowed": True, "crossed": set(), "message_map": {}}
+
+            sd, ld, sw, lw, sm, lm = row
+
+            def exceeded(spent, limit):
+                return (limit > 0) and (spent > limit)
+
+            if exceeded(sd, ld):
+                msg = bl.company_id.bet_msg_daily or "Has alcanzado tu límite diario."
+                return self._raise_casino_error(
+                    getattr(CasinoErrorCodes, "LIMIT_DAILY_EXCEEDED", CasinoErrorCodes.INSUFFICIENT_FUNDS),
+                    override_msg=msg
+                )
+            if exceeded(sw, lw):
+                msg = bl.company_id.bet_msg_weekly or "Has alcanzado tu límite semanal."
+                return self._raise_casino_error(
+                    getattr(CasinoErrorCodes, "LIMIT_WEEKLY_EXCEEDED", CasinoErrorCodes.INSUFFICIENT_FUNDS),
+                    override_msg=msg
+                )
+            if exceeded(sm, lm):
+                msg = bl.company_id.bet_msg_monthly or "Has alcanzado tu límite mensual."
+                return self._raise_casino_error(
+                    getattr(CasinoErrorCodes, "LIMIT_MONTHLY_EXCEEDED", CasinoErrorCodes.INSUFFICIENT_FUNDS),
+                    override_msg=msg
+                )
+
+            # sin límites > 0 -> permitir
+            return {"allowed": True, "crossed": set(), "message_map": {}}
+
+        # UPDATE aceptado: leer exactamente una vez
+        row = cr.fetchone()
+        if not row:
+            _logger.warning("SoftCap: RETURNING vacío para id=%s (amt=%.6f)", bl.id, amount)
+            return {"allowed": True, "crossed": set(), "message_map": {}}
+
+        new_d, new_w, new_m, ld, lw, lm, prev_d, prev_w, prev_m = row
+        _logger.info('SoftCap: RETURNING id=%s -> %s', bl.id, row)
+
+        crossed = set()
+        if ld > 0 and prev_d <= ld and new_d >= ld:
+            crossed.add("daily")
+        if lw > 0 and prev_w <= lw and new_w >= lw:
+            crossed.add("weekly")
+        if lm > 0 and prev_m <= lm and new_m >= lm:
+            crossed.add("monthly")
+
+        message_map = {
+            "daily":   bl.company_id.bet_msg_daily   or "Has alcanzado tu límite diario.",
+            "weekly":  bl.company_id.bet_msg_weekly  or "Has alcanzado tu límite semanal.",
+            "monthly": bl.company_id.bet_msg_monthly or "Has alcanzado tu límite mensual.",
+        }
+        return {"allowed": True, "crossed": crossed, "message_map": message_map}
+    
     def _prepare_session_vals(self, game_id, round_id, user_id, token, initial_balance, final_balance, amount, state, result, transaction_id, internal_transaction_id, json_data):
         """
         Devuelve los valores para crear una sesión de juego.
@@ -414,13 +566,33 @@ class GameController(http.Controller):
 
             _logger.info('Casino Iframe: api_lose called with session_id: %s, amount: %s, transactionId: %s', session.id, amount, transactionId)
             amount = amount / 100
-            result = self._apply_amount(session.id, product_id=gameId, round_id=roundId, amount=amount, op='lose', token=token, transaction_id=transactionId, internal_transaction_id=internal_transaction_id)
 
+            limit_result = self._update_limits_softcap(user, request.env.company, amount)
+            #_logger.info('Casino Iframe: Resultado de límites: %s', limit_result)
+
+            result = self._apply_amount(
+                session.id,
+                product_id=gameId,
+                round_id=roundId,
+                amount=amount,
+                op='lose',
+                token=token,
+                transaction_id=transactionId,
+                internal_transaction_id=internal_transaction_id
+            )
+            _logger.info('Casino Iframe: Resultado de la aplicación de monto: %s', result)
+            limit_messages = []
+            
+            _logger.info('Casino Iframe: Mensajes de límite: %s', limit_messages)
             response = {
                 "balance": int(result.get("balance", 0.0) * 100),
                 "transactionId": internal_transaction_id,
                 "timestamp": int(time.time() * 1000)
             }
+
+            if limit_messages:
+                response["limit_messages"] = limit_messages
+
             return Response(json.dumps(response), content_type='application/json')
         except CasinoError as ce:
             return error_response(ce)

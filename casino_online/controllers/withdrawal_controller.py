@@ -20,7 +20,7 @@ class CasinoWithdrawalPortal(http.Controller):
     def withdrawal_form(self, **kw):
         user = request.env.user
         partner = user.partner_id
-        _logger.info("PABLO --- /casino/withdrawal/form --- Accediendo al formulario de retiro para el partner: %s", partner.id)
+        _logger.info("/casino/withdrawal/form --- Accediendo al formulario de retiro para el partner: %s", partner.id)
         # buscamos las cuentas bancarias asociadas al partner
         bank_accounts = request.env['casino.game.bank'].sudo().search([
             ('partner_id', '=', partner.id)
@@ -37,10 +37,10 @@ class CasinoWithdrawalPortal(http.Controller):
     
     @http.route(['/mi/retiros'], type='http', auth="user", website=True)
     def portal_withdrawals(self, **kwargs):
-        _logger.info("PABLO --- /mi/retiros --- Accediendo a la página de retiros")
+        _logger.info("/mi/retiros --- Accediendo a la página de retiros")
         user = request.env.user
         partner = user.partner_id
-        _logger.info("PABLO --- /mi/retiros --- Accediendo a la página de retiros para el partner: %s", partner.id)
+        _logger.info("/mi/retiros --- Accediendo a la página de retiros para el partner: %s", partner.id)
         # Bancos asociados al partner
         bank_accounts = request.env["casino.game.bank"].sudo().search([
             ("partner_id", "=", partner.id)

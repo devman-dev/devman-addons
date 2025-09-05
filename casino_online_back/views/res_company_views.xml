@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_company_form_bet_msgs" model="ir.ui.view">
+        <field name="name">res.company.form.bet.msgs</field>
+        <field name="model">res.company</field>
+        <field name="inherit_id" ref="base.view_company_form" />
+        <field name="arch" type="xml">
+            <xpath expr="//sheet/notebook" position="inside">
+                <page string="Apuestas">
+                    <group string="Mensajes por compañía">
+                        <field name="bet_msg_daily" placeholder="Has alcanzado tu límite diario." />
+                        <field name="bet_msg_weekly" placeholder="Has alcanzado tu límite semanal." />
+                        <field name="bet_msg_monthly" placeholder="Has alcanzado tu límite mensual." />
+                    </group>
+                </page>
+            </xpath>
+        </field>
+    </record>
+</odoo>

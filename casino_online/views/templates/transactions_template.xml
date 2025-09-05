@@ -307,7 +307,7 @@
     </template>
 
     <template id="portal_medios_pagos" name="Mis Medios de Pago">
-        <div class="container  ">
+        <div class="container">
             <h2>Configura tus Métodos de Pago</h2>
 
             <form action="/my/medios_pagos" method="post">
@@ -344,9 +344,9 @@
     </template>
 
     <template id="portal_mis_limites" name="Wrapper Mis Límites">
-        <div class="container mt-4">
+        <div class="container">
             <div class="row justify-content-center">
-                <div id="portal_mis_limites_wrapper" class="col-lg-8">
+                <div id="portal_mis_limites_wrapper">
                     <t t-call="casino_online.portal_mis_limites_partial" />
                 </div>
             </div>

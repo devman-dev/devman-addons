@@ -96,6 +96,37 @@ publicWidget.registry.CasinoWithdrawalList = publicWidget.Widget.extend({
         this.maxCount = this.withdrawalData.length;
     },
 
+    _formatAmount(value, opts = {}) {
+        const { decimals = 2, useGrouping = true, locale = (navigator.language || 'es-AR') } = opts;
+
+        // 1) Detectar separadores del locale actual
+        const parts = new Intl.NumberFormat(locale).formatToParts(1234.5);
+        const groupSym = parts.find(p => p.type === 'group')?.value || ',';
+        const decimalSym = parts.find(p => p.type === 'decimal')?.value || '.';
+
+        // 2) Normalizar el string recibido a número JS:
+        //    - remover separadores de miles
+        //    - convertir decimal del locale a '.'
+        let s = (value ?? '').toString().trim();
+        if (s) {
+            const groupRe = new RegExp('\\' + groupSym, 'g');
+            s = s.replace(groupRe, '');
+            if (decimalSym !== '.') {
+                const decRe = new RegExp('\\' + decimalSym, 'g');
+                s = s.replace(decRe, '.');
+            }
+        }
+        let n = Number(s);
+        if (!isFinite(n)) n = 0;
+
+        // 3) Formatear a exactamente N decimales
+        return new Intl.NumberFormat(locale, {
+            minimumFractionDigits: decimals,
+            maximumFractionDigits: decimals,
+            useGrouping,
+        }).format(n);
+    },
+
     _renderWithdrawalTable() {
         const container = this.$el.find(".o_casino_withdrawals_table_body");
         container.empty();
@@ -123,7 +154,7 @@ publicWidget.registry.CasinoWithdrawalList = publicWidget.Widget.extend({
                 <td>${withdrawal.bank_cuil}</td>
                 <td>${withdrawal.description}</td>
                 <td>${withdrawal.bank_cbu}</td>
-                <td>${withdrawal.amount}</td>
+                <td>${this._formatAmount(withdrawal.amount)}</td>
                 <td>${this._formatDate(withdrawal.date)}</td>
                 <td class="text-center">${this._stateBadgeHTML(withdrawal.state)}</td>
             </tr>

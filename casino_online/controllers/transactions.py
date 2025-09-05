@@ -3,7 +3,9 @@ import json
 import logging
 import math
 import urllib
+from psycopg2 import IntegrityError
 from datetime import date, datetime
+from odoo.tools.float_utils import float_round
 
 import werkzeug
 from requests import post
@@ -158,9 +160,29 @@ class CasinoHome(CustomerPortal):
         rows = prepared_desc[offset: offset + page_size]
 
         # Mis Límites
-        daily_limit = partner.daily_deposit_limit
-        weekly_limit = partner.weekly_deposit_limit
-        monthly_limit = partner.monthly_deposit_limit
+        company = partner.company_id
+        Bet = request.env['casino.game.bet.limits'].sudo()
+
+        bl = Bet.search([('partner_id', '=', partner.id),
+                 ('company_id', '=', company.id)], limit=1)
+        _logger.info("Bet limits found: %s con partner %s y company %s", bl, partner.id, company.id)
+        if not bl:
+            _logger.info("Creating default Bet limits for partner %s and company %s", partner.id, company.id)
+            bl = Bet.create({
+                'partner_id': partner.id,
+                'company_id': company.id,
+                'limit_daily': 0.0,
+                'limit_weekly': 0.0,
+                'limit_monthly': 0.0,
+            })
+
+        limit_daily   = bl.limit_daily   or 0.0
+        limit_weekly  = bl.limit_weekly  or 0.0
+        limit_monthly = bl.limit_monthly or 0.0
+        _logger.info("Bet limits for partner %s: daily %s, weekly %s, monthly %s", partner.id, limit_daily, limit_weekly, limit_monthly)
+        # daily_limit = partner.daily_deposit_limit
+        # weekly_limit = partner.weekly_deposit_limit
+        # monthly_limit = partner.monthly_deposit_limit
 
         # Mis Datos Bancarios
         account_number = partner.account_number
@@ -180,9 +202,10 @@ class CasinoHome(CustomerPortal):
             'start_date': start_date_s,
             'end_date': end_date_s,
             'selected_types': selected_types,
-            'daily_limit': daily_limit,
-            'weekly_limit': weekly_limit,
-            'monthly_limit': monthly_limit,
+            'bl': bl,
+            # 'limit_daily': limit_daily,
+            # 'limit_weekly': limit_weekly,
+            # 'limit_monthly': limit_monthly,
 
             'account_number': account_number,
             'bank_name': bank_name,
@@ -311,25 +334,72 @@ class MiPortalController(http.Controller):
     @http.route('/my/mis_limites', type='http', auth='user', methods=['POST'], website=True, csrf=True)
     def portal_mis_limites(self, **post):
         partner = request.env.user.partner_id
-        partner.write({
-            'daily_deposit_limit': post.get('daily_limit'),
-            'weekly_deposit_limit': post.get('weekly_limit'),
-            'monthly_deposit_limit': post.get('monthly_limit'),
-        })
+        company = request.env.company
+        Bet = request.env['casino.game.bet.limits'].sudo()
 
+        _logger.info("Updating bet limits for partner %s (company %s) with data: %s",
+                     partner.id, company.id, post)
+
+        # --- 1) Obtener o crear el registro de límites (concurrencia segura) ---
+        bl = Bet.search([('partner_id', '=', partner.id),
+                         ('company_id', '=', company.id)], limit=1)
+        
+        if not bl:
+            try:
+                with request.env.cr.savepoint():
+                    bl = Bet.create({
+                        'partner_id': partner.id,
+                        'company_id': company.id,
+                        'limit_daily': 0.0,
+                        'limit_weekly': 0.0,
+                        'limit_monthly': 0.0,
+                    })
+            except IntegrityError:
+                # Otra transacción lo creó al mismo tiempo -> recuperar
+                request.env.cr.rollback()
+                bl = Bet.search([('partner_id', '=', partner.id),
+                                 ('company_id', '=', company.id)], limit=1)
+
+        # Seguridad adicional: que el registro corresponda al partner actual
+        if not bl or bl.partner_id.id != partner.id:
+            _logger.warning("bet.limits not found or not owned by partner %s", partner.id)
+            return request.redirect('/my/home#mis_limites_form')
+        
+        def _num(key):
+            """Convierte a float, clamp >= 0 y redondea según la moneda."""
+            raw = post.get(key)
+            try:
+                x = float(raw or 0.0)
+            except Exception:
+                x = 0.0
+            if x < 0:
+                x = 0.0
+            prec = (bl.currency_id.decimal_places or 2) if bl.currency_id else 2
+            return float_round(x, precision_digits=prec)
+
+        vals = {
+            'limit_daily': _num('limit_daily'),
+            'limit_weekly': _num('limit_weekly'),
+            'limit_monthly': _num('limit_monthly'),
+        }
+
+        # --- 3) Guardar ---
+        bl.write(vals)
+
+        # (Opcional) mensaje flash -> podrías usar web.assets/JS para mostrar toast con ?saved=1
         return request.redirect('/my/home#mis_limites_form')
-
+ 
     @http.route('/my/mis_limites2', type='http', auth='user', website=True, methods=['GET', 'POST'], csrf=True)
     def portal_mis_limites2(self, **post):
         partner = request.env.user.partner_id.sudo()
         if request.httprequest.method == 'POST':
             vals = {}
-            if post.get('daily_limit'):
-                vals['daily_deposit_limit'] = float(post.get('daily_limit'))
-            if post.get('weekly_limit'):
-                vals['weekly_deposit_limit'] = float(post.get('weekly_limit'))
-            if post.get('monthly_limit'):
-                vals['monthly_deposit_limit'] = float(post.get('monthly_limit'))
+            if post.get('limit_daily'):
+                vals['daily_deposit_limit'] = float(post.get('limit_daily'))
+            if post.get('limit_weekly'):
+                vals['weekly_deposit_limit'] = float(post.get('limit_weekly'))
+            if post.get('limit_monthly'):
+                vals['monthly_deposit_limit'] = float(post.get('limit_monthly'))
             partner.write(vals)
             _logger.info(f"POST Updated limits for partner {partner.id}: {vals}")
             return request.redirect('/my/mis_limites')
@@ -337,9 +407,9 @@ class MiPortalController(http.Controller):
         _logger.info(f"GET Render limits for partner {partner.id} \n%s\n%s\n%s", partner.daily_deposit_limit, partner.weekly_deposit_limit, partner.monthly_deposit_limit)
         return request.redirect('/my/movimientos')
         return request.render('casino_online.portal_mis_limites',  {
-            'daily_limit': partner.daily_deposit_limit,
-            'weekly_limit': partner.weekly_deposit_limit,
-            'monthly_limit': partner.monthly_deposit_limit,
+            'limit_daily': partner.daily_deposit_limit,
+            'limit_weekly': partner.weekly_deposit_limit,
+            'limit_monthly': partner.monthly_deposit_limit,
         })
         # return request.redirect('/my/movimientos' + (f'?{qs}' if qs else ''))   
 
