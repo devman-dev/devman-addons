@@ -82,7 +82,8 @@ publicWidget.registry.CasinoWithdrawalForm = publicWidget.Widget.extend({
                     description,
                     amount,
                     state: "pending",
-                    partner_id: this.partnerId
+                    partner_id: this.partnerId,
+                    bank_id: method === "transfer" ? parseInt(bankId) : null,
                 }]);
                 if (method === "transfer") vals.bank_id = parseInt(bankId);
 
