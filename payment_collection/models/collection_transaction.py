@@ -125,12 +125,20 @@ class CollectionTransaction(models.Model):
 
     #TIPO DE CAMBIO
     change_amount = fields.Float(string='')
-    change_currency_id = fields.Many2one('res.currency')
+    exchange_rate = fields.Float(string='')
+    manual_rate = fields.Boolean(string='')
+    change_currency_id = fields.Many2one('res.currency', default=lambda self: self.env.ref("base.USD"))
 
     #CUENTA PARA RETIRO POR PAGO DE CUENTA
-    retirement_account = fields.Many2one('collection.services.commission', string='Retiro por pago de cuenta')
+    retirement_account = fields.Many2one('collection.services.commission', string='')
 
     check_compra_venta = fields.Boolean('')
+
+    retirement_account_client = fields.Many2one('collection.services.commission', string='')
+    retirement_account_cuit = fields.Char(string='CUIT', tracking=True, default=False)
+    retirement_account_cvu = fields.Char(string='CVU', tracking=True)
+    retirement_account_cbu = fields.Char(string='CBU', tracking=True)
+    retirement_alias = fields.Char(string='Alias')
 
 
     
@@ -678,17 +686,22 @@ class CollectionTransaction(models.Model):
                 if moneda.name == 'BRL':
                     vals_list.update({'currency_real': vals_list['amount']})
 
+
         res = super(CollectionTransaction, self).create(vals_list)
 
-        #MOVIMIENTO INTERNO
+        if res.compra_venta:
+        #     res.collection_trans_type = 'retiro'
+        #     res.amount = res.amount * -1
+            res.origin_account = res.retirement_account_client.id
+            res.origin_name = res.retirement_account_client.name_account
 
-        if vals_list['collection_trans_type'] == 'movimiento_interno' and not self.env.context.get('ignore_acr', False):
+        # MOVIMIENTOS DE COMPRA VENTA
+        if 'compra_venta' in vals_list:
             if vals_list['compra_venta'] == True:
-
-                #CREAR MOVIMIENTO DE ACREDITACION
+                # CREAR MOVIMIENTO DE ACREDITACION
 
                 dict_dest = {
-                    'transaction_name': self.env['ir.sequence'].next_by_code('collection.transaction') or ('New'),
+                    'transaction_name': vals_list['transaction_name'],
                     'customer': vals_list['customer_destination'],
                     'commission': 0,
                     'commission_app_rate': False,
@@ -699,20 +712,20 @@ class CollectionTransaction(models.Model):
                     'collection_trans_type': 'movimiento_recaudacion',
                     'currency_id': vals_list['currency_id'],
                     'check_compra_venta': True,
-                    'destination_account':vals_list['destination_account'],
+                    'destination_account': vals_list['destination_account'],
                 }
                 self.env['collection.transaction'].sudo().with_context(ignore_acr=True).create(dict_dest)
 
-
                 # ACREDITACION EN CUENTA
                 dict_dest_2 = {
-                    'transaction_name': self.env['ir.sequence'].next_by_code('collection.transaction') or ('New'),
+                    'transaction_name': vals_list['transaction_name'],
                     'customer': vals_list['customer'],
                     'commission': 0,
                     'commission_app_rate': False,
                     'commission_app_amount': False,
                     'date': vals_list['date'],
-                    'amount': vals_list['change_amount'] if vals_list['change_amount'] > 0 else vals_list['change_amount'] * -1,
+                    'amount': vals_list['change_amount'] if vals_list['change_amount'] > 0 else vals_list[
+                                                                                                    'change_amount'] * -1,
                     'count': 0,
                     'collection_trans_type': 'movimiento_recaudacion',
                     'currency_id': vals_list['change_currency_id'],
@@ -721,15 +734,16 @@ class CollectionTransaction(models.Model):
                 }
                 self.env['collection.transaction'].sudo().with_context(ignore_acr=True).create(dict_dest_2)
 
-                #MOV RETIRO
+                # MOV RETIRO
 
                 dict_dest_ret = {
-                    'transaction_name': self.env['ir.sequence'].next_by_code('collection.transaction') or ('New'),
+                    'transaction_name': vals_list['transaction_name'],
                     'customer': vals_list['customer_destination'],
                     # 'service': vals_list['service_dest'],
                     'commission': 0,
                     'date': vals_list['date'],
-                    'amount': vals_list['change_amount'] * -1 if vals_list['change_amount'] > 0 else vals_list['change_amount'],
+                    'amount': vals_list['change_amount'] * -1 if vals_list['change_amount'] > 0 else vals_list[
+                        'change_amount'],
                     'count': 0,
                     'collection_trans_type': 'retiro',
                     'currency_id': vals_list['change_currency_id'],
@@ -738,40 +752,44 @@ class CollectionTransaction(models.Model):
                 }
                 self.env['collection.transaction'].sudo().with_context(ignore_acr=True).create(dict_dest_ret)
 
-            else:
-                if vals_list['collection_trans_type_dest'] == 'movimiento_recaudacion':
-                    service_dest = self.env['collection.services.commission'].sudo().search([('id', '=', vals_list['service_dest'])])
-                    commission_app_amount = (vals_list['amount'] * service_dest.commission_app_rate) / 100
-                    dict_dest = {
-                        'transaction_name': self.env['ir.sequence'].next_by_code('collection.transaction') or ('New'),
-                        'customer': vals_list['customer_destination'],
-                        'service': vals_list['service_dest'],
-                        'commission': vals_list['commission_dest'],
-                        'commission_app_rate': service_dest.commission_app_rate,
-                        'commission_app_amount': commission_app_amount,
-                        'date': vals_list['date'],
-                        'amount': vals_list['amount'] if vals_list['amount'] > 0 else vals_list['amount'] * -1,
-                        'count': 0,
-                        'collection_trans_type': 'movimiento_recaudacion',
-                        'currency_id': vals_list['currency_id'],
-                    }
-                    self.env['collection.transaction'].sudo().with_context(ignore_acr=True).create(dict_dest)
+        # MOVIMIENTO INTERNO
 
-                elif vals_list['collection_trans_type_dest'] == 'retiro':
-                    dict_dest = {
-                        'transaction_name': self.env['ir.sequence'].next_by_code('collection.transaction') or ('New'),
-                        'customer': vals_list['customer_destination'],
-                        'service': vals_list['service_dest'],
-                        'commission': vals_list['commission_dest'],
-                        'date': vals_list['date'],
-                        'amount': vals_list['amount'] * -1 if vals_list['amount'] > 0 else vals_list['amount'],
-                        'count': 0,
-                        'collection_trans_type': 'retiro',
-                        'currency_id': vals_list['currency_id'],
-                    }
-                    self.env['collection.transaction'].sudo().with_context(ignore_acr=True).create(dict_dest)
-                else:
-                    pass
+        if vals_list['collection_trans_type'] == 'movimiento_interno' and not self.env.context.get('ignore_acr', False):
+
+            if vals_list['collection_trans_type_dest'] == 'movimiento_recaudacion':
+                service_dest = self.env['collection.services.commission'].sudo().search([('id', '=', vals_list['service_dest'])])
+                commission_app_amount = (vals_list['amount'] * service_dest.commission_app_rate) / 100
+                dict_dest = {
+                    'transaction_name': self.env['ir.sequence'].next_by_code('collection.transaction') or ('New'),
+                    'customer': vals_list['customer_destination'],
+                    'service': vals_list['service_dest'],
+                    'commission': vals_list['commission_dest'],
+                    'commission_app_rate': service_dest.commission_app_rate,
+                    'commission_app_amount': commission_app_amount,
+                    'date': vals_list['date'],
+                    'amount': vals_list['amount'] if vals_list['amount'] > 0 else vals_list['amount'] * -1,
+                    'count': 0,
+                    'collection_trans_type': 'movimiento_recaudacion',
+                    'currency_id': vals_list['currency_id'],
+                }
+                self.env['collection.transaction'].sudo().with_context(ignore_acr=True).create(dict_dest)
+
+            elif vals_list['collection_trans_type_dest'] == 'retiro':
+                dict_dest = {
+                    'transaction_name': self.env['ir.sequence'].next_by_code('collection.transaction') or ('New'),
+                    'customer': vals_list['customer_destination'],
+                    'service': vals_list['service_dest'],
+                    'commission': vals_list['commission_dest'],
+                    'date': vals_list['date'],
+                    'amount': vals_list['amount'] * -1 if vals_list['amount'] > 0 else vals_list['amount'],
+                    'count': 0,
+                    'collection_trans_type': 'retiro',
+                    'currency_id': vals_list['currency_id'],
+                }
+                self.env['collection.transaction'].sudo().with_context(ignore_acr=True).create(dict_dest)
+            else:
+                pass
+
         message = ('Se ha creado la siguiente transaccion: %s.') % (str(vals_list['transaction_name']))
         res.message_post(body=message)
 
@@ -1076,11 +1094,11 @@ class CollectionTransaction(models.Model):
                         if rec.currency_id.name == 'USD':
                             comision_por_usd = rec.currency_id.inverse_rate * (rec.commision_1 / 100)
 
-                            commission_amount = comision_por_usd * rec.amount
+                            commission_amount = comision_por_usd * rec.amount * -1
                         else:
                             comision_por_usd = rec.change_currency_id.inverse_rate * (rec.commision_1 / 100)
 
-                            commission_amount = comision_por_usd * rec.change_amount
+                            commission_amount = comision_por_usd * rec.change_amount * -1
 
                     if commission_amount > 0 and rec.count == 0:
                         coll_trans_commi_dict_1 = {
@@ -1105,13 +1123,24 @@ class CollectionTransaction(models.Model):
                         commission_amount = rec.commision_2
                     else:
                         if rec.currency_id.name == 'USD':
-                            comision_por_usd = rec.currency_id.inverse_rate * (rec.commision_2 / 100)
+                            if rec.manual_rate:
+                                comision_por_usd = rec.exchange_rate * (rec.commision_2 / 100)
 
-                            commission_amount = comision_por_usd * rec.amount
+                                commission_amount = comision_por_usd * (rec.amount * -1)
+                            else:
+                                comision_por_usd = rec.currency_id.inverse_rate * (rec.commision_2 / 100)
+
+                                commission_amount = comision_por_usd * (rec.amount * -1)
+
                         else:
-                            comision_por_usd = rec.change_currency_id.inverse_rate * (rec.commision_2 / 100)
+                            if rec.manual_rate:
+                                comision_por_usd = rec.exchange_rate * (rec.commision_2 / 100)
 
-                            commission_amount = comision_por_usd * rec.change_amount
+                                commission_amount = comision_por_usd * (rec.change_amount * -1)
+                            else:
+                                comision_por_usd = rec.change_currency_id.inverse_rate * (rec.commision_2 / 100)
+
+                                commission_amount = comision_por_usd * (rec.change_amount * -1)
 
                     if commission_amount > 0 and rec.count == 0:
                         coll_trans_commi_dict_2 = {
@@ -1488,14 +1517,51 @@ class CollectionTransaction(models.Model):
                         },
         }
 
-    @api.onchange('amount', 'currency_id','change_currency_id')
+    @api.onchange('amount', 'currency_id','change_currency_id','exchange_rate')
     def calculate_exchange_rate(self):
         for rec in self:
             rec.change_amount = 0
             if rec.currency_id.name == 'USD':
-                rec.change_amount = rec.amount * rec.currency_id.inverse_rate
+                if rec.manual_rate:
+                    # rec.exchange_rate = rec.currency_id.inverse_rate
+                    rec.change_amount = rec.amount * rec.exchange_rate
+                else:
+                    rec.exchange_rate = rec.currency_id.inverse_rate
+                    rec.change_amount = rec.amount * rec.currency_id.inverse_rate
+
             if rec.currency_id.name == 'ARS':
                 if rec.change_currency_id:
-                    rec.change_amount = rec.amount / rec.change_currency_id.inverse_rate
-            if rec.currency_id.id == rec.change_currency_id.id:
-                raise ValidationError('El tipo de cambio debe ser distinto a la moneda original')
+                    if rec.manual_rate:
+                        # rec.exchange_rate = rec.change_currency_id.inverse_rate
+                        if rec.exchange_rate > 0:
+                            rec.change_amount = rec.amount / rec.exchange_rate
+                        else:
+                            raise ValidationError('El tipo de cambio debe ser mayor a 0.')
+                    else:
+                        rec.exchange_rate = rec.change_currency_id.inverse_rate
+                        rec.change_amount = rec.amount / rec.change_currency_id.inverse_rate
+
+
+    @api.constrains('currency_id')
+    def check_curency_id_compra_venta(self):
+        for rec in self:
+            if rec.compra_venta:
+                if rec.currency_id.id == rec.change_currency_id.id:
+                    raise ValidationError('El tipo de moneda compradora debe ser distinto a la moneda original')
+
+
+    @api.onchange('retirement_account_client')
+    def get_retirement_account_data(self):
+        print('hola hola')
+        conciliation_wiz = self.env.context.get('conciliation_wiz', False)
+        if conciliation_wiz:
+            return
+        for rec in self:
+            self.sudo().write(
+                {
+                    'retirement_account_cuit': rec.retirement_account_client.cuit,
+                    'retirement_account_cbu': rec.retirement_account_client.cbu,
+                    'retirement_account_cvu': rec.retirement_account_client.cvu,
+                    'retirement_alias': rec.retirement_account_client.alias,
+                }
+            )

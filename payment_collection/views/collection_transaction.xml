@@ -60,13 +60,13 @@
                     <group>
                         <group>
                             <field name="collection_trans_type" widget="radio" options="{'horizontal': True}" />
-                            <field name="compra_venta" string="Compra/Venta de Divisas" invisible="collection_trans_type != 'movimiento_interno'"/>
+                            <field name="compra_venta" string="Compra/Venta de Divisas" invisible="collection_trans_type != 'retiro'"/>
                             <field name="check_compra_venta" invisible="1"/>
                             <field name="customer" options="{'no_create': True, 'no_create_edit': True,'no_quick_create': True}" />
                             <!-- <field name="account_bank"/> -->
                             <field name="service" required="compra_venta == False or check_compra_venta != True" invisible="compra_venta == True" domain="[('services.collection_type', '=', 'service'), ('customer', '=', customer)]" context="{'show_servicio_name': True}" options="{'no_create': True, 'no_create_edit': True,'no_quick_create': True}" />
                             <field name="categories" invisible="compra_venta == True" widget="many2many_tags"/>
-                            <field name="commission" invisible="collection_trans_type == 'movimiento_interno'" />
+                            <field name="commission" invisible="collection_trans_type == 'movimiento_interno' or compra_venta == True"/>
 
                             <!-- COMISIONISTAS COMPRA VENTA-->
 
@@ -96,20 +96,29 @@
                             <label for="amount">Monto</label>
                             <div style="display: flex; gap: 8px; align-items: center;">
                                 <field name="amount" nolabel="1"/>
-                                <field name="currency_id" nolabel="1"/>
+                                <field name="currency_id" nolabel="1" required="1"/>
                             </div>
 
                             <!-- TIPO DE CAMBIO -->
-
-                            <label for="change_amount" string="Tipo de cambio" invisible="compra_venta == False"/>
+                            <label for="exchange_rate" string="Tipo de cambio" invisible="compra_venta == False"/>
                             <div style="display: flex; gap: 8px; align-items: center;" invisible="compra_venta == False">
-                                <field name="change_amount" nolabel="1"/>
-                                <field name="change_currency_id" nolabel="1"/>
+                                <field name="exchange_rate" string="Tipo de cambio"/>
+                                <strong><label for="manual_rate" string="Manual"/></strong>
+                                <field name="manual_rate" string="Manual"/>
+                            </div>
+
+
+                            <label for="change_amount" string="Total en moneda compradora" invisible="compra_venta == False"/>
+                            <div style="display: flex; gap: 8px; align-items: center;" invisible="compra_venta == False">
+                                <field name="change_amount" nolabel="1" required="compra_venta == True"/>
+                                <field name="change_currency_id" nolabel="1" required="compra_venta == True"/>
                             </div>
                             <field name="amount" invisible="1"/>
                             <field name="currency_id" invisible="1"/>
                             <field name="change_amount" invisible="1"/>
                             <field name="change_currency_id" invisible="1"/>
+                            <field name="exchange_rate" invisible="1"/>
+                            <field name="manual_rate" invisible="1"/>
 
 
                             <label for="payment_id">Cheque</label>
@@ -129,11 +138,13 @@
                             <field name="concilied_id" widget="many2one" readonly="1" force_save="1" domain="[('is_concilied','=',False)]" />
                             <field name="previous_month" invisible="1"/>
                             <field name="account_move_id"/>
+
+                            <field name="retirement_account_client" invisible="1"/>
                         </group>
 
 
                         <!-- Acreditacion -->
-                        <group invisible="collection_trans_type not in ['movimiento_recaudacion','compra_venta']">
+                        <group invisible="collection_trans_type not in ['movimiento_recaudacion']">
                             <field name="destination_account" domain="[('customer','=', customer)]" options="{'no_create': True, 'no_create_edit': True,'no_quick_create': True}" context="{'show_account_name': True}" />
                             <field name="cuit_destination_account" readonly="1" force_save="1" />
                             <field name="cbu_destination_account" readonly="1" force_save="1" />
@@ -160,7 +171,8 @@
                         </group>
 
                         <!--Retiro -->
-                        <group invisible="collection_trans_type != 'retiro'">
+
+                        <group invisible="compra_venta == True">
 
                             <field name="origin_account" domain="[('id','in',origin_account_table)]" context="{'show_account_name': True}" options="{'no_create': True, 'no_create_edit': True, 'no_quick_create': True}" />
                             <field name="origin_account_cuit" readonly="1" force_save="1" />
@@ -189,20 +201,29 @@
                             <field name="previous_month" invisible="1" />
                         </group>
 
-                        <!-- Interno -->
-                        <group invisible="collection_trans_type != 'movimiento_interno'">
-                            <field name="origin_account" domain="[('customer','=',customer)]" context="{'show_account_name': True}" options="{'no_create': True, 'no_create_edit': True,'no_quick_create': True}" required="collection_trans_type == 'movimiento_interno'" />
+                        <!-- RETIRO CON COMPRA_VENTA -->
+
+                        <group invisible="compra_venta == False">
+                            <field name="origin_account" domain="[('customer','=',customer)]" context="{'show_account_name': True}" options="{'no_create': True, 'no_create_edit': True,'no_quick_create': True}" required="collection_trans_type == 'movimiento_interno'" invisible="compra_venta == True"/>
+                            <field name="origin_account" domain="[('customer','=',customer)]" context="{'show_account_name': True}" options="{'no_create': True, 'no_create_edit': True,'no_quick_create': True}" required="collection_trans_type == 'movimiento_interno'" invisible="compra_venta == False" string="Cuenta cliente receptora del pago de divisa"/>
                             <field name="origin_account_cuit" readonly="1" force_save="1" />
                             <field name="origin_account_cvu" readonly="1" force_save="1" />
                             <field name="origin_account_cbu" readonly="1" force_save="1" />
                             <field name="alias_origen" readonly="1" force_save="1" />
 
-                            <separator />
+                            <field name="retirement_account_client" domain="[('customer','=',customer)]" context="{'show_account_name': True}" options="{'no_create': True, 'no_create_edit': True,'no_quick_create': True}" required="collection_trans_type == 'movimiento_interno'" invisible="compra_venta == False" string="Cuenta cliente de retiro de divisa vendida"/>
+                            <field name="retirement_account_cuit" readonly="1" force_save="1" invisible="compra_venta == False"/>
+                            <field name="retirement_account_cvu" readonly="1" force_save="1" invisible="compra_venta == False"/>
+                            <field name="retirement_account_cbu" readonly="1" force_save="1" invisible="compra_venta == False"/>
+                            <field name="retirement_alias" readonly="1" force_save="1" invisible="compra_venta == False"/>
 
-                            <field name="customer_destination" options="{'no_create': True, 'no_create_edit': True, 'no_quick_create': True}" required="collection_trans_type == 'movimiento_interno'" />
+                            <separator class="small-separator"/>
+
+                            <field name="customer_destination" options="{'no_create': True, 'no_create_edit': True, 'no_quick_create': True}" required="collection_trans_type == 'movimiento_interno'" invisible="compra_venta == True"/>
+                            <field name="customer_destination" options="{'no_create': True, 'no_create_edit': True, 'no_quick_create': True}" required="collection_trans_type == 'movimiento_interno'" invisible="compra_venta == False" string="Cliente Pagador"/>
                             <field name="destination_account" domain="[('customer','=',customer_destination)]" context="{'show_account_name': True}" options="{'no_create': True, 'no_create_edit': True,'no_quick_create': True}" required="collection_trans_type == 'movimiento_interno'" invisible="compra_venta == True"/>
-                            <field name="destination_account" domain="[('customer','=',customer_destination)]" context="{'show_account_name': True}" options="{'no_create': True, 'no_create_edit': True,'no_quick_create': True}" required="collection_trans_type == 'movimiento_interno'" invisible="compra_venta == False" string="Acreditación en cuenta destino"/>
-                            <field name="retirement_account" domain="[('customer','=',customer_destination)]" context="{'show_account_name': True}" options="{'no_create': True, 'no_create_edit': True,'no_quick_create': True}" required="compra_venta == True" invisible="compra_venta == False"/>
+                            <field name="destination_account" domain="[('customer','=',customer_destination)]" context="{'show_account_name': True}" options="{'no_create': True, 'no_create_edit': True,'no_quick_create': True}" required="collection_trans_type == 'movimiento_interno'" invisible="compra_venta == False" string="Cuenta Recaudadora"/>
+                            <field name="retirement_account" domain="[('customer','=',customer_destination)]" context="{'show_account_name': True}" options="{'no_create': True, 'no_create_edit': True,'no_quick_create': True}" required="compra_venta == True" invisible="compra_venta == False" string="Cuenta Pagadora"/>
                             <field name="collection_trans_type_dest" widget="radio" invisible="customer_destination == False" options="{'horizontal': True}" />
                             <field name="service_dest" required="collection_trans_type == 'movimiento_interno' and customer_destination != False and compra_venta == False" invisible="customer_destination == False" domain="[('services.collection_type', '=', 'service'), ('customer', '=', customer_destination)]" context="{'show_servicio_name': True}" options="{'no_create': True, 'no_create_edit': True,'no_quick_create': True}" />
                             <field name="commission_dest" invisible="customer_destination == False or collection_trans_type_dest == 'retiro'" />
@@ -217,37 +238,34 @@
 
                         </group>
 
-                        <!-- Cheque -->
-                        <!--                        <group invisible="collection_trans_type != 'cheque'">-->
-                        <!--                            <field name="destination_account" domain="[('customer','=', customer)]" options="{'no_create': True, 'no_create_edit': True,'no_quick_create': True}" context="{'show_account_name': True}" />-->
-                        <!--                            <field name="cuit_destination_account" readonly="1" force_save="1" />-->
-                        <!--                            <field name="cbu_destination_account" readonly="1" force_save="1" />-->
-                        <!--                            <field name="cvu_destination_account" readonly="1" force_save="1" />-->
-                        <!--                            <field name="alias_destination_account" readonly="1" force_save="1" />-->
-
-                        <!--                            <field name="check_number"/>-->
-                        <!--                            <field name="check_date"/>-->
-                        <!--                            <field name="check_deposit_date"/>-->
-                        <!--                            <field name="check_endorsement"/>-->
-                        <!--                            <field name="check_bank"/>-->
-                        <!--                            <separator />-->
-
-                        <!--                            <field name="origin_type" help="Seleccione Interno si el cliente pertenece a PagoFlex" widget="radio" options="{'horizontal': True}" />-->
-
-                        <!--                            <field name="customer_origin" options="{'no_create': True, 'no_create_edit': True,'no_quick_create': True}" invisible="origin_type == 'externo'" />-->
-                        <!--                            <field name="origin_account" domain="[('customer','=',customer_origin)]" context="{'show_account_name': True}" options="{'no_create': True, 'no_create_edit': True,'no_quick_create': True}" invisible="origin_type == 'externo'" />-->
-                        <!--                            <field name="origen_name_account_extern" invisible="origin_type == 'interno'" />-->
-                        <!--                            <field name="origin_account_cuit" readonly="origin_type == 'interno'" />-->
-                        <!--                            <field name="origin_account_cvu" readonly="origin_type == 'interno'" force_save="1" />-->
-                        <!--                            <field name="origin_account_cbu" readonly="origin_type == 'interno'" force_save="1" />-->
-                        <!--                            <field name="alias_origen" readonly="origin_type == 'interno'" force_save="1" />-->
 
 
-                        <!--                            <field name="commission_app_rate" readonly="1" force_save="1" />-->
-                        <!--                            <field name="commission_app_amount" readonly="1" force_save="1" />-->
-                        <!--                            <field name="transaction_state" />-->
-                        <!--                            <field name="previous_month" invisible="1" />-->
-                        <!--                        </group>-->
+                        <!-- Interno -->
+
+                        <group invisible="collection_trans_type not in ['movimiento_interno']">
+                            <field name="origin_account" domain="[('customer','=',customer)]" context="{'show_account_name': True}" options="{'no_create': True, 'no_create_edit': True,'no_quick_create': True}" required="collection_trans_type == 'movimiento_interno'"/>
+                            <field name="origin_account_cuit" readonly="1" force_save="1" />
+                            <field name="origin_account_cvu" readonly="1" force_save="1" />
+                            <field name="origin_account_cbu" readonly="1" force_save="1" />
+                            <field name="alias_origen" readonly="1" force_save="1" />
+
+                            <separator />
+
+                            <field name="customer_destination" options="{'no_create': True, 'no_create_edit': True, 'no_quick_create': True}" required="collection_trans_type == 'movimiento_interno'"/>
+                            <field name="destination_account" domain="[('customer','=',customer_destination)]" context="{'show_account_name': True}" options="{'no_create': True, 'no_create_edit': True,'no_quick_create': True}" required="collection_trans_type == 'movimiento_interno'"/>
+                            <field name="collection_trans_type_dest" widget="radio" invisible="customer_destination == False" options="{'horizontal': True}" />
+                            <field name="service_dest" required="collection_trans_type == 'movimiento_interno' and customer_destination != False and compra_venta == False" invisible="customer_destination == False" domain="[('services.collection_type', '=', 'service'), ('customer', '=', customer_destination)]" context="{'show_servicio_name': True}" options="{'no_create': True, 'no_create_edit': True,'no_quick_create': True}" />
+                            <field name="commission_dest" invisible="customer_destination == False or collection_trans_type_dest == 'retiro'" />
+                            <field name="cuit_destination_account" readonly="1" force_save="1" />
+                            <field name="cbu_destination_account" readonly="1" force_save="1" />
+                            <field name="cvu_destination_account" readonly="1" force_save="1" />
+                            <field name="alias_destination_account" readonly="1" force_save="1" />
+                            <field name="commission_app_rate" readonly="1" force_save="1" />
+                            <field name="commission_app_amount" readonly="1" force_save="1" />
+                            <field name="transaction_state" />
+                            <field name="previous_month" invisible="1"/>
+
+                        </group>
 
                         <div id="alertWithdrawal" role="alert" class="alert alert-danger" style="height: 40px; width: 90%; margin-bottom: 20px;" invisible="alert_withdrawal != True">
                             AVISO! Estas retirando mas de lo disponible.
@@ -257,6 +275,7 @@
                         <field name="count" invisible="1" />
                         <field name="alert_withdrawal" invisible="1" />
                         <field name="origin_account_table" invisible="1" />
+
                     </group>
                 </sheet>
                 <!-- Chatter -->
