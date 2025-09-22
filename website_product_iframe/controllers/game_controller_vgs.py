@@ -454,6 +454,7 @@ class GameControllerVGS(http.Controller):
             _xml_tag("HASH", params.get("hash")),
         ])
 
+        product_id = request.env['product.product'].sudo().search([('game_id', '=', game_id)], limit=1).id
         partner = request.env['res.partner'].sudo().search([('id', '=', user_ref)], limit=1)
         _logger.info(">>>> ChangeBalance: Found partner: %s", partner)
 
@@ -491,9 +492,9 @@ class GameControllerVGS(http.Controller):
             if amount > balance:
                 return _xml_envelope(req_xml, _xml_tag("RESULT", "FAILED") + _xml_tag("CODE", "300"))
 
-            result = self._apply_amount(session.id, product_id = game_id, round_id = round_id, amount=amount, op="lose" if trntype == "BET" else "tip", token=token, transaction_id=casino_tx, internal_transaction_id=internal_transaction_id)
+            result = self._apply_amount(session.id, product_id, round_id = round_id, amount=amount, op="lose" if trntype == "BET" else "tip", token=token, transaction_id=casino_tx, internal_transaction_id=internal_transaction_id)
         elif trntype in ("WIN", "CANCELED_BET"):
-            result = self._apply_amount(session.id, product_id = game_id, round_id = round_id, amount=amount, op='win', token=token, transaction_id=casino_tx, internal_transaction_id=internal_transaction_id)
+            result = self._apply_amount(session.id, product_id, round_id = round_id, amount=amount, op='win', token=token, transaction_id=casino_tx, internal_transaction_id=internal_transaction_id)
         else:
             # Tipo desconocido: failed genérico 301
             return _xml_envelope(req_xml, _xml_tag("RESULT", "FAILED") + _xml_tag("CODE", "301"))
