@@ -464,7 +464,8 @@ class GameControllerVGS(http.Controller):
         # Moneda desde la wallet existente del partner; si necesitas multicurrency avanzada, amplía aquí
         # (Authenticate ya fija la currency del jugador en VGS según primera activación)
         # Para EC usamos la que tenga su wallet local.
-        user = request.env['res.users'].sudo().browse(int(user_ref))
+        # user = request.env['res.users'].sudo().browse(int(user_ref))
+        user = request.env['res.users'].sudo().search([('partner_id', '=', partner.id)], limit=1)
         if user is not None:
             token = user.partner_id.token
 
@@ -534,7 +535,8 @@ class GameControllerVGS(http.Controller):
             # 302: unknown transaction id (GetStatus) según spec
             return _xml_envelope(req_xml, _xml_tag("RESULT", "FAILED") + _xml_tag("CODE", "302"))
         
-        user = request.env['res.users'].sudo().browse(int(user_ref))
+        # user = request.env['res.users'].sudo().browse(int(user_ref))
+        user = request.env['res.users'].sudo().search([('partner_id', '=', partner.id)], limit=1)
         _logger.info(">>>> RequestStatus: Found user: %s", user)
         if user is not None:
             token = user.partner_id.token
