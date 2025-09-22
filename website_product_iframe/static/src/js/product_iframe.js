@@ -125,7 +125,7 @@ publicWidget.registry.ProductIframe = publicWidget.Widget.extend({
         console.log('Datos del producto:', { productId, agencyId, userId, lang, iframeUrl });
         if (!iframeUrl) return; // sin iframe_url -> navegación normal
         const baseIframeUrl = a.dataset.productUrl;
-        if (!baseIframeUrl || !agencyId) return; // sin datos -> navegación normal
+        // if (!baseIframeUrl || !agencyId) return; // sin datos -> navegación normal CHEQUEAR operatorID
 
         ev.preventDefault();
         ev.stopPropagation();
@@ -138,6 +138,7 @@ publicWidget.registry.ProductIframe = publicWidget.Widget.extend({
         const url = new URL(baseIframeUrl, window.location.origin);
         url.searchParams.set('token', res.token);
         url.searchParams.set('agencyId', agencyId);
+        url.searchParams.set('operatorID', agencyId);
         url.searchParams.set('lang', lang);
         console.log('URL construida para el iframe:', url.toString());
         // Realizar petición fetch y mostrar resultado en consola
