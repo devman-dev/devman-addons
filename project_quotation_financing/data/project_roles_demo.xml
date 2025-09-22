@@ -1,0 +1,16 @@
+<odoo>
+  <data noupdate="1">
+    <record id="role_pm" model="project.role">
+      <field name="name">Project Manager</field>
+      <field name="code">PM</field>
+    </record>
+    <record id="role_dev" model="project.role">
+      <field name="name">Developer</field>
+      <field name="code">DEV</field>
+    </record>
+    <record id="role_qa" model="project.role">
+      <field name="name">QA</field>
+      <field name="code">QA</field>
+    </record>
+  </data>
+</odoo>

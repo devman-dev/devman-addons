@@ -1,0 +1,170 @@
+<odoo>
+  <record id="view_project_role_tree" model="ir.ui.view">
+    <field name="name">project.role.tree</field>
+    <field name="model">project.role</field>
+    <field name="arch" type="xml">
+      <tree>
+        <field name="name"/>
+        <field name="code"/>
+      </tree>
+    </field>
+  </record>
+  <record id="view_project_role_form" model="ir.ui.view">
+    <field name="name">project.role.form</field>
+    <field name="model">project.role</field>
+    <field name="arch" type="xml">
+      <form>
+        <sheet>
+          <group>
+            <field name="name"/>
+            <field name="code"/>
+            <field name="description"/>
+          </group>
+        </sheet>
+      </form>
+    </field>
+  </record>
+
+  <record id="view_project_role_rate_tree" model="ir.ui.view">
+    <field name="name">project.role.rate.tree</field>
+    <field name="model">project.role.rate</field>
+    <field name="arch" type="xml">
+      <tree>
+        <field name="role_id"/>
+        <field name="rate_hour"/>
+        <field name="currency_id"/>
+      </tree>
+    </field>
+  </record>
+
+  <record id="view_project_role_rate_form" model="ir.ui.view">
+    <field name="name">project.role.rate.form</field>
+    <field name="model">project.role.rate</field>
+    <field name="arch" type="xml">
+      <form>
+        <sheet>
+          <group>
+            <field name="role_id"/>
+            <field name="rate_hour"/>
+            <field name="currency_id"/>
+          </group>
+        </sheet>
+      </form>
+    </field>
+  </record>
+
+  <record id="view_employee_hourly_cost_tree" model="ir.ui.view">
+    <field name="name">employee.hourly.cost.tree</field>
+    <field name="model">employee.hourly.cost</field>
+    <field name="arch" type="xml">
+      <tree>
+        <field name="employee_id"/>
+        <field name="cost_hour"/>
+        <field name="date_from"/>
+        <field name="date_to"/>
+        <field name="active"/>
+      </tree>
+    </field>
+  </record>
+
+  <record id="view_employee_hourly_cost_form" model="ir.ui.view">
+    <field name="name">employee.hourly.cost.form</field>
+    <field name="model">employee.hourly.cost</field>
+    <field name="arch" type="xml">
+      <form>
+        <sheet>
+          <group>
+            <field name="employee_id"/>
+            <field name="cost_hour"/>
+            <field name="date_from"/>
+            <field name="date_to"/>
+            <field name="active"/>
+          </group>
+        </sheet>
+      </form>
+    </field>
+  </record>
+
+  <record id="view_project_complexity_ref_tree" model="ir.ui.view">
+    <field name="name">project.complexity.ref.tree</field>
+    <field name="model">project.complexity.ref</field>
+    <field name="arch" type="xml">
+      <tree>
+        <field name="name"/>
+        <field name="factor"/>
+      </tree>
+    </field>
+  </record>
+  <record id="view_project_complexity_ref_form" model="ir.ui.view">
+    <field name="name">project.complexity.ref.form</field>
+    <field name="model">project.complexity.ref</field>
+    <field name="arch" type="xml">
+      <form>
+        <sheet>
+          <group>
+            <field name="name"/>
+            <field name="factor"/>
+          </group>
+        </sheet>
+      </form>
+    </field>
+  </record>
+
+  <record id="view_hr_team_tree" model="ir.ui.view">
+    <field name="name">hr.team.tree</field>
+    <field name="model">hr.team</field>
+    <field name="arch" type="xml">
+      <tree>
+        <field name="name"/>
+        <field name="manager_id"/>
+      </tree>
+    </field>
+  </record>
+  <record id="view_hr_team_form" model="ir.ui.view">
+    <field name="name">hr.team.form</field>
+    <field name="model">hr.team</field>
+    <field name="arch" type="xml">
+      <form>
+        <sheet>
+          <group>
+            <field name="name"/>
+            <field name="manager_id"/>
+            <field name="member_ids"/>
+          </group>
+        </sheet>
+      </form>
+    </field>
+  </record>
+
+  <record id="action_project_role" model="ir.actions.act_window">
+    <field name="name">Roles</field>
+    <field name="res_model">project.role</field>
+    <field name="view_mode">tree,form</field>
+  </record>
+  <record id="action_project_role_rate" model="ir.actions.act_window">
+    <field name="name">Tarifas por Rol</field>
+    <field name="res_model">project.role.rate</field>
+    <field name="view_mode">tree,form</field>
+  </record>
+  <record id="action_employee_hourly_cost" model="ir.actions.act_window">
+    <field name="name">Costos por Empleado</field>
+    <field name="res_model">employee.hourly.cost</field>
+    <field name="view_mode">tree,form</field>
+  </record>
+  <record id="action_project_complexity_ref" model="ir.actions.act_window">
+    <field name="name">Complejidades</field>
+    <field name="res_model">project.complexity.ref</field>
+    <field name="view_mode">tree,form</field>
+  </record>
+  <record id="action_hr_team" model="ir.actions.act_window">
+    <field name="name">Equipos</field>
+    <field name="res_model">hr.team</field>
+    <field name="view_mode">tree,form</field>
+  </record>
+
+  <menuitem id="menu_pqf_roles" name="Roles" parent="menu_pqf_reference" action="action_project_role"/>
+  <menuitem id="menu_pqf_role_rate" name="Tarifas por Rol" parent="menu_pqf_reference" action="action_project_role_rate"/>
+  <menuitem id="menu_pqf_employee_cost" name="Costos por Empleado" parent="menu_pqf_reference" action="action_employee_hourly_cost"/>
+  <menuitem id="menu_pqf_complexity" name="Complejidades" parent="menu_pqf_reference" action="action_project_complexity_ref"/>
+  <menuitem id="menu_pqf_hr_team" name="Equipos" parent="menu_pqf_reference" action="action_hr_team"/>
+</odoo>

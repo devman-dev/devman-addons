@@ -1,0 +1,55 @@
+<odoo>
+  <record id="view_project_quotation_summary_tree" model="ir.ui.view">
+    <field name="name">project.quotation.summary.tree</field>
+    <field name="model">project.quotation.summary</field>
+    <field name="arch" type="xml">
+      <tree>
+        <field name="quotation_id"/>
+        <field name="partner_id"/>
+        <field name="revenue_after_discount"/>
+        <field name="expenses_total"/>
+        <field name="team_cost_total"/>
+        <field name="profit"/>
+        <field name="margin_net"/>
+      </tree>
+    </field>
+  </record>
+
+  <record id="view_project_quotation_summary_form" model="ir.ui.view">
+    <field name="name">project.quotation.summary.form</field>
+    <field name="model">project.quotation.summary</field>
+    <field name="arch" type="xml">
+      <form string="Resumen de Cotización" create="false" delete="false" edit="true">
+        <header>
+          <button name="action_print_pdf" type="object" string="Imprimir PDF" class="oe_highlight"/>
+        </header>
+        <sheet>
+          <group>
+            <field name="quotation_id" readonly="1"/>
+            <field name="partner_id" readonly="1"/>
+            <field name="lead_id" readonly="1"/>
+            <field name="total_hours" readonly="1"/>
+          </group>
+          <group>
+            <field name="financing_type" readonly="1"/>
+            <field name="revenue" readonly="1"/>
+            <field name="revenue_after_discount" readonly="1"/>
+            <field name="expenses_total" readonly="1"/>
+            <field name="team_cost_total" readonly="1"/>
+            <field name="profit" readonly="1"/>
+            <field name="margin_net" readonly="1"/>
+          </group>
+          <group string="Observaciones (editable)">
+            <field name="observations" placeholder="Notas para el cliente..."/>
+          </group>
+        </sheet>
+      </form>
+    </field>
+  </record>
+
+  <record id="action_project_quotation_summary" model="ir.actions.act_window">
+    <field name="name">Resúmenes</field>
+    <field name="res_model">project.quotation.summary</field>
+    <field name="view_mode">tree,form</field>
+  </record>
+</odoo>

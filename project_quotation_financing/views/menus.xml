@@ -1,0 +1,8 @@
+<odoo>
+  <menuitem id="menu_pqf_root" name="PQF" sequence="10"/>
+  <menuitem id="menu_pqf_config" name="Configuración" parent="menu_pqf_root" sequence="90"/>
+  <menuitem id="menu_pqf_quotation" name="Cotizaciones" parent="menu_pqf_root" action="action_project_quotation" sequence="10"/>
+  <menuitem id="menu_pqf_financing" name="Financiamiento" parent="menu_pqf_root" action="action_project_financing" sequence="20"/>
+  <menuitem id="menu_pqf_summary" name="Resúmenes" parent="menu_pqf_root" action="action_project_quotation_summary" sequence="30"/>
+  <menuitem id="menu_pqf_reference" name="Referencias" parent="menu_pqf_config" sequence="10"/>
+</odoo>

@@ -1,0 +1,94 @@
+<odoo>
+  <record id="view_project_financing_tree" model="ir.ui.view">
+    <field name="name">project.financing.tree</field>
+    <field name="model">project.financing</field>
+    <field name="arch" type="xml">
+      <tree>
+        <field name="quotation_id"/>
+        <field name="partner_id"/>
+        <field name="financing_type"/>
+        <field name="revenue_after_discount"/>
+        <field name="expenses_total"/>
+        <field name="team_cost_total"/>
+        <field name="profit"/>
+      </tree>
+    </field>
+  </record>
+
+  <record id="view_project_financing_form" model="ir.ui.view">
+    <field name="name">project.financing.form</field>
+    <field name="model">project.financing</field>
+    <field name="arch" type="xml">
+      <form string="Financiamiento de Proyecto">
+        <header>
+          <button name="action_view_summary" type="object" string="Ver Resumen Final" class="oe_highlight"/>
+        </header>
+        <sheet>
+          <group string="Datos">
+            <field name="quotation_id" readonly="1"/>
+            <field name="partner_id" readonly="1"/>
+            <field name="lead_id" readonly="1"/>
+            <field name="team_id"/>
+            <field name="currency_id"/>
+            <field name="financing_type"/>
+          </group>
+          <notebook>
+            <page string="Distribución por Rol">
+              <field name="role_breakdown_ids">
+                <tree editable="bottom">
+                  <field name="role_id"/>
+                  <field name="hours"/>
+                  <field name="rate_id"/>
+                  <field name="price_hour"/>
+                  <field name="subtotal" readonly="1"/>
+                </tree>
+              </field>
+            </page>
+            <page string="Gastos y Servicios en USD">
+              <group>
+                <field name="usd_rate"/>
+              </group>
+              <field name="cost_line_ids">
+                <tree editable="bottom">
+                  <field name="name"/>
+                  <field name="amount_usd"/>
+                  <field name="usd_rate" readonly="1"/>
+                  <field name="subtotal_converted" readonly="1"/>
+                </tree>
+              </field>
+            </page>
+            <page string="Costos por Empleado">
+              <field name="employee_allocation_ids">
+                <tree editable="bottom">
+                  <field name="employee_id"/>
+                  <field name="hours"/>
+                  <field name="hourly_cost_id"/>
+                  <field name="cost_hour"/>
+                  <field name="subtotal_cost" readonly="1"/>
+                </tree>
+              </field>
+            </page>
+            <page string="Totales">
+              <group>
+                <field name="discount_percent"/>
+                <field name="revenue" readonly="1"/>
+                <field name="revenue_after_discount" readonly="1"/>
+                <field name="expenses_total" readonly="1"/>
+                <field name="team_cost_total" readonly="1"/>
+                <field name="profit" readonly="1"/>
+                <field name="margin_net" readonly="1"/>
+                <field name="note"/>
+              </group>
+            </page>
+          </notebook>
+        </sheet>
+      </form>
+    </field>
+  </record>
+
+  <record id="action_project_financing" model="ir.actions.act_window">
+    <field name="name">Financiamiento</field>
+    <field name="res_model">project.financing</field>
+    <field name="view_mode">tree,form</field>
+  </record>
+</odoo>
