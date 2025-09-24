@@ -44,6 +44,8 @@ class BankMoveImported(models.Model):
     extract_checkbox = fields.Boolean('Generar Extracto?', default=False)
     date_column = fields.Char(string='Columna Fecha', required=True)
 
+    currency_id = fields.Many2one('res.currency', default=lambda self: self.env.company.currency_id.id)
+
     @api.onchange('customer_id')
     def _blank_service(self):
         self.service_id = False
@@ -245,6 +247,7 @@ class BankMoveImported(models.Model):
                         'destination_account': self.destination_account_id.id,
                         'count': 0,
                         'account_bank': self.bank_id.id,
+                        'currency_id': self.currency_id.id if self.currency_id.id else False,
                     }
                 )
                 if self.extract_checkbox:

@@ -25,6 +25,7 @@
                                 context="{'show_servicio_name': True}"
                                 options="{'no_create': True, 'no_create_edit': True,'no_quick_create': True}" />
                             <field name="date" />
+                            <field name="currency_id"/>
                             <field name="extract_checkbox" />
                             <field name="bank_id"
                                 options="{'no_create': True, 'no_create_edit': True,'no_quick_create': True}" />
