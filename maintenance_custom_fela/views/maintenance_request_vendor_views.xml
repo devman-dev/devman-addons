@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="maintenance_request_view_form_inherit_fela_vendor" model="ir.ui.view">
+        <field name="name">maintenance.request.form.inherit.fela.vendor</field>
+        <field name="model">maintenance.request</field>
+        <field name="inherit_id" ref="dev_maintenance_purchase_agreement.form_maintenance_dev_maintenance_purchase_agreement_inherited"/>
+        <field name="arch" type="xml">
+            <!-- Agregar show_vendor si no existe -->
+            <xpath expr="//form/field[@name='company_id']" position="after">
+                <field name="show_vendor" invisible="1" force_save="1"/>
+            </xpath>
+            
+            <!-- Ocultar vendor_id cuando show_vendor es False -->
+            <xpath expr="//field[@name='vendor_id']" position="attributes">
+                <attribute name="invisible">not show_vendor</attribute>
+            </xpath>
+        </field>
+    </record>
+</odoo>
