@@ -5,16 +5,21 @@
         <field name="arch" type="xml">
             <form string="Sesión de Juego">
                 <group>
-                    <field name="game_id"/>
-                    <field name="user_id"/>
-                    <field name="start_datetime"/>
-                    <field name="end_datetime"/>
-                    <field name="initial_balance"/>
-                    <field name="final_balance"/>
-                    <field name="currency_id"/>
-                    <field name="result"/>
-                    <field name="state"/>
-                    <field name="description"/>
+                    <field name="transaction_id" />
+                    <field name="internal_transaction_id" string="ID Transacción Interna" />
+                    <field name="game_id" />
+                    <field name="user_id" />
+                    <field name="token" />
+                    <field name="start_datetime" />
+                    <field name="end_datetime" />
+                    <field name="initial_balance" />
+                    <field name="amount" />
+                    <field name="final_balance" />
+                    <field name="currency_id" />
+                    <field name="result" />
+                    <field name="state" />
+                    <field name="description" />
+                    <field name="json_data" />
                 </group>
             </form>
         </field>
@@ -24,30 +29,55 @@
         <field name="name">casino.game.session.tree</field>
         <field name="model">casino.game.session</field>
         <field name="arch" type="xml">
-            <list string="Sesiones de Juego" 
-                  decoration-success="state=='finished'" 
-                  decoration-warning="state=='in_progress'" 
-                  decoration-muted="state=='pending'">
-                
-                <field name="game_id" string="Juego"/>
-                <field name="user_id" string="Usuario"/>
-                <field name="initial_balance" string="S.Ant."/>
-                <field name="final_balance" string="S.Pos."/>
-                <field name="start_datetime" string="Inicio"/>
-                <field name="end_datetime" string="Fin"/>
-                <field name="result" string="Resultado"/>
-                <field name="state" string="Estado"/>
-                
+            <list string="Sesiones de Juego"
+                decoration-success="state=='finished'"
+                decoration-warning="state=='in_progress'"
+                decoration-muted="state=='pending'"
+                default_order="id desc, round_id desc">
+
+                <field name="id" string="ID" />
+                <field name="round_id" string="ID Round" />
+                <field name="transaction_id" string="ID Transacción" />
+                <field name="game_id" string="Juego" />
+                <field name="user_id" string="Usuario" />
+                <field name="initial_balance" string="S.Inicial" optional="show" />
+                <field name="amount" string="Monto" />
+                <field name="final_balance" string="S.Final" optional="show" />
+                <field name="start_datetime" string="Inicio" optional="show" />
+                <field name="end_datetime" string="Fin" optional="show" />
+                <field name="result" string="Resultado" />
+                <field name="state" string="Estado" />
+                <field name="internal_transaction_id" string="ID Transacción Interna"
+                    optional="show" />
             </list>
         </field>
     </record>
 
-    <!-- Acción corregida para Odoo 18 -->
+    <!-- Vista de búsqueda con agrupación por transaction_id -->
+    <record id="view_casino_game_session_search" model="ir.ui.view">
+        <field name="name">casino.game.session.search</field>
+        <field name="model">casino.game.session</field>
+        <field name="arch" type="xml">
+            <search string="Buscar Sesiones de Juego">
+                <field name="transaction_id" />
+                <field name="game_id" />
+                <field name="user_id" />
+                <field name="start_datetime" />
+                <field name="internal_transaction_id" />
+                <!-- <filter string="Agrupar por Transacción"
+                    name="group_by_group_display_name"
+                    context="{'group_by':'group_display_name'}" /> -->
+            </search>
+        </field>
+    </record>
+
+    <!-- Acción con agrupamiento por defecto en transaction_id -->
     <record id="action_casino_game_session" model="ir.actions.act_window">
         <field name="name">Sesiones de Juego</field>
         <field name="res_model">casino.game.session</field>
         <field name="view_mode">list,form</field>
-        <field name="view_id" ref="view_casino_game_session_tree"/>
+        <field name="view_id" ref="view_casino_game_session_tree" />
+        <field name="search_view_id" ref="view_casino_game_session_search" />
+        <!-- <field name="context">{'search_default_group_by_group_display_name': 1}</field> -->
     </record>
-
 </odoo>

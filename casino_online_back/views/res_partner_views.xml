@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_partner_form_bet_limits_button" model="ir.ui.view">
+        <field name="name">res.partner.form.bet.limits.button</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_partner_form" />
+        <field name="arch" type="xml">
+            <xpath expr="//sheet//div[hasclass('oe_button_box')]" position="inside">
+                <button type="action" class="oe_stat_button"
+                    name="%(casino_online_back.action_bet_limits)d"
+                    context="{'search_default_partner_id': active_id, 'default_partner_id': active_id}"
+                    help="Ver/editar límites de apuesta del cliente">
+                    <div class="o_stat_info">
+                        <span class="fa fa-shield" role="img" aria-label="Bet Limits" />
+                        <span class="o_stat_text">Límites de Apuesta</span>
+                    </div>
+                </button>
+            </xpath>
+        </field>
+    </record>
+</odoo>

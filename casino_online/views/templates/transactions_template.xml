@@ -1,323 +1,362 @@
 <odoo>
-    <template id="portal_depositar_form" t-name="casino_online.portal_depositar_form" name="Formulario Depositar">
-        <t t-call="website.layout">
-            <div class="container mt16 mb16">
-                <h2>Depositar Dinero</h2>
+    <template id="portal_depositar_form" name="Deposit Form">
+        <t t-call="portal.portal_layout">
+            <t t-set="page_title" t-value="'Depositar Fondos'" />
+            <div id="wrap">
+                <div class="container py-2">
+                    <div class="row position-relative mb32">
+                        <div class="sticky-lg-top offset-xl-1 col-12 col-lg-5 col-xl-4 order-lg-2">
+                            <div class="card">
+                                <div class="card-header bg-primary text-white text-center">
+                                    <strong>Resúmen</strong>
+                                </div>
+                                <div
+                                    class="card-body d-flex align-items-center justify-content-md-center justify-content-lg-between flex-wrap gap-2">
+                                    <div class="mb-0 text-break mx-auto fs-2">
+                                        <strong t-out="amount"
+                                            class="monetary_field text-end p-0"
+                                            t-options="{'widget': 'monetary', 'display_currency': currency}" />
+                                    </div>
+                                    <div class="my-1 w-100"> </div>
+                                    <div class="small w-100 text-center">Total a Depositar</div>
 
-                <form action="/my/depositar" method="post">
-                    <!-- Métodos de pago -->
-                    <div class="mb-3">
-                        <label class="form-label">Selecciona un método de pago:</label>
-                        <t t-foreach="payment_providers" t-as="provider">
-                            <label class="list-group-item">
-                                <input type="radio" name="payment_provider_id" t-att-value="provider.id" class="form-check-input me-2" required="required" />
-                                <t t-esc="provider.name" />
-                            </label>
-                        </t>
+                                    <div class="text-center w-100 mt-3 mb-2">
+                                        <t t-call="payment.submit_button">
+                                            <t t-set="submit_button_label">Confirmar Pago</t>
+                                        </t>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-12 col-lg-7">
+                            <h3 class="mb-4">Depositar Créditos</h3>
+
+                            <div id="payment_method" class="o_not_editable mt-4">
+                                <t t-call="payment.form" />
+                            </div>
+                        </div>
                     </div>
-
-                    <!-- Monto a depositar -->
-                    <div class="mb-3">
-                        <label for="amount" class="form-label">Monto a depositar</label>
-                        <input type="number" step="0.01" min="0" name="amount" id="amount" class="form-control" required="required" />
-                    </div>
-
-                    <!-- Botón -->
-                    <button type="submit" class="btn btn-primary">Depositar</button>
-
-                    <!-- Tabla de movimientos -->
-                    <table class="table table-striped">
-                        <thead>
-                            <tr>
-                                <th>Fecha</th>
-                                <th>Descripción</th>
-                                <th>Tipo</th>
-                                <th>Monto</th>
-                                <th>Estado</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td>2025-08-05</td>
-                                <td>Depósito inicial</td>
-                                <td>Ingreso</td>
-                                <td>$1000.00</td>
-                                <td>Completado</td>
-                            </tr>
-                            <tr>
-                                <td>2025-08-04</td>
-                                <td>Retiro cajero</td>
-                                <td>Egreso</td>
-                                <td>$200.00</td>
-                                <td>Pendiente</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </form>
+                </div>
             </div>
         </t>
+
     </template>
 
-
-
-
     <template id="portal_retirar_form" name="Formulario Retirar">
-        <t t-call="website.layout">
-            <div class="container mt16 mb16">
-                <h2>Retirar Dinero</h2>
+        <div id="withdrawal_methods_container"
+            name="o_casino_withdrawal_list_container"
+            t-att-data-partner-id="user_id.partner_id.id">
 
-                <form action="/my/retirar" method="post">
-                    <!-- Métodos de pago -->
-                    <div class="mb-3">
-                        <label class="form-label">Selecciona un método de pago:</label>
-                        <t t-foreach="payment_providers" t-as="provider">
-                            <label class="list-group-item">
-                                <input type="radio" name="payment_provider_id" t-att-value="provider.id" class="form-check-input me-2" required="required" />
-                                <t t-esc="provider.name" />
-                            </label>
-                        </t>
+            <p class="text-center mb-4">
+                Por favor seleccioná tu método de retiro preferido y completá los datos.
+            </p>
+
+            <div class="d-flex justify-content-center gap-3 mb-5">
+                <!-- Botón Transferencia -->
+                <div class="card withdrawal-option text-center"
+                    role="button"
+                    data-bs-toggle="modal"
+                    data-bs-target="#withdrawalTransferModal"
+                    data-method="transfer"
+                    style="width: 120px; height: 120px; cursor: pointer;">
+                    <div class="card-body">
+                        <img src="/casino_online/static/src/img/transfer_icon.png"
+                            alt="Transferencia Bancaria" class="img-fluid mb-2"
+                            style="max-height: 40px;" />
+                        <p class="card-title" style="font-size: .8rem;">Transferencia Bancaria</p>
                     </div>
+                </div>
 
-                    <!-- Monto -->
-                    <div class="mb-3">
-                        <label for="amount" class="form-label">Monto a retirar</label>
-                        <input type="number" step="0.01" min="0" name="amount" id="amount" class="form-control" required="required" />
+                <!-- Otra opción (ejemplo CityCenter) -->
+                <div class="card withdrawal-option text-center"
+                    role="button"
+                    data-bs-toggle="modal"
+                    data-bs-target="#withdrawalTransferModal"
+                    data-method="cashier"
+                    style="width: 120px; height: 120px; cursor: pointer;">
+                    <div class="card-body">
+                        <img src="/casino_online/static/src/img/casa_central.png"
+                            alt="Casa Central" class="img-fluid mb-2"
+                            style="max-height: 40px;" />
+                        <p class="card-title" style="font-size: .8rem;">Retiro en Casa Central</p>
                     </div>
-
-                    <!-- Botón -->
-                    <button type="submit" class="btn btn-primary">Retirar</button>
-                </form>
+                </div>
             </div>
-        </t>
+
+            <!-- DETALLE DE ÚLTIMOS RETIROS -->
+            <div>
+                <div class="card shadow-sm">
+                    <div class="card-header bg-info text-white">
+                        <strong>Detalle de últimos retiros</strong>
+                    </div>
+
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-sm table-hover mb-0 o_withdrawals_list_table">
+                                <thead style="font-size:0.9rem;">
+                                    <tr>
+                                        <!-- <th>Titular</th> -->
+                                        <th>Cuil</th>
+                                        <th>Descripción</th>
+                                        <th>CBU</th>
+                                        <th>Monto</th>
+                                        <th>Fecha</th>
+                                        <th class="text-center">Estado</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="o_casino_withdrawals_table_body"
+                                    style="font-size:0.9rem;"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="card-footer" style="font-size: 0.9rem;">
+                        <div
+                            class="o_withdrawal_list_pagination_info text-muted me-auto" />
+                    </div>
+                </div>
+            </div>
+            <!-- ===== Paginación ===== -->
+            <nav class="align-self-center mt-2"
+                aria-label="Navegación de Retiros">
+                <ul
+                    class="pagination justify-content-end o_withdrawal_list_pagination" />
+            </nav>
+        </div>
+
+        <div class="modal fade" id="withdrawalTransferModal" tabindex="-1"
+            aria-labelledby="withdrawalTransferLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg modal-dialog-centered">
+                <div class="modal-content">
+
+                    <div class="modal-header bg-primary text-white">
+                        <h5 class="modal-title" id="withdrawalTransferLabel">
+                            Solicitud de Retiro - Transferencia Bancaria
+                        </h5>
+                        <button type="button" class="btn-close btn-close-white"
+                            data-bs-dismiss="modal"
+                            aria-label="Cerrar"></button>
+                    </div>
+                    <t t-name="casino_online.withdrawal_modal">
+                        <div class="modal-body">
+                            <form class="o_withdrawal_form">
+                                <div class="mb-3">
+                                    <label class="form-label">Monto a retirar *</label>
+                                    <input type="number" name="amount" class="form-control"
+                                        required="required" min="1" step="0.01" />
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label">Contraseña de usuario *</label>
+                                    <input type="password" name="password"
+                                        class="form-control" required="required" />
+                                </div>
+
+                                <div class="mb-3 o_bank_row">
+                                    <label class="form-label">Cuenta Destino *</label>
+                                    <select name="bank_account" class="form-select"
+                                        id="bank_account_select">
+                                        <option value="">Seleccione una cuenta</option>
+                                    </select>
+                                </div>
+                                <div
+                                    class="d-flex justify-content-center justify-content-md-end gap-2 flex-wrap">
+                                    <button class="btn btn-outline-secondary"
+                                        data-bs-dismiss="modal">
+                                        Cancelar
+                                    </button>
+                                    <button class="btn btn-primary o_withdrawal_submit">
+                                        Solicitar Retiro
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </t>
+                </div>
+            </div>
+        </div>
+        <script type="text/javascript"> document.addEventListener('DOMContentLoaded', function() {
+            var modal = document.getElementById('withdrawalTransferModal');
+            modal.addEventListener('show.bs.modal', function () { var select =
+            document.getElementById('bank_account_select'); select.innerHTML = '<option
+                value="">Seleccione una cuenta</option>'; fetch('/casino/withdrawal/banks', {
+            method: 'POST', headers: {'Content-Type': 'application/json'}, body: '{}' })
+            .then(response => response.json()) .then(data => { (data.result ||
+            []).forEach(function(bank) { var option = document.createElement('option'); option.value
+            = bank.id; option.textContent = bank.name + ' - ' + bank.cbu;
+            select.appendChild(option); }); }); }); }); </script>
     </template>
 
     <template id="portal_registrar_bonus_form" name="Formulario Registrar Bonus">
-        <t t-call="website.layout">
-            <div class="container mt16 mb16">
-                <h2>Registrar Código Promocional</h2>
-
-                <form action="/my/registrar_bonus" method="post">
-                    <div class="mb-3">
-                        <label for="promo_code" class="form-label">Ingresa tu código promocional</label>
-                        <input type="text" name="promo_code" id="promo_code" class="form-control" required="required" placeholder="Ej: BONUS2025" />
-                    </div>
-
-                    <button type="submit" class="btn btn-success">Registrar Bonus</button>
-                </form>
-            </div>
-        </t>
+        <div class="container">
+            <h2>Registrar Código Promocional</h2>
+            <form action="/my/registrar_bonus" method="post">
+                <div class="mb-3">
+                    <label for="promo_code" class="form-label">Ingresa tu código promocional</label>
+                    <input type="text" name="promo_code" id="promo_code" class="form-control"
+                        required="required"
+                        placeholder="Ej: BONUS2025" />
+                </div>
+                <button type="submit" class="btn btn-success">Registrar Bonus</button>
+            </form>
+        </div>
     </template>
 
+    <!-- ===== BLOQUE MODIFICADO PARA AJAX ===== -->
     <template id="portal_movimientos" name="Movimientos del Usuario">
-        <t t-call="website.layout">
-            <div class="container mt16 mb16">
-                <h2>Historial de Movimientos</h2>
-
-                <!-- Filtros -->
-                <form method="get" action="/my/movimientos" class="mb-4">
-
-                    <!-- Buscar por fecha -->
-                    <div class="row mb-3">
-                        <div class="col-md-6">
-                            <label for="start_date" class="form-label">Fecha de Inicio</label>
-                            <input type="date" id="start_date" name="start_date" class="form-control" value="2025-08-01" />
-                        </div>
-                        <div class="col-md-6">
-                            <label for="end_date" class="form-label">Fecha de Fin</label>
-                            <input type="date" id="end_date" name="end_date" class="form-control" value="2025-08-10" />
-                        </div>
+        <div class="container o_portal_movements">
+            <h2>Historial de Movimientos</h2>
+            <!-- Filtros -->
+            <form method="get" action="/my/movimientos" class="mb-4 o_movements_filters">
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label for="start_date" class="form-label">Fecha de Inicio</label>
+                        <input type="date" id="start_date" name="start_date" class="form-control"
+                            value="" />
                     </div>
-
-                    <!-- Buscar por tipo -->
-                    <div class="mb-3">
-                        <label class="form-label d-block">Buscar por Tipo</label>
-                        <div class="form-check form-check-inline">
-                            <input class="form-check-input" type="checkbox" name="types" value="deposito_retiro" checked="checked" />
-                            <label class="form-check-label">Dep./Retiros</label>
-                        </div>
-                        <div class="form-check form-check-inline">
-                            <input class="form-check-input" type="checkbox" name="types" value="bonus" />
-                            <label class="form-check-label">Saldo de Bonus</label>
-                        </div>
-                        <div class="form-check form-check-inline">
-                            <input class="form-check-input" type="checkbox" name="types" value="juego" />
-                            <label class="form-check-label">Transacciones de Juegos</label>
-                        </div>
-                        <div class="form-check form-check-inline">
-                            <input class="form-check-input" type="checkbox" name="types" value="ajuste" />
-                            <label class="form-check-label">Ajustes</label>
-                        </div>
+                    <div class="col-md-6">
+                        <label for="end_date" class="form-label">Fecha de Fin</label>
+                        <input type="date" id="end_date" name="end_date" class="form-control"
+                            value="" />
                     </div>
-
-                    <button type="submit" class="btn btn-primary">Filtrar</button>
-                </form>
-
-                <!-- Tabla de resultados con datos de prueba -->
-                <table class="table table-striped">
-                    <thead>
-                        <tr>
-                            <th>Fecha</th>
-                            <th>Descripción</th>
-                            <th>Tipo</th>
-                            <th>Monto</th>
-                            <th>Estado</th>
-                            <th>Balance</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>2025-08-05</td>
-                            <td>Depósito inicial</td>
-                            <td>Dep./Retiros</td>
-                            <td>$1000.00</td>
-                            <td>Completado</td>
-                            <td>$1000.00</td>
-                        </tr>
-                        <tr>
-                            <td>2025-08-06</td>
-                            <td>Retiro cajero</td>
-                            <td>Dep./Retiros</td>
-                            <td>-$200.00</td>
-                            <td>Pendiente</td>
-                            <td>$800.00</td>
-                        </tr>
-                        <tr>
-                            <td>2025-08-07</td>
-                            <td>Bonus por promoción</td>
-                            <td>Saldo de Bonus</td>
-                            <td>$50.00</td>
-                            <td>Completado</td>
-                            <td>$850.00</td>
-                        </tr>
-                        <tr>
-                            <td>2025-08-08</td>
-                            <td>Transacción juego A</td>
-                            <td>Transacciones de Juegos</td>
-                            <td>-$30.00</td>
-                            <td>Completado</td>
-                            <td>$820.00</td>
-                        </tr>
-                        <tr>
-                            <td>2025-08-09</td>
-                            <td>Ajuste manual</td>
-                            <td>Ajustes</td>
-                            <td>$10.00</td>
-                            <td>Completado</td>
-                            <td>$830.00</td>
-                        </tr>
-                    </tbody>
-                </table>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label d-block">Buscar por Tipo</label>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="checkbox" name="types"
+                            value="deposito_retiro"
+                            checked="checked" />
+                        <label class="form-check-label">Dep./Retiros</label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="checkbox" name="types" value="bonus" />
+                        <label class="form-check-label">Saldo de Bonus</label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="checkbox" name="types" value="juego" />
+                        <label class="form-check-label">Transacciones de Juegos</label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="checkbox" name="types" value="ajuste" />
+                        <label class="form-check-label">Ajustes</label>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary">Filtrar</button>
+            </form>
+            <!-- Contenedor que se recarga por AJAX -->
+            <div id="movements_container">
+                <t t-call="casino_online.portal_movimientos_inner" />
             </div>
-        </t>
+        </div>
+    </template>
+
+    <!-- Fragmento interno -->
+    <template id="portal_movimientos_inner">
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead style="font-size:0.9rem;">
+                    <tr>
+                        <th>Fecha</th>
+                        <th>Descripción</th>
+                        <th>Tipo</th>
+                        <th class="text-end">Monto</th>
+                        <th>Estado</th>
+                        <th class="text-end">Saldo</th>
+                    </tr>
+                </thead>
+                <tbody style="font-size:0.9rem;">
+                    <t t-foreach="movements" t-as="movement">
+                        <tr>
+                            <td>
+                                <t t-esc="movement['date']" />
+                            </td>
+                            <td>
+                                <t t-esc="movement['description']" />
+                            </td>
+                            <td>
+                                <span class="badge bg-secondary">
+                                    <t t-esc="movement['type_display']" />
+                                </span>
+                            </td>
+                            <td class="text-end">
+                                <span t-if="movement['amount'] &gt;= 0" class="text-success">+$<t
+                                        t-esc="movement['amount']" /></span>
+                                <span t-else="" class="text-danger">$<t t-esc="movement['amount']" /></span>
+                            </td>
+                            <td>
+                                <span t-if="movement['state'] == 'Completado'"
+                                    class="badge bg-success">
+                                    <t t-esc="movement['state']" />
+                                </span>
+                                <span t-else="" class="badge bg-warning">
+                                    <t t-esc="movement['state']" />
+                                </span>
+                            </td>
+                            <td class="text-end">
+                                <strong>
+                                    <span t-if="movement['balance'] &gt;= 0" class="text-success">$<t
+                                            t-esc="movement['balance']" /></span>
+                                    <span t-else="" class="text-danger">$<t
+                                            t-esc="movement['balance']" /></span>
+                                </strong>
+                            </td>
+                        </tr>
+                    </t>
+                </tbody>
+            </table>
+        </div>
     </template>
 
     <template id="portal_medios_pagos" name="Mis Medios de Pago">
-        <t t-call="website.layout">
-            <div class="container mt16 mb16">
-                <h2>Configura tus Métodos de Pago</h2>
+        <div class="container">
+            <h2>Configura tus Métodos de Pago</h2>
 
-                <form action="/my/medios_pagos" method="post">
-                    <table class="table table-bordered">
-                        <thead>
+            <form action="/my/medios_pagos" method="post">
+                <table class="table table-bordered">
+                    <thead style="font-size:0.9rem;">
+                        <tr>
+                            <th>Método de Pago</th>
+                            <th>Usar para Depósito</th>
+                            <th>Usar para Retiro</th>
+                        </tr>
+                    </thead>
+                    <tbody style="font-size:0.9rem;">
+                        <t t-foreach="payment_methods" t-as="pm">
                             <tr>
-                                <th>Método de Pago</th>
-                                <th>Usar para Depósito</th>
-                                <th>Usar para Retiro</th>
+                                <td>
+                                    <t t-esc="pm.name" />
+                                </td>
+                                <td>
+                                    <input type="checkbox" name="deposit_{{ pm.id }}"
+                                        t-att-checked="pm.config.for_deposit if pm.config else False" />
+                                </td>
+                                <td>
+                                    <input type="checkbox" name="withdraw_{{ pm.id }}"
+                                        t-att-checked="pm.config.for_withdraw if pm.config else False" />
+                                </td>
                             </tr>
-                        </thead>
-                        <tbody>
-                            <t t-foreach="payment_methods" t-as="pm">
-                                <tr>
-                                    <td>
-                                        <t t-esc="pm.name" />
-                                    </td>
-                                    <td>
-                                        <input type="checkbox" name="deposit_{{ pm.id }}" t-att-checked="pm.config.for_deposit if pm.config else False" />
-                                    </td>
-                                    <td>
-                                        <input type="checkbox" name="withdraw_{{ pm.id }}" t-att-checked="pm.config.for_withdraw if pm.config else False" />
-                                    </td>
-                                </tr>
-                            </t>
-                        </tbody>
-                    </table>
+                        </t>
+                    </tbody>
+                </table>
 
-                    <button type="submit" class="btn btn-primary">Guardar Configuración</button>
-                </form>
-            </div>
-        </t>
+                <button type="submit" class="btn btn-primary">Guardar Configuración</button>
+            </form>
+        </div>
     </template>
 
-    <template id="portal_mis_limites" name="Mis Límites">
-        <t t-call="website.layout">
-            <div class="container mt16 mb16">
-                <h2>Mis Límites</h2>
-
-                <form action="/my/mis_limites" method="post">
-                    <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()" />
-
-                    <div class="mb-4">
-                        <label for="daily_limit" class="form-label fw-bold">Límite diario de depósito</label>
-                        <input type="number" step="0.01" min="0" name="daily_limit" id="daily_limit" class="form-control" t-att-value="daily_limit or ''" />
-                    </div>
-
-                    <div class="mb-4">
-                        <label for="weekly_limit" class="form-label fw-bold">Límite semanal de depósito</label>
-                        <input type="number" step="0.01" min="0" name="weekly_limit" id="weekly_limit" class="form-control" t-att-value="weekly_limit or ''" />
-                    </div>
-
-                    <div class="mb-4">
-                        <label for="monthly_limit" class="form-label fw-bold">Límite mensual de depósito</label>
-                        <input type="number" step="0.01" min="0" name="monthly_limit" id="monthly_limit" class="form-control" t-att-value="monthly_limit or ''" />
-                    </div>
-
-                    <button type="submit" class="btn btn-primary">Guardar Límites</button>
-                </form>
+    <template id="portal_mis_limites" name="Wrapper Mis Límites">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div id="portal_mis_limites_wrapper">
+                    <t t-call="casino_online.portal_mis_limites_partial" />
+                </div>
             </div>
-        </t>
+        </div>
     </template>
 
     <template id="portal_datos_bancarios" name="Mis Datos Bancarios">
-        <t t-call="website.layout">
-            <div class="container mt16 mb16">
-                <h2>MIS DATOS BANCARIOS</h2>
-
-                <form action="/my/datos_bank" method="post">
-                    <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()" />
-
-                    <div class="mb-3">
-                        <label for="account_number" class="form-label">Cuenta Bancaria</label>
-                        <input type="text" name="account_number" id="account_number" class="form-control" t-att-value="account_number or ''" />
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="bank_name" class="form-label">Banco</label>
-                        <input type="text" name="bank_name" id="bank_name" class="form-control" t-att-value="bank_name or ''" />
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="account_type" class="form-label">Tipo de Cuenta</label>
-                        <input type="text" name="account_type" id="account_type" class="form-control" t-att-value="account_type or ''" />
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="cbu" class="form-label">CBU</label>
-                        <input type="text" name="cbu" id="cbu" class="form-control" t-att-value="cbu or ''" />
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="cuil" class="form-label">CUIL</label>
-                        <input type="text" name="cuil" id="cuil" class="form-control" t-att-value="cuil or ''" />
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="nuevo_cbu" class="form-label">Nuevo CBU</label>
-                        <input type="text" name="nuevo_cbu" id="nuevo_cbu" class="form-control" t-att-value="nuevo_cbu or ''" />
-                    </div>
-
-                    <button type="submit" class="btn btn-primary">Guardar Datos</button>
-                </form>
+        <div class="container mt-4">
+            <div class="row justify-content-center">
             </div>
-        </t>
+        </div>
     </template>
 </odoo>

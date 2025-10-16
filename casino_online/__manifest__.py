@@ -9,26 +9,25 @@
     'description': """
         Casino Online Module
         ===================
-        
-        This module provides a complete online casino platform integrated with Odoo's eCommerce system.
-        
-        Features:
-        - Casino game integration with eCommerce portal
-        - Custom portal templates for casino users
-        - Payment processing for gaming transactions
-        - User account management for casino players
-        - Secure gaming environment with account integration
-        
-        This module extends the standard eCommerce functionality to support online casino operations
-        while maintaining compatibility with Odoo's portal and payment systems.
+        ...
     """,
     'images': ['static/description/icon.png'],
-    'depends': ['website_sale', 'portal', 'account', 'payment'],
+    'depends': ['website_sale', 'portal', 'account', 'payment', 'web'],
     'data': [
         'security/ir.model.access.csv',
+        'views/templates/transactions_template.xml',
+        'views/templates/website_header.xml',
         'views/templates/strip_template.xml',
+        'views/templates/portal_mis_limites_partial.xml',
+        'views/res_partner_form_casino_online.xml',
         'views/templates/user_options_template.xml',
-        'views/templates/transactions_template.xml'
+        'data/balance_cron.xml',
     ],
+    "assets": {
+        "web.assets_frontend": [
+            "casino_online/static/src/**/*",
+            "casino_online/static/src/scss/withdrawals.scss",
+        ]
+    },
     'installable': True,
 }

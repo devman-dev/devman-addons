@@ -1,47 +1,496 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
+
+    <template id="side_content_custom" inherit_id="portal.side_content">
+        <xpath expr="//div[2]" position="replace">
+            <div t-attf-class="{{'offcanvas-body' if isOffcanvas else 'mt-3 mw-100'}}"
+                style="display:none;">
+                <div class="d-flex justify-content-start align-items-start gap-3 mb-4">
+                    <img class="o_portal_contact_img rounded o_object_fit_cover"
+                        t-att-src="image_data_uri(user_id.partner_id.avatar_128)" alt="Contact"
+                        width="50" />
+                    <div class="d-flex flex-column justify-content-center">
+                        <h5 class="mb-0" t-out="user_id.name" />
+                        <p class="mb-0 text-muted" t-out="user_id.company_name" />
+                    </div>
+                </div>
+                <div class="o_portal_my_details">
+                    <div t-field="user_id.partner_id"
+                        t-options="{&quot;widget&quot;: &quot;contact&quot;, &quot;fields&quot;: [&quot;email&quot;, &quot;phone&quot;, &quot;address&quot;]}" />
+                </div>
+                <a role="button" href="/my/account" class="btn btn-link p-0 mt-3"><i
+                        class="fa fa-pencil" /> Edit information</a>
+                <div name="portal_contact" class="o_my_contact mt-5" t-if="sales_user">
+                    <t t-call="portal.portal_contact" />
+                </div>
+            </div>
+        </xpath>
+    </template>
+
+    <template id="portal_layout_custom" inherit_id="portal.portal_layout">
+        <xpath expr="//div[@class='row justify-content-between']" position="replace">
+            <div class="row justify-content-between">
+                <!-- Contenido portal -->
+                <div t-attf-class="o_portal_content col-12 mb-5">
+                    <t t-out="0" />
+                </div>
+
+                <!-- Side content oculto -->
+                <div class="d-none d-lg-flex justify-content-end col-lg-0" visibility="hidden">
+                    <t t-call="portal.side_content" style="display:none;" />
+                </div>
+                <div class="offcanvas offcanvas-start d-lg-none" id="accountOffCanvas">
+                    <t t-call="portal.side_content" style="display:none;">
+                        <t t-set="isOffcanvas" t-value="true" />
+                    </t>
+                </div>
+            </div>
+        </xpath>
+    </template>
+
     <template id="custom_portal_my_home" inherit_id="portal.portal_my_home">
-        <xpath expr="//div[@id='portal_client_category']" position="replace">
-            <div id="portal_client_category" class="o_portal_category row g-2 mt-3">
+        <xpath expr="//div[contains(@class, 'o_portal_my_home')]" position="before">
+            <!-- Script original -->
+            <script type="text/javascript">
+                document.addEventListener("DOMContentLoaded", function () {
+                const buttons = document.querySelectorAll("button[data-target]");
+                buttons.forEach((button) => {
+                button.addEventListener("click", function () {
+                const targetId = this.getAttribute("data-target");
+                const allDivs = document.querySelectorAll(".w-75 > div");
+                allDivs.forEach((div) => { div.classList.add("d-none"); });
+                const targetDiv = document.querySelector(targetId);
+                if (targetDiv) { targetDiv.classList.remove("d-none"); }
+                if (targetId) {
+                history.replaceState(null, "", targetId);
+                }
+                });
+                });
 
-                <a href="/my/depositar" class="btn btn-success w-100 mb-2">
-                    <i class="fa fa-piggy-bank me-2"></i> Depositar
-                </a>
+                // Si llega con hash #movimientos_form, mostrar esa sección
+                if (window.location.hash === "#movimientos_form") {
+                const allDivs = document.querySelectorAll(".w-75 > div");
+                allDivs.forEach((div) => { div.classList.add("d-none"); });
+                const targetDiv = document.querySelector("#movimientos_form");
+                if (targetDiv) { targetDiv.classList.remove("d-none"); }
+                }
+                });
+            </script>
 
-                <a href="/my/retirar" class="btn btn-warning w-100 mb-2">
-                    <i class="fa fa-wallet me-2"></i> Retirar
-                </a>
+            <div id="portal_client_category_1" class="o_portal_category row g-2 d-flex">
+                <div class="w-25">
+                    <button type="button" class="btn btn-success w-100 mb-2"
+                        data-target="#depositar_form">Depositar</button>
+                    <button type="button" class="btn btn-warning w-100 mb-2"
+                        data-target="#retirar_form">Retirar</button>
+                    <button type="button" class="btn btn-info w-100 mb-2"
+                        data-target="#registrar_bonus_form">Registrar Bonus</button>
 
-                <a href="/my/registrar_bonus" class="btn btn-info w-100">
-                    <i class="fa fa-star me-2"></i> Registrar Bonus
-                </a>
+                    <h4>Cajero</h4>
 
-                <h4>Cajero</h4>
+                    <button type="button" class="btn btn-info w-100 mb-2"
+                        data-target="#movimientos_form">Movimientos</button>
+                    <button type="button" class="btn btn-info w-100 mb-2"
+                        data-target="#medios_pagos_form">Mis Medios de Pago</button>
+                    <button type="button" class="btn btn-info w-100 mb-2"
+                        data-target="#mis_limites_form">Mis Limites</button>
+                    <button type="button" class="btn btn-info w-100 mb-2"
+                        data-target="#datos_bancarios_form">Mis Datos Bancarios</button>
+                </div>
 
-                <a href="/my/depositar" class="btn btn-success w-100 mb-2">
-                    <i class="fa fa-piggy-bank me-2"></i> Depositar
-                </a>
+                <div class="w-75 my-0 ps-4">
+                    <div id="depositar_form">
+                        <div class="card mb-4 shadow-sm">
+                            <div class="card-header bg-primary text-white">
+                                <strong>Depositar Dinero</strong>
+                            </div>
+                            <div class="card-body">
+                                <form action="/my/depositar" method="post" class="oe_payment_form">
+                                    <input type="hidden" name="csrf_token"
+                                        t-att-value="request.csrf_token()" />
 
-                <a href="/my/retirar" class="btn btn-warning w-100 mb-2">
-                    <i class="fa fa-wallet me-2"></i> Retirar
-                </a>
+                                    <div class="form-group mb-4">
+                                        <label for="amount" class="form-label">Monto a depositar
+                                            (USD)</label>
+                                        <div class="input-group">
+                                            <div class="input-group">
+                                                <span class="input-group-text"
+                                                    t-out="currency.symbol" />
+                                                <input type="number"
+                                                    step="0.01"
+                                                    min="10"
+                                                    name="amount"
+                                                    id="amount"
+                                                    class="form-control"
+                                                    required="required"
+                                                    placeholder="10.0" />
+                                            </div>
+                                            <button type="submit" class="btn btn-primary">Depositar</button>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
 
-                <a href="/my/movimientos" class="btn btn-info w-100">
-                    <i class="fa fa-chart-line me-2"></i> Movimientos
-                </a>
+                        <div name="o_transaction_list_container"
+                            t-att-data-partner-id="partner_sudo.id"
+                            t-att-data-currency-id="currency.id">
+                            <div class="card shadow-sm">
+                                <div class="card-header bg-info text-white">
+                                    <strong>Historial de Depósitos</strong>
+                                </div>
+                                <div class="card-body px-2 pt-2 pb-0">
+                                    <div class="table-responsive">
+                                        <table
+                                            class="table table-sm table-hover mb-0 o_transaction_list_table">
+                                            <thead class="thead-light" style="font-size:0.9rem;">
+                                                <tr>
+                                                    <th class="text-center">Fecha</th>
+                                                    <th>Descripción</th>
+                                                    <th class="text-end">Monto</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody class="o_transaction_list_content"
+                                                style="font-size:0.9rem;"></tbody>
+                                            <tfoot class="o_transaction_list_footer">
+                                                <tr>
+                                                    <td></td>
+                                                    <td class="text-end fw-bold">Total:</td>
+                                                    <td
+                                                        class="text-end fw-bold o_transaction_list_total" />
+                                                </tr>
+                                            </tfoot>
+                                        </table>
+                                    </div>
+                                </div>
+                                <div class="card-footer" style="font-size: 0.9rem;">
+                                    <div
+                                        class="o_transaction_list_pagination_info text-muted me-auto" />
+                                </div>
+                            </div>
 
-                <a href="/my/medios_pagos" class="btn btn-info w-100">
-                    <i class="fa fa-credit-card me-2"></i> Mis Medios de Pago
-                </a>
+                            <nav class="align-self-center mt-2"
+                                aria-label="Navegación de Transacciones">
+                                <ul
+                                    class="align-self-center mt-2 pagination justify-content-end o_transaction_list_pagination" />
+                            </nav>
+                        </div>
+                    </div>
 
-                <a href="/my/mis_limites" class="btn btn-info w-100">
-                    <i class="fa fa-sliders-h me-2"></i> Mis Limites
-                </a>
+                    <div id="retirar_form" class="d-none">
+                        <t t-call="casino_online.portal_retirar_form" />
+                    </div>
 
-                <a href="/my/datos_bank" class="btn btn-info w-100">
-                    <i class="fa fa-university me-2"></i> Mis Datos Bancarios
-                </a>
+                    <div id="registrar_bonus_form" class="d-none">
+                        <t t-call="casino_online.portal_registrar_bonus_form" />
+                    </div>
 
+                    <!-- ===== Movimientos ===== -->
+                    <div id="movimientos_form" class="d-none">
+                        <div class="o_portal_movements">
+
+                            <!-- ===== Card de Filtros ===== -->
+                            <div class="card mb-4 shadow-sm">
+                                <div class="card-header bg-primary text-white">
+                                    <strong>Filtros de búsqueda</strong>
+                                </div>
+                                <div class="card-body">
+                                    <form method="get"
+                                        t-attf-action="{{ request.httprequest.path }}#movimientos_form"
+                                        class="o_movements_filters">
+
+                                        <!-- Fechas -->
+                                        <div class="row mb-3">
+                                            <div class="col">
+                                                <div class="d-flex align-items-center">
+                                                    <label for="start_date"
+                                                        class="form-label me-2 mb-0">Fecha de
+                                                        Inicio:</label>
+                                                    <input type="date" id="start_date"
+                                                        name="start_date"
+                                                        class="form-control form-control-sm me-4 w-auto"
+                                                        t-att-value="start_date or ''" />
+
+                                                    <label for="end_date"
+                                                        class="form-label me-2 mb-0">Fecha de Fin:</label>
+                                                    <input type="date" id="end_date" name="end_date"
+                                                        class="form-control form-control-sm w-auto"
+                                                        t-att-value="end_date or ''" />
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Tipos -->
+                                        <div class="mb-3">
+                                            <!-- <label class="form-label d-block">Buscar por
+                                            Tipo</label> -->
+                                            <div class="d-flex flex-wrap align-items-center gap-3">
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="checkbox"
+                                                        name="types" value="deposito_retiro"
+                                                        t-att-checked="'checked' if (selected_types and 'deposito_retiro' in selected_types) or (not selected_types) else None" />
+                                                    <label class="form-check-label">Dep./Retiros</label>
+                                                </div>
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="checkbox"
+                                                        name="types" value="bonus"
+                                                        t-att-checked="'checked' if (selected_types and 'bonus' in selected_types) else None" />
+                                                    <label class="form-check-label">Saldo de Bonus</label>
+                                                </div>
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="checkbox"
+                                                        name="types" value="juego"
+                                                        t-att-checked="'checked' if (selected_types and 'juego' in selected_types) else None" />
+                                                    <label class="form-check-label">Transacciones de
+                                                        Juegos</label>
+                                                </div>
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="checkbox"
+                                                        name="types" value="ajuste"
+                                                        t-att-checked="'checked' if (selected_types and 'ajuste' in selected_types) else None" />
+                                                    <label class="form-check-label">Ajustes</label>
+                                                </div>
+                                                <!-- Botón Filtrar -->
+                                                <div class="d-flex justify-content-end">
+                                                    <button type="submit" class="btn btn-primary">
+                                                        Filtrar
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Reset y paginación oculta -->
+                                        <input type="hidden" name="page" value="1" />
+                                        <input type="hidden" name="page_size"
+                                            t-att-value="page_size or 10" />
+
+                                    </form>
+                                </div>
+                            </div>
+                            <!-- ===== /Card de Filtros ===== -->
+
+                            <!-- Separador -->
+                            <!-- <hr class="my-4 border-top border-2 border-primary"> </hr> -->
+
+                            <!-- ===== Card de Resultados ===== -->
+                            <div class="card shadow-sm">
+                                <div class="card-header bg-info text-white">
+                                    <strong>Resultados</strong>
+                                </div>
+                                <div class="card-body p-0">
+
+                                    <div class="table-responsive">
+                                        <table
+                                            class="table table-sm table-hover mb-0 o_transaction_list_table">
+                                            <thead style="font-size:0.9rem;">
+                                                <tr>
+                                                    <th>Fecha</th>
+                                                    <th>Descripción</th>
+                                                    <!-- <th>Tipo</th> -->
+                                                    <th class="text-end">Monto</th>
+                                                    <th class="text-end">Saldo</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody style="font-size:0.9rem;">
+                                                <t t-foreach="movements or []" t-as="movement">
+                                                    <tr>
+                                                        <td>
+                                                            <t t-esc="movement['date']" />
+                                                        </td>
+                                                        <td>
+                                                            <t t-esc="movement['description']" />
+                                                        </td>
+                                                        <!-- <td>
+                                                            <span class="badge bg-secondary">
+                                                                <t t-esc="movement['type_display']" />
+                                                            </span>
+                                                        </td> -->
+
+                                                        <!-- Calcular montos -->
+                                                        <t t-set="is_fact"
+                                                            t-value="movement['type_display'] in ('Facturación','facturacion','Factura')" />
+                                                        <t t-set="signed_amount"
+                                                            t-value="(-movement['amount']) if is_fact else movement['amount']" />
+                                                        <t t-set="signed_amount_fmt"
+                                                            t-value="'{:.2f}'.format(signed_amount)" />
+
+                                                        <td class="text-end">
+                                                            <span t-if="signed_amount &gt;= 0"
+                                                                class="text-success"> +$<t
+                                                                    t-esc="signed_amount_fmt" />
+                                                            </span>
+                                                            <span t-else="" class="text-danger"> $<t
+                                                                    t-esc="signed_amount_fmt" />
+                                                            </span>
+                                                        </td>
+
+                                                        <t t-set="signed_balance"
+                                                            t-value="(-movement['balance']) if is_fact else movement['balance']" />
+                                                        <t t-set="signed_balance_fmt"
+                                                            t-value="signed_balance" />
+
+                                                        <td class="text-end">
+                                                            <strong>
+                                                                <span t-if="signed_balance &gt;= 0"
+                                                                    class="text-success"> $<t
+                                                                        t-esc="'{:.2f}'.format(signed_balance_fmt)" />
+                                                                </span>
+                                                                <span t-else="" class="text-danger">
+                                                                    -$<t
+                                                                        t-esc="'{:.2f}'.format(abs(signed_balance_fmt))" />
+                                                                </span>
+                                                            </strong>
+                                                        </td>
+                                                    </tr>
+                                                </t>
+                                            </tbody>
+                                        </table>
+                                    </div>
+
+                                    <!-- ===== Paginación ===== -->
+
+                                    <t t-set="q"
+                                        t-value="'start_date=%s&amp;end_date=%s' % (start_date or '', end_date or '')" />
+                                    <t t-foreach="selected_types or []" t-as="tval">
+                                        <t t-set="q" t-value="q + '&amp;types=' + tval" />
+                                    </t>
+                                    <t t-set="q"
+                                        t-value="q + '&amp;page_size=%s' % (page_size or 10)" />
+
+                                    <div
+                                        class="d-flex align-items-center justify-content-between p-3 border-top">
+                                        <div class="small text-muted">
+                                            <t t-set="first_item"
+                                                t-value="((page or 1)-1)*(page_size or 10) + 1 if (total_movements or 0) else 0" />
+                                            <t
+                                                t-set="last_item"
+                                                t-value="min((page or 1)*(page_size or 10), (total_movements or 0))" />
+                                            Mostrando <t t-esc="first_item" />–<t t-esc="last_item" />
+                                            de <t t-esc="total_movements or 0" />
+                                        </div>
+
+                                        <nav class="align-self-center mt-2" aria-label="Pagination">
+                                            <ul class="pagination mb-0">
+                                                <li class="page-item"
+                                                    t-att-class="'disabled' if (page or 1) &lt;= 1 else None">
+                                                    <a class="page-link"
+                                                        t-attf-href="{{ request.httprequest.path }}?{{ q }}&amp;page={{ (page or 1) - 1 }}#movimientos_form">
+                                                        ￩</a>
+                                                </li>
+                                                <t t-foreach="range(1, (page_count or 1)+1)"
+                                                    t-as="p">
+                                                    <li class="page-item"
+                                                        t-att-class="'active' if p == (page or 1) else None">
+                                                        <a class="page-link"
+                                                            t-attf-href="{{ request.httprequest.path }}?{{ q }}&amp;page={{ p }}#movimientos_form">
+                                                            <t t-esc="p" />
+                                                        </a>
+                                                    </li>
+                                                </t>
+                                                <li class="page-item"
+                                                    t-att-class="'disabled' if (page or 1) &gt;= (page_count or 1) else None">
+                                                    <a class="page-link"
+                                                        t-attf-href="{{ request.httprequest.path }}?{{ q }}&amp;page={{ (page or 1) + 1 }}#movimientos_form">
+                                                        ￫</a>
+                                                </li>
+                                            </ul>
+                                        </nav>
+                                    </div>
+                                    <!-- ===== /Paginación ===== -->
+
+                                </div>
+                            </div>
+                            <!-- ===== /Card de Resultados ===== -->
+
+                        </div>
+                    </div>
+
+                    <!-- ===== /Movimientos ===== -->
+
+                    <div id="medios_pagos_form" class="d-none">
+                        <t t-call="casino_online.portal_medios_pagos" />
+                    </div>
+
+                    <div id="mis_limites_form" class="d-none">
+                        <t t-call="casino_online.portal_mis_limites" />
+                    </div>
+
+                    <div id="datos_bancarios_form" class="d-none"
+                        t-att-data-partner-id="user_id.partner_id.id">
+                        <!-- <t t-call="casino_online.portal_datos_bancarios" /> -->
+
+                        <!-- Contenedor del widget -->
+                        <div class="card-body">
+                            <div name="o_casino_bank_list_container"
+                                t-att-data-partner-id="user_id.partner_id.id">
+
+                                <div class="card mb-4 shadow-sm">
+                                    <div class="card-header bg-primary text-white">
+                                        <strong>Mis Datos Bancarios</strong>
+                                    </div>
+
+                                    <!-- FORMULARIO -->
+                                    <div class="card-body">
+                                        <form class="o_casino_bank_form">
+                                            <div class="row g-2">
+                                                <div class="col-md-3">
+                                                    <input type="text" name="bank_name"
+                                                        class="form-control"
+                                                        placeholder="Banco" required="required" />
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <input type="text" name="cbu"
+                                                        class="form-control"
+                                                        placeholder="CBU" required="required" />
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <input type="text" name="cuil"
+                                                        class="form-control"
+                                                        placeholder="CUIL" required="required" />
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <button type="submit"
+                                                        class="btn btn-primary w-100">
+                                                        Agregar Banco
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+
+                                <div class="card shadow-sm">
+                                    <div class="card-header bg-info text-white">
+                                        <strong>Mis Cuentas Activas</strong>
+                                    </div>
+                                    <p class="text-muted mb-2">
+                                        La primera transferencia puede demorar más de lo habitual
+                                        hasta
+                                        tanto
+                                        validemos la información.
+                                    </p>
+
+                                    <!-- TABLA -->
+                                    <div class="card-body p-0">
+                                        <table
+                                            class="table table-sm table-hover mb-0">
+                                            <thead style="font-size:0.9rem;">
+                                                <tr>
+                                                    <th>Titular</th>
+                                                    <th>CUIL</th>
+                                                    <th>Banco</th>
+                                                    <th>CBU</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody class="o_casino_bank_table_body"
+                                                style="font-size:0.9rem;"></tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </xpath>
     </template>

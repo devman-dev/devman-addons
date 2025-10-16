@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="0">
+        <!-- Sitios -->
+        <record id="maintenance_site_pergamino" model="maintenance.site">
+            <field name="name">Pergamino</field>
+            <field name="code">PERG</field>
+        </record>
+
+        <record id="maintenance_site_arroyo_dulce" model="maintenance.site">
+            <field name="name">Arroyo Dulce</field>
+            <field name="code">AD</field>
+        </record>
+    </data>
+</odoo>

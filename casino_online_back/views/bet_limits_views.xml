@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Listado -->
+    <record id="view_game_casino_bet_limits_tree" model="ir.ui.view">
+        <field name="name">bet.limits.tree</field>
+        <field name="model">casino.game.bet.limits</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="partner_id" />
+                <field name="company_id" />
+                <field name="limit_daily" />
+                <field name="limit_weekly" />
+                <field name="limit_monthly" />
+                <field name="spent_daily" />
+                <field name="spent_weekly" />
+                <field name="spent_monthly" />
+            </list>
+        </field>
+    </record>
+
+    <!-- Formulario -->
+    <record id="view_game_casino_bet_limits_form" model="ir.ui.view">
+        <field name="name">game.casino.bet.limits.form</field>
+        <field name="model">casino.game.bet.limits</field>
+        <field name="arch" type="xml">
+            <form string="Límites de Apuesta">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="partner_id"
+                                options="{'no_quick_create': True, 'no_create_edit': True}" />
+                            <field name="company_id" readonly="1" />
+                            <field name="currency_id" readonly="1" />
+                        </group>
+                        <group string="Límites">
+                            <field name="limit_daily" />
+                            <field name="limit_weekly" />
+                            <field name="limit_monthly" />
+                        </group>
+                    </group>
+
+                    <group string="Acumulados (solo lectura)">
+                        <field name="spent_daily" readonly="1" />
+                        <field name="spent_weekly" readonly="1" />
+                        <field name="spent_monthly" readonly="1" />
+                    </group>
+
+                    <group string="Mensajes">
+                        <field name="msg_daily" placeholder="Has alcanzado tu límite diario." />
+                        <field name="msg_weekly" placeholder="Has alcanzado tu límite semanal." />
+                        <field name="msg_monthly" placeholder="Has alcanzado tu límite mensual." />
+                    </group>
+
+                    <group string="Marcas de reset">
+                        <field name="last_reset_daily" readonly="1" />
+                        <field name="last_reset_weekly" readonly="1" />
+                        <field name="last_reset_monthly" readonly="1" />
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Search -->
+    <record id="view_game_casino_bet_limits_search" model="ir.ui.view">
+        <field name="name">game.casino.bet.limits.search</field>
+        <field name="model">casino.game.bet.limits</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="partner_id" />
+                <field name="company_id" />
+                <filter string="Con límites" name="has_limits"
+                    domain="['|','|',('limit_daily','&gt;',0),('limit_weekly','&gt;',0),('limit_monthly','&gt;',0)]" />
+            </search>
+        </field>
+    </record>
+
+    <!-- Acción -->
+    <record id="action_bet_limits" model="ir.actions.act_window">
+        <field name="name">Límites de Apuesta</field>
+        <field name="res_model">casino.game.bet.limits</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="view_game_casino_bet_limits_search" />
+        <field name="context">{}</field>
+    </record>
+
+    <!-- Menú (opcional; si ya tenés raíz propia, podés colgarlo allí) -->
+    <!-- <menuitem id="menu_casino_back_root" name="Casino Back" sequence="80" />
+    <menuitem id="menu_bet_limits" name="Límites de Apuesta"
+        parent="menu_casino_back_root" action="action_bet_limits" sequence="10" /> -->
+
+</odoo>

@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- ACCIONES - Deben ir ANTES de las vistas que las referencian -->
+    <record id="maintenance_sector_action" model="ir.actions.act_window">
+        <field name="name">Sectores</field>
+        <field name="res_model">maintenance.sector</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Crear un nuevo sector de mantenimiento
+            </p>
+            <p>
+                Los sectores son áreas específicas dentro de cada sitio.
+            </p>
+        </field>
+    </record>
+
+    <record id="maintenance_site_action" model="ir.actions.act_window">
+        <field name="name">Sitios</field>
+        <field name="res_model">maintenance.site</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Crear un nuevo sitio de mantenimiento
+            </p>
+            <p>
+                Los sitios representan las ubicaciones principales donde se realizan los mantenimientos.
+            </p>
+        </field>
+    </record>
+
+    <!-- Vista List de Maintenance Site -->
+    <record id="maintenance_site_view_list" model="ir.ui.view">
+        <field name="name">maintenance.site.view.list</field>
+        <field name="model">maintenance.site</field>
+        <field name="arch" type="xml">
+            <list string="Sitios de Mantenimiento">
+                <field name="name"/>
+                <field name="code"/>
+                <field name="sector_count" string="Sectores"/>
+                <field name="company_id" groups="base.group_multi_company"/>
+                <field name="active" widget="boolean_toggle"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Vista Form de Maintenance Site -->
+    <record id="maintenance_site_view_form" model="ir.ui.view">
+        <field name="name">maintenance.site.view.form</field>
+        <field name="model">maintenance.site</field>
+        <field name="arch" type="xml">
+            <form string="Sitio de Mantenimiento">
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="%(maintenance_sector_action)d" 
+                                type="action" 
+                                class="oe_stat_button" 
+                                icon="fa-map-marker"
+                                context="{'default_site_id': id}">
+                            <field name="sector_count" widget="statinfo" string="Sectores"/>
+                        </button>
+                    </div>
+                    <widget name="web_ribbon" title="Archivado" bg_color="text-bg-danger" invisible="active"/>
+                    <div class="oe_title">
+                        <label for="name" string="Sitio"/>
+                        <h1>
+                            <field name="name" placeholder="ej. Pergamino"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="code" placeholder="ej. PERG"/>
+                            <field name="company_id" options="{'no_create': True}" groups="base.group_multi_company"/>
+                        </group>
+                        <group>
+                            <field name="active" widget="boolean_toggle"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Sectores" name="sectors">
+                            <field name="sector_ids" context="{'default_site_id': id}">
+                                <list editable="bottom">
+                                    <field name="name"/>
+                                    <field name="code"/>
+                                    <field name="description"/>
+                                    <field name="active" widget="boolean_toggle"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Vista List de Maintenance Sector -->
+    <record id="maintenance_sector_view_list" model="ir.ui.view">
+        <field name="name">maintenance.sector.view.list</field>
+        <field name="model">maintenance.sector</field>
+        <field name="arch" type="xml">
+            <list string="Sectores de Mantenimiento">
+                <field name="name"/>
+                <field name="code"/>
+                <field name="site_id"/>
+                <field name="company_id" groups="base.group_multi_company"/>
+                <field name="active" widget="boolean_toggle"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Vista Form de Maintenance Sector -->
+    <record id="maintenance_sector_view_form" model="ir.ui.view">
+        <field name="name">maintenance.sector.view.form</field>
+        <field name="model">maintenance.sector</field>
+        <field name="arch" type="xml">
+            <form string="Sector de Mantenimiento">
+                <sheet>
+                    <widget name="web_ribbon" title="Archivado" bg_color="text-bg-danger" invisible="active"/>
+                    <div class="oe_title">
+                        <label for="name" string="Sector"/>
+                        <h1>
+                            <field name="name" placeholder="ej. Producción"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="code" placeholder="ej. PROD"/>
+                            <field name="site_id" options="{'no_create': True}"/>
+                        </group>
+                        <group>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                            <field name="active" widget="boolean_toggle"/>
+                        </group>
+                    </group>
+                    <group>
+                        <field name="description" placeholder="Descripción del sector..." nolabel="1"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Menús -->
+    <menuitem id="maintenance_site_menu"
+              name="Sitios"
+              parent="maintenance.menu_maintenance_configuration"
+              action="maintenance_site_action"
+              sequence="25"/>
+
+    <menuitem id="maintenance_sector_menu"
+              name="Sectores"
+              parent="maintenance.menu_maintenance_configuration"
+              action="maintenance_sector_action"
+              sequence="26"/>
+
+</odoo>

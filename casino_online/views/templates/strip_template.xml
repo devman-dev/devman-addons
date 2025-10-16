@@ -3,7 +3,8 @@
     <template id="product_skip" inherit_id="website_sale.product">
         <xpath expr="//div[@id='o_wsale_cta_wrapper']" position="replace">
         </xpath>
-        <xpath expr="//div[contains(@class, 'js_product') and contains(@class, 'js_main_product') and contains(@class, 'mb-3')]" position="replace">
+        <xpath expr="//div[contains(@class, 'js_product') and contains(@class, 'js_main_product') and contains(@class, 'mb-3')]"
+               position="replace">
 
         </xpath>
 
@@ -13,12 +14,32 @@
         </xpath>
     </template>
     <template id="product_price_item_skip" inherit_id="website_sale.products_item">
-        <xpath expr="//div[contains(@class, 'o_wsale_product_sub') and contains(@class, 'd-flex') and contains(@class, 'justify-content-between')]" position="replace">
+        <xpath expr="//div[contains(@class, 'o_wsale_product_sub') and contains(@class, 'd-flex') and contains(@class, 'justify-content-between')]"
+               position="replace">
 
         </xpath>
     </template>
     <template id="sort_filter_skip" inherit_id="website_sale.sort">
         <xpath expr="//div" position="replace">
         </xpath>
+    </template>
+
+    <template id="disable_portal_categories" inherit_id="portal.portal_my_home">
+        <!-- Anula las condiciones t-if para que no se muestren -->
+        <xpath expr="//div[@id='portal_alert_category']" position="attributes">
+            <attribute name="t-if">False</attribute>
+        </xpath>
+        <xpath expr="//div[@id='portal_client_category']" position="attributes">
+            <attribute name="t-if">False</attribute>
+        </xpath>
+        <xpath expr="//div[@id='portal_service_category']" position="attributes">
+            <attribute name="t-if">False</attribute>
+        </xpath>
+        <xpath expr="//div[@id='portal_vendor_category']" position="attributes">
+            <attribute name="t-if">False</attribute>
+        </xpath>
+
+        <!-- Oculta la categoría común -->
+        <xpath expr="//div[@id='portal_common_category']" position="replace"/>
     </template>
 </odoo>

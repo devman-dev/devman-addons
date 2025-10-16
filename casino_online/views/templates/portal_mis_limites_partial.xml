@@ -1,0 +1,189 @@
+<odoo>
+    <!-- <template t-name="casino_online.portal_mis_limites_partial">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h3 class="card-title mb-0">Límites de Depósito</h3>
+            </div>
+
+            <div class="card-body">
+                <form action="/my/mis_limites" method="post" class="oe_portal_form">
+                    <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()" />
+                    <div class="form-group mb-4">
+                        <label for="daily_limit" class="form-label">Límite diario de depósito (USD)</label>
+                        <div class="input-group">
+                            <span class="input-group-text">$</span>
+                            <input type="number" step="1" min="10"
+                                name="daily_limit" id="daily_limit"
+                                inputmode="numeric" pattern="\d*"
+                                class="form-control"
+                                required="required"
+                                t-att-value="int(daily_limit) if daily_limit else ''" />
+                        </div>
+                    </div>
+
+                    <div class="form-group mb-4">
+                        <label for="weekly_limit" class="form-label">Límite semanal de depósito
+                            (USD)</label>
+                        <div class="input-group">
+                            <span class="input-group-text">$</span>
+                            <input type="number" step="1" min="10"
+                                name="weekly_limit" id="weekly_limit"
+                                inputmode="numeric" pattern="\d*"
+                                class="form-control"
+                                required="required"
+                                t-att-value="int(weekly_limit) if weekly_limit else ''" />
+                        </div>
+                    </div>
+
+                    <div class="form-group mb-4">
+                        <label for="monthly_limit" class="form-label">Límite mensual de depósito
+                            (USD)</label>
+                        <div class="input-group">
+                            <span class="input-group-text">$</span>
+                            <input type="number" step="1" min="10"
+                                name="monthly_limit" id="monthly_limit"
+                                inputmode="numeric" pattern="\d*"
+                                class="form-control"
+                                required="required"
+                                t-att-value="int(monthly_limit) if monthly_limit else ''" />
+                        </div>
+                    </div>
+
+                    <div class="text-center mt-4">
+                        <button type="submit" class="btn btn-primary btn-lg px-5">
+                            Guardar Límites
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </template> -->
+    <template t-name="casino_online.portal_mis_limites_partial">
+        <t t-set="currency_symbol"
+            t-value="(bl and bl.currency_id and bl.currency_id.symbol) or '$'" />
+        <div class="card mb-4 shadow-sm">
+            <div class="card-header bg-primary text-white">
+                <strong>Límites de Depósito</strong>
+            </div>
+            <div>
+                <form class="card-body mx-auto" style="width:80%; max-width:700px"
+                    action="/my/mis_limites" method="post"
+                    id="bet_limits_form" novalidate="novalidate">
+                    <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()" />
+                    <!-- Ayuda a identificar el registro (opcional, el servidor igual puede usar
+                    get_or_create) -->
+                    <input type="hidden" name="bet_limits_id" t-att-value="bl and bl.id or 0" />
+
+                    <!-- Diario -->
+                    <div class="row align-items-center mb-3">
+                        <label for="limit_daily" class="col-12 col-md-4 col-form-label"> Límite
+                            diario (<t
+                                t-esc="bl and bl.currency_id and bl.currency_id.name or 'USD'" />) </label>
+                        <div class="col-12 col-md-7">
+                            <div class="input-group">
+                                <span class="input-group-text">
+                                    <t t-esc="currency_symbol" />
+                                </span>
+                                <input type="number" min="0" step="0.01"
+                                    class="form-control limit-input"
+                                    id="limit_daily" name="limit_daily"
+                                    t-att-value="('%.2f' % (bl.limit_daily or 0.0))"
+                                    t-att-data-original="('%.2f' % (bl.limit_daily or 0.0))"
+                                    placeholder="0.00" required="required" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Semanal -->
+                    <div class="row align-items-center mb-3">
+                        <label for="limit_weekly" class="col-12 col-md-4 col-form-label"> Límite
+                            semanal (<t
+                                t-esc="bl and bl.currency_id and bl.currency_id.name or 'USD'" />) </label>
+                        <div class="col-12 col-md-7">
+                            <div class="input-group">
+                                <span class="input-group-text">
+                                    <t t-esc="currency_symbol" />
+                                </span>
+                                <input type="number" min="0" step="0.01"
+                                    class="form-control limit-input"
+                                    id="limit_weekly" name="limit_weekly"
+                                    t-att-value="('%.2f' % (bl.limit_weekly or 0.0))"
+                                    t-att-data-original="('%.2f' % (bl.limit_weekly or 0.0))"
+                                    placeholder="0.00" required="required" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Mensual -->
+                    <div class="row align-items-center mb-3">
+                        <label for="limit_monthly" class="col-12 col-md-4 col-form-label"> Límite
+                            mensual (<t
+                                t-esc="bl and bl.currency_id and bl.currency_id.name or 'USD'" />) </label>
+                        <div class="col-12 col-md-7">
+                            <div class="input-group">
+                                <span class="input-group-text">
+                                    <t t-esc="currency_symbol" />
+                                </span>
+                                <input type="number" min="0" step="0.01"
+                                    class="form-control limit-input"
+                                    id="limit_monthly" name="limit_monthly"
+                                    t-att-value="('%.2f' % (bl.limit_monthly or 0.0))"
+                                    t-att-data-original="('%.2f' % (bl.limit_monthly or 0.0))"
+                                    placeholder="0.00" required="required" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="text-center mt-4">
+                        <button type="submit" class="btn text-white px-4" id="btn_save_limits"
+                            style="background-color:#6b4a63; border-radius:2rem;"
+                            disabled="disabled">
+                            Guardar Límites
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <!-- <xpath expr="." position="inside">
+            <script type="text/javascript" src="/casino_online/static/src/js/limits_form.js"></script>
+        </xpath> -->
+
+        <script type="text/javascript"> (function(){ // Locale-aware sin separador de miles y
+            con 2
+            decimales var nf = new Intl.NumberFormat(navigator.language || 'es-AR', {
+            minimumFractionDigits: 2, maximumFractionDigits: 2, useGrouping: false }); function
+            parseLocale(s){ if (s === null || s === undefined)
+            return NaN; s = String(s).trim(); if (!s) return NaN; // Detectar separador decimal de
+            la configuración actual var sample = nf.format(1.1); // "1,10" o "1.10" var dec =
+            sample.match(/[.,]/)?.[0] || '.'; // Normalizar: quitar posibles separadores de miles
+            (aunque no deberíamos tenerlos) var group = (dec === '.') ? ',' : '.'; s = s.replace(new
+            RegExp('\\' + group, 'g'), ''); // Cambiar el separador decimal a punto para Number() if
+            (dec !== '.') s = s.replace(new RegExp('\\' + dec, 'g'), '.'); return Number(s); }
+            function toNumber(v){ return parseLocale(v); } function isValid(n){ return !isNaN(n)
+            &amp;&amp; isFinite(n) &amp;&amp; n &gt;= 0; } function fmt2(n){ return
+            nf.format(Number(n.toFixed(2))); } function refresh(){ var inputs =
+            document.querySelectorAll('#bet_limits_form .limit-input'); var changed = false,
+            allValid = true; inputs.forEach(function(inp){ var val = toNumber(inp.value); var orig =
+            toNumber(inp.getAttribute('data-original')); if(!isValid(val)){ allValid = false;
+            inp.classList.add('is-invalid'); } else { inp.classList.remove('is-invalid'); } //
+            Comparar con 2 decimales if (isValid(val) &amp;&amp; isValid(orig)) { if
+            (Number(val.toFixed(2)) !== Number(orig.toFixed(2))) changed = true; } else { // si
+            alguno es inválido, evitamos habilitar allValid = false; } }); var btn =
+            document.getElementById('btn_save_limits'); if(btn) btn.disabled = !(changed &amp;&amp;
+            allValid); } // Formatear a 2 decimales al salir de cada input (sin miles) function
+            bindFormatOnBlur(){ document.querySelectorAll('#bet_limits_form
+            .limit-input').forEach(function(inp){ inp.addEventListener('blur', function(){ var v =
+            toNumber(inp.value); if (isValid(v)) inp.value = fmt2(v); // fija exactamente 2
+            decimales refresh(); }); }); } document.addEventListener('input', function(ev){
+            if(ev.target &amp;&amp; ev.target.classList.contains('limit-input')) refresh(); });
+            document.addEventListener('DOMContentLoaded', function(){ // Formatea inicial según
+            locale a 2 decimales (evita "2,0") document.querySelectorAll('#bet_limits_form
+            .limit-input').forEach(function(inp){ var v = toNumber(inp.value); if (isValid(v)) {
+            inp.value = fmt2(v); // Alinea también el "original" mostrado (sin cambiar el numérico
+            real) var orig = toNumber(inp.getAttribute('data-original')); if (isValid(orig))
+            inp.setAttribute('data-original', fmt2(orig)); } }); bindFormatOnBlur(); refresh(); });
+            })();
+        </script>
+
+    </template>
+</odoo>

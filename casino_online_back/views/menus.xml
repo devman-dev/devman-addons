@@ -2,26 +2,32 @@
     <menuitem id="menu_casino_root" name="Casino" sequence="10" />
 
     <menuitem id="menu_casino_games"
-              name="Catálogo de Juegos"
-              parent="menu_casino_root"
-              action="product.product_template_action_all"
-              sequence="1" />
+        name="Catálogo de Juegos"
+        parent="menu_casino_root"
+        action="product.product_template_action_all"
+        sequence="1" />
 
-    <menuitem id="menu_casino_sessions2"
-              name="Sesiones de Juego"
-              parent="menu_casino_root"
-              action="action_casino_game_session"
-              sequence="2" />
+    <menuitem id="menu_casino_sessions"
+        name="Sesiones de Juego"
+        parent="menu_casino_root"
+        action="action_casino_game_session"
+        sequence="2" />
 
     <menuitem id="menu_casino_users"
-              name="Usuarios Registrados"
-              parent="menu_casino_root"
-              action="base.action_res_users"
-              sequence="3" />
+        name="Usuarios Registrados"
+        parent="menu_casino_root"
+        action="base.action_res_users"
+        sequence="3" />
 
     <menuitem id="menu_casino_account"
-              name="Cuenta Corriente de Usuarios"
-              parent="menu_casino_root"
-              action="action_casino_account_move_line"
-              sequence="4" />
+        name="Cuenta Corriente de Usuarios"
+        parent="menu_casino_root"
+        action="action_casino_account_move_line"
+        sequence="4" />
+
+    <menuitem id="menu_casino_withdrawals"
+        name="Retiros"
+        parent="menu_casino_root"
+        action="action_casino_game_withdrawals"
+        sequence="5" />
 </odoo>

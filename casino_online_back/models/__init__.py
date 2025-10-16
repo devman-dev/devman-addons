@@ -2,3 +2,8 @@ from . import player
 from . import game
 from . import session
 from . import account_move
+from . import bank
+from . import withdrawals
+from . import bet_limits
+from . import res_partner
+from . import res_company
