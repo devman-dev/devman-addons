@@ -1,0 +1,3 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_historial_progreso,access.historial.progreso,model_slide_historial_progreso,,1,1,1,1
+access_ruta_aprendizaje,access.ruta.aprendizaje,model_slide_ruta_aprendizaje,,1,1,1,1

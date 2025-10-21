@@ -1,0 +1,16 @@
+<odoo>
+    <!-- Crear canal de demostración -->
+    <record id="demo_slide_channel" model="slide.channel">
+        <field name="name">Canal Demo - Aprendizaje Adaptativo</field>
+        <field name="channel_type">documentation</field>
+        <field name="website_published">True</field>
+    </record>
+
+    <!-- Crear ruta de aprendizaje de demostración -->
+    <record id="demo_ruta_aprendizaje" model="slide.ruta.aprendizaje">
+        <field name="user_id" ref="base.user_admin"/>
+        <field name="channel_id" ref="demo_slide_channel"/>
+        <field name="nivel_dificultad">basico</field>
+        <field name="activa">True</field>
+    </record>
+</odoo>
