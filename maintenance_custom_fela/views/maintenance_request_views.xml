@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="maintenance_request_view_form_inherit_fela" model="ir.ui.view">
+        <field name="name">maintenance.request.form.inherit.fela</field>
+        <field name="model">maintenance.request</field>
+        <field name="inherit_id" ref="maintenance.hr_equipment_request_view_form" />
+        <field name="arch" type="xml">
+
+            <!-- Agregar campos Sitio y Sector después de equipment_id -->
+            <xpath expr="//field[@name='equipment_id']" position="after">
+                <field name="site_id"
+                    options="{'no_create': True, 'no_open': True}"
+                    required="1" />
+                <field name="sector_id"
+                    options="{'no_create': True, 'no_open': True}"
+                    context="{'default_site_id': site_id}" />
+            </xpath>
+
+            <!-- Aplicar modifiers sobre campos existentes -->
+            <xpath expr="//field[@name='vendor_id']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+
+            <xpath expr="//field[@name='email_cc']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+
+        </field>
+    </record>
+</odoo>
