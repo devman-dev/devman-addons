@@ -1,0 +1,66 @@
+<odoo>
+    <!-- Vista del formulario del wizard -->
+    <record id="casino_session_report_wizard_form" model="ir.ui.view">
+        <field name="name">casino.session.report.wizard.form</field>
+        <field name="model">casino.session.report.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Reporte de Sesiones de Casino">
+                <group>
+                    <group string="Filtros">
+                        <field name="date_from"/>
+                        <field name="date_to"/>
+                        <field name="user_id"/>
+                        <field name="agent_id"/>
+                        <field name="currency_id" invisible="1"/>
+                    </group>
+                </group>
+                
+                <!-- Mostrar resumen solo si ya se calculó -->
+                <group string="Resumen" invisible="total_games_count == 0">
+                    <group>
+                        <field name="total_rounds"/>
+                        <field name="total_games_count"/>
+                        <field name="total_games_amount"/>
+                        <field name="total_wins_count"/>
+                        <field name="total_wins_amount"/>
+                    </group>
+                    <group>
+                        <field name="total_losses_count"/>
+                        <field name="total_losses_amount"/>
+                        <field name="player_classification"/>
+                    </group>
+                </group>
+                
+                <footer>
+                    <button string="Generar Reporte" 
+                            name="action_generate_report" 
+                            type="object" 
+                            class="btn-primary"/>
+                    <button string="Ver Sesiones" 
+                            name="action_view_sessions" 
+                            type="object" 
+                            class="btn-secondary"
+                            invisible="total_games_count == 0"/>
+                    <button string="Cancelar" 
+                            special="cancel" 
+                            class="btn-secondary"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <!-- Acción del wizard -->
+    <record id="action_casino_session_report_wizard" model="ir.actions.act_window">
+        <field name="name">Reporte de Sesiones de Casino</field>
+        <field name="res_model">casino.session.report.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+
+    <!-- Menú para acceder al wizard -->
+    <menuitem id="menu_casino_session_report"
+              name="Reporte de Sesiones"
+              parent="menu_casino_main"
+              action="action_casino_session_report_wizard"
+              sequence="20"/>
+</odoo>

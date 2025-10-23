@@ -14,6 +14,7 @@ class CasinoGameSession(models.Model):
     TokenLive = fields.Boolean(string='Token Live')
 
     user_id = fields.Many2one('res.users', string='Jugador', required=True)
+    agent_id = fields.Many2one('res.partner', string='Agente', domain=[('is_company', '=', False)])
     start_datetime = fields.Datetime(string='Inicio')
     end_datetime = fields.Datetime(string='Fin')
     initial_balance = fields.Monetary(string='Saldo Inicial')
