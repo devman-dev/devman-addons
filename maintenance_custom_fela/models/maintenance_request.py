@@ -4,7 +4,7 @@ from odoo import api, fields, models
 class MaintenanceRequest(models.Model):
     _inherit = 'maintenance.request'
 
-    # Nuevos campos: Sitio y Sector
+    #Nuevos campos: Sitio y Sector
     site_id = fields.Many2one(
         'maintenance.site',
         string='Sitio',
@@ -28,3 +28,19 @@ class MaintenanceRequest(models.Model):
         else:
             self.sector_id = False
             return {'domain': {'sector_id': []}}
+#Boton finalizar tarea
+    def action_mark_done(self):
+        stage_done = self.env['maintenance.stage'].search([('done', '=', True)], limit=1)
+        for rec in self:
+            if stage_done:
+                rec.stage_id = stage_done.id
+            rec.message_post(body=f"✅ Solicitud marcada como realizada por {self.env.user.name}")
+
+        # 🔁 Redirige a la vista kanban de mantenimiento
+        return {
+            'type': 'ir.actions.act_window',
+            'res_model': 'maintenance.request',
+            'view_mode': 'kanban',
+            'target': 'current',
+            'name': 'Solicitudes de Mantenimiento',
+        }

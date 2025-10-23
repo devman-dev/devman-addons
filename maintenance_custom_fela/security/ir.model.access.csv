@@ -1,3 +1,4 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
 access_maintenance_site_user,access.maintenance.site.user,model_maintenance_site,maintenance.group_equipment_manager,1,1,1,1
 access_maintenance_sector_user,access.maintenance.sector.user,model_maintenance_sector,maintenance.group_equipment_manager,1,1,1,1
+access_maintenance_request_contractor,maintenance.request.contractor,maintenance.model_maintenance_request,maintenance_custom_fela.group_maintenance_contractor,1,0,0,0
