@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <!-- Agregar commission a la pestaña Datos del juego -->
+  <record id="product_template_casino_game_inherit_commission" model="ir.ui.view">
+    <field name="name">product.template.casino.game.inherit.commission</field>
+    <field name="model">product.template</field>
+    <field name="inherit_id" ref="casino_online_back.view_product_form_inherit_casino_game" />
+    <field name="arch" type="xml">
+      <xpath expr="//page[@name='casino_game_data']//field[@name='agency_id']" position="after">
+        <field name="commission" widget="percentage" />
+      </xpath>
+    </field>
+  </record>
+</odoo>

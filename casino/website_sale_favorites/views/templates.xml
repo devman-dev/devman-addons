@@ -1,0 +1,256 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <data>
+    <!-- Template básico de favoritos sin herencia - para evitar problemas de compatibilidad -->
+    <template id="favorite_button_snippet" name="Botón de Favorito">
+      <div class="o_wsf_container">
+        <a t-attf-title="#{_('Marcar como favorito')}"
+          t-att-data-title-on="_('Quitar de favoritos')"
+          t-att-data-title-off="_('Marcar como favorito')"
+          t-att-data-product-id="product_id or (product and product.id)"
+          class="o_wsf_btn o_wsf_toggle btn btn-outline-secondary btn-sm"
+          data-icon-on="wsf-heart"
+          data-icon-off="wsf-heart-o">
+          <i class="fa fa-heart-o o_wsf_icon" />
+          <span class="ml-1">Favorito</span>
+        </a>
+      </div>
+    </template>
+
+    <!-- Página de favoritos simplificada -->
+    <template id="my_favorites_page" name="Mis favoritos">
+      <html>
+        <head>
+          <meta charset="UTF-8" />
+          <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+          <title>Mis Favoritos</title>
+          <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css"
+            rel="stylesheet" />
+          <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+            rel="stylesheet" />
+        </head>
+        <body>
+          <div class="container mt-4">
+            <div class="row">
+              <div class="col-12">
+                <h3>
+                  <i class="fa fa-heart text-danger" /> Mis productos favoritos </h3>
+                <hr />
+              </div>
+            </div>
+
+            <t t-if="not products">
+              <div class="alert alert-info">
+                <p>Aún no has marcado productos como favoritos.</p>
+                <p>
+                  <a href="/shop" class="btn btn-primary">Explorar tienda</a>
+                </p>
+              </div>
+            </t>
+
+            <t t-if="products">
+              <div class="row">
+                <t t-foreach="products" t-as="product">
+                  <div class="col-md-3 col-sm-6 mb-4">
+                    <div class="card h-100">
+                      <t t-if="product.image_1920">
+                        <img
+                          t-attf-src="/web/image/product.template/#{product.id}/image_1920/300x300"
+                          class="card-img-top"
+                          t-att-alt="product.name"
+                          style="height: 200px; object-fit: cover;" />
+                      </t>
+                      <div class="card-body">
+                        <h6 class="card-title">
+                          <a t-attf-href="/shop/product/#{product.id}"
+                            t-esc="product.name" />
+                        </h6>
+                        <p class="card-text">
+                          <span class="h5 text-primary" t-esc="product.list_price" />
+                        </p>
+                      </div>
+                      <div class="card-footer">
+                        <button class="o_wsf_toggle btn btn-outline-danger btn-sm"
+                          t-att-data-product-id="product.id">
+                          <i class="fa fa-heart" /> Quitar de favoritos </button>
+                      </div>
+                    </div>
+                  </div>
+                </t>
+              </div>
+            </t>
+          </div>
+        </body>
+      </html>
+    </template>
+
+    <!-- Template JavaScript injection - Version simplificada sin dependencias Odoo -->
+    <template id="favorite_js_injection" name="Favorite JS Injection">
+      <script>
+        <![CDATA[
+        // Script completamente independiente - sin dependencias Odoo
+        (function() {
+          'use strict';
+          
+          // Evitar ejecución múltiple
+          if (window.favoritesLoaded) return;
+          window.favoritesLoaded = true;
+          
+          console.log('🎯 Cargando favoritos...');
+          
+          function initFavorites() {
+            // Buscar elementos de productos de diferentes maneras
+            let productSelectors = [
+              '[data-oe-model="product.template"]',
+              '.oe_product',
+              '[data-product-template-id]',
+              '.o_wsale_product_grid_wrapper [itemscope]'
+            ];
+            
+            let productItems = [];
+            productSelectors.forEach(selector => {
+              const items = document.querySelectorAll(selector + ':not(.favorite-processed)');
+              productItems = productItems.concat(Array.from(items));
+            });
+            
+            // Eliminar duplicados para evitar procesar el mismo producto varias veces
+            productItems = [...new Set(productItems)];
+            
+            console.log('📦 Productos encontrados:', productItems.length);
+            
+            const productData = productItems.map(item => {
+                let productId = item.getAttribute('data-oe-id') ||
+                                item.getAttribute('data-product-template-id') ||
+                                item.getAttribute('data-product-id');
+                if (!productId) {
+                    const productLink = item.querySelector('a[href*="/shop/product/"]');
+                    if (productLink) {
+                        const match = productLink.href.match(/\/shop\/product\/(\d+)/);
+                        if (match) productId = match[1];
+                    }
+                }
+                return { item, productId: parseInt(productId) };
+            }).filter(p => p.productId);
+
+            const productIds = productData.map(p => p.productId);
+            if (productIds.length === 0) {
+                console.log('🎉 No se encontraron productos para procesar.');
+                return;
+            }
+
+            // Obtener CSRF token si existe
+            const csrfToken = document.querySelector('meta[name="csrf-token"]');
+            const headers = { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' };
+            if (csrfToken) { headers['X-CSRFToken'] = csrfToken.getAttribute('content'); }
+
+            // 1. Obtener el estado inicial de todos los productos
+            fetch('/shop/favorites/status', {
+                method: 'POST',
+                headers: headers,
+                body: JSON.stringify({ params: { product_ids: productIds } })
+            })
+            .then(response => response.ok ? response.json() : Promise.reject('Error fetching status'))
+            .then(data => {
+                const favoritesStatus = data.result || {};
+                console.log('ℹ️ Estado inicial de favoritos:', favoritesStatus);
+
+                // 2. Procesar y crear cada botón con su estado correcto
+                productData.forEach(({ item, productId }, index) => {
+                    if (item.querySelector('.favorite-btn')) return; // Ya procesado
+                    if (document.querySelector(`.favorite-btn[data-product-id="${productId}"]`)) return;
+                    item.classList.add('favorite-processed');
+
+                    const isFavorited = favoritesStatus[productId] === true;
+
+                    const favoriteBtn = document.createElement('button');
+                    favoriteBtn.className = 'favorite-btn';
+                    favoriteBtn.setAttribute('data-product-id', productId);
+                    
+                    // Estilos
+                    Object.assign(favoriteBtn.style, {
+                        position: 'absolute', top: '8px', right: '8px', zIndex: '1000',
+                        background: 'rgba(255,255,255,0.95)', border: '1px solid #dc3545',
+                        borderRadius: '50%', width: '32px', height: '32px', fontSize: '16px',
+                        cursor: 'pointer', display: 'flex', alignItems: 'center',
+                        justifyContent: 'center', transition: 'all 0.2s', color: '#dc3545'
+                    });
+
+                    // Función para actualizar la UI del botón
+                    const updateButtonUI = (isFav) => {
+                        if (isFav) {
+                            favoriteBtn.innerHTML = '♥';
+                            favoriteBtn.title = 'Quitar de favoritos';
+                            favoriteBtn.style.background = 'rgba(220,53,69,0.1)';
+                        } else {
+                            favoriteBtn.innerHTML = '♡';
+                            favoriteBtn.title = 'Marcar como favorito';
+                            favoriteBtn.style.background = 'rgba(255,255,255,0.95)';
+                        }
+                    };
+
+                    updateButtonUI(isFavorited); // Establecer estado inicial
+
+                    if (getComputedStyle(item).position === 'static') {
+                        item.style.position = 'relative';
+                    }
+                    item.appendChild(favoriteBtn);
+
+                    // Evento click
+                    favoriteBtn.addEventListener('click', function(e) {
+                        e.preventDefault(); e.stopPropagation();
+                        this.disabled = true; this.style.opacity = '0.6';
+
+                        fetch('/shop/favorite/toggle', {
+                            method: 'POST', headers: headers,
+                            body: JSON.stringify({ params: { product_id: productId } })
+                        })
+                        .then(response => response.ok ? response.json() : Promise.reject(response))
+                        .then(data => {
+                            if (data.result) {
+                                updateButtonUI(data.result.favorited);
+                            }
+                        })
+                        .catch(error => {
+                            console.error('❌ Error al cambiar favorito:', error);
+                            if (error.status === 401 || error.status === 403) {
+                                if (confirm('Debes iniciar sesión para usar favoritos. ¿Ir al login?')) {
+                                    window.location.href = '/web/login?redirect=' + encodeURIComponent(window.location.pathname);
+                                }
+                            }
+                        })
+                        .finally(() => {
+                            this.disabled = false; this.style.opacity = '1';
+                        });
+                    });
+                });
+                console.log('🎉 Favoritos inicializados correctamente');
+            })
+            .catch(error => {
+                console.error('❌ Error al inicializar favoritos:', error);
+            });
+          }
+          
+          // Ejecutar cuando el DOM esté listo
+          if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initFavorites);
+          } else {
+            // DOM ya está listo
+            setTimeout(initFavorites, 100);
+          }
+          
+        })();
+        ]]>
+      </script>
+    </template>
+
+    <!-- Inyectar el script solo una vez -->
+    <template id="shop_favorite_script_inject" inherit_id="website.layout"
+      name="Inject Favorite Script">
+      <xpath expr="//body" position="inside">
+        <t t-if="request.httprequest.path.startswith('/shop')">
+          <t t-call="website_sale_favorites.favorite_js_injection" />
+        </t>
+      </xpath>
+    </template>
+  </data>
+</odoo>

@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Extensión de la vista de res.partner -->
+    <record id="view_partner_form_agent_multilevel" model="ir.ui.view">
+        <field name="name">res.partner.form.agent.multilevel</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_partner_form" />
+        <field name="arch" type="xml">
+            <!-- Bandera de Agente/Jugador en la pestaña de Contacto -->
+            <!-- <xpath expr="//field[@name='company_type']" position="after">
+                <group>
+                    <field name="is_agent" />
+                    <field name="is_player" />
+                </group>
+            </xpath> -->
+
+            <!-- Pestaña para configuración de agente -->
+            <xpath expr="//notebook" position="inside">
+                <page string="Agente" invisible="not is_agent">
+                    <group>
+                        <field name="parent_agent_id" options="{'no_open': False}"
+                            domain="[('is_agent','=',True), ('id','!=', id)]" />
+                        <field name="agent_depth" readonly="1" />
+                    </group>
+                    <group string="Subagentes">
+                        <field name="child_agent_ids" context="{'default_is_agent': True}">
+                            <form editable="bottom">
+                                <field name="name" />
+                                <field name="is_agent" />
+                                <field name="parent_agent_id" />
+                                <field name="agent_depth" readonly="1" />
+                            </form>
+                            <form>
+                                <group>
+                                    <field name="name" />
+                                    <field name="is_agent" />
+                                    <field name="parent_agent_id"
+                                        domain="[('is_agent','=',True), ('id','!=', id)]" />
+                                    <field name="agent_depth" readonly="1" />
+                                </group>
+                            </form>
+                        </field>
+                    </group>
+                    <group string="Jugadores a cargo">
+                        <!-- ojo: acá ya habíamos corregido active_id -> id -->
+                        <field name="managed_player_ids"
+                            context="{'default_is_player': True, 'default_agent_id': id}">
+                            <form editable="bottom">
+                                <field name="name" />
+                                <field name="is_player" />
+                                <field name="agent_id" domain="[('is_agent','=',True)]" />
+                            </form>
+                            <form>
+                                <group>
+                                    <field name="name" />
+                                    <field name="is_player" />
+                                    <field name="agent_id" domain="[('is_agent','=',True)]" />
+                                </group>
+                            </form>
+                        </field>
+                    </group>
+                </page>
+
+                <!-- Pestaña para jugador -->
+                <page string="Jugador" invisible="not is_player">
+                    <group>
+                        <field name="agent_id" domain="[('is_agent','=',True)]" />
+                    </group>
+                </page>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Vista adicional de partners con información de agente/jugador -->
+    <record id="view_partner_form_agent_multilevel_info" model="ir.ui.view">
+        <field name="name">res.partner.form.agent.multilevel.info</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_partner_form" />
+        <field name="arch" type="xml">
+            <!-- <xpath expr="//sheet//div[hasclass('oe_button_box')]" position="after">
+                <field name="is_agent"/>
+                <field name="is_player"/>
+                <field name="agent_id" optional="show"/>
+                <field name="parent_agent_id" optional="show"/>
+            </xpath> -->
+            <!-- //tree/field[@name='name'] -->
+            <xpath expr="//notebook" position="inside">
+                <page string="Apuestas">
+                    <!-- Contenedor columna (equivalente a display:flex; flex-direction:column) -->
+                    <div style="display:flex; flex-direction:column; width:100%; gap:8px;">
+
+                        <!-- Fila 1: ocupa todo el ancho -->
+                        <div
+                            style="display: grid;
+                            grid-template-columns: 100px 50px 120px 1fr;
+                            align-items: center;
+                            column-gap: 8px;
+                            width: 100%;">
+                            <label for="is_agent"
+                                style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" />
+                            <field name="is_agent" widget="boolean_toggle" />
+
+                            <label for="parent_agent_id" invisible="not is_agent"
+                                style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" />
+                            <field name="parent_agent_id" optional="show" invisible="not is_agent" />
+                        </div>
+
+                        <div
+                            style="display: grid;
+                            grid-template-columns: 100px 50px 120px 1fr;
+                            align-items: center;
+                            column-gap: 8px;
+                            width: 100%;">
+                            <label for="is_player"
+                                style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" />
+                            <field name="is_player" widget="boolean_toggle" />
+
+                            <label for="agent_id" invisible="not is_player"
+                                style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" />
+                            <field name="agent_id" optional="show" invisible="not is_player" />
+                        </div>
+
+                        <!-- Fila 2 -->
+                        <!-- <div
+                            style="display: grid;
+                            grid-template-columns: 20px 5px 20px 1fr;
+                            align-items: center;
+                            column-gap: 8px;
+                            width: 100%;">
+                            <label for="is_player"
+                                style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" />
+                                <field name="is_player" widget="boolean_toggle" />
+                                
+                                
+                                <div class="o_col-3" invisible="not is_player">
+                                    <label for="agent_id" />
+                                </div>
+                                <div class="o_col-3" invisible="not is_player">
+                                    <field name="agent_id" optional="show" />
+                                </div>
+                            </div>
+                        </div> -->
+
+                    </div>
+
+
+                </page>
+            </xpath>
+        </field>
+    </record>
+</odoo>

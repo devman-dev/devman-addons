@@ -1,0 +1,1772 @@
+/* ===== ORGANIGRAMA DE AGENTES - ESTILOS COMPLETOS ===== */
+
+/* Vista Kanban Personalizada */
+.o_agent_hierarchy_kanban {
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    min-height: 100vh;
+    padding: 20px;
+}
+
+/* Tarjetas de agentes en kanban */
+.agent-hierarchy-card {
+    background: white;
+    border: 2px solid #e9ecef;
+    border-radius: 15px;
+    padding: 0;
+    margin-bottom: 20px;
+    overflow: hidden;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    position: relative;
+}
+
+.agent-hierarchy-card:hover {
+    transform: translateY(-8px) scale(1.02);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
+    border-color: #007bff;
+}
+
+/* Estilo por nivel jerárquico */
+.agent-hierarchy-card[data-level="0"] {
+    border-left: 6px solid #007bff;
+    background: linear-gradient(145deg, #ffffff 0%, #f8f9ff 100%);
+}
+
+.agent-hierarchy-card[data-level="1"] {
+    border-left: 6px solid #17a2b8;
+    background: linear-gradient(145deg, #ffffff 0%, #f0fdff 100%);
+}
+
+.agent-hierarchy-card[data-level="2"] {
+    border-left: 6px solid #28a745;
+    background: linear-gradient(145deg, #ffffff 0%, #f0fff4 100%);
+}
+
+.agent-hierarchy-card[data-level="3"] {
+    border-left: 6px solid #ffc107;
+    background: linear-gradient(145deg, #ffffff 0%, #fffef0 100%);
+}
+
+/* Header de la tarjeta */
+.agent-card-header {
+    background: linear-gradient(90deg, rgba(0, 123, 255, 0.1) 0%, rgba(0, 123, 255, 0.05) 100%);
+    padding: 15px 20px 10px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.agent-info .agent-name {
+    margin: 0 0 8px 0;
+    color: #2c3e50;
+    font-size: 1.1em;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+}
+
+.agent-badges {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+.agent-badges .badge {
+    font-size: 0.75em;
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-weight: 500;
+}
+
+.badge-primary {
+    background: #007bff;
+    color: white;
+}
+
+.badge-success {
+    background: #28a745;
+    color: white;
+}
+
+.badge-info {
+    background: #17a2b8;
+    color: white;
+}
+
+/* Cuerpo de la tarjeta */
+.agent-card-body {
+    padding: 15px 20px 20px;
+}
+
+.hierarchy-info {
+    margin-bottom: 10px;
+}
+
+.stat-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 12px;
+    background: rgba(0, 123, 255, 0.05);
+    border-radius: 8px;
+    margin-bottom: 6px;
+    font-size: 0.9em;
+    font-weight: 500;
+}
+
+.stat-item i {
+    width: 16px;
+    text-align: center;
+}
+
+/* Conector visual de jerarquía */
+.hierarchy-connector {
+    position: absolute;
+    top: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.connector-line {
+    width: 2px;
+    height: 20px;
+    background: linear-gradient(to bottom, #007bff, transparent);
+    border-radius: 1px;
+}
+
+/* ===== WIDGET INTERACTIVO DE ORGANIGRAMA ===== */
+
+/* Contenedor principal del widget */
+.o_agent_hierarchy {
+    padding: 20px;
+    height: 100vh;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.o_hierarchy_view {
+    background: white;
+    border-radius: 15px;
+    padding: 30px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    max-height: calc(100vh - 200px);
+}
+
+/* Panel de control */
+.o_control_panel {
+    background: white;
+    border-radius: 12px;
+    padding: 20px;
+    /* box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1); */
+    /* margin-bottom: 25px; */
+    /* border-left: 5px solid #007bff; */
+}
+
+.o_control_panel h2 {
+    color: #2c3e50;
+    font-weight: 700;
+    margin: 0;
+}
+
+.o_content_custom {
+    margin-top: 20px;
+}
+
+/* Contenedor de jerarquía interactiva */
+.hierarchy-container {
+    display: flex;
+    flex-direction: column;
+    gap: 50px;
+    align-items: center;
+}
+
+/* Branch de agente con conexiones */
+.agent-branch {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    width: 100%;
+}
+
+/* Tarjetas interactivas */
+.agent-card {
+    background: white;
+    border: 3px solid transparent;
+    border-radius: 20px;
+    padding: 25px;
+    cursor: pointer;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    min-width: 280px;
+    max-width: 380px;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+    position: relative;
+    overflow: hidden;
+}
+
+.agent-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #007bff, #17a2b8);
+    transform: scaleX(0);
+    transition: transform 0.3s ease;
+}
+
+.agent-card:hover::before {
+    transform: scaleX(1);
+}
+
+.agent-card:hover {
+    transform: translateY(-10px) scale(1.05);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+    border-color: #007bff;
+}
+
+/* Tipos de agente */
+.root-agent {
+    background: linear-gradient(145deg, #ffffff 0%, #f8f9ff 100%);
+    border-color: #007bff;
+}
+
+.root-agent:hover {
+    background: linear-gradient(145deg, #f8f9ff 0%, #e3f2fd 100%);
+}
+
+.sub-agent {
+    background: linear-gradient(145deg, #ffffff 0%, #f0fdff 100%);
+    border-color: #17a2b8;
+}
+
+.sub-agent:hover {
+    background: linear-gradient(145deg, #f0fdff 0%, #e0f7fa 100%);
+}
+
+/* Header de agente */
+.agent-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 15px;
+    margin-bottom: 15px;
+}
+
+.agent-details h4,
+.agent-details h5 {
+    margin: 0 0 5px 0;
+    color: #2c3e50;
+    line-height: 1.3;
+}
+
+.agent-details h4 {
+    font-size: 1.3em;
+    font-weight: 700;
+}
+
+.agent-details h5 {
+    font-size: 1.1em;
+    font-weight: 600;
+}
+
+.agent-details small {
+    font-size: 0.85em;
+    color: #6c757d;
+    font-weight: 500;
+}
+
+/* Contenedores de sub-elementos */
+.sub-agents-container,
+.players-container {
+    margin-top: 30px;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.sub-agents-grid {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 25px;
+    margin-top: 25px;
+    width: 100%;
+}
+
+/* Información de jugadores */
+.players-section {
+    margin-top: 15px;
+    padding: 12px 16px;
+    background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+    border-radius: 10px;
+    border: 1px solid #28a745;
+    box-shadow: 0 2px 8px rgba(40, 167, 69, 0.2);
+}
+
+.players-info {
+    padding: 18px 24px;
+    background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+    border-radius: 12px;
+    border: 2px solid #28a745;
+    display: flex;
+    align-items: center;
+    margin-top: 20px;
+    box-shadow: 0 4px 15px rgba(40, 167, 69, 0.2);
+}
+
+/* Líneas de conexión jerárquica */
+.hierarchy-line {
+    width: 3px;
+    height: 40px;
+    background: linear-gradient(to bottom, #007bff, #17a2b8, #28a745);
+    margin: 15px 0;
+    border-radius: 2px;
+    box-shadow: 0 2px 8px rgba(0, 123, 255, 0.3);
+}
+
+/* Estado de carga */
+.fa-spinner {
+    color: #007bff;
+}
+
+/* Vista vacía */
+.o_view_nocontent {
+    text-align: center;
+    color: #6c757d;
+    /* padding: 60px 20px; */
+}
+
+.o_view_nocontent .fa-users {
+    color: #dee2e6;
+    /* margin-bottom: 20px; */
+}
+
+.o_view_nocontent h3 {
+    color: #495057;
+    margin-bottom: 15px;
+    font-weight: 600;
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+    .sub-agents-grid {
+        gap: 20px;
+    }
+
+    .agent-card {
+        min-width: 250px;
+        max-width: 320px;
+    }
+}
+
+@media (max-width: 768px) {
+    .sub-agents-grid {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .agent-card {
+        min-width: 220px;
+        max-width: 300px;
+        padding: 20px;
+    }
+
+    .o_agent_hierarchy {
+        padding: 15px;
+    }
+
+    .o_hierarchy_view {
+        padding: 20px;
+    }
+
+    .hierarchy-container {
+        gap: 30px;
+    }
+}
+
+/* Animaciones */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateX(-20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.agent-card {
+    animation: fadeInUp 0.6s ease-out;
+}
+
+.stat-item {
+    animation: slideIn 0.4s ease-out;
+}
+
+/* Iconos con colores específicos */
+.fa-user-circle {
+    color: #007bff;
+}
+
+.fa-user {
+    color: #17a2b8;
+}
+
+.fa-gamepad {
+    color: #28a745;
+}
+
+.fa-users {
+    color: #6f42c1;
+}
+
+.fa-sitemap {
+    color: #fd7e14;
+}
+
+/* Efectos de hover avanzados */
+.agent-hierarchy-card:hover .agent-name {
+    color: #007bff;
+}
+
+.agent-card:hover .agent-details h4,
+.agent-card:hover .agent-details h5 {
+    color: #007bff;
+}
+
+/* Agrupación por columnas en kanban */
+.o_kanban_group {
+    min-width: 300px;
+    margin-right: 20px;
+}
+
+.o_kanban_group .o_kanban_header_title {
+    background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+    color: white;
+    padding: 15px;
+    border-radius: 10px 10px 0 0;
+    font-weight: 600;
+    text-align: center;
+    box-shadow: 0 2px 10px rgba(0, 123, 255, 0.3);
+}
+
+/* Panel de estadísticas */
+.stat-box {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 15px;
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 8px;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.stat-box i {
+    font-size: 1.2em;
+}
+
+.stat-box strong {
+    font-size: 1.1em;
+    font-weight: 700;
+}
+
+.stat-box span {
+    font-size: 0.85em;
+    color: #6c757d;
+}
+
+/* Botones de acción en tarjetas */
+.agent-actions {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+.agent-actions .btn {
+    font-size: 0.8em;
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-weight: 500;
+}
+
+/* Tercer nivel de agentes */
+.sub-sub-agents {
+    padding: 10px;
+    background: rgba(0, 123, 255, 0.05);
+    border-radius: 8px;
+    border: 1px solid rgba(0, 123, 255, 0.1);
+}
+
+.small-hierarchy-line {
+    width: 2px;
+    height: 15px;
+    background: linear-gradient(to bottom, #17a2b8, #28a745);
+    margin: 5px auto;
+    border-radius: 1px;
+}
+
+.mini-agent-card {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 10px;
+    background: white;
+    border: 1px solid #e9ecef;
+    border-radius: 6px;
+    margin-bottom: 4px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 0.85em;
+}
+
+.mini-agent-card:hover {
+    background: #f8f9fa;
+    border-color: #007bff;
+    transform: translateX(5px);
+}
+
+.mini-agent-card i {
+    color: #17a2b8;
+}
+
+/* Mejoras responsive adicionales */
+@media (max-width: 576px) {
+    .o_control_panel .d-flex {
+        flex-direction: column;
+        gap: 15px;
+        align-items: stretch !important;
+    }
+
+    .stat-box-parent {
+        height: 0px;
+        visibility: hidden;
+    }
+
+    .o_control_panel .d-flex>div:first-child {
+        text-align: center;
+    }
+
+    .o_control_panel .d-flex .d-flex {
+        justify-content: center;
+    }
+
+    .stat-box {
+        justify-content: center;
+    }
+
+    .agent-actions {
+        justify-content: center;
+    }
+}
+
+/* Estados de hover mejorados */
+.agent-card:hover .agent-actions .btn {
+    opacity: 1;
+    transform: scale(1.05);
+}
+
+.agent-actions .btn {
+    opacity: 0.8;
+    transition: all 0.2s ease;
+}
+
+/* Mejoras visuales para jugadores */
+.players-info {
+    align-items: center;
+}
+
+.players-info .btn {
+    transition: all 0.2s ease;
+}
+
+.players-info:hover .btn {
+    transform: scale(1.05);
+}
+
+/* Scrollbar personalizado */
+.o_hierarchy_view::-webkit-scrollbar {
+    width: 12px;
+}
+
+.o_hierarchy_view::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.05);
+    border-radius: 6px;
+    margin: 4px 0;
+}
+
+.o_hierarchy_view::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, #007bff 0%, #17a2b8 100%);
+    border-radius: 6px;
+    border: 2px solid transparent;
+    background-clip: content-box;
+    min-height: 30px;
+}
+
+.o_hierarchy_view::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(180deg, #0056b3 0%, #138496 100%);
+    background-clip: content-box;
+}
+
+.o_hierarchy_view::-webkit-scrollbar-thumb:active {
+    background: linear-gradient(180deg, #004085 0%, #0f6674 100%);
+    background-clip: content-box;
+}
+
+/* Soporte para Firefox */
+.o_hierarchy_view {
+    scrollbar-width: thin;
+    scrollbar-color: #007bff rgba(0, 0, 0, 0.05);
+}
+
+/* Indicador visual de scroll */
+.o_hierarchy_view::before {
+    content: "";
+    position: sticky;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent 0%, #007bff 50%, transparent 100%);
+    z-index: 10;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.o_hierarchy_view:hover::before {
+    opacity: 1;
+}
+
+/* Animaciones avanzadas */
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.05);
+    }
+
+    100% {
+        transform: scale(1);
+    }
+}
+
+.stat-box:hover {
+    animation: pulse 0.3s ease;
+}
+
+/* Efectos de entrada escalonados */
+.agent-card:nth-child(1) {
+    animation-delay: 0.1s;
+}
+
+.agent-card:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.agent-card:nth-child(3) {
+    animation-delay: 0.3s;
+}
+
+.agent-card:nth-child(4) {
+    animation-delay: 0.4s;
+}
+
+.agent-card:nth-child(5) {
+    animation-delay: 0.5s;
+}
+
+/* ===== ESTILOS PARA ORGANIGRAMA HORIZONTAL POR NIVELES ===== */
+
+/* Contenedor de niveles horizontales */
+.hierarchy-levels-container {
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+    padding: 20px 0;
+    width: 100%;
+    min-height: fit-content;
+}
+
+.hierarchy-level {
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 15px;
+    padding: 20px;
+    box-shadow: 0 6px 25px rgba(0, 0, 0, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    position: relative;
+    overflow: hidden;
+    animation: levelSlideIn 0.6s ease-out;
+}
+
+.hierarchy-level.level-0 {
+    border-left: 4px solid #007bff;
+    background: linear-gradient(145deg, rgba(0, 123, 255, 0.05), rgba(255, 255, 255, 0.95));
+}
+
+.hierarchy-level.level-1 {
+    border-left: 4px solid #17a2b8;
+    background: linear-gradient(145deg, rgba(23, 162, 184, 0.05), rgba(255, 255, 255, 0.95));
+    margin-left: 20px;
+}
+
+.hierarchy-level.level-2 {
+    border-left: 4px solid #28a745;
+    background: linear-gradient(145deg, rgba(40, 167, 69, 0.05), rgba(255, 255, 255, 0.95));
+    margin-left: 40px;
+}
+
+/* Headers de nivel */
+.level-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 2px solid rgba(0, 0, 0, 0.1);
+    position: relative;
+}
+
+.level-header h4,
+.level-header h5 {
+    margin: 0;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.level-badge {
+    font-size: 0.7em;
+    padding: 4px 8px;
+    border-radius: 20px;
+    font-weight: 700;
+}
+
+/* Conector jerárquico */
+.hierarchy-connector {
+    position: absolute;
+    left: -25px;
+    top: -25px;
+    width: 3px;
+    height: 50px;
+    background: linear-gradient(to bottom, #17a2b8, transparent);
+    border-radius: 2px;
+}
+
+.hierarchy-connector.small {
+    height: 35px;
+    background: linear-gradient(to bottom, #28a745, transparent);
+}
+
+/* Filas horizontales de registros */
+.level-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    align-items: stretch;
+}
+
+.level-row.players-row {
+    gap: 12px;
+}
+
+/* Registros de agentes */
+.agent-record {
+    flex: 1;
+    min-width: 280px;
+    max-width: 350px;
+    background: white;
+    border: 2px solid #e9ecef;
+    border-radius: 12px;
+    overflow: hidden;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: pointer;
+    animation: recordFadeIn 0.5s ease-out;
+}
+
+.agent-record:hover {
+    transform: translateY(-3px) scale(1.02);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    border-color: #007bff;
+}
+
+.agent-record.root-record {
+    border-color: #007bff;
+    border-width: 2px;
+}
+
+.agent-record.root-record:hover {
+    border-color: #0056b3;
+    box-shadow: 0 8px 25px rgba(0, 123, 255, 0.2);
+}
+
+.agent-record.sub-record {
+    border-color: #17a2b8;
+}
+
+.agent-record.sub-record:hover {
+    border-color: #138496;
+    box-shadow: 0 8px 25px rgba(23, 162, 184, 0.2);
+}
+
+/* Header de registro */
+.record-header {
+    padding: 15px;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+}
+
+.agent-avatar,
+.player-avatar {
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.2em;
+    flex-shrink: 0;
+}
+
+.agent-avatar.bg-primary {
+    background: linear-gradient(135deg, #007bff, #0056b3);
+}
+
+.agent-avatar.bg-info {
+    background: linear-gradient(135deg, #17a2b8, #138496);
+}
+
+.player-avatar.bg-success {
+    background: linear-gradient(135deg, #28a745, #1e7e34);
+    width: 40px;
+    height: 40px;
+    font-size: 1em;
+}
+
+/* Información del agente */
+.agent-info,
+.player-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.agent-name,
+.player-name {
+    font-size: 1.1em;
+    font-weight: 600;
+    color: #2c3e50;
+    margin: 0 0 4px 0;
+    line-height: 1.2;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.agent-metrics {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+}
+
+.agent-metrics .badge {
+    font-size: 0.75em;
+    padding: 3px 8px;
+    border-radius: 12px;
+}
+
+.parent-info {
+    color: #6c757d;
+    font-size: 0.8em;
+    margin-top: 2px;
+}
+
+/* Acciones de registro */
+.record-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 0 15px 15px;
+}
+
+.record-actions .btn {
+    font-size: 0.85em;
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    border-width: 1px;
+}
+
+.record-actions .btn:hover {
+    transform: scale(1.05);
+}
+
+/* Registros de jugadores */
+.player-record {
+    flex: 1;
+    min-width: 250px;
+    max-width: 280px;
+    background: white;
+    border: 2px solid #28a745;
+    border-radius: 10px;
+    overflow: hidden;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: pointer;
+    animation: recordFadeIn 0.5s ease-out;
+}
+
+.player-record:hover {
+    transform: translateY(-2px) scale(1.01);
+    box-shadow: 0 6px 20px rgba(40, 167, 69, 0.2);
+    border-color: #1e7e34;
+}
+
+.player-record .record-header {
+    padding: 12px 15px;
+}
+
+.player-record .record-actions {
+    flex-direction: row;
+    padding: 0 15px 12px;
+    gap: 6px;
+}
+
+.player-record .record-actions .btn {
+    flex: 1;
+    font-size: 0.8em;
+    padding: 4px 8px;
+}
+
+/* Animaciones */
+@keyframes levelSlideIn {
+    from {
+        opacity: 0;
+        transform: translateX(-50px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes recordFadeIn {
+    from {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* Responsive para niveles horizontales */
+@media (max-width: 1200px) {
+    .agent-record {
+        min-width: 250px;
+        max-width: 300px;
+    }
+
+    .player-record {
+        min-width: 220px;
+        max-width: 250px;
+    }
+}
+
+@media (max-width: 768px) {
+    .o_agent_hierarchy {
+        padding: 10px;
+        height: 100vh;
+    }
+
+    .o_hierarchy_view {
+        padding: 15px;
+        max-height: calc(100vh - 220px);
+        border-radius: 10px;
+    }
+
+    .hierarchy-levels-container {
+        padding: 10px 0;
+        gap: 20px;
+    }
+
+    .hierarchy-level {
+        padding: 15px;
+        margin-left: 0 !important;
+    }
+
+    .level-row {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .agent-record,
+    .player-record {
+        min-width: 100%;
+        max-width: 100%;
+    }
+
+    .record-header {
+        padding: 12px;
+    }
+
+    .record-actions {
+        flex-direction: row;
+        gap: 8px;
+        padding: 0 12px 12px;
+    }
+
+    .level-header {
+        margin-bottom: 15px;
+        padding-bottom: 10px;
+    }
+
+    .level-header h4,
+    .level-header h5 {
+        font-size: 1.1em;
+    }
+}
+
+@media (max-width: 576px) {
+    .o_agent_hierarchy {
+        padding: 8px;
+    }
+
+    .o_hierarchy_view {
+        padding: 10px;
+        max-height: calc(100vh - 310px);
+    }
+
+    .hierarchy-level {
+        padding: 12px;
+    }
+
+    .agent-avatar,
+    .player-avatar {
+        width: 35px;
+        height: 35px;
+        font-size: 1em;
+    }
+
+    .agent-name,
+    .player-name {
+        font-size: 1em;
+    }
+
+    .level-badge {
+        display: none;
+    }
+}
+
+/* Estados especiales */
+.agent-record.no-children {
+    opacity: 0.8;
+}
+
+.agent-record.has-many-children {
+    border-width: 3px;
+}
+
+.level-row:empty::after {
+    content: "Sin registros en este nivel";
+    color: #6c757d;
+    font-style: italic;
+    text-align: center;
+    width: 100%;
+    padding: 20px;
+}
+
+/* ===== ESTILOS PARA ORGANIGRAMA INTERACTIVO TIPO EMPLEADOS ===== */
+
+/* Contenedor principal interactivo */
+.interactive-hierarchy-container {
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+    width: 100%;
+}
+
+/* Grid de agentes principales */
+.root-agents-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+/* Tarjetas interactivas de agentes */
+.agent-card-interactive {
+    background: white;
+    border: 2px solid #e9ecef;
+    border-radius: 12px;
+    padding: 20px;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.agent-card-interactive:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    border-color: #007bff;
+}
+
+.agent-card-interactive.selected {
+    border-color: #007bff;
+    background: linear-gradient(145deg, #f8f9ff 0%, #ffffff 100%);
+    box-shadow: 0 8px 25px rgba(0, 123, 255, 0.2);
+}
+
+/* Contenido de la tarjeta */
+.agent-card-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 15px;
+}
+
+/* Avatar grande */
+.agent-avatar-large {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #007bff, #0056b3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 2em;
+    font-weight: 700;
+    box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
+}
+
+.avatar-letter {
+    font-size: 28px;
+    line-height: 1;
+    margin-bottom: 5px;
+}
+
+/* Detalles principales del agente */
+.agent-details-main {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+}
+
+.agent-title {
+    margin: 0;
+    font-size: 1.3em;
+    font-weight: 600;
+    color: #2c3e50;
+}
+
+.agent-role {
+    margin: 0;
+    color: #6c757d;
+    font-size: 0.9em;
+}
+
+/* Estado online */
+.agent-status {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.status-indicator {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: #28a745;
+    border: 2px solid white;
+    box-shadow: 0 0 0 2px #28a745;
+}
+
+/* Información de subordinados */
+.subordinates-info {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 10px;
+}
+
+.subordinates-count {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #6c757d;
+    font-size: 0.9em;
+}
+
+.expansion-icon {
+    transition: transform 0.3s ease;
+}
+
+.expansion-icon.rotated {
+    transform: rotate(180deg);
+}
+
+/* Línea conectora */
+.connection-line {
+    position: absolute;
+    bottom: -15px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 2px;
+    height: 15px;
+    background: linear-gradient(to bottom, #007bff, transparent);
+}
+
+/* Contenedor de contenido expandible */
+.expanded-content-container {
+    background: rgba(255, 255, 255, 0.9);
+    border: 1px solid #dee2e6;
+    border-radius: 12px;
+    padding: 25px;
+    margin-top: 20px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    animation: expandIn 0.4s ease-out;
+}
+
+@keyframes expandIn {
+    from {
+        opacity: 0;
+        transform: translateY(-20px) scale(0.95);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+/* Header del agente seleccionado */
+.selected-agent-header {
+    border-bottom: 2px solid #e9ecef;
+    padding-bottom: 15px;
+    margin-bottom: 25px;
+}
+
+.back-to-overview {
+    display: flex;
+    align-items: center;
+    color: #007bff;
+    font-weight: 600;
+    font-size: 1.1em;
+}
+
+/* Contenedores de sub-niveles */
+.sub-level-container {
+    margin-bottom: 25px;
+}
+
+.sub-level-title {
+    color: #2c3e50;
+    font-weight: 600;
+    margin-bottom: 15px;
+    border-bottom: 1px solid #e9ecef;
+    padding-bottom: 8px;
+}
+
+/* Contenedor de dos columnas */
+.two-columns-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 30px;
+    margin-top: 20px;
+}
+
+.left-column,
+.right-column {
+    display: flex;
+    flex-direction: column;
+}
+
+/* Columnas de sub-agentes y jugadores */
+.sub-agents-column,
+.players-column {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+/* Filas de sub-agentes y jugadores (legacy - mantenido para compatibilidad) */
+.sub-agents-row,
+.players-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 15px;
+}
+
+/* Contenedores expandibles de sub-agentes */
+.sub-agent-card-expandable {
+    width: 100%;
+    box-sizing: border-box;
+    margin-bottom: 8px;
+    border-radius: 8px;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.sub-agent-card-expandable.expanded {
+    background: rgba(23, 162, 184, 0.05);
+    border: 1px solid rgba(23, 162, 184, 0.2);
+}
+
+/* Tarjetas de sub-agentes */
+.sub-agent-card {
+    background: white;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    padding: 15px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.sub-agent-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    border-color: #17a2b8;
+}
+
+.sub-agent-card-expandable.expanded .sub-agent-card {
+    border-color: #17a2b8;
+    background: linear-gradient(145deg, #ffffff, #f8fdff);
+}
+
+.sub-agent-avatar {
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #17a2b8, #138496);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: 600;
+    font-size: 1.1em;
+}
+
+.sub-agent-info {
+    flex: 1;
+}
+
+.sub-agent-info h6 {
+    margin: 0 0 4px 0;
+    font-size: 1em;
+    color: #2c3e50;
+}
+
+.sub-agent-info small {
+    color: #6c757d;
+    font-size: 0.8em;
+}
+
+.sub-agent-stats {
+    margin-top: 5px;
+}
+
+.sub-agent-actions {
+    display: flex;
+    gap: 5px;
+}
+
+/* Tarjetas de jugadores */
+.player-card {
+    background: white;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    padding: 15px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.player-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    border-color: #28a745;
+}
+
+.player-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #28a745, #1e7e34);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: 600;
+    font-size: 0.9em;
+}
+
+.player-info {
+    flex: 1;
+}
+
+.player-info h6 {
+    margin: 0 0 4px 0;
+    font-size: 0.95em;
+    color: #2c3e50;
+}
+
+.player-info small {
+    color: #6c757d;
+    font-size: 0.8em;
+}
+
+.player-actions {
+    display: flex;
+    gap: 5px;
+}
+
+/* Botón de expansión en sub-agentes */
+.expansion-btn {
+    padding: 4px 8px !important;
+    min-width: auto;
+}
+
+.expansion-chevron {
+    transition: transform 0.3s ease;
+    font-size: 0.8em;
+}
+
+.expansion-chevron.rotated {
+    transform: rotate(180deg);
+}
+
+/* Contenido expandible de sub-agentes */
+.sub-agent-expanded-content {
+    padding: 15px;
+    background: rgba(248, 249, 250, 0.8);
+    border-top: 1px solid #dee2e6;
+    animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        max-height: 0;
+        padding: 0 15px;
+    }
+
+    to {
+        opacity: 1;
+        max-height: 500px;
+        padding: 15px;
+    }
+}
+
+.sub-agent-header {
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #dee2e6;
+}
+
+/* Columnas de sub-sub elementos */
+.sub-sub-columns {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-bottom: 15px;
+}
+
+.sub-sub-left,
+.sub-sub-right {
+    display: flex;
+    flex-direction: column;
+}
+
+.sub-sub-title {
+    font-size: 0.85em;
+    font-weight: 600;
+    margin: 0 0 10px 0;
+    color: #495057;
+    border-bottom: 1px solid #e9ecef;
+    padding-bottom: 5px;
+}
+
+/* Items de sub-sub nivel */
+.sub-sub-items {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.sub-sub-agent-item,
+.sub-sub-player-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 10px;
+    background: white;
+    border: 1px solid #e9ecef;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.sub-sub-agent-item:hover,
+.sub-sub-player-item:hover {
+    background: #f8f9fa;
+    border-color: #17a2b8;
+    transform: translateX(3px);
+}
+
+/* Avatares de sub-sub nivel */
+.sub-sub-avatar {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #ffc107, #fd7e14);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 0.7em;
+    font-weight: 600;
+}
+
+.sub-sub-avatar.player {
+    background: linear-gradient(135deg, #28a745, #20c997);
+}
+
+/* Info de sub-sub nivel */
+.sub-sub-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.sub-sub-name {
+    font-weight: 600;
+    color: #495057;
+    font-size: 0.8em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.sub-sub-info tiny {
+    font-size: 0.7em;
+    color: #6c757d;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Acciones rápidas del sub-agente */
+.sub-agent-quick-actions {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    padding-top: 10px;
+    border-top: 1px solid #dee2e6;
+}
+
+.btn-xs {
+    padding: 4px 8px;
+    font-size: 0.75em;
+    line-height: 1.2;
+}
+
+/* Estados vacíos */
+.empty-state {
+    text-align: center;
+    padding: 30px 15px;
+    background: rgba(248, 249, 250, 0.7);
+    border: 2px dashed #dee2e6;
+    border-radius: 8px;
+    margin-top: 15px;
+}
+
+.empty-state i {
+    opacity: 0.5;
+}
+
+.empty-state p {
+    margin: 0 0 15px 0;
+    font-size: 0.9em;
+}
+
+/* Acciones del agente seleccionado */
+.selected-agent-actions {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    flex-wrap: wrap;
+    padding-top: 20px;
+    border-top: 1px solid #e9ecef;
+    margin-top: 20px;
+}
+
+/* Responsive para organigrama interactivo */
+@media (max-width: 768px) {
+    .root-agents-grid {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+
+    .agent-card-interactive {
+        padding: 15px;
+    }
+
+    .agent-avatar-large {
+        width: 60px;
+        height: 60px;
+        font-size: 1.5em;
+    }
+
+    /* Dos columnas se convierten en una columna en móviles */
+    .two-columns-container {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+
+    .sub-agents-row,
+    .players-row {
+        grid-template-columns: 1fr;
+        gap: 10px;
+    }
+
+    .expanded-content-container {
+        padding: 15px;
+        margin-top: 15px;
+    }
+
+    .selected-agent-actions {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .empty-state {
+        padding: 20px 10px;
+    }
+
+    /* Sub-sub columnas en móvil */
+    .sub-sub-columns {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+
+    .sub-agent-expanded-content {
+        padding: 10px;
+    }
+
+    .sub-agent-quick-actions {
+        flex-direction: column;
+        gap: 6px;
+    }
+}
+
+@media (max-width: 576px) {
+
+    /* Diseño más compacto en móviles pequeños */
+    .two-columns-container {
+        gap: 15px;
+    }
+
+    .sub-agent-card,
+    .player-card {
+        padding: 12px;
+        gap: 8px;
+    }
+
+    .sub-agent-avatar,
+    .player-avatar {
+        width: 35px;
+        height: 35px;
+        font-size: 0.8em;
+    }
+
+    .sub-agent-info h6,
+    .player-info h6 {
+        font-size: 0.9em;
+    }
+
+    .sub-agent-actions,
+    .player-actions {
+        gap: 3px;
+    }
+
+    .sub-agent-actions .btn,
+    .player-actions .btn {
+        padding: 4px 6px;
+        font-size: 0.8em;
+    }
+
+    .empty-state {
+        padding: 15px 8px;
+    }
+
+    .empty-state i {
+        font-size: 2em;
+    }
+
+    /* Tercer nivel en móviles pequeños */
+    .sub-sub-agent-item,
+    .sub-sub-player-item {
+        padding: 6px 8px;
+        gap: 6px;
+    }
+
+    .sub-sub-avatar {
+        width: 24px;
+        height: 24px;
+        font-size: 0.6em;
+    }
+
+    .sub-sub-name {
+        font-size: 0.75em;
+    }
+
+    .sub-sub-info tiny {
+        font-size: 0.65em;
+    }
+
+    .sub-agent-expanded-content {
+        padding: 8px;
+    }
+
+    .sub-sub-title {
+        font-size: 0.8em;
+    }
+}

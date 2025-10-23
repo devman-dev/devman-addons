@@ -1,0 +1,268 @@
+<?xml version="1.0" encoding="utf-8"?>
+<templates xml:space="preserve">
+    <t t-name="agent_multilevel.HierarchyView" owl="1">
+        <div class="o_agent_hierarchy">
+
+            <!-- Panel de Control Avanzado -->
+            <div class="o_control_panel">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <h2 class="mb-1">
+                            <i class="fa fa-sitemap me-2"/>
+                            Organigrama Interactivo de Agentes
+                        </h2>
+                        <p class="text-muted mb-0">Estructura jerárquica completa: Agentes → Subagentes → Jugadores</p>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-outline-primary" t-on-click="() => this.onViewAgentManagement()">
+                            <i class="fa fa-list me-1"/>
+                            Gestión
+                        </button>
+                        <button class="btn btn-success" t-on-click="() => this.onCreateAgent()">
+                            <i class="fa fa-plus me-1"/>
+                            Nuevo Agente
+                        </button>
+                        <button class="btn btn-primary" t-on-click="() => this.onRefresh()">
+                            <i class="fa fa-refresh me-1"/>
+                            Actualizar
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Panel de Estadísticas -->
+                <div class="mt-3 d-flex gap-4 stat-box-parent">
+                    <div class="stat-box">
+                        <i class="fa fa-users text-primary"/>
+                        <strong t-esc="state.statistics.totalAgents"/>
+                        <span>Agentes</span>
+                    </div>
+                    <div class="stat-box">
+                        <i class="fa fa-gamepad text-success"/>
+                        <strong t-esc="state.statistics.totalPlayers"/>
+                        <span>Jugadores</span>
+                    </div>
+                    <div class="stat-box">
+                        <i class="fa fa-sitemap text-info"/>
+                        <strong t-esc="state.statistics.maxDepth + 1"/>
+                        <span>Niveles</span>
+                    </div>
+                    <div class="stat-box">
+                        <i class="fa fa-star text-warning"/>
+                        <strong t-esc="state.statistics.rootAgents"/>
+                        <span>Principales</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Estado de Carga -->
+            <div t-if="state.loading" class="text-center p-5">
+                <i class="fa fa-spinner fa-spin fa-3x text-primary mb-3"/>
+                <h4>Cargando organigrama...</h4>
+                <p class="text-muted">Procesando estructura jerárquica de agentes y jugadores</p>
+            </div>
+
+            <!-- Contenido Principal -->
+            <div t-else="" class="o_content o_content_custom">
+                <div class="o_hierarchy_view">
+                    
+                    <t t-if="state.agents and state.agents.length and this.rootAgents and this.rootAgents.length">
+                        <!-- Organigrama Horizontal con Conexiones -->
+                        <div class="full-width-hierarchy-container">
+
+                            <!-- NIVEL 0: Agentes Principales (Fila Horizontal Completa) -->
+                            <div class="main-agents-row">
+                                <t t-foreach="this.rootAgents" t-as="rootAgent" t-key="rootAgent.id">
+                                    <div class="main-agent-card" 
+                                         t-att-class="this.isAgentExpanded(rootAgent.id) ? 'selected' : ''"
+                                         t-att-data-agent-id="rootAgent.id"
+                                         t-on-click="() => this.onToggleAgent(rootAgent.id)">
+
+                                        <!-- Avatar principal -->
+                                        <div class="main-agent-avatar">
+                                            <span class="avatar-letter" t-esc="rootAgent.name.charAt(0).toUpperCase()"/>
+                                        </div>
+
+                                        <!-- Información del agente -->
+                                        <div class="main-agent-info">
+                                            <h5 class="main-agent-name" t-esc="rootAgent.name"/>
+                                            <p class="main-agent-role">Agente Principal</p>
+
+                                            <!-- Contador de subordinados -->
+                                            <t t-set="subAgents" t-value="this.getSubAgents(rootAgent.id)"/>
+                                            <t t-set="totalPlayers" t-value="(rootAgent.managed_player_ids || []).length"/>
+                                            <t t-set="totalSubordinates" t-value="subAgents.length + totalPlayers"/>
+                                            
+                                            <div class="subordinates-badge" t-if="totalSubordinates > 0">
+                                                <i class="fa fa-chevron-down expansion-arrow" 
+                                                   t-att-class="this.isAgentExpanded(rootAgent.id) ? 'rotated' : ''"/>
+                                                <span t-esc="totalSubordinates"/> personas
+                                            </div>
+                                        </div>
+
+                                        <!-- Indicador de estado online -->
+                                        <div class="main-agent-status">
+                                            <span class="status-dot online"></span>
+                                        </div>
+                                    </div>
+                                </t>
+                            </div>
+
+                            <!-- Subordinados Expandidos Recursivamente -->
+            <t t-if="state.selectedAgent">
+                <t t-set="selectedHierarchy" t-value="this.getCompleteHierarchy(state.selectedAgent)"/>
+
+                                <!-- Llamada recursiva para renderizar todos los niveles -->
+                <t t-call="agent_multilevel.RecursiveHierarchyLevel">
+                    <t t-set="hierarchyData" t-value="selectedHierarchy"/>
+                    <t t-set="parentAgentIndex" t-value="this.rootAgents.findIndex(a => a.id === state.selectedAgent)"/>
+                    <t t-set="totalRootAgents" t-value="this.rootAgents.length"/>
+                </t>
+            </t>
+                        </div>
+                    </t>
+
+                    <!-- Estado Vacío -->
+                    <t t-else="">
+                        <div class="o_view_nocontent text-center p-5">
+                            <div class="o_nocontent_help">
+                                <i class="fa fa-users fa-4x text-muted mb-4"/>
+                                <h3 class="mb-3">¡Bienvenido al Organigrama de Agentes!</h3>
+                                <p class="text-muted mb-4">
+                                    Crea tu primer agente para comenzar a construir la estructura jerárquica de tu organización.
+                                </p>
+                                <div class="d-flex justify-content-center gap-3">
+                                    <button class="btn btn-primary btn-lg" t-on-click="() => this.onCreateAgent()">
+                                        <i class="fa fa-plus me-2"/>
+                                        Crear Primer Agente
+                                    </button>
+                                    <button class="btn btn-outline-secondary btn-lg" t-on-click="() => this.onViewAgentManagement()">
+                                        <i class="fa fa-cog me-2"/>
+                                        Configuración
+                                    </button>
+                                </div>
+                                <div class="mt-4">
+                                    <small class="text-muted">
+                                        <i class="fa fa-info-circle me-1"/>
+                                        Tip: Los agentes pueden tener subagentes y jugadores asignados
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </div>
+            </div>
+        </div>
+    </t>
+
+    <!-- TEMPLATE RECURSIVO PARA MÚLTIPLES NIVELES -->
+    <t t-name="agent_multilevel.RecursiveHierarchyLevel" owl="1">
+        <t t-set="allSubordinates" t-value="hierarchyData.subAgents.concat(hierarchyData.players)"/>
+
+        <!-- Solo mostrar si hay subordinados -->
+        <t t-if="allSubordinates.length > 0">
+            <!-- Estructura de Conexión para este nivel -->
+            <div class="connection-structure" t-att-data-level="hierarchyData.level">
+                <!-- Línea vertical desde el agente padre -->
+                <div class="vertical-connector" 
+                     t-att-style="hierarchyData.level === 0 ? 
+                         'left: ' + (parentAgentIndex * (100 / totalRootAgents) + (50 / totalRootAgents)) + '%' : 
+                         'left: 50%'"></div>
+
+                <!-- Línea horizontal que conecta todos los subordinados de este nivel -->
+                <div class="horizontal-connector"></div>
+
+                <!-- Líneas verticales hacia cada subordinado -->
+                <div class="subordinate-connectors">
+                    <t t-foreach="allSubordinates" t-as="subordinate" t-key="'connector-' + subordinate.id + '-level-' + hierarchyData.level">
+                        <div class="subordinate-connector" 
+                             t-att-style="'left: ' + ((allSubordinates.indexOf(subordinate) + 0.5) * (100 / allSubordinates.length)) + '%'">
+                        </div>
+                    </t>
+                </div>
+            </div>
+
+            <!-- Fila de Subordinados de este nivel -->
+            <div class="subordinates-row" t-att-data-level="hierarchyData.level">
+                <div class="subordinates-grid" t-att-data-level="hierarchyData.level">
+                    <!-- Sub-agentes de este nivel -->
+                    <t t-foreach="hierarchyData.subAgents" t-as="subAgent" t-key="'sub-agent-' + subAgent.id + '-level-' + hierarchyData.level">
+                        <div class="subordinate-card sub-agent-type" 
+                             t-att-class="this.isSubAgentExpanded(subAgent.id) ? 'expanded' : ''"
+                             t-att-data-level="hierarchyData.level"
+                             t-on-click="(event) => this.onToggleSubAgent(subAgent.id, event)">
+                            
+                            <div class="subordinate-avatar sub-agent">
+                                <span t-esc="subAgent.name.charAt(0).toUpperCase()"/>
+                            </div>
+                            
+                            <div class="subordinate-info">
+                                <h6 class="subordinate-name" t-esc="subAgent.name"/>
+                                <p class="subordinate-type">Agente Nivel <span t-esc="subAgent.level + 1"/></p>
+                                <!-- <small class="subordinate-contact" t-esc="subAgent.email or
+                                'Sin email'"/> -->
+
+                                <!-- Stats del agente -->
+                                <div class="subordinate-stats">
+                                    <t t-set="subAgentSubAgents" t-value="this.getSubAgents(subAgent.id)"/>
+                                    <span class="stat-badge sub-agents" t-if="subAgentSubAgents.length > 0">
+                                        <i class="fa fa-users"></i>
+                                        <span t-esc="subAgentSubAgents.length"/>
+                                    </span>
+                                    <span class="stat-badge players" t-if="subAgent.managed_player_ids and subAgent.managed_player_ids.length > 0">
+                                        <i class="fa fa-gamepad"></i>
+                                        <span t-esc="subAgent.managed_player_ids.length"/>
+                                    </span>
+                                </div>
+                            </div>
+
+                            <!-- Botón de expansión si tiene subordinados -->
+                            <t t-set="hasSubordinatesInLevel" t-value="this.getSubAgents(subAgent.id).length > 0 or (subAgent.managed_player_ids and subAgent.managed_player_ids.length > 0)"/>
+                            <div class="subordinate-expand" t-if="hasSubordinatesInLevel">
+                                <i class="fa fa-chevron-down" t-att-class="this.isSubAgentExpanded(subAgent.id) ? 'rotated' : ''"/>
+                            </div>
+                        </div>
+                    </t>
+
+                    <!-- Jugadores de este nivel -->
+                    <t t-foreach="hierarchyData.players" t-as="player" t-key="'player-' + player.id + '-level-' + hierarchyData.level">
+                        <div class="subordinate-card player-type" 
+                             t-att-data-level="hierarchyData.level"
+                             t-on-click="() => this.onViewPlayer(player.id)">
+                            
+                            <div class="subordinate-avatar player">
+                                <span t-esc="player.name.charAt(0).toUpperCase()"/>
+                            </div>
+                            
+                            <div class="subordinate-info">
+                                <h6 class="subordinate-name" t-esc="player.name"/>
+                                <p class="subordinate-type">Jugador</p>
+                                <!-- <small class="subordinate-contact" t-esc="player.email or 'Sin
+                                email'"/> -->
+                            </div>
+                        </div>
+                    </t>
+                </div>
+            </div>
+
+            <!-- RECURSIÓN: Renderizar sub-niveles expandidos -->
+            <t t-foreach="hierarchyData.subAgents" t-as="expandedSubAgent" t-key="'expanded-' + expandedSubAgent.id + '-level-' + hierarchyData.level">
+                <t t-if="this.isSubAgentExpanded(expandedSubAgent.id) and expandedSubAgent.hierarchy">
+                    <!-- Indicador de nivel -->
+                    <div class="level-indicator-container" t-att-data-level="expandedSubAgent.level">
+                        <div class="level-indicator">
+                            <i class="fa fa-arrow-down me-2"/>
+                            Subordinados de <strong t-esc="expandedSubAgent.name"/> (Nivel <span t-esc="expandedSubAgent.level + 2"/>)
+                        </div>
+                    </div>
+
+                    <!-- Llamada recursiva para el siguiente nivel -->
+                    <t t-call="agent_multilevel.RecursiveHierarchyLevel">
+                        <t t-set="hierarchyData" t-value="expandedSubAgent.hierarchy"/>
+                        <t t-set="parentAgentIndex" t-value="0"/>
+                        <t t-set="totalRootAgents" t-value="1"/>
+                    </t>
+                </t>
+            </t>
+        </t>
+    </t>
+</templates>

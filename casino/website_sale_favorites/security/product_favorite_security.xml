@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <record id="casino_game_favorite_rule_portal" model="ir.rule">
+    <field name="name">casino.game.favorite: portal own</field>
+    <field name="model_id" ref="model_casino_game_favorite" />
+    <field name="groups" eval="[(4, ref('base.group_portal'))]" />
+    <field name="domain_force">[('user_id', '=', user.id)]</field>
+  </record>
+
+  <record id="casino_game_favorite_rule_user" model="ir.rule">
+    <field name="name">casino.game.favorite: user own</field>
+    <field name="model_id" ref="model_casino_game_favorite" />
+    <field name="groups" eval="[(4, ref('base.group_user'))]" />
+    <field name="domain_force">[('user_id', '=', user.id)]</field>
+  </record>
+</odoo>

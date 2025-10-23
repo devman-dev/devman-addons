@@ -1,0 +1,3 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_casino_game_favorite_user,access.casino.game.favorite.user,model_casino_game_favorite,base.group_user,1,1,1,1
+access_casino_game_favorite_portal,access.casino.game.favorite.portal,model_casino_game_favorite,base.group_portal,1,0,0,0
