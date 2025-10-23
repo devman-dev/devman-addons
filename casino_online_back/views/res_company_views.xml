@@ -6,8 +6,23 @@
         <field name="inherit_id" ref="base.view_company_form" />
         <field name="arch" type="xml">
             <xpath expr="//sheet/notebook" position="inside">
-                <page string="Apuestas">
-                    <group string="Mensajes por compañía">
+                <page string="Casino">
+                    <group string="Configuración Contable">
+                        <group string="Diarios Bancarios">
+                            <field name="casino_deposit_journal_id" 
+                                   options="{'no_create': True, 'no_open': True}"/>
+                            <field name="casino_bet_transfer_journal_id" 
+                                   options="{'no_create': True, 'no_open': True}"/>
+                        </group>
+                        <group string="Cuentas Contables (Opcional)">
+                            <field name="casino_deposit_account_id" 
+                                   options="{'no_create': True, 'no_open': True}"/>
+                            <field name="casino_bet_account_id" 
+                                   options="{'no_create': True, 'no_open': True}"/>
+                        </group>
+                    </group>
+                    
+                    <group string="Mensajes de Límites de Apuesta">
                         <field name="bet_msg_daily" placeholder="Has alcanzado tu límite diario." />
                         <field name="bet_msg_weekly" placeholder="Has alcanzado tu límite semanal." />
                         <field name="bet_msg_monthly" placeholder="Has alcanzado tu límite mensual." />

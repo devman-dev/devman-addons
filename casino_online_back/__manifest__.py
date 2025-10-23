@@ -1,6 +1,6 @@
 {
     'name': 'Casino Base',
-    'version': '1.0',
+    'version': '1.0.1',
     'summary': 'Base para la gestión de jugadores y juegos de casino',
     'description': 'Incluye modelos personalizados para onboarding de jugadores, juegos y sesiones.',
     'author': 'Tu Empresa',
