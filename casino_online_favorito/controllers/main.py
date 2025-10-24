@@ -4,9 +4,13 @@ from odoo.http import request
 
 class WebsiteSaleFavorites(http.Controller):
 
-    @http.route('/shop/favorite/toggle', type='json', auth='user', methods=['POST'], website=True)
+    @http.route('/shop/favorite/toggle', type='json', auth='public', methods=['POST'], website=True)
     def toggle_favorite_json(self, product_id, **kwargs):
         """Endpoint JSON para alternar un favorito."""
+        # Validar que el usuario esté autenticado
+        if request.env.user._is_public():
+            return {'error': 'Debes iniciar sesión para usar favoritos.', 'favorited': False}
+        
         ProductFavorite = request.env['casino.game.favorite']
         return ProductFavorite.toggle_favorite(product_id)
 

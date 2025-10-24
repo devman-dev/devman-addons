@@ -1,16 +1,25 @@
 <odoo>
   <template id="website_navbar_balance" inherit_id="website.template_header_default">
     <xpath expr="//ul[contains(@class, 'flex-shrink-0')]" position="inside">
-      <t t-if="saldo_final is not None">
+      <!-- Calcular nickname y saldo si no vienen en el contexto (páginas fuera de /my) -->
+      <t t-set="_partner" t-value="request.env.user.partner_id.commercial_partner_id" />
+      <!-- <t t-set="nickname" t-value="(_partner.nickname or _partner.name)"/> -->
+      <t t-set="saldo_final" t-value="_partner.sudo().website_wallet_balance()" />
+      <t t-if="not request.env.user._is_public()">
         <li class="nav-item">
-          <span class="nav-link text-nowrap">
-            Saldo:
-            <span t-att-class="'badge rounded-pill ' + ('bg-success' if saldo_final >= 0 else 'bg-danger')">
+          <!-- <span class="nav-link text-nowrap">
+            <span>
+              <t t-esc="nickname" />
+            </span>
+          </span> -->
+          <span class="nav-link text-nowrap"> Saldo: <span
+              t-att-class="'badge rounded-pill ' + ('bg-success' if saldo_final >= 0 else 'bg-danger')">
               <t t-if="saldo_final >= 0">
-                <t t-esc="request.env['ir.qweb.field.monetary'].value_to_html(saldo_final, {'display_currency': request.env.company.currency_id})"/>
+                <t
+                  t-esc="request.env['ir.qweb.field.monetary'].value_to_html(saldo_final, {'display_currency': request.env.company.currency_id})" />
               </t>
-              <t t-else="">
-                -<t t-esc="request.env['ir.qweb.field.monetary'].value_to_html(abs(saldo_final), {'display_currency': request.env.company.currency_id})"/>
+              <t t-else=""> -<t
+                  t-esc="request.env['ir.qweb.field.monetary'].value_to_html(abs(saldo_final), {'display_currency': request.env.company.currency_id})" />
               </t>
             </span>
           </span>

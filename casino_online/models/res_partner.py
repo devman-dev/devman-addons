@@ -21,6 +21,25 @@ class ResPartner(models.Model):
     nickname = fields.Char(string='Nickname')
     balance_game = fields.Float(string='Balance de los Juego')
 
+    def website_wallet_balance(self):
+        """Devuelve el saldo (float) a mostrar en el header del Website.
+        Calcula la suma de movimientos de cuentas de tipo por cobrar/pagar
+        del partner comercial en la compañía actual.
+        """
+        self_sudo = self.sudo()
+        partner = self_sudo.commercial_partner_id
+        company = self.env.company
+        AML = self.env['account.move.line'].sudo()
+        domain = [
+            ('company_id', '=', company.id),
+            ('partner_id', '=', partner.id),
+            ('account_id.account_type', 'in', ['asset_receivable', 'liability_payable']),
+            ('parent_state', 'in', ['draft', 'posted']),
+        ]
+        lines = AML.search(domain)
+        total = sum(float((l.amount_signed if l.amount_signed is not None else l.balance) or 0.0) for l in lines)
+        return round(total, 2)
+
     def _deposit_payments_fields(self):
         return [
             "date",
