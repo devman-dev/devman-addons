@@ -1,0 +1,4 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_public_category_commission_wizard,access_public_category_commission_wizard,model_casino_agentes_public_category_commission_wizard,base.group_user,1,1,1,1
+access_agent_liquidation,access_agent_liquidation,model_agent_liquidation,base.group_system,1,1,1,1
+access_agent_liquidation_line,access_agent_liquidation_line,model_agent_liquidation_line,base.group_system,1,0,0,0

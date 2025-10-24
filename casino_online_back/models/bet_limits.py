@@ -13,6 +13,13 @@ class BetLimits(models.Model):
     _check_company_auto = True
 
     partner_id = fields.Many2one("res.partner", required=True, ondelete="cascade", index=True)
+    def _default_company(self):
+        # Robusto: si el usuario/entorno no tiene company, tomar la primera disponible
+        company = self.env.company
+        if not company:
+            company = self.env['res.company'].sudo().search([], limit=1)
+        return company
+
     company_id = fields.Many2one("res.company", required=True, default=lambda self: self.env.company, index=True)
     currency_id = fields.Many2one(related="company_id.currency_id", store=True, readonly=True)
 
@@ -215,6 +222,8 @@ class BetLimits(models.Model):
         Maneja concurrencia usando unique(partner_id, company_id)."""
         self = self.sudo()
         company = company or partner.company_id or self.env.company
+        if not company:
+            company = self.env['res.company'].sudo().search([], limit=1)
 
         rec = self.search([
             ('partner_id', '=', partner.id),

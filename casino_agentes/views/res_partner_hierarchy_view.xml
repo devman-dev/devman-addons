@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_partner_hierarchy_casino_agentes" model="ir.ui.view">
+        <field name="name">res.partner.hierarchy.agent.multilevel</field>
+        <field name="model">res.partner</field>
+        <field name="arch" type="xml">
+            <agent_hierarchy string="Organigrama de Agentes"
+                             js_class="AgentHierarchy">
+                <field name="display_name"/>
+                <field name="child_agent_ids"/>
+                <field name="managed_player_ids"/>
+            </agent_hierarchy>
+        </field>
+    </record>
+
+    <record id="action_agent_hierarchy_org" model="ir.actions.act_window">
+        <field name="name">Organigrama</field>
+        <field name="res_model">res.partner</field>
+        <field name="view_mode">agent_hierarchy,tree,form</field>
+        <field name="domain">[('is_agent','=',True)]</field>
+        <field name="context">{'default_is_agent': True}</field>
+    </record>
+
+    <menuitem id="menu_casino_agentes_org"
+              name="Organigrama de Agentes"
+              parent="contacts.menu_contacts"
+              action="action_agent_hierarchy_org"
+              sequence="60"/>
+</odoo>

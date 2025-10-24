@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <!-- Menú principal -->
+  <menuitem
+    id="menu_agent_hierarchy_root"
+    name="Agentes"
+    sequence="10" />
+
+  <!-- Menú organigrama interactivo -->
+  <menuitem
+    id="menu_agent_hierarchy_widget"
+    name="Organigrama Interactivo"
+    parent="menu_agent_hierarchy_root"
+    action="action_agent_hierarchy_widget"
+    sequence="10" />
+
+  <!-- Menú de gestión de Agentes -->
+  <menuitem
+    id="menu_agent_management"
+    name="Gestión de Agentes"
+    parent="menu_agent_hierarchy_root"
+    sequence="20" />
+
+  <!-- Submenú de gestión -->
+  <menuitem
+    id="menu_agent"
+    name="Agentes"
+    parent="menu_agent_management"
+    action="action_agent_hierarchy"
+    sequence="10" />
+
+  <!-- Submenú liquidación (wizard) -->
+  <menuitem
+    id="menu_agent_liquidation_root"
+    name="Liquidación de Agentes"
+    parent="menu_agent_management"
+    action="action_agent_liquidation_wizard"
+    sequence="20" />
+
+  <!-- Submenú liquidaciones (histórico) -->
+  <menuitem
+    id="menu_agent_liquidations"
+    name="Liquidaciones"
+    parent="menu_agent_management"
+    action="action_agent_liquidation"
+    groups="base.group_system"
+    sequence="30" />
+
+  <!-- Menú de Categorías dentro del menú principal de casino_online_back -->
+  <menuitem
+    id="menu_product_category_commission"
+    name="Categorías"
+    parent="casino_online_back.menu_casino_root"
+    action="public_category_commission_action"
+    sequence="100" />
+</odoo>

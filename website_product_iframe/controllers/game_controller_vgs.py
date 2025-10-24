@@ -1048,6 +1048,40 @@ class GameControllerVGS(http.Controller):
                 product_id, user_id, token, current_balance, new_balance, amt, state, result, transaction_id, json_data)
             try:
                 session_vals = self._prepare_session_vals(product_id, round_id, user_id, token, current_balance, new_balance, amt, state, result, transaction_id, internal_transaction_id, json_data)
+                # Si es un débito (apuesta perdida), calcular y guardar comisión del agente
+                if op == 'lose':
+                    # 1) Determinar agente del jugador (si el módulo de agentes está instalado)
+                    agent = None
+                    try:
+                        if hasattr(partner, '_fields') and 'agent_id' in partner._fields:
+                            agent = partner.agent_id
+                    except Exception:
+                        agent = None
+
+                    # 2) Determinar % de comisión del juego
+                    commission_pct = 0.0
+                    try:
+                        Product = request.env['product.product'].sudo()
+                        prod = Product.search(['|', ('id', '=', product_id), ('game_id', '=', str(product_id))], limit=1)
+                        if prod:
+                            # El campo commission está en product.template, pero es accesible desde product.product
+                            commission_pct = float(prod.commission or 0.0)
+                    except Exception:
+                        commission_pct = 0.0
+
+                    # 3) Calcular importe de comisión
+                    try:
+                        currency = request.env.company.currency_id
+                        commission_amt = (currency.round(amt * commission_pct / 100.0)
+                                          if currency else round(amt * commission_pct / 100.0, 2))
+                    except Exception:
+                        commission_amt = round(amt * commission_pct / 100.0, 2)
+
+                    # 4) Inyectar en la sesión
+                    session_vals.update({
+                        'agent_id': agent.id if agent else False,
+                        'agent_commission': commission_amt,
+                    })
             except Exception as e:
                 _logger.error('Error en _prepare_session_vals: %s', str(e))
                 raise

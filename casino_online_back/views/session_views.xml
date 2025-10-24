@@ -9,6 +9,7 @@
                     <field name="internal_transaction_id" string="ID Transacción Interna" />
                     <field name="game_id" />
                     <field name="user_id" />
+                    <field name="agent_id" />
                     <field name="token" />
                     <field name="start_datetime" />
                     <field name="end_datetime" />
@@ -16,6 +17,8 @@
                     <field name="amount" />
                     <field name="final_balance" />
                     <field name="currency_id" />
+                    <field name="agent_id" />
+                    <field name="agent_commission" />
                     <field name="result" />
                     <field name="state" />
                     <field name="description" />
@@ -40,9 +43,12 @@
                 <field name="transaction_id" string="ID Transacción" />
                 <field name="game_id" string="Juego" />
                 <field name="user_id" string="Usuario" />
+                <field name="agent_id" string="Agente" optional="show" />
                 <field name="initial_balance" string="S.Inicial" optional="show" />
                 <field name="amount" string="Monto" />
                 <field name="final_balance" string="S.Final" optional="show" />
+                <field name="agent_commission" string="Comisión Agente" optional="show" />
+                <field name="agent_id" string="Agente" optional="show" />
                 <field name="start_datetime" string="Inicio" optional="show" />
                 <field name="end_datetime" string="Fin" optional="show" />
                 <field name="result" string="Resultado" />
