@@ -19,7 +19,8 @@ class ProductFavorite(models.Model):
         """Alterna favorito para el usuario actual. Requiere usuario autenticado (no público)."""
         user = self.env.user
         if user._is_public():
-            raise AccessError(_("Debes iniciar sesión para usar favoritos."))
+            # No lanzar excepción, devolver mensaje informativo
+            return {"error": "Debes iniciar sesión para usar favoritos.", "favorited": False}
         fav = self.search([("user_id", "=", user.id), ("product_tmpl_id", "=", product_tmpl_id)], limit=1)
         if fav:
             fav.unlink()

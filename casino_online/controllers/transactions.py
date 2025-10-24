@@ -191,7 +191,8 @@ class CasinoHome(CustomerPortal):
         cbu = partner.cbu
         cuil = partner.cuil
         nuevo_cbu = partner.nuevo_cbu
-        
+        nickname = partner.nickname if partner.nickname else partner.name
+
         values.update({
             'movements': rows,
             'saldo_final': round(saldo_total, 2),
@@ -213,7 +214,8 @@ class CasinoHome(CustomerPortal):
             'cbu': cbu,
             'cuil': cuil,
             'nuevo_cbu': nuevo_cbu,
-            'currency': company.currency_id
+            'currency': company.currency_id,
+            'nickname': nickname,
         })
         res.qcontext.update(values)
         _logger.info("Rendering portal home for partner %s", values)
