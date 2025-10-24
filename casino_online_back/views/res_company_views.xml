@@ -8,7 +8,7 @@
             <xpath expr="//sheet/notebook" position="inside">
                 <page string="Casino">
                     <group string="Configuración Contable">
-                        <group string="Diarios Bancarios">
+                        <group string="Cuentas Bancarias Custodia y operativa">
                             <field name="casino_deposit_journal_id" 
                                    options="{'no_create': True, 'no_open': True}"/>
                             <field name="casino_bet_transfer_journal_id" 
@@ -23,9 +23,10 @@
                     </group>
                     
                     <group string="Mensajes de Límites de Apuesta">
-                        <field name="bet_msg_daily" placeholder="Has alcanzado tu límite diario." />
+                        <!-- Campos comentados temporalmente para evitar errores hasta que se definan todos los campos necesarios -->
+                        <!-- <field name="bet_msg_daily" placeholder="Has alcanzado tu límite diario." />
                         <field name="bet_msg_weekly" placeholder="Has alcanzado tu límite semanal." />
-                        <field name="bet_msg_monthly" placeholder="Has alcanzado tu límite mensual." />
+                        <field name="bet_msg_monthly" placeholder="Has alcanzado tu límite mensual." /> -->
                     </group>
                 </page>
             </xpath>

@@ -41,7 +41,7 @@
         <field name="res_model">account.move.line</field>
         <field name="view_mode">list,form</field>
         <!-- Use only a safe search view to avoid loading inherited search views
-             that may reference a non-existing field `user_id`. -->
+             that may reference a non-existing field `user_id` or other custom fields. -->
         <field name="search_view_id" ref="account_move_line_view_search_inherit_casino"/>
         <field name="domain">[('account_id.account_type', 'in', ['asset_receivable', 'liability_payable'])]</field>
         <field name="context">{

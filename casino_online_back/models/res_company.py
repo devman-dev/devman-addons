@@ -12,16 +12,16 @@ class ResCompany(models.Model):
     # Configuración de diarios bancarios para casino
     casino_deposit_journal_id = fields.Many2one(
         'account.journal',
-        string='Diario para Depósitos de Casino',
+        string='Cuenta Bancaria de Custodia',
         help='Diario contable utilizado para registrar los depósitos de los usuarios del casino',
         domain=[('type', 'in', ['bank', 'cash'])]
     )
     
     casino_bet_transfer_journal_id = fields.Many2one(
         'account.journal',
-        string='Diario para Transferencias de Apuestas',
+        string='Cuaenta Bancaria Operativa',
         help='Diario contable utilizado para registrar las transferencias de apuestas/pérdidas del casino',
-        domain=[('type', 'in', ['general'])]
+        domain=[('type', 'in', ['bank', 'cash'])]
     )
     
     # Configuración de cuentas contables para casino
