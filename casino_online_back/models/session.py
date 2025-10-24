@@ -19,6 +19,17 @@ class CasinoGameSession(models.Model):
     initial_balance = fields.Monetary(string='Saldo Inicial')
     final_balance = fields.Monetary(string='Saldo Final')
     currency_id = fields.Many2one('res.currency', string='Moneda')
+    # Datos de agente y comisión por débito
+    agent_id = fields.Many2one(
+        'res.partner',
+        string='Agente',
+        help='Agente asociado al jugador en el momento de la operación.'
+    )
+    agent_commission = fields.Monetary(
+        string='Comisión del agente',
+        currency_field='currency_id',
+        help='Importe de la comisión del agente calculada sobre el monto debitado (amount × % comisión del juego).'
+    )
     result = fields.Selection([
         ('win', 'Ganó'),
         ('loss', 'Perdió'),

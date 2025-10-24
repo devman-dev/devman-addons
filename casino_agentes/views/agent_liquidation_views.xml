@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <!-- Árbol de liquidaciones -->
+  <record id="view_agent_liquidation_tree" model="ir.ui.view">
+    <field name="name">agent.liquidation.list</field>
+    <field name="model">agent.liquidation</field>
+    <field name="arch" type="xml">
+      <list string="Liquidaciones" create="0">
+        <field name="name" />
+        <field name="date_from" />
+        <field name="date_to" />
+        <field name="agent_id" />
+        <field name="total_direct" />
+        <field name="total_subagents" />
+        <field name="total_amount" />
+        <field name="company_id" />
+        <field name="create_date" />
+      </list>
+    </field>
+  </record>
+
+  <!-- Formulario de liquidación -->
+  <record id="view_agent_liquidation_form" model="ir.ui.view">
+    <field name="name">agent.liquidation.form</field>
+    <field name="model">agent.liquidation</field>
+    <field name="arch" type="xml">
+      <form string="Liquidación">
+        <sheet>
+          <group>
+            <field name="name" readonly="1" />
+            <field name="date_from" readonly="1" />
+            <field name="date_to" readonly="1" />
+            <field name="agent_id" readonly="1" />
+            <field name="company_id" readonly="1" />
+          </group>
+          <group>
+            <field name="total_direct" readonly="1" />
+            <field name="total_subagents" readonly="1" />
+            <field name="total_amount" readonly="1" />
+          </group>
+          <notebook>
+            <page string="Detalle">
+              <field name="line_ids" context="{'default_liquidation_id': id}">
+                <list editable="bottom">
+                  <field name="agent_id" />
+                  <field name="direct_commission" />
+                  <field name="subagent_commission" />
+                  <field name="total_commission" readonly="1" />
+                </list>
+              </field>
+            </page>
+          </notebook>
+        </sheet>
+      </form>
+    </field>
+  </record>
+
+  <!-- Acción para abrir las liquidaciones -->
+  <record id="action_agent_liquidation" model="ir.actions.act_window">
+    <field name="name">Liquidaciones</field>
+    <field name="res_model">agent.liquidation</field>
+    <field name="view_mode">list,form</field>
+    <field name="context">{}</field>
+    <field name="domain">[]</field>
+  </record>
+
+</odoo>
