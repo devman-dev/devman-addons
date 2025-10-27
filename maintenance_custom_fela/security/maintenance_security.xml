@@ -1,0 +1,25 @@
+ <odoo>
+     <!--  Categoría de aplicación  -->
+        <record id="module_category_maintenance_custom" model="ir.module.category">
+            <field name="name">Mantenimiento Personalizado</field>
+            <field name="description">Permisos para el módulo de mantenimiento personalizado</field>
+            <field name="sequence">10</field>
+        </record>
+<!-- Grupo: Contratista -->
+        <record id="group_maintenance_contractor" model="res.groups">
+            <field name="name">Mantenimiento: Contratista</field>
+            <field name="category_id" ref="module_category_maintenance_custom"/>
+            <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+        </record>
+
+     <!-- Permisos de acceso SOLO al modelo maintenance.request -->
+        <record id="access_maintenance_request_contractor" model="ir.model.access">
+            <field name="name">maintenance.request.contractor</field>
+            <field name="model_id" ref="maintenance.model_maintenance_request"/>
+            <field name="group_id" ref="group_maintenance_contractor"/>
+            <field name="perm_read" eval="1"/>
+            <field name="perm_write" eval="0"/>
+            <field name="perm_create" eval="0"/>
+            <field name="perm_unlink" eval="0"/>
+        </record>
+ </odoo>
