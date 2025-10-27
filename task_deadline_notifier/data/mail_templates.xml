@@ -1,0 +1,37 @@
+<odoo>
+    <data noupdate="1">
+        <!-- Email Template for Task Deadline Reminder -->
+        <record id="email_template_task_deadline" model="mail.template">
+            <field name="name">Task Deadline Reminder</field>
+            <field name="model_id" ref="project.model_project_task"/>
+            <field name="subject">Reminder: Task "{{ object.name }}" Deadline Approaching</field>
+            <field name="email_from">${(user.email or 'no-reply@yourcompany.com')}</field>
+            <field name="email_to">${object.user_ids[0].email if object.user_ids else 'default@yourcompany.com'}</field>
+            <!-- HTML body content -->
+            <field name="body_html" type="html">
+                <div>
+                    Dear <t t-out="object.user_ids[0].name if object.user_ids else 'User'"/>,
+                    <br/>
+                    <br/>
+                    <p>This is a reminder that the task
+                        <strong>
+                            <t t-out="object.name"/>
+                        </strong>
+                        is due on
+                        <strong>
+                            <t t-out="object.date_deadline.date()"/>
+                        </strong>
+                        .
+                    </p>
+                    <p>Please ensure that the necessary actions are taken.</p>
+                    <p>Best Regards,</p>
+                    <p>Your Company</p>
+                </div>
+            </field>
+
+            <!-- Language and auto-delete settings -->
+            <field name="lang">{{ object.partner_id.lang }}</field>
+            <field name="auto_delete" eval="True"/>
+        </record>
+    </data>
+</odoo>
