@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <data>
+
+    <!-- Incrustamos un "app" propio en res.config.settings como hace Website -->
+    <record id="res_config_settings_view_form_casino_agentes" model="ir.ui.view">
+      <field name="name">res.config.settings.view.form.inherit.casino_agentes</field>
+      <field name="model">res.config.settings</field>
+      <field name="priority" eval="35" />
+      <field name="inherit_id" ref="base.res_config_settings_view_form" />
+      <field name="arch" type="xml">
+        <xpath expr="//form" position="inside">
+
+          <!-- name = clave que usaremos en el context {'module': 'casino_agentes'} -->
+          <app data-string="Agentes" string="Agentes" name="casino_agentes"
+            groups="base.group_system">
+
+            <!-- Selector de compañía -->
+            <block title="Ajustes de Comisionamiento">
+              <setting help="Seleccioná la compañía para configurar sus parámetros de comisión.">
+                <label for="agent_company_id" string="Compañía: " />
+                <field name="agent_company_id"
+                  placeholder="Seleccionar compañía..."
+                  required="1"
+                  options="{'no_create': True}"
+                  class="w-50" />
+              </setting>
+            </block>
+
+            <!-- Parámetros de comisión -->
+            <block title="Parámetros de comisión" invisible="not agent_company_id">
+              <setting help="Seleccioná el modo de cálculo de comisiones para agentes.">
+                <label for="commission_mode" string="Modo: " />
+                <field name="commission_mode" />
+              </setting>
+
+              <setting help="Porcentaje de comisión por defecto.">
+                <label for="agent_commission_percent_default"
+                  string="Porcentaje: " />
+                <field name="agent_commission_percent_default" widget="percentage" />
+              </setting>
+            </block>
+          </app>
+
+        </xpath>
+      </field>
+    </record>
+
+  </data>
+</odoo>

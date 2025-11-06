@@ -991,7 +991,7 @@ class GameControllerVGS(http.Controller):
                     "roundId": "roundId",
                     "transactionId": transaction_id,
                     "amount": amt,
-                    "TokenLive": True,
+                    "token_live": True,
                 }
             elif op == 'lose':
                 _logger.info('Casino Iframe: LOSE')
@@ -1008,7 +1008,7 @@ class GameControllerVGS(http.Controller):
                     "roundId": "roundId",
                     "transactionId": transaction_id,
                     "amount": amt,
-                    "TokenLive": True,
+                    "token_live": True,
                 }
             elif op == 'refund':
                 _logger.info('Casino Iframe: REFUND')

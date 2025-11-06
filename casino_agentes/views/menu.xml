@@ -29,28 +29,118 @@
     action="action_agent_hierarchy"
     sequence="10" />
 
-  <!-- Submenú liquidación (wizard) -->
-  <menuitem
-    id="menu_agent_liquidation_root"
-    name="Liquidación de Agentes"
-    parent="menu_agent_management"
-    action="action_agent_liquidation_wizard"
-    sequence="20" />
-
   <!-- Submenú liquidaciones (histórico) -->
   <menuitem
-    id="menu_agent_liquidations"
+    id="menu_casino_agent_liquidations"
     name="Liquidaciones"
     parent="menu_agent_management"
-    action="action_agent_liquidation"
+    action="action_casino_agent_liquidation"
     groups="base.group_system"
     sequence="30" />
 
-  <!-- Menú de Categorías dentro del menú principal de casino_online_back -->
+
+  <menuitem
+    id="menu_casino_agent"
+    name="Agentes"
+    parent="casino_online_back.menu_casino_root"
+    groups="base.group_system"
+    sequence="45" />
+
+  <menuitem
+    id="menu_casino_agent_agents"
+    name="Agentes"
+    parent="menu_casino_agent"
+    action="public_category_commission_action"
+    sequence="5" />
+
+  <menuitem id="menu_casino_report_global_agents"
+    name="Reporte Global"
+    parent="menu_casino_agent"
+    action="public_category_commission_action"
+    sequence="10" />
+
+  <menuitem id="menu_casino_deposits_and_withdrawals_agents"
+    name="Cargas y Retiros"
+    parent="menu_casino_agent"
+    action="public_category_commission_action"
+    sequence="10" />
+
+  <menuitem id="menu_casino_history_agents"
+    name="Historial"
+    parent="menu_casino_agent"
+    action="public_category_commission_action"
+    sequence="10" />
+
+  <menuitem id="menu_casino_finance_agents"
+    name="Finanzas"
+    parent="menu_casino_agent"
+    action="public_category_commission_action"
+    sequence="10" />
+  <!-- Menú de Configuración dentro del menú principal de casino_online_back -->
+  <menuitem
+    id="menu_configuration_agent_commission"
+    name="Configuración"
+    parent="casino_online_back.menu_casino_root"
+    groups="base.group_system"
+    sequence="100" />
+
   <menuitem
     id="menu_product_category_commission"
     name="Categorías"
-    parent="casino_online_back.menu_casino_root"
+    parent="menu_configuration_agent_commission"
     action="public_category_commission_action"
-    sequence="100" />
+    sequence="10" />
+
+  <!-- Submenú Ajustes de Agentes - Acceso rápido a Ajustes > Agentes -->
+  <menuitem
+    id="menu_configuration_agent_settings"
+    name="Ajustes de Agentes"
+    parent="menu_configuration_agent_commission"
+    action="action_open_agent_settings"
+    sequence="20" />
+
+  <!-- Acción: abrir Perfiles de Agentes -->
+  <record id="action_casino_agent_profiles" model="ir.actions.act_window">
+    <field name="name">Perfiles de Agentes</field>
+    <field name="res_model">casino.agent.profile</field>
+    <field name="view_mode">tree,form</field>
+    <field name="context">{'search_default_my_company': 1}</field>
+    <field name="help" type="html">
+      <p class="o_view_nocontent_smiling_face">
+        Creá perfiles de comisiones por compañía.
+      </p>
+    </field>
+  </record>
+
+  <!-- Acción: abrir Ajustes y enfocar el bloque “Agentes” -->
+  <record id="action_open_agent_settings" model="ir.actions.act_window">
+    <field name="name">Configuración de Agentes</field>
+    <field name="res_model">res.config.settings</field>
+    <field name="view_mode">form</field>
+    <field name="view_id" ref="base.res_config_settings_view_form" />
+    <!-- El context 'module' define la pestaña/anchor activa en el lateral de Ajustes.
+         data-key="casino_agentes" debe coincidir con tu bloque -->
+    <field name="context">{'module': 'casino_agentes'}</field>
+    <field name="target">current</field>
+  </record>
+
+  <!-- Menú raíz bajo Ajustes -->
+  <menuitem id="menu_casino_agents_root"
+    name="Agentes"
+    parent="base.menu_config"
+    sequence="45" />
+
+  <!-- Submenú Perfiles -->
+  <menuitem id="menu_casino_agent_profiles"
+    name="Perfiles"
+    parent="menu_casino_agents_root"
+    action="action_casino_agent_profiles"
+    sequence="10" />
+
+  <!-- Submenú Configuración (lleva al panel de Ajustes y hace foco en tu bloque) -->
+  <menuitem id="menu_casino_agent_settings"
+    name="Configuración"
+    parent="menu_casino_agents_root"
+    action="action_open_agent_settings"
+    sequence="20" />
 </odoo>
