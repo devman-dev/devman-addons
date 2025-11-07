@@ -46,12 +46,12 @@
     groups="base.group_system"
     sequence="45" />
 
-  <menuitem
+  <!-- <menuitem
     id="menu_casino_agent_agents"
     name="Agentes"
     parent="menu_casino_agent"
     action="public_category_commission_action"
-    sequence="5" />
+    sequence="5" /> -->
 
   <menuitem id="menu_casino_report_global_agents"
     name="Reporte Global"
@@ -91,6 +91,13 @@
     action="public_category_commission_action"
     sequence="10" />
 
+  <menuitem
+    id="menu_configuration_agent_settings"
+    name="Ajustes de Agentes"
+    parent="menu_configuration_agent_commission"
+    action="action_open_agent_settings"
+    sequence="20" />
+
 
   <!-- Acción: abrir Perfiles de Agentes -->
   <record id="action_casino_agent_profiles" model="ir.actions.act_window">
@@ -118,30 +125,17 @@
   </record>
 
   <!-- Menú raíz bajo Ajustes -->
-  <menuitem id="menu_casino_agents_root"
+  <!-- <menuitem id="menu_casino_agents_root"
     name="Agentes"
     parent="casino_online_back.menu_casino_root"
-    sequence="45" />
+    sequence="45" /> -->
 
   <!-- Submenú Perfiles -->
-  <menuitem id="menu_casino_agent_profiles"
+  <!-- <menuitem id="menu_casino_agent_profiles"
     name="Perfiles"
     parent="menu_casino_agents_root"
     action="action_casino_agent_profiles"
-    sequence="10" />
+    sequence="10" /> -->
 
-  <!-- Submenú Configuración (lleva al panel de Ajustes y hace foco en tu bloque) -->
-  <menuitem id="menu_casino_agent_settings"
-    name="Configuración"
-    parent="menu_casino_agents_root"
-    action="action_open_agent_settings"
-    sequence="20" />
-
-  <!-- <menuitem
-    id="menu_configuration_agent_settings"
-    name="Ajustes de Agentes"
-    parent="menu_configuration_agent_commission"
-    action="action_open_agent_settings"
-    sequence="20" /> -->
 
 </odoo>
