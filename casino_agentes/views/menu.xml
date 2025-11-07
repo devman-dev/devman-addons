@@ -120,7 +120,7 @@
   <!-- Menú raíz bajo Ajustes -->
   <menuitem id="menu_casino_agents_root"
     name="Agentes"
-    parent="base.menu_config"
+    parent="casino_online_back.menu_casino_root"
     sequence="45" />
 
   <!-- Submenú Perfiles -->

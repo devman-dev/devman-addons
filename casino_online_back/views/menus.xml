@@ -29,13 +29,13 @@
     <menuitem id="menu_casino_report_global_players"
         name="Reporte Global"
         parent="menu_casino_players"
-        action="action_casino_account_move_line"
+        action="action_casino_global_report"
         sequence="5" />
 
     <menuitem id="menu_casino_account_players"
         name="Cuenta Corriente"
         parent="menu_casino_players"
-        action="action_casino_account_move_line"
+        action="action_casino_game_session"
         sequence="10" />
     <menuitem id="menu_casino_deposits_and_withdrawals_players"
         name="Cargas y Retiros"

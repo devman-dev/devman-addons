@@ -1,6 +1,6 @@
 {
     'name': 'Casino Base',
-    'version': '1.0.1',
+    'version': '1.0.0',
     'summary': 'Base para la gestión de jugadores y juegos de casino',
     'description': 'Incluye modelos personalizados para onboarding de jugadores, juegos y sesiones.',
     'author': 'Tu Empresa',
@@ -15,6 +15,7 @@
         'views/bet_limits_views.xml',
         'views/res_company_views.xml',
         'wizard/casino_session_report_wizard_views.xml',
+        'views/global_report_views.xml',
         'views/menus.xml',
         'security/ir.model.access.csv',
         'data/ir_cron.xml'

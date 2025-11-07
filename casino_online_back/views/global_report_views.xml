@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <!-- Vista Tree para las líneas del reporte -->
+  <record id="view_casino_global_report_line_tree" model="ir.ui.view">
+    <field name="name">casino.global.report.line.list</field>
+    <field name="model">casino.global.report.line</field>
+    <field name="arch" type="xml">
+      <list string="Detalle por Categoría" decoration-bf="categoria == 'Cargas y Retiros'"
+        create="0" edit="0" delete="0">
+        <field name="categoria" string="Categoría" />
+        <field name="apostado" sum="Total Apostado" widget="monetary" />
+        <field name="ganado" sum="Total Ganado" widget="monetary" />
+        <field name="netwin" sum="Total Netwin" widget="monetary" />
+        <field name="rake" sum="Total Rake" widget="monetary" />
+        <field name="currency_id" column_invisible="1" />
+      </list>
+    </field>
+  </record>
+
+  <!-- Vista Form del Wizard con Filtros -->
+  <record id="view_casino_global_report_form" model="ir.ui.view">
+    <field name="name">casino.global.report.form</field>
+    <field name="model">casino.global.report</field>
+    <field name="arch" type="xml">
+      <form string="Reporte Global por Jugador" create="false" edit="false" delete="false">
+        <header>
+          <button name="action_generate_report" string="Generar Reporte" type="object"
+            class="btn-primary" />
+        </header>
+        <sheet>
+          <group name="filters" string="Filtros">
+            <group>
+              <label for="date_from" string="Período" />
+              <div class="o_row">
+                <field name="date_from" required="1" />
+                <span class="mx-2">a</span>
+                <field name="date_to" required="1" />
+              </div>
+              <label for="time_from" string="Horario" />
+              <div class="o_row">
+                <field name="time_from" widget="float_time" />
+                <span class="mx-2">a</span>
+                <field name="time_to" widget="float_time" />
+              </div>
+            </group>
+            <group>
+              <field name="filter_type" widget="radio" options="{'horizontal': true}" />
+              <field name="user_id"
+                invisible="filter_type != 'user'" required="filter_type == 'user'" />
+              <field name="agent_id"
+                invisible="filter_type != 'agent'" required="filter_type == 'agent'" />
+            </group>
+          </group>
+
+          <!-- Sección del Reporte (visible solo después de generar) -->
+          <group name="report_section" string="Reporte por Categoría" invisible="line_ids == []">
+            <field name="currency_id" column_invisible="1" />
+            <field name="line_ids" nolabel="1" colspan="2" widget="one2many" readonly="1" />
+          </group>
+
+          <!-- Totales -->
+          <group name="totals" invisible="line_ids == []">
+            <group string="Totales Generales" class="oe_subtotal_footer oe_right">
+              <field name="total_apostado" widget="monetary" class="oe_subtotal_footer_separator" />
+              <field name="total_ganado" widget="monetary" />
+              <field name="total_netwin" widget="monetary" class="oe_subtotal_footer_separator" />
+              <field name="total_rake" widget="monetary" />
+            </group>
+            <group string="Cargas y Retiros">
+              <field name="total_cargas" string="Total Cargas" widget="monetary" />
+              <field name="total_retiros" string="Total Retiros" widget="monetary" />
+            </group>
+          </group>
+        </sheet>
+      </form>
+    </field>
+  </record>
+
+  <!-- Acción para abrir el wizard -->
+  <record id="action_casino_global_report" model="ir.actions.act_window">
+    <field name="name">Reporte General</field>
+    <field name="res_model">casino.global.report</field>
+    <field name="view_mode">form</field>
+    <field name="target">current</field>
+    <field name="context">{'form_view_initial_mode': 'edit'}</field>
+    <field name="view_id" ref="view_casino_global_report_form" />
+  </record>
+
+</odoo>

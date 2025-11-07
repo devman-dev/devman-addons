@@ -7,3 +7,4 @@ from . import withdrawals
 from . import bet_limits
 from . import res_partner
 from . import res_company
+from . import global_report
