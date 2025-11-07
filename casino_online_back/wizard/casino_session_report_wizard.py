@@ -6,6 +6,7 @@ class CasinoSessionReportWizard(models.TransientModel):
     _name = 'casino.session.report.wizard'
     _description = 'Wizard para Reporte de Sesiones de Casino'
 
+    # Filtros de fecha
     date_from = fields.Date(
         string='Fecha Desde',
         required=True,
@@ -14,43 +15,45 @@ class CasinoSessionReportWizard(models.TransientModel):
     date_to = fields.Date(
         string='Fecha Hasta',
         required=True,
-        default=fields.Date.today
+        default=fields.Date.today()
     )
+    
+    # Filtros de entidad
     user_id = fields.Many2one(
         'res.users',
         string='Jugador'
     )
     agent_id = fields.Many2one(
         'res.partner',
-        string='Agente',
-        domain=[('is_company', '=', False)]
+        string='Agente'
+    )
+    
+    # Filtros: Categoría y Proveedor
+    category_id = fields.Many2one(
+        'product.public.category',
+        string='Categoría de Juego',
+        help='Filtrar por categoría de producto'
+    )
+    seller_id = fields.Many2one(
+        'res.partner',
+        string='Proveedor',
+        help='Filtrar por proveedor del juego'
     )
 
     # Campos computados para el resumen
     total_rounds = fields.Integer(string='Total de Rondas', readonly=True)
     total_games_count = fields.Integer(string='Total Jugadas (Cantidad)', readonly=True)
-    total_games_amount = fields.Monetary(string='Total Jugadas (Monto)', readonly=True)
+    total_games_amount = fields.Float(string='Total Jugadas (Monto)', readonly=True)
     total_wins_count = fields.Integer(string='Total Ganadas (Cantidad)', readonly=True)
-    total_wins_amount = fields.Monetary(string='Total Ganadas (Monto)', readonly=True)
+    total_wins_amount = fields.Float(string='Total Ganadas (Monto)', readonly=True)
     total_losses_count = fields.Integer(string='Total Perdidas (Cantidad)', readonly=True)
-    total_losses_amount = fields.Monetary(string='Total Perdidas (Monto)', readonly=True)
+    total_losses_amount = fields.Float(string='Total Perdidas (Monto)', readonly=True)
     player_classification = fields.Char(string='Clasificación del Jugador', readonly=True)
-    currency_id = fields.Many2one('res.currency', string='Moneda', default=lambda self: self.env.company.currency_id)
 
     def action_generate_report(self):
         """Genera el reporte basado en los filtros"""
         self.ensure_one()
-        # Construir el dominio de búsqueda
-        domain = []
-        
-        if self.date_from:
-            domain.append(('start_datetime', '>=', self.date_from))
-        if self.date_to:
-            domain.append(('start_datetime', '<=', self.date_to))
-        if self.user_id:
-            domain.append(('user_id', '=', self.user_id.id))
-        if self.agent_id:
-            domain.append(('agent_id', '=', self.agent_id.id))
+        domain = self._build_search_domain()
 
         # Buscar las sesiones
         sessions = self.env['casino.game.session'].search(domain)
@@ -69,8 +72,50 @@ class CasinoSessionReportWizard(models.TransientModel):
             'context': self.env.context,
         }
 
+    def _build_search_domain(self):
+        """Construye el dominio de búsqueda con todos los filtros"""
+        domain = []
+        
+        if self.date_from:
+            domain.append(('start_datetime', '>=', self.date_from))
+        if self.date_to:
+            domain.append(('start_datetime', '<=', self.date_to))
+        if self.user_id:
+            domain.append(('user_id', '=', self.user_id.id))
+        if self.agent_id:
+            domain.append(('agent_id', '=', self.agent_id.id))
+        
+        # Filtros de categoría
+        if self.category_id:
+            products = self.env['product.template'].search([
+                ('categ_id', '=', self.category_id.id)
+            ]).mapped('product_variant_ids')
+            product_ids = products.ids if products else [0]
+            domain.append(('game_id', 'in', product_ids))
+        
+        # Filtros de proveedor
+        if self.seller_id:
+            products = self.env['product.product'].search([
+                ('seller_ids.name', '=', self.seller_id.id)
+            ])
+            product_ids = products.ids if products else [0]
+            domain.append(('game_id', 'in', product_ids))
+        
+        return domain
+
     def _calculate_statistics(self, sessions):
         """Calcula las estadísticas del reporte"""
+        if not sessions:
+            self.total_rounds = 0
+            self.total_games_count = 0
+            self.total_games_amount = 0.0
+            self.total_wins_count = 0
+            self.total_wins_amount = 0.0
+            self.total_losses_count = 0
+            self.total_losses_amount = 0.0
+            self.player_classification = "Sin datos"
+            return
+
         # Contar rondas únicas
         round_ids = sessions.mapped('round_id')
         unique_rounds = set(round_ids) if round_ids else set()
@@ -98,13 +143,9 @@ class CasinoSessionReportWizard(models.TransientModel):
         if self.total_games_count == 0:
             return "Sin datos suficientes"
         
-        # Calcular ratio de ganancias
-        win_ratio = self.total_wins_count / self.total_games_count if self.total_games_count > 0 else 0
-        
-        # Calcular balance neto
+        win_ratio = self.total_wins_count / self.total_games_count
         net_balance = self.total_wins_amount - self.total_losses_amount
         
-        # Clasificación basada en win ratio y balance neto
         if win_ratio >= 0.7 and net_balance > 0:
             return "Muy Rentable"
         elif win_ratio >= 0.5 and net_balance >= 0:
@@ -117,17 +158,7 @@ class CasinoSessionReportWizard(models.TransientModel):
     def action_view_sessions(self):
         """Muestra las sesiones filtradas en una vista de lista"""
         self.ensure_one()
-        # Construir el dominio de búsqueda
-        domain = []
-        
-        if self.date_from:
-            domain.append(('start_datetime', '>=', self.date_from))
-        if self.date_to:
-            domain.append(('start_datetime', '<=', self.date_to))
-        if self.user_id:
-            domain.append(('user_id', '=', self.user_id.id))
-        if self.agent_id:
-            domain.append(('agent_id', '=', self.agent_id.id))
+        domain = self._build_search_domain()
 
         return {
             'type': 'ir.actions.act_window',

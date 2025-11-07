@@ -14,8 +14,8 @@
         'views/account_move.xml',
         'views/bet_limits_views.xml',
         'views/res_company_views.xml',
-        'wizard/casino_session_report_wizard_views.xml',
         'views/menus.xml',
+        'wizard/casino_session_report_wizard_views.xml',
         'security/ir.model.access.csv',
         'data/ir_cron.xml'
         
