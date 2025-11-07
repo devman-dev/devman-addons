@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <odoo>
     <!-- Vista del formulario del wizard -->
     <record id="casino_session_report_wizard_form" model="ir.ui.view">
@@ -6,12 +7,20 @@
         <field name="arch" type="xml">
             <form string="Reporte de Sesiones de Casino">
                 <group>
-                    <group string="Filtros">
+                    <group string="Filtros de Fecha">
                         <field name="date_from" />
                         <field name="date_to" />
+                    </group>
+                    <group string="Filtros de Entidad">
                         <field name="user_id" />
                         <field name="agent_id" />
-                        <field name="currency_id" invisible="1" />
+                    </group>
+                </group>
+
+                <group>
+                    <group string="Filtros de Producto">
+                        <field name="category_id" options="{'no_create': True}" />
+                        <field name="seller_id" options="{'no_create': True}" />
                     </group>
                 </group>
 
@@ -50,19 +59,18 @@
     </record>
 
     <!-- Acción del wizard -->
-    <!-- <record id="action_casino_session_report_wizard" model="ir.actions.act_window">
+    <record id="action_casino_session_report_wizard" model="ir.actions.act_window">
         <field name="name">Reporte de Sesiones de Casino</field>
         <field name="res_model">casino.session.report.wizard</field>
         <field name="view_mode">form</field>
         <field name="target">new</field>
-    </record> -->
+    </record>
 
     <!-- Menú para acceder al wizard -->
-    <!-- <menuitem id="menu_casino_session_report"
+    <menuitem id="menu_casino_session_report"
               name="Reporte de Sesiones Analítico"
               parent="menu_casino_sessions"
               action="action_casino_session_report_wizard"
-              sequence="20"/> -->
-
+              sequence="20"/>
 
 </odoo>
