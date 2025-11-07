@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 {
     "name": "Agent Multilevel",
-    "version": "18.0.1.1.9",
+    "version": "18.0.1.1.10",
     "summary": "Jerarquía multinivel de agentes y vinculación de jugadores",
     "description": """
         Agentes multinivel para gestionar subagentes y jugadores.

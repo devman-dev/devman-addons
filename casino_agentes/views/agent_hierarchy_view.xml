@@ -3,8 +3,9 @@
 
     <!-- Vista kanban para organigrama jerárquico -->
     <record id="view_agent_hierarchy_kanban" model="ir.ui.view">
-        <field name="name">agent.hierarchy.kanban</field>
+        <field name="name">casino.agent.hierarchy.kanban</field>
         <field name="model">res.partner</field>
+        <field name="priority">1000</field>
         <field name="arch" type="xml">
             <kanban default_group_by="parent_agent_id" class="o_agent_hierarchy_kanban">
                 <field name="name" />
@@ -83,8 +84,9 @@
 
     <!-- Vista list mejorada para agentes -->
     <record id="view_agent_hierarchy_list" model="ir.ui.view">
-        <field name="name">agent.hierarchy.list</field>
+        <field name="name">casino.agent.hierarchy.list</field>
         <field name="model">res.partner</field>
+        <field name="priority">1000</field>
         <field name="arch" type="xml">
             <list string="Jerarquía de Agentes" expand="1" editable="bottom">
                 <field name="name" />

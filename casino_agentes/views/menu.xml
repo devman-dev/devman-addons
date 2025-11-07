@@ -91,13 +91,6 @@
     action="public_category_commission_action"
     sequence="10" />
 
-  <!-- Submenú Ajustes de Agentes - Acceso rápido a Ajustes > Agentes -->
-  <menuitem
-    id="menu_configuration_agent_settings"
-    name="Ajustes de Agentes"
-    parent="menu_configuration_agent_commission"
-    action="action_open_agent_settings"
-    sequence="20" />
 
   <!-- Acción: abrir Perfiles de Agentes -->
   <record id="action_casino_agent_profiles" model="ir.actions.act_window">
@@ -143,4 +136,12 @@
     parent="menu_casino_agents_root"
     action="action_open_agent_settings"
     sequence="20" />
+
+  <!-- <menuitem
+    id="menu_configuration_agent_settings"
+    name="Ajustes de Agentes"
+    parent="menu_configuration_agent_commission"
+    action="action_open_agent_settings"
+    sequence="20" /> -->
+
 </odoo>
