@@ -67,10 +67,10 @@
     </record>
 
     <!-- Menú para acceder al wizard -->
-    <menuitem id="menu_casino_session_report"
-              name="Reporte de Sesiones Analítico"
-              parent="menu_casino_sessions"
-              action="action_casino_session_report_wizard"
-              sequence="20"/>
+    <!-- <menuitem id="menu_casino_session_report"
+        name="Reporte de Sesiones Analítico"
+        parent="menu_casino_sessions"
+        action="action_casino_session_report_wizard"
+        sequence="20" /> -->
 
 </odoo>

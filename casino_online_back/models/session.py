@@ -14,19 +14,13 @@ class CasinoGameSession(models.Model):
     token_live = fields.Boolean(string='Token Live')
 
     user_id = fields.Many2one('res.users', string='Jugador', required=True)
-    agent_id = fields.Many2one('res.partner', string='Agente', domain=[('is_company', '=', False)])
+    agent_id = fields.Many2one('res.partner', string='Agente', domain=[('is_company', '=', False)],  help='Agente asociado al jugador.')
     start_datetime = fields.Datetime(string='Inicio')
     end_datetime = fields.Datetime(string='Fin')
     initial_balance = fields.Monetary(string='Saldo Inicial')
     net_loss = fields.Monetary(string='Pérdida Neta', currency_field='currency_id')
     final_balance = fields.Monetary(string='Saldo Final')
     currency_id = fields.Many2one('res.currency', string='Moneda')
-    # Datos de agente y comisión por débito
-    agent_id = fields.Many2one(
-        'res.partner',
-        string='Agente',
-        help='Agente asociado al jugador en el momento de la operación.'
-    )
     agent_commission = fields.Monetary(
         string='Comisión del agente',
         currency_field='currency_id',
@@ -40,6 +34,7 @@ class CasinoGameSession(models.Model):
         ('balance', 'Balance'),
         ('started', 'Started')
     ], string='Resultado')
+    
     state = fields.Selection([
         ('pending', 'Pendiente'),
         ('in_progress', 'En curso'),

@@ -88,17 +88,17 @@ class CasinoSessionReportWizard(models.TransientModel):
         # Filtros de categoría
         if self.category_id:
             products = self.env['product.template'].search([
-                ('categ_id', '=', self.category_id.id)
+                ('public_categ_ids', 'in', [self.category_id.id])
             ]).mapped('product_variant_ids')
-            product_ids = products.ids if products else [0]
+            product_ids = products.ids
             domain.append(('game_id', 'in', product_ids))
-        
+
         # Filtros de proveedor
         if self.seller_id:
             products = self.env['product.product'].search([
-                ('seller_ids.name', '=', self.seller_id.id)
+                ('product_tmpl_id.seller_ids.partner_id', '=', self.seller_id.id)
             ])
-            product_ids = products.ids if products else [0]
+            product_ids = products.ids
             domain.append(('game_id', 'in', product_ids))
         
         return domain

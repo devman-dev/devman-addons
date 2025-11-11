@@ -4,7 +4,7 @@
     'summary': 'Base para la gestión de jugadores y juegos de casino',
     'description': 'Incluye modelos personalizados para onboarding de jugadores, juegos y sesiones.',
     'author': 'Tu Empresa',
-    'depends': ['base', 'product', 'account'],
+    'depends': ['base', 'product', 'account', 'website_sale'],
     'data': [
         # 'views/player_views.xml',
         'views/game_views.xml',
