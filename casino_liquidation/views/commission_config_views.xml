@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Vista list de configuración de comisiones -->
+    <record id="view_commission_config_list" model="ir.ui.view">
+        <field name="name">casino.commission.config.list</field>
+        <field name="model">casino.commission.config</field>
+        <field name="arch" type="xml">
+            <list string="Configuración de Comisiones" editable="bottom">
+                <field name="provider_id" required="1" />
+                <field name="category_id" required="1" />
+                <field name="commission_percentage" />
+                <field name="active" />
+            </list>
+        </field>
+    </record>
+
+    <!-- Vista form de configuración de comisiones -->
+    <record id="view_commission_config_form" model="ir.ui.view">
+        <field name="name">casino.commission.config.form</field>
+        <field name="model">casino.commission.config</field>
+        <field name="arch" type="xml">
+            <form string="Configuración de Comisión">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="provider_id" required="1" />
+                            <field name="category_id" required="1" />
+                        </group>
+                        <group>
+                            <field name="commission_percentage" required="1" />
+                            <field name="active" />
+                        </group>
+                    </group>
+                    <group string="Notas">
+                        <field name="notes" nolabel="1" />
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Vista search de configuración de comisiones -->
+    <record id="view_commission_config_search" model="ir.ui.view">
+        <field name="name">casino.commission.config.search</field>
+        <field name="model">casino.commission.config</field>
+        <field name="arch" type="xml">
+            <search string="Configuración de Comisiones">
+                <field name="provider_id" />
+                <field name="category_id" />
+                <filter name="active_filter" string="Activos" domain="[('active', '=', True)]" />
+                <filter name="inactive_filter" string="Inactivos" domain="[('active', '=', False)]" />
+                <separator />
+                <group expand="1" string="Agrupar por">
+                    <filter string="Proveedor" name="provider_groupby" context="{'group_by': 'provider_id'}" />
+                    <filter string="Categoría" name="category_groupby" context="{'group_by': 'category_id'}" />
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- Action para listar configuración de comisiones -->
+    <record id="action_commission_config" model="ir.actions.act_window">
+        <field name="name">Configuración de Comisiones</field>
+        <field name="res_model">casino.commission.config</field>
+        <field name="view_mode">list,form</field>
+        <field name="context">{}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No hay configuraciones de comisión. Crea una nueva.
+            </p>
+        </field>
+    </record>
+</odoo>

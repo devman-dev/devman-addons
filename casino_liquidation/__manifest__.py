@@ -1,0 +1,20 @@
+{
+    'name': 'Casino - Gestión de Liquidaciones',
+    'version': '18.0.1.0.0',
+    'category': 'Industries/Casino',
+    'summary': 'Gestión integral de liquidaciones de casino por proveedor',
+    'author': 'Casino Team',
+    'depends': ['base', 'account', 'casino_online_back'],
+    'data': [
+        'security/ir.model.access.csv',
+        'data/commission_sequence.xml',
+        'views/commission_config_views.xml',
+        'views/liquidation_views.xml',
+        'views/liquidation_line_views.xml',
+        'views/generate_liquidation_wizard_views.xml',
+        'views/menus.xml',
+    ],
+    'installable': True,
+    'application': True,
+    'auto_install': False,
+}
