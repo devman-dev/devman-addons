@@ -1,0 +1,157 @@
+/* Estilos para el Wizard de Reporte de Fichas */
+
+.o_casino_chip_wizard {
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    padding: 20px;
+}
+
+.o_casino_chip_wizard .oe_title h1 {
+    color: #2c3e50;
+    font-weight: 600;
+    margin-bottom: 20px;
+    text-align: center;
+    padding: 15px;
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.o_casino_chip_wizard .oe_title i {
+    color: #3498db;
+    font-size: 1.2em;
+}
+
+/* Grupos con estilo de tarjeta */
+.o_casino_chip_wizard .o_group {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+    padding: 15px !important;
+    margin-bottom: 15px;
+}
+
+.o_casino_chip_wizard .o_group .o_group_title {
+    font-weight: 600;
+    font-size: 1.1em;
+    color: #34495e;
+    margin-bottom: 10px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid #3498db;
+}
+
+/* Estilo para el campo de tipo de operación */
+.o_casino_chip_wizard .o_operation_type_field .o_radio_item {
+    display: inline-block;
+    margin-right: 20px;
+    padding: 10px 20px;
+    background: #ecf0f1;
+    border-radius: 20px;
+    transition: all 0.3s ease;
+}
+
+.o_casino_chip_wizard .o_operation_type_field .o_radio_item:hover {
+    background: #3498db;
+    color: white;
+    transform: scale(1.05);
+}
+
+.o_casino_chip_wizard .o_operation_type_field input[type="radio"]:checked + label {
+    background: #27ae60;
+    color: white;
+    font-weight: bold;
+}
+
+/* Estilo para el campo de importe */
+.o_casino_chip_wizard .o_field_monetary input {
+    font-size: 1.3em !important;
+    color: #27ae60 !important;
+    font-weight: bold !important;
+    text-align: right;
+    padding: 10px;
+    border: 2px solid #27ae60;
+    border-radius: 5px;
+}
+
+/* Estilo para el campo de descripción */
+.o_casino_chip_wizard .o_description_field textarea {
+    border: 2px solid #95a5a6;
+    border-radius: 5px;
+    padding: 10px;
+    min-height: 80px;
+}
+
+.o_casino_chip_wizard .o_description_field textarea:focus {
+    border-color: #3498db;
+    box-shadow: 0 0 8px rgba(52, 152, 219, 0.3);
+}
+
+/* Estilo para los campos en general */
+.o_casino_chip_wizard .o_field_widget input,
+.o_casino_chip_wizard .o_field_widget select {
+    border-radius: 5px;
+    border: 1px solid #bdc3c7;
+    padding: 8px 12px;
+}
+
+.o_casino_chip_wizard .o_field_widget input:focus,
+.o_casino_chip_wizard .o_field_widget select:focus {
+    border-color: #3498db;
+    box-shadow: 0 0 5px rgba(52, 152, 219, 0.3);
+}
+
+/* Estilo para los botones del footer */
+.o_casino_chip_wizard + .modal-footer button,
+.modal-footer button.btn-primary {
+    padding: 10px 30px;
+    font-size: 1.1em;
+    border-radius: 25px;
+    transition: all 0.3s ease;
+    font-weight: 600;
+}
+
+.modal-footer button.btn-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: none;
+}
+
+.modal-footer button.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+}
+
+.modal-footer button.btn-secondary {
+    background: #95a5a6;
+    border: none;
+}
+
+.modal-footer button.btn-secondary:hover {
+    background: #7f8c8d;
+    transform: translateY(-2px);
+}
+
+/* Animación de entrada */
+.o_casino_chip_wizard {
+    animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .o_casino_chip_wizard .o_group {
+        margin-bottom: 10px;
+    }
+    
+    .o_casino_chip_wizard .oe_title h1 {
+        font-size: 1.5em;
+    }
+}

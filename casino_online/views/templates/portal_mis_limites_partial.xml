@@ -148,40 +148,95 @@
             <script type="text/javascript" src="/casino_online/static/src/js/limits_form.js"></script>
         </xpath> -->
 
-        <script type="text/javascript"> (function(){ // Locale-aware sin separador de miles y
-            con 2
-            decimales var nf = new Intl.NumberFormat(navigator.language || 'es-AR', {
-            minimumFractionDigits: 2, maximumFractionDigits: 2, useGrouping: false }); function
-            parseLocale(s){ if (s === null || s === undefined)
-            return NaN; s = String(s).trim(); if (!s) return NaN; // Detectar separador decimal de
-            la configuración actual var sample = nf.format(1.1); // "1,10" o "1.10" var dec =
-            sample.match(/[.,]/)?.[0] || '.'; // Normalizar: quitar posibles separadores de miles
-            (aunque no deberíamos tenerlos) var group = (dec === '.') ? ',' : '.'; s = s.replace(new
-            RegExp('\\' + group, 'g'), ''); // Cambiar el separador decimal a punto para Number() if
-            (dec !== '.') s = s.replace(new RegExp('\\' + dec, 'g'), '.'); return Number(s); }
-            function toNumber(v){ return parseLocale(v); } function isValid(n){ return !isNaN(n)
-            &amp;&amp; isFinite(n) &amp;&amp; n &gt;= 0; } function fmt2(n){ return
-            nf.format(Number(n.toFixed(2))); } function refresh(){ var inputs =
-            document.querySelectorAll('#bet_limits_form .limit-input'); var changed = false,
-            allValid = true; inputs.forEach(function(inp){ var val = toNumber(inp.value); var orig =
-            toNumber(inp.getAttribute('data-original')); if(!isValid(val)){ allValid = false;
-            inp.classList.add('is-invalid'); } else { inp.classList.remove('is-invalid'); } //
-            Comparar con 2 decimales if (isValid(val) &amp;&amp; isValid(orig)) { if
-            (Number(val.toFixed(2)) !== Number(orig.toFixed(2))) changed = true; } else { // si
-            alguno es inválido, evitamos habilitar allValid = false; } }); var btn =
-            document.getElementById('btn_save_limits'); if(btn) btn.disabled = !(changed &amp;&amp;
-            allValid); } // Formatear a 2 decimales al salir de cada input (sin miles) function
-            bindFormatOnBlur(){ document.querySelectorAll('#bet_limits_form
-            .limit-input').forEach(function(inp){ inp.addEventListener('blur', function(){ var v =
-            toNumber(inp.value); if (isValid(v)) inp.value = fmt2(v); // fija exactamente 2
-            decimales refresh(); }); }); } document.addEventListener('input', function(ev){
-            if(ev.target &amp;&amp; ev.target.classList.contains('limit-input')) refresh(); });
-            document.addEventListener('DOMContentLoaded', function(){ // Formatea inicial según
-            locale a 2 decimales (evita "2,0") document.querySelectorAll('#bet_limits_form
-            .limit-input').forEach(function(inp){ var v = toNumber(inp.value); if (isValid(v)) {
-            inp.value = fmt2(v); // Alinea también el "original" mostrado (sin cambiar el numérico
-            real) var orig = toNumber(inp.getAttribute('data-original')); if (isValid(orig))
-            inp.setAttribute('data-original', fmt2(orig)); } }); bindFormatOnBlur(); refresh(); });
+        <script type="text/javascript">
+            (function(){
+            // Locale-aware sin separador de miles y con 2 decimales
+            var nf = new Intl.NumberFormat(navigator.language || 'es-AR', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+            useGrouping: false
+            });
+
+            function parseLocale(s){
+            if (s === null || s === undefined) return NaN;
+            s = String(s).trim();
+            if (!s) return NaN;
+            // Detectar separador decimal de la configuración actual
+            var sample = nf.format(1.1); // "1,10" o "1.10"
+            var dec = sample.match(/[.,]/)?.[0] || '.';
+            // Normalizar: quitar posibles separadores de miles (aunque no deberíamos tenerlos)
+            var group = (dec === '.') ? ',' : '.';
+            s = s.replace(new RegExp('\\' + group, 'g'), '');
+            // Cambiar el separador decimal a punto para Number()
+            if (dec !== '.') s = s.replace(new RegExp('\\' + dec, 'g'), '.');
+            return Number(s);
+            }
+
+            function toNumber(v){
+            return parseLocale(v);
+            }
+
+            function isValid(n){
+            return !isNaN(n) &amp;&amp; isFinite(n) &amp;&amp; n &gt;= 0;
+            }
+
+            function fmt2(n){
+            return nf.format(Number(n.toFixed(2)));
+            }
+
+            function refresh(){
+            var inputs = document.querySelectorAll('#bet_limits_form .limit-input');
+            var changed = false, allValid = true;
+            inputs.forEach(function(inp){
+            var val = toNumber(inp.value);
+            var orig = toNumber(inp.getAttribute('data-original'));
+            if(!isValid(val)){
+            allValid = false;
+            inp.classList.add('is-invalid');
+            } else {
+            inp.classList.remove('is-invalid');
+            }
+            // Comparar con 2 decimales
+            if (isValid(val) &amp;&amp; isValid(orig)) {
+            if (Number(val.toFixed(2)) !== Number(orig.toFixed(2))) changed = true;
+            } else {
+            // Si alguno es inválido, evitamos habilitar
+            allValid = false;
+            }
+            });
+            var btn = document.getElementById('btn_save_limits');
+            if(btn) btn.disabled = !(changed &amp;&amp; allValid);
+            }
+
+            // Formatear a 2 decimales al salir de cada input (sin miles)
+            function bindFormatOnBlur(){
+            document.querySelectorAll('#bet_limits_form .limit-input').forEach(function(inp){
+            inp.addEventListener('blur', function(){
+            var v = toNumber(inp.value);
+            if (isValid(v)) inp.value = fmt2(v); // Fija exactamente 2 decimales
+            refresh();
+            });
+            });
+            }
+
+            document.addEventListener('input', function(ev){
+            if(ev.target &amp;&amp; ev.target.classList.contains('limit-input')) refresh();
+            });
+
+            document.addEventListener('DOMContentLoaded', function(){
+            // Formatea inicial según locale a 2 decimales (evita "2,0")
+            document.querySelectorAll('#bet_limits_form .limit-input').forEach(function(inp){
+            var v = toNumber(inp.value);
+            if (isValid(v)) {
+            inp.value = fmt2(v);
+            // Alinea también el "original" mostrado (sin cambiar el numérico real)
+            var orig = toNumber(inp.getAttribute('data-original'));
+            if (isValid(orig)) inp.setAttribute('data-original', fmt2(orig));
+            }
+            });
+            bindFormatOnBlur();
+            refresh();
+            });
             })();
         </script>
 

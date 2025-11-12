@@ -16,8 +16,10 @@
         'views/res_company_views.xml',
         'wizard/casino_session_report_wizard_views.xml',
         'views/global_report_views.xml',
+        'views/chip_operation_views.xml',
         'views/menus.xml',
         'wizard/casino_session_report_wizard_views.xml',
+        'wizard/chip_operation_wizard_views.xml',
         'security/ir.model.access.csv',
         'data/ir_cron.xml'
         

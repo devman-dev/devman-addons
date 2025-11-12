@@ -38,9 +38,9 @@
         action="action_casino_session_report_wizard"
         sequence="10" />
     <menuitem id="menu_casino_deposits_and_withdrawals_players"
-        name="Cargas y Retiros"
+        name="Cargas y Retiros de Fichas"
         parent="menu_casino_players"
-        action="action_casino_account_move_line"
+        action="action_casino_chip_operations"
         sequence="15" />
 
     <menuitem id="menu_casino_history_players"

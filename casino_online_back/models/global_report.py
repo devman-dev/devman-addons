@@ -3,10 +3,10 @@ from odoo import models, fields, api
 from odoo.tools import float_round
 
 
-class CasinoGlobalReport(models.TransientModel):
-    _name = 'casino.global.report'
-    _description = 'Reporte Global de Casino'
-    _rec_name = 'id'
+class CasinoGlobalReportWizard(models.TransientModel):
+    """Wizard para configurar filtros y generar el Reporte Global"""
+    _name = 'casino.global.report.wizard'
+    _description = 'Wizard de Filtros para Reporte Global'
 
     # Filtros
     date_from = fields.Date(string='Fecha Desde', required=True, default=fields.Date.context_today)
@@ -20,12 +20,59 @@ class CasinoGlobalReport(models.TransientModel):
     ], string='Filtrar por', default='user')
     
     user_id = fields.Many2one('res.users', string='Jugador')
-    agent_id = fields.Many2one('res.partner', string='Agente', domain=[('is_agent', '=', True)])
     
-    # Líneas del reporte
+    def action_generate_report(self):
+        """Genera y muestra el reporte con los filtros aplicados"""
+        self.ensure_one()
+        
+        # Crear el reporte con los filtros
+        report = self.env['casino.global.report'].create({
+            'date_from': self.date_from,
+            'date_to': self.date_to,
+            'time_from': self.time_from,
+            'time_to': self.time_to,
+            'filter_type': self.filter_type,
+            'user_id': self.user_id.id if self.user_id else False,
+        })
+        
+        # Generar los datos del reporte
+        report._generate_report_data()
+        
+        # Mostrar el reporte en modo readonly
+        return {
+            'type': 'ir.actions.act_window',
+            'name': 'Reporte General',
+            'res_model': 'casino.global.report',
+            'res_id': report.id,
+            'view_mode': 'form',
+            'view_id': self.env.ref('casino_online_back.view_casino_global_report_result_form').id,
+            'target': 'current',
+        }
+
+
+class CasinoGlobalReport(models.TransientModel):
+    _name = 'casino.global.report'
+    _description = 'Reporte Global de Casino'
+    _rec_name = 'id'
+
+    # Filtros (readonly en la vista de resultado)
+    date_from = fields.Date(string='Fecha Desde', required=True, readonly=True)
+    date_to = fields.Date(string='Fecha Hasta', required=True, readonly=True)
+    time_from = fields.Float(string='Hora Desde', readonly=True)
+    time_to = fields.Float(string='Hora Hasta', readonly=True)
+    
+    filter_type = fields.Selection([
+        ('user', 'Jugador'),
+        ('agent', 'Agente'),
+    ], string='Filtrar por', readonly=True)
+    
+    user_id = fields.Many2one('res.users', string='Jugador', readonly=True)
+    # agent_id = fields.Many2one('res.partner', string='Agente', domain=[('is_agent', '=', True)])
+    
+    # Líneas del reporte (almacenadas temporalmente)
     line_ids = fields.One2many('casino.global.report.line', 'report_id', string='Líneas de Reporte')
     
-    # Totales
+    # Totales (computados dinámicamente)
     total_apostado = fields.Monetary(string='Total Apostado', compute='_compute_totals', store=False)
     total_ganado = fields.Monetary(string='Total Ganado', compute='_compute_totals', store=False)
     total_netwin = fields.Monetary(string='Total Netwin', compute='_compute_totals', store=False)
@@ -39,22 +86,10 @@ class CasinoGlobalReport(models.TransientModel):
         """Mostrar siempre 'Reporte General' en lugar del ID"""
         return [(record.id, 'Reporte General') for record in self]
 
-    @api.depends('line_ids.apostado', 'line_ids.ganado', 'line_ids.netwin', 'line_ids.rake')
-    def _compute_totals(self):
-        for report in self:
-            report.total_apostado = sum(report.line_ids.mapped('apostado'))
-            report.total_ganado = sum(report.line_ids.mapped('ganado'))
-            report.total_netwin = sum(report.line_ids.mapped('netwin'))
-            report.total_rake = sum(report.line_ids.mapped('rake'))
-            report.total_cargas = sum(report.line_ids.filtered(lambda l: l.categoria == 'Cargas y Retiros').mapped('apostado'))
-            report.total_retiros = sum(report.line_ids.filtered(lambda l: l.categoria == 'Cargas y Retiros').mapped('ganado'))
-
-    def action_generate_report(self):
-        """Genera el reporte basado en los filtros"""
-        self.ensure_one()
-        
+    def _generate_report_data(self):
+        """Genera las líneas del reporte basándose en los filtros"""
         # Limpiar líneas anteriores
-        self.line_ids.unlink()
+        self.line_ids = [(5, 0, 0)]
         
         # Construir dominio de fechas
         datetime_from = fields.Datetime.to_datetime(self.date_from)
@@ -70,11 +105,11 @@ class CasinoGlobalReport(models.TransientModel):
             ('start_datetime', '<=', datetime_to),
         ]
         
-        # Filtrar por usuario o agente
-        if self.filter_type == 'user' and self.user_id:
-            session_domain.append(('user_id', '=', self.user_id.id))
-        elif self.filter_type == 'agent' and self.agent_id:
-            session_domain.append(('agent_id', '=', self.agent_id.id))
+        # # Filtrar por usuario o agente
+        # if self.filter_type == 'user' and self.user_id:
+        #     session_domain.append(('user_id', '=', self.user_id.id))
+        # elif self.filter_type == 'agent' and self.agent_id:
+        #     session_domain.append(('agent_id', '=', self.agent_id.id))
         
         # Obtener sesiones
         sessions = self.env['casino.game.session'].search(session_domain)
@@ -84,7 +119,6 @@ class CasinoGlobalReport(models.TransientModel):
         
         for session in sessions:
             if session.game_id and session.game_id.public_categ_ids:
-                # Tomar la primera categoría pública del juego
                 category_name = session.game_id.public_categ_ids[0].name
             else:
                 category_name = 'Sin Categoría'
@@ -102,11 +136,11 @@ class CasinoGlobalReport(models.TransientModel):
             ganado = 0.0
             
             if session.result == 'win':
-                ganado = apostado + (session.net_loss or 0.0)  # Si ganó, recupera apuesta + ganancia
+                ganado = apostado + (session.net_loss or 0.0)
             elif session.result == 'loss':
-                ganado = 0.0  # Si perdió, no gana nada
+                ganado = 0.0
             elif session.result == 'draw':
-                ganado = apostado  # Si empató, recupera la apuesta
+                ganado = apostado
             
             netwin = ganado - apostado
             rake = session.agent_commission or 0.0
@@ -116,39 +150,10 @@ class CasinoGlobalReport(models.TransientModel):
             category_data[category_name]['netwin'] += netwin
             category_data[category_name]['rake'] += rake
         
-        # Agregar Cargas y Retiros
-        withdrawal_domain = [
-            ('date', '>=', datetime_from),
-            ('date', '<=', datetime_to),
-        ]
-        
-        if self.filter_type == 'user' and self.user_id:
-            withdrawal_domain.append(('partner_id', '=', self.user_id.partner_id.id))
-        elif self.filter_type == 'agent' and self.agent_id:
-            # Para agente, buscar todos los jugadores del agente
-            user_ids = self.env['res.users'].search([('partner_id.agent_id', '=', self.agent_id.id)])
-            if user_ids:
-                partner_ids = user_ids.mapped('partner_id').ids
-                withdrawal_domain.append(('partner_id', 'in', partner_ids))
-        
-        withdrawals = self.env['casino.game.withdrawals'].search(withdrawal_domain)
-        
-        total_cargas = sum(withdrawals.filtered(lambda w: w.amount > 0).mapped('amount'))
-        total_retiros = abs(sum(withdrawals.filtered(lambda w: w.amount < 0).mapped('amount')))
-        
-        if total_cargas > 0 or total_retiros > 0:
-            category_data['Cargas y Retiros'] = {
-                'apostado': total_cargas,
-                'ganado': total_retiros,
-                'netwin': total_cargas - total_retiros,
-                'rake': 0.0,
-            }
-        
-        # Crear líneas del reporte
+        # Crear líneas del reporte para categorías
         line_vals = []
         for categoria, datos in category_data.items():
             line_vals.append((0, 0, {
-                'report_id': self.id,
                 'categoria': categoria,
                 'apostado': datos['apostado'],
                 'ganado': datos['ganado'],
@@ -156,28 +161,173 @@ class CasinoGlobalReport(models.TransientModel):
                 'rake': datos['rake'],
             }))
         
-        self.write({'line_ids': line_vals})
+        # Agregar línea de Cargas y Retiros al final
+        # Calcular el total de Cargas y Retiros en el mismo período
+        dt_from = datetime_from
+        dt_to = datetime_to
         
-        # Retornar vista del reporte
+        withdrawal_domain = [
+            ('date', '>=', dt_from),
+            ('date', '<=', dt_to),
+        ]
+        if self.filter_type == 'user' and self.user_id:
+            withdrawal_domain.append(('partner_id', '=', self.user_id.partner_id.id))
+        
+        withdrawals = self.env['casino.game.withdrawals'].search(withdrawal_domain)
+        
+        # Calcular total (cargas son positivas, retiros son negativos)
+        # Cargas: operation_type == 'load'
+        total_cargas = sum(withdrawals.filtered(lambda w: w.operation_type == 'load').mapped('amount'))
+        # Retiros: sin operation_type o operation_type == 'withdrawal'
+        total_retiros = sum(withdrawals.filtered(lambda w: not w.operation_type or w.operation_type == 'withdrawal').mapped('amount'))
+        
+        # Total neto: cargas - retiros
+        total_cargas_retiros = total_cargas - total_retiros
+        
+        # Agregar línea al final del listado
+        line_vals.append((0, 0, {
+            'categoria': 'Cargas y Retiros',
+            'apostado': total_cargas_retiros,  # Total neto en columna Apostado
+            'ganado': 0.0,
+            'netwin': total_cargas_retiros,    # Netwin = total neto
+            'rake': 0.0,
+        }))
+        
+        self.line_ids = line_vals
+
+    def action_back_to_wizard(self):
+        """Volver al wizard de filtros"""
+        # Crear un nuevo wizard con los mismos filtros
+        wizard = self.env['casino.global.report.wizard'].create({
+            'date_from': self.date_from,
+            'date_to': self.date_to,
+            'time_from': self.time_from,
+            'time_to': self.time_to,
+            'filter_type': self.filter_type,
+            'user_id': self.user_id.id if self.user_id else False,
+        })
         return {
             'type': 'ir.actions.act_window',
-            'name': 'Reporte Global',
-            'res_model': 'casino.global.report',
+            'name': 'Reporte General - Filtros',
+            'res_model': 'casino.global.report.wizard',
+            'res_id': wizard.id,
             'view_mode': 'form',
-            'res_id': self.id,
-            'target': 'current',
-            'context': {'show_report': True},
+            'target': 'new',
         }
+
+    def _get_datetime_range(self):
+        """Helper: arma (dt_from, dt_to) combinando fecha y hora."""
+        self.ensure_one()
+        dt_from = fields.Datetime.to_datetime(self.date_from)
+        dt_to = fields.Datetime.to_datetime(self.date_to)
+        dt_from = dt_from.replace(hour=int(self.time_from or 0.0),
+                                   minute=int(((self.time_from or 0.0) % 1) * 60))
+        dt_to = dt_to.replace(hour=int(self.time_to or 0.0),
+                               minute=int(((self.time_to or 0.0) % 1) * 60))
+        return dt_from, dt_to
+
+    def action_view_withdrawals(self):
+        """Abrir Cargas y Retiros en el período filtrado (y jugador si aplica)."""
+        self.ensure_one()
+        dt_from, dt_to = self._get_datetime_range()
+        domain = [('date', '>=', dt_from), ('date', '<=', dt_to)]
+        if self.filter_type == 'user' and self.user_id:
+            domain.append(('partner_id', '=', self.user_id.partner_id.id))
+
+        return {
+            'type': 'ir.actions.act_window',
+            'name': 'Cargas y Retiros',
+            'res_model': 'casino.game.withdrawals',
+            'view_mode': 'list,form',
+            'domain': domain,
+            'target': 'current',
+            'context': {'search_default_group_by_partner': 0},
+        }
+
+    def action_view_sessions(self):
+        """Abrir Sesiones de Juego del período (y jugador si aplica)."""
+        self.ensure_one()
+        dt_from, dt_to = self._get_datetime_range()
+        domain = [('start_datetime', '>=', dt_from), ('start_datetime', '<=', dt_to)]
+        if self.filter_type == 'user' and self.user_id:
+            domain.append(('user_id', '=', self.user_id.id))
+
+        return {
+            'type': 'ir.actions.act_window',
+            'name': 'Sesiones de Juego',
+            'res_model': 'casino.game.session',
+            'view_mode': 'list,form',
+            'domain': domain,
+            'target': 'current',
+        }
+
+    @api.depends(
+        'line_ids.apostado', 'line_ids.ganado', 'line_ids.netwin', 'line_ids.rake',
+        'date_from', 'date_to', 'time_from', 'time_to', 'filter_type', 'user_id'
+    )
+    def _compute_totals(self):
+        """Calcula los totales basándose en las líneas"""
+        for report in self:
+            report.total_apostado = sum(report.line_ids.mapped('apostado'))
+            report.total_ganado = sum(report.line_ids.mapped('ganado'))
+            report.total_netwin = sum(report.line_ids.mapped('netwin'))
+            report.total_rake = sum(report.line_ids.mapped('rake'))
+
+            # Calcular Cargas y Retiros como totales separados (no en el listado por categoría)
+            # Construir el rango datetime a partir de fecha+hora
+            dt_from = fields.Datetime.to_datetime(report.date_from)
+            dt_to = fields.Datetime.to_datetime(report.date_to)
+            dt_from = dt_from.replace(hour=int(report.time_from or 0.0),
+                                       minute=int(((report.time_from or 0.0) % 1) * 60))
+            dt_to = dt_to.replace(hour=int(report.time_to or 0.0),
+                                   minute=int(((report.time_to or 0.0) % 1) * 60))
+
+            withdrawal_domain = [
+                ('date', '>=', dt_from),
+                ('date', '<=', dt_to),
+            ]
+            if report.user_id:
+                withdrawal_domain.append(('partner_id', '=', report.user_id.partner_id.id))
+
+            withdrawals = self.env['casino.game.withdrawals'].search(withdrawal_domain)
+            # Cargas: registros con operation_type == 'load'
+            total_cargas = sum(withdrawals.filtered(lambda w: w.operation_type == 'load').mapped('amount'))
+            # Retiros: registros sin operation_type definido o con operation_type == 'withdrawal'
+            total_retiros = sum(withdrawals.filtered(lambda w: not w.operation_type or w.operation_type == 'withdrawal').mapped('amount'))
+
+            report.total_cargas = total_cargas or 0.0
+            report.total_retiros = total_retiros or 0.0
 
 
 class CasinoGlobalReportLine(models.TransientModel):
     _name = 'casino.global.report.line'
     _description = 'Línea de Reporte Global'
 
-    report_id = fields.Many2one('casino.global.report', string='Reporte', required=True, ondelete='cascade')
-    categoria = fields.Char(string='Categoría', required=True)
+    report_id = fields.Many2one('casino.global.report', string='Reporte', ondelete='cascade')
+    categoria = fields.Char(string='Categoría')
     apostado = fields.Monetary(string='Apostado', currency_field='currency_id')
     ganado = fields.Monetary(string='Ganado', currency_field='currency_id')
     netwin = fields.Monetary(string='Netwin', currency_field='currency_id')
     rake = fields.Monetary(string='Rake', currency_field='currency_id')
-    currency_id = fields.Many2one('res.currency', related='report_id.currency_id', store=True)
+    participacion = fields.Float(string='Peso %', compute='_compute_participacion', digits=(16, 4))
+    currency_id = fields.Many2one('res.currency', related='report_id.currency_id')
+    color = fields.Integer(string='Color Index', compute='_compute_color', store=False)
+
+    @api.depends('categoria')
+    def _compute_color(self):
+        """Asigna un índice de color (0-11) basado en un hash del nombre de categoría"""
+        for line in self:
+            if line.categoria:
+                # Generar un índice de color consistente basado en el hash del nombre
+                hash_value = hash(line.categoria)
+                # Odoo soporta colores del 0 al 11
+                line.color = abs(hash_value) % 12
+            else:
+                line.color = 0
+
+    @api.depends('apostado', 'report_id.total_apostado')
+    def _compute_participacion(self):
+        """Participación de la categoría sobre el Total Apostado (0..1)."""
+        for line in self:
+            total = line.report_id.total_apostado or 0.0
+            line.participacion = (line.apostado / total) if total else 0.0

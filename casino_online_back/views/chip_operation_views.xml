@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <!-- Vista de árbol -->
+  <record id="view_casino_withdrawals_tree" model="ir.ui.view">
+    <field name="name">casino.game.withdrawals.list</field>
+    <field name="model">casino.game.withdrawals</field>
+    <field name="arch" type="xml">
+      <list string="Reporte de Fichas">
+        <field name="date" string="Fecha" />
+        <field name="create_uid" string="Agente" />
+        <field name="partner_id" string="Jugador/Agente" />
+        <field name="operation_type" string="Tipo" />
+        <field name="amount" invisible="1" />
+        <field name="amount_signed" string="Monto" sum="Total"
+          decoration-danger="operation_type == 'withdrawal'"
+          decoration-success="operation_type == 'load'"
+          class="text-end fw-bold" />
+        <field name="description" string="Descripción" />
+        <!-- <field name="state" string="Estado" widget="badge"
+          decoration-success="state == 'approved'"
+          decoration-warning="state == 'pending'"
+          decoration-danger="state == 'rejected'" /> -->
+      </list>
+    </field>
+  </record>
+
+  <!-- Vista de formulario -->
+  <record id="view_casino_withdrawals_form" model="ir.ui.view">
+    <field name="name">casino.game.withdrawals.form</field>
+    <field name="model">casino.game.withdrawals</field>
+    <field name="arch" type="xml">
+      <form string="Operación de Fichas">
+        <sheet>
+          <group>
+            <group>
+              <field name="date" readonly="1" />
+              <field name="operation_type" />
+            </group>
+            <group>
+              <field name="partner_id" options="{'no_create': True, 'no_create_edit': True}" />
+              <field name="amount" />
+            </group>
+          </group>
+        </sheet>
+      </form>
+    </field>
+  </record>
+
+  <!-- Vista de búsqueda -->
+  <record id="view_casino_withdrawals_search" model="ir.ui.view">
+    <field name="name">casino.game.withdrawals.search</field>
+    <field name="model">casino.game.withdrawals</field>
+    <field name="arch" type="xml">
+      <search string="Buscar Operaciones">
+        <searchpanel>
+          <field name="operation_type" select="1" />
+          <!-- <field name="state" select="1" /> -->
+          <field name="partner_id" select="1" />
+        </searchpanel>
+        <field name="partner_id" string="Proveedor" />
+        <filter name="filter_load" string="Cargas"
+          domain="[('operation_type', '=', 'load')]" />
+        <filter name="filter_withdrawal" string="Retiros"
+          domain="[('operation_type', '=', 'withdrawal')]" />
+        <separator />
+        <!-- Filtro sencillo para ver registros desde hoy 00:00 -->
+        <filter name="filter_today" string="Hoy"
+          domain="[('date_date', '=', context_today())]" />
+        <group expand="0" string="Agrupar por">
+          <filter name="group_partner" string="Proveedor" context="{'group_by': 'partner_id'}" />
+          <filter name="group_type" string="Tipo de Operación"
+            context="{'group_by': 'operation_type'}" />
+          <filter name="group_date" string="Fecha" context="{'group_by': 'date'}" />
+        </group>
+      </search>
+    </field>
+  </record>
+
+  <!-- Acción de ventana -->
+  <record id="action_casino_chip_operations" model="ir.actions.act_window">
+    <field name="name">Reportes de Fichas</field>
+    <field name="res_model">casino.game.withdrawals</field>
+    <field name="view_mode">list,form</field>
+    <field name="view_id" ref="view_casino_withdrawals_tree" />
+    <field name="search_view_id" ref="view_casino_withdrawals_search" />
+    <!-- Mostrar sólo reporte de fichas: con tipo definido y SIN cuenta bancaria asociada -->
+    <field name="domain">[("operation_type", "in", ["load", "withdrawal"]), ("bank_id", "=", False)]</field>
+    <!-- Por defecto, al crear desde este menú proponemos una Carga de fichas -->
+    <field name="context">{
+      'default_operation_type': 'load'
+      }</field>
+    <field name="help" type="html">
+      <p class="o_view_nocontent_smiling_face">
+        ¡Crea tu primera operación de fichas!
+      </p>
+      <p>
+        Haz clic en el botón "Nuevo" para registrar una carga o retiro de fichas.
+      </p>
+    </field>
+  </record>
+
+  <!-- Acción de creación que abre el wizard -->
+  <record id="action_casino_chip_operations_view_form" model="ir.actions.act_window.view">
+    <field name="sequence" eval="10" />
+    <field name="view_mode">form</field>
+    <field name="view_id" ref="view_chip_operation_wizard_form" />
+    <field name="act_window_id" ref="action_casino_chip_operations" />
+  </record>
+
+  <record id="action_casino_chip_operations_view_list" model="ir.actions.act_window.view">
+    <field name="sequence" eval="1" />
+    <field name="view_mode">list</field>
+    <field name="view_id" ref="view_casino_withdrawals_tree" />
+    <field name="act_window_id" ref="action_casino_chip_operations" />
+  </record>
+
+  <!-- Acción del botón Nuevo que abre el wizard -->
+  <record id="action_open_chip_operation_wizard" model="ir.actions.act_window">
+    <field name="name">Nueva Operación de Fichas</field>
+    <field name="res_model">chip.operation.wizard</field>
+    <field name="view_mode">form</field>
+    <field name="target">new</field>
+  </record>
+
+  <!-- Menú principal -->
+  <!-- <menuitem id="menu_casino_root"
+    name="Casino"
+    sequence="10" />
+
+  <menuitem id="menu_casino_operations"
+    name="Operaciones"
+    parent="menu_casino_root"
+    sequence="10" />
+
+  <menuitem id="menu_casino_chip_operations"
+    name="Carga/Retiro de Fichas"
+    parent="menu_casino_operations"
+    action="action_casino_chip_operations"
+    sequence="10" /> -->
+</odoo>

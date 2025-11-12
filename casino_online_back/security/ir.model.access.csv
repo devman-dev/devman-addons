@@ -17,5 +17,9 @@ access_bet_casino_game_limits_user_public,casino.game.bet.limits.public,casino_o
 
 access_casino_session_report_wizard_user,casino.session.report.wizard.user,casino_online_back.model_casino_session_report_wizard,,1,1,1,1
 
+access_casino_global_report_wizard_user,casino.global.report.wizard.user,casino_online_back.model_casino_global_report_wizard,,1,1,1,1
 access_casino_global_report_user,casino.global.report.user,casino_online_back.model_casino_global_report,,1,1,1,1
 access_casino_global_report_line_user,casino.global.report.line.user,casino_online_back.model_casino_global_report_line,,1,1,1,1
+
+access_casino_game_withdrawals_user,casino.game.withdrawals.user,model_casino_game_withdrawals,base.group_user,1,1,1,1
+access_chip_operation_wizard_user,chip.operation.wizard.user,model_chip_operation_wizard,base.group_user,1,1,1,1

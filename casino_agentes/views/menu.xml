@@ -84,6 +84,16 @@
     groups="base.group_system"
     sequence="100" />
 
+  <!-- Acción: abrir Ajustes y enfocar el bloque "Agentes" -->
+  <record id="action_open_agent_settings" model="ir.actions.act_window">
+    <field name="name">Configuración de Agentes</field>
+    <field name="res_model">res.config.settings</field>
+    <field name="view_mode">form</field>
+    <field name="view_id" ref="base.res_config_settings_view_form" />
+    <field name="context">{'module': 'casino_agentes'}</field>
+    <field name="target">current</field>
+  </record>
+
   <menuitem
     id="menu_product_category_commission"
     name="Categorías"
@@ -110,18 +120,6 @@
         Creá perfiles de comisiones por compañía.
       </p>
     </field>
-  </record>
-
-  <!-- Acción: abrir Ajustes y enfocar el bloque “Agentes” -->
-  <record id="action_open_agent_settings" model="ir.actions.act_window">
-    <field name="name">Configuración de Agentes</field>
-    <field name="res_model">res.config.settings</field>
-    <field name="view_mode">form</field>
-    <field name="view_id" ref="base.res_config_settings_view_form" />
-    <!-- El context 'module' define la pestaña/anchor activa en el lateral de Ajustes.
-         data-key="casino_agentes" debe coincidir con tu bloque -->
-    <field name="context">{'module': 'casino_agentes'}</field>
-    <field name="target">current</field>
   </record>
 
   <!-- Menú raíz bajo Ajustes -->
