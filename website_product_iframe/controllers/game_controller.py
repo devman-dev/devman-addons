@@ -535,9 +535,9 @@ class GameController(http.Controller):
             if roundId is None:
                 roundId = data.get('params', {}).get('roundId')
 
-            endGame = data.get('endGame', None)
-            if endGame is None:
-                endGame = data.get('params', {}).get('endGame')
+            endRound = data.get('endRound', None)
+            if endRound is None:
+                endRound = data.get('params', {}).get('endRound')
 
             roundId = data.get('roundId', None)
             if roundId is None:
@@ -552,6 +552,10 @@ class GameController(http.Controller):
                 amount = data.get('params', {}).get('amount', 0.0)
             if not isinstance(amount, (int, float)) or amount <= 0:
                 raise CasinoError(*CasinoErrorCodes.INVALID_AMOUNT)
+
+            events = data.get('events', None)
+            if events is None:
+                events = data.get('params', {}).get('events')
 
             current_balance = self._get_balance_user(token)
             if amount / 100 > current_balance:
@@ -570,16 +574,17 @@ class GameController(http.Controller):
 
             limit_result = self._update_limits_softcap(user, request.env.company, amount)
             #_logger.info('Casino Iframe: Resultado de límites: %s', limit_result)
-
+            op = 'pending' if not endRound else 'lose'
             result = self._apply_amount(
                 session.id,
                 product_id=gameId,
                 round_id=roundId,
                 amount=amount,
-                op='lose',
+                op=op,
                 token=token,
                 transaction_id=transactionId,
-                internal_transaction_id=internal_transaction_id
+                internal_transaction_id=internal_transaction_id,
+                events=events
             )
             _logger.info('Casino Iframe: Resultado de la aplicación de monto: %s', result)
             limit_messages = []
@@ -643,7 +648,7 @@ class GameController(http.Controller):
 
 
     # ----------------- Helper interno -----------------
-    def _apply_amount(self, session_id, product_id, round_id, amount, op, token, transaction_id, internal_transaction_id):
+    def _apply_amount(self, session_id, product_id, round_id, amount, op, token, transaction_id, internal_transaction_id, events=None):
         """
         Ajusta el balance de la sesión y deja nota en description.
         op: 'win' | 'lose' | 'refund'
@@ -716,6 +721,24 @@ class GameController(http.Controller):
                     "transactionId": transaction_id,
                     "amount": amt,
                     "token_live": True,
+                }
+            elif op == 'pending':
+                _logger.info('Casino Iframe: Pendiente')
+                new_balance = current_balance - amt
+                user.balance_game = new_balance
+                result = 'pending'
+                state = 'in_progress'
+                debit = amt,
+                events = events,
+                json_data = {
+                    "token": token,
+                    "gameId": product_id,
+                    "endRound": False,
+                    "roundId": "roundId",
+                    "transactionId": transaction_id,
+                    "amount": amt,
+                    "token_live": True,
+                    "events": events
                 }
             elif op == 'refund':
                 _logger.info('Casino Iframe: REFUND')

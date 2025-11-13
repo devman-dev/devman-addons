@@ -22,6 +22,7 @@
                     <field name="result" />
                     <field name="state" />
                     <field name="description" />
+                    <field name="events"></field>
                     <field name="json_data" />
                 </group>
             </form>
@@ -48,13 +49,14 @@
                 <field name="end_datetime" string="Fin" optional="show" />
                 <field name="initial_balance" string="S.Inicial" optional="show" />
                 <field name="amount" string="Monto" />
+                <field name="to_win" string="A Ganar" />
                 <field name="final_balance" string="S.Final" optional="show" />
                 <field name="currency_id" string="Moneda" optional="show" />
 
                 <!-- <field name="agent_id" string="Agente" optional="show" />
                 <field name="agent_commission" string="Comisión Agente" optional="show" />
                 <field name="result" string="Resultado" /> -->
-                <field name="state" string="Estado" />
+                <field name="result" string="Resultado" />
                 <field name="internal_transaction_id" string="ID Transacción Interna"
                     optional="show" />
             </list>

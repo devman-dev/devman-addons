@@ -20,6 +20,8 @@ class CasinoGameSession(models.Model):
     initial_balance = fields.Monetary(string='Saldo Inicial')
     net_loss = fields.Monetary(string='Pérdida Neta', currency_field='currency_id')
     final_balance = fields.Monetary(string='Saldo Final')
+    to_win = fields.Monetary(string='A Ganar', currency_field='currency_id', help='Monto que el jugador puede ganar en esta sesión.')
+    events = fields.Text(string='Eventos')
     currency_id = fields.Many2one('res.currency', string='Moneda')
     agent_commission = fields.Monetary(
         string='Comisión del agente',
