@@ -8,6 +8,14 @@ class CasinoGameSession(models.Model):
 
     token = fields.Char(string='Token')
     game_id = fields.Many2one('product.product', string='Juego')
+    provider_id = fields.Many2one(
+        'res.partner',
+        string='Proveedor',
+        related='game_id.product_tmpl_id.provider_id',
+        store=True,
+        readonly=True,
+        help='Proveedor (publisher) asociado al juego de la sesión.'
+    )
     endGame = fields.Boolean(string='Fin del Juego')
     round_id = fields.Text(string='Ronda')
     transaction_id = fields.Text(string='Transacción')
@@ -31,12 +39,13 @@ class CasinoGameSession(models.Model):
         help='Importe de la comisión del agente calculada sobre el monto debitado (amount × % comisión del juego).'
     )
     result = fields.Selection([
-        ('win', 'Ganó'),
-        ('loss', 'Perdió'),
-        ('draw', 'Empate'),
-        ('abandoned', 'Abandonada'),
+        ('win', 'Win'),
+        ('loss', 'Loss'),
+        ('draw', 'Draw'),
+        ('abandoned', 'Abandoned'),
         ('balance', 'Balance'),
-        ('started', 'Started')
+        ('started', 'Started'),
+        ('in_progress', 'Running')
     ], string='Resultado')
     
     state = fields.Selection([
@@ -212,8 +221,8 @@ class CasinoGameSession(models.Model):
                                 <span class="o_event_value o_event_cuota">{cuota}</span>
                             </div>
                             <div class="o_event_row">
-                                <span class="o_event_label">Estado:</span>
-                                <span class="o_event_value">{live_badge}</span>
+                                <span class="o_event_label">Live:</span>
+                                <span class="o_event_value">{live}</span>
                             </div>
                     '''
                     

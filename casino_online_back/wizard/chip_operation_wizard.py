@@ -131,7 +131,7 @@ class ChipOperationWizard(models.TransientModel):
         
         # Mostrar mensaje de éxito
         message = f"Operación registrada exitosamente: {operation_name} por ${self.amount:,.2f}"
-        self.env.user.notify_success(message=message, title="¡Operación Completada!")
+        # self.env.user.notify_success(message=message, title="¡Operación Completada!")
         
         # Retornar acción para volver al listado
         return {
