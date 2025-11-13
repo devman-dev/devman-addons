@@ -3,28 +3,48 @@
         <field name="name">casino.game.session.form</field>
         <field name="model">casino.game.session</field>
         <field name="arch" type="xml">
-            <form string="Sesión de Juego">
-                <group>
-                    <field name="transaction_id" />
-                    <field name="internal_transaction_id" string="ID Transacción Interna" />
-                    <field name="game_id" />
-                    <field name="user_id" />
-                    <field name="agent_id" />
-                    <field name="token" />
-                    <field name="start_datetime" />
-                    <field name="end_datetime" />
-                    <field name="initial_balance" />
-                    <field name="amount" />
-                    <field name="final_balance" />
-                    <field name="currency_id" />
-                    <field name="agent_id" />
-                    <field name="agent_commission" />
-                    <field name="result" />
-                    <field name="state" />
-                    <field name="description" />
-                    <field name="events"></field>
-                    <field name="json_data" />
-                </group>
+            <form string="Sesión de Juego" class="o_casino_session_form">
+                <sheet>
+                    <group>
+                        <group string="Información de Transacción">
+                            <field name="transaction_id" />
+                            <field name="internal_transaction_id" string="ID Transacción Interna" />
+                            <field name="round_id" />
+                            <field name="token" />
+                        </group>
+                        <group string="Detalles del Juego">
+                            <field name="game_id" />
+                            <field name="user_id" />
+                            <field name="agent_id" />
+                            <field name="state" />
+                            <field name="result" />
+                        </group>
+                    </group>
+
+                    <group>
+                        <group string="Periodo">
+                            <field name="start_datetime" />
+                            <field name="end_datetime" />
+                        </group>
+                        <group string="Financiero">
+                            <field name="initial_balance" />
+                            <field name="amount" />
+                            <field name="to_win" />
+                            <field name="final_balance" />
+                            <field name="currency_id" />
+                            <field name="agent_commission" />
+                        </group>
+                    </group>
+                    <field name="description" nolabel="1" />
+                    <field name="json_data" nolabel="1" />
+                    <notebook>
+                        <page string="Eventos" name="events_page">
+                            <div class="o_casino_events_container">
+                                <field name="events_html" nolabel="1" readonly="1" />
+                            </div>
+                        </page>
+                    </notebook>
+                </sheet>
             </form>
         </field>
     </record>

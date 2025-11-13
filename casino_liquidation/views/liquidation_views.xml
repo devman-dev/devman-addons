@@ -5,7 +5,8 @@
         <field name="name">casino.liquidation.list</field>
         <field name="model">casino.liquidation</field>
         <field name="arch" type="xml">
-            <list string="Liquidaciones" decoration-info="state == 'draft'" decoration-success="state == 'confirmed'" decoration-danger="state == 'cancelled'">
+            <list string="Liquidaciones" decoration-info="state == 'draft'"
+                decoration-success="state == 'confirmed'" decoration-danger="state == 'cancelled'">
                 <field name="name" />
                 <field name="date_from" />
                 <field name="date_to" />
@@ -26,13 +27,14 @@
             <form string="Liquidación">
                 <header>
                     <button name="action_confirm" string="Confirmar" type="object"
-                            class="oe_highlight"
-                            invisible="state != 'draft'" />
+                        class="oe_highlight"
+                        invisible="state != 'draft'" />
                     <button name="action_draft" string="Volver a Borrador" type="object"
-                            invisible="state != 'confirmed'" />
+                        invisible="state != 'confirmed'" />
                     <button name="action_cancel" string="Cancelar" type="object"
-                            invisible="state not in ('draft', 'confirmed')" />
-                    <field name="state" widget="statusbar" statusbar_visible="draft,confirmed,cancelled" />
+                        invisible="state not in ('draft', 'confirmed')" />
+                    <field name="state" widget="statusbar"
+                        statusbar_visible="draft,confirmed,cancelled" />
                 </header>
                 <sheet>
                     <div class="oe_title">
@@ -76,7 +78,9 @@
                             </field>
                         </page>
                         <page string="Notas" name="notes">
-                            <field name="notes" nolabel="1" placeholder="Agregar notas sobre esta liquidación..." readonly="state != 'draft'" />
+                            <field name="notes" nolabel="1"
+                                placeholder="Agregar notas sobre esta liquidación..."
+                                readonly="state != 'draft'" />
                         </page>
                     </notebook>
 
@@ -91,10 +95,6 @@
                         </group>
                     </group>
                 </sheet>
-                <div class="oe_chatter">
-                    <field name="message_ids" widget="mail_thread" />
-                    <field name="activity_ids" widget="mail_activity" />
-                </div>
             </form>
         </field>
     </record>
@@ -111,12 +111,16 @@
                 <field name="date_from" />
                 <separator />
                 <filter name="draft_filter" string="Borrador" domain="[('state', '=', 'draft')]" />
-                <filter name="confirmed_filter" string="Confirmadas" domain="[('state', '=', 'confirmed')]" />
-                <filter name="cancelled_filter" string="Canceladas" domain="[('state', '=', 'cancelled')]" />
+                <filter name="confirmed_filter" string="Confirmadas"
+                    domain="[('state', '=', 'confirmed')]" />
+                <filter name="cancelled_filter" string="Canceladas"
+                    domain="[('state', '=', 'cancelled')]" />
                 <separator />
                 <group expand="1" string="Agrupar por">
-                    <filter string="Proveedor" name="provider_groupby" context="{'group_by': 'provider_id'}" />
-                    <filter string="Categoría" name="category_groupby" context="{'group_by': 'category_id'}" />
+                    <filter string="Proveedor" name="provider_groupby"
+                        context="{'group_by': 'provider_id'}" />
+                    <filter string="Categoría" name="category_groupby"
+                        context="{'group_by': 'category_id'}" />
                     <filter string="Estado" name="state_groupby" context="{'group_by': 'state'}" />
                 </group>
             </search>

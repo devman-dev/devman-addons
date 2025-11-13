@@ -1,6 +1,8 @@
 from odoo import models, fields, api
 from odoo.exceptions import UserError
+import logging
 
+_logger = logging.getLogger(__name__)
 
 class GenerateLiquidationWizard(models.TransientModel):
     _name = 'casino.liquidation.wizard'
@@ -43,33 +45,41 @@ class GenerateLiquidationWizard(models.TransientModel):
             'category_id': self.category_id.id,
         }
         liquidation = self.env['casino.liquidation'].create(liquidation_vals)
-
+        _logger.info(f'Liquidación creada con ID {liquidation.id}, categoria {self.category_id.id}: {self.category_id.name}, proveedror {self.provider_id.id}: {self.provider_id.name}, categoría {self.category_id.name}, período {self.date_from} a {self.date_to}')
         # Buscar sesiones en el período que pertenezcan a juegos de este proveedor y categoría
-        sessions = self.env['casino.game.session'].search([
-            ('game_id.product_tmpl_id.provider_id', '=', self.provider_id.id),
-            ('game_id.public_categ_ids', 'in', self.category_id.id),
-            ('start_datetime', '>=', fields.Datetime.to_datetime(self.date_from)),
-            ('start_datetime', '<=', fields.Datetime.to_datetime(self.date_to)),
-            ('state', '=', 'finished'),  # Solo sesiones finalizadas
-        ])
+        try:
+            sessions = self.env['casino.game.session'].search([
+                ('game_id.product_tmpl_id.provider_id', '=', self.provider_id.id),
+                # Filtrado por categoría debe ir vía product_tmpl_id
+                # ('game_id.product_tmpl_id.public_categ_ids', 'in', [self.category_id.id]),
+                ('start_datetime', '>=', fields.Datetime.to_datetime(self.date_from)),
+                ('start_datetime', '<=', fields.Datetime.to_datetime(self.date_to)),
+                ('state', '=', 'finished'),  # Solo sesiones finalizadas
+            ])
+            _logger.info('Sesiones encontradas para liquidación %s: %s', liquidation.id, sessions.ids)
+        except Exception as e:
+            _logger.error(f'Error al buscar sesiones: {e}')
+            raise UserError(f'Error al buscar sesiones: {e}')
 
-        if not sessions:
-            raise UserError(
-                f'No hay sesiones finalizadas para el proveedor {self.provider_id.name} '
-                f'y categoría {self.category_id.name} en el período {self.date_from} a {self.date_to}'
-            )
+        # if not sessions:
+        #     raise UserError(
+        #         f'No hay sesiones finalizadas para el proveedor {self.provider_id.name} '
+        #         f'y categoría {self.category_id.name} en el período {self.date_from} a {self.date_to}'
+        #     )
 
         # Buscar configuración de comisión para este proveedor y categoría
         commission_config = self.env['casino.commission.config'].search([
-            ('provider_id', '=', self.provider_id.id),
-            ('category_id', '=', self.category_id.id),
+            # ('category_id', '=', self.category_id.id),
             ('active', '=', True),
         ], limit=1)
 
         if not commission_config:
-            raise UserError(
-                f'No hay configuración de comisión para {self.provider_id.name} - {self.category_id.name}'
-            )
+            commission = 35
+            # raise UserError(
+            #     f'No hay configuración de comisión para {self.provider_id.name} - {self.category_id.name}'
+            # )
+        else:
+            commission = commission_config.commission_percentage
 
         # Generar líneas de liquidación
         line_vals_list = []
@@ -78,7 +88,7 @@ class GenerateLiquidationWizard(models.TransientModel):
                 'liquidation_id': liquidation.id,
                 'session_id': session.id,
                 'category_id': self.category_id.id,
-                'commission_percentage': commission_config.commission_percentage,
+                'commission_percentage': commission,
             }
             line_vals_list.append((0, 0, line_vals))
 
