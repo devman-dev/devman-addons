@@ -397,6 +397,7 @@ class GameController(http.Controller):
         """
         data = request.get_json_data()
         token = data.get('token', None)
+        _logger.info('Casino Iframe: token: %s', token)
         
         if token is None:
             token = data.get('params', {}).get('token')

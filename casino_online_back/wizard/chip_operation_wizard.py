@@ -98,24 +98,6 @@ class ChipOperationWizard(models.TransientModel):
             if record.amount <= 0:
                 raise ValidationError('El importe debe ser mayor a cero.')
 
-    @api.onchange('operation_type')
-    def _onchange_operation_type(self):
-        """Cambiar el texto de ayuda según el tipo de operación"""
-        if self.operation_type == 'load':
-            return {
-                'warning': {
-                    'title': 'Carga de Fichas',
-                    'message': 'Está registrando una CARGA de fichas para el jugador/agente seleccionado.'
-                }
-            }
-        elif self.operation_type == 'withdrawal':
-            return {
-                'warning': {
-                    'title': 'Retiro de Fichas',
-                    'message': 'Está registrando un RETIRO de fichas del jugador/agente seleccionado.'
-                }
-            }
-
     def action_confirm(self):
         """Confirmar y crear la operación"""
         self.ensure_one()

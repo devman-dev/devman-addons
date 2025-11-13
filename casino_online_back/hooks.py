@@ -28,3 +28,36 @@ def create_bet_limits_for_all_partners(cr, registry=None):
         for partner in partners:
             BetLimits.get_or_create_for_partner(partner)
         offset += batch
+
+
+def recalculate_partner_roles(cr, registry=None):
+    """Recalcula el campo 'role' para todos los partners que sean agentes o jugadores."""
+    env = None
+    try:
+        from odoo.api import Environment
+        if hasattr(cr, "cr") and hasattr(cr, "uid"):
+            env = cr
+        else:
+            env = api.Environment(cr, SUPERUSER_ID, {})
+    except Exception:
+        env = api.Environment(cr, SUPERUSER_ID, {})
+
+    Partner = env['res.partner'].sudo()
+    
+    # Buscar partners que sean agentes o jugadores
+    partners = Partner.search([
+        '|',
+        ('is_agent', '=', True),
+        ('is_player', '=', True)
+    ])
+    
+    if partners:
+        # Forzar recálculo del campo role
+        partners._compute_role()
+        print(f"✓ Campo 'role' recalculado para {len(partners)} partners")
+
+
+def post_init_hook(cr, registry=None):
+    """Hook que se ejecuta después de instalar o actualizar el módulo."""
+    create_bet_limits_for_all_partners(cr, registry)
+    recalculate_partner_roles(cr, registry)

@@ -26,6 +26,16 @@
         groups="base.group_system"
         sequence="40" />
 
+    <!-- <menuitem id="menu_casino_report_global_players"
+        name="Usuarios"
+        parent="menu_casino_players"
+        action="action_casino_usuarios_report"
+        sequence="5" /> -->
+    <menuitem id="menu_casino_agents_players"
+        name="Usuarios"
+        parent="menu_casino_players"
+        action="action_casino_agents_players"
+        sequence="3" />
     <menuitem id="menu_casino_report_global_players"
         name="Reporte Global"
         parent="menu_casino_players"

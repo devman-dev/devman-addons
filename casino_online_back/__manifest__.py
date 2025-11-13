@@ -16,6 +16,7 @@
         'views/res_company_views.xml',
         'wizard/casino_session_report_wizard_views.xml',
         'views/global_report_views.xml',
+        'views/agents_players_views.xml',
         'wizard/chip_operation_wizard_views.xml',
         'views/chip_operation_views.xml',
         'wizard/casino_session_report_wizard_views.xml',
@@ -30,7 +31,7 @@
             "casino_online_back/static/src/**/*",
         ],
     },
-    "post_init_hook": "create_bet_limits_for_all_partners",
+    "post_init_hook": "post_init_hook",
     'installable': True,
     'application': True,
 }
