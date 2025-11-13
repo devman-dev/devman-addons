@@ -3,23 +3,19 @@
     <!-- Menú principal de Casino Liquidaciones -->
     <menuitem id="menu_casino_liquidation_root" name="Gestión de Liquidaciones" sequence="1" web_icon="casino_liquidation,static/description/icon.png" />
 
-    <!-- Menú de Liquidaciones -->
-    <menuitem id="menu_casino_liquidation" name="Liquidaciones"
-              parent="menu_casino_liquidation_root" sequence="10" />
-
-    <!-- Submenú: Generar Liquidación -->
-    <menuitem id="menu_generate_liquidation" name="Generar Liquidación"
-              parent="menu_casino_liquidation" sequence="1"
-              action="action_generate_liquidation_wizard" />
-
-    <!-- Submenú: Listado de Liquidaciones -->
+    <!-- Submenú: Listado de Liquidaciones (Primero) -->
     <menuitem id="menu_liquidations_list" name="Liquidaciones"
-              parent="menu_casino_liquidation" sequence="2"
-              action="action_liquidation" />
+              parent="menu_casino_liquidation_root" sequence="10"
+              action="action_liquidation_list_only" />
+
+    <!-- Submenú: Generar Liquidación (Segundo) -->
+    <menuitem id="menu_generate_liquidation" name="Generar Liquidación"
+              parent="menu_casino_liquidation_root" sequence="20"
+              action="action_generate_liquidation_wizard" />
 
     <!-- Menú de Configuración -->
     <menuitem id="menu_casino_config" name="Configuración"
-              parent="menu_casino_liquidation_root" sequence="20" />
+              parent="menu_casino_liquidation_root" sequence="30" />
 
     <!-- Submenú: Configuración de Comisiones -->
     <menuitem id="menu_commission_config" name="Comisiones por Proveedor"
