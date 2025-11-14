@@ -131,18 +131,9 @@ class ChipOperationWizard(models.TransientModel):
         
         # Mostrar mensaje de éxito
         message = f"Operación registrada exitosamente: {operation_name} por ${self.amount:,.2f}"
-        # self.env.user.notify_success(message=message, title="¡Operación Completada!")
         
-        # Retornar acción para volver al listado
-        return {
-            'type': 'ir.actions.act_window',
-            'name': 'Reporte de Fichas',
-            'res_model': 'casino.game.withdrawals',
-            'view_mode': 'list,form',
-            'views': [(self.env.ref('casino_online_back.view_casino_withdrawals_tree').id, 'list')],
-            'domain': [('operation_type', 'in', ['load', 'withdrawal']), ('bank_id', '=', False)],
-            'target': 'current',
-        }
+        # Cerrar el wizard y quedarse en la misma vista de usuarios
+        return {'type': 'ir.actions.act_window_close'}
 
     def action_cancel(self):
         """Cancelar y cerrar el wizard"""

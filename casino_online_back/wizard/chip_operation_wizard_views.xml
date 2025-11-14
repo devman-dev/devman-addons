@@ -49,15 +49,14 @@
           </group> -->
         </sheet>
         <footer>
-          <button string="✓ Confirmar Operación"
+          <button string="✓ Confirmar"
             type="object"
             name="action_confirm"
             class="btn-primary oe_highlight"
             data-hotkey="q" />
-          <button string="✗ Cancelar"
-            type="object"
-            name="action_cancel"
+          <button string="Cancelar"
             class="btn-secondary"
+            special="cancel"
             data-hotkey="z" />
         </footer>
       </form>
