@@ -32,7 +32,6 @@ class CasinoLiquidationLine(models.Model):
     category_id = fields.Many2one(
         'product.public.category',
         string='Categoría',
-        readonly=True,
         help='Categoría del producto/juego'
     )
     session_amount = fields.Monetary(

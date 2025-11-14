@@ -65,11 +65,11 @@
     action="public_category_commission_action"
     sequence="10" />
 
-  <menuitem id="menu_casino_history_agents"
+  <!-- <menuitem id="menu_casino_history_agents"
     name="Historial"
     parent="menu_casino_agent"
     action="public_category_commission_action"
-    sequence="10" />
+    sequence="10" /> -->
 
   <menuitem id="menu_casino_finance_agents"
     name="Finanzas"

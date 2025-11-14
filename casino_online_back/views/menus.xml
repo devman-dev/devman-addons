@@ -53,11 +53,11 @@
         action="action_casino_chip_operations"
         sequence="15" />
 
-    <menuitem id="menu_casino_history_players"
+    <!-- <menuitem id="menu_casino_history_players"
         name="Historial"
         parent="menu_casino_players"
         action="action_casino_account_move_line"
-        sequence="20" />
+        sequence="20" /> -->
 
     <menuitem id="menu_casino_finance_players"
         name="Finanzas"

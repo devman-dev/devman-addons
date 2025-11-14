@@ -1,6 +1,9 @@
 from odoo import models, fields, api
 from odoo.exceptions import ValidationError, UserError
 from datetime import datetime
+import logging
+
+_logger = logging.getLogger(__name__)
 
 
 class CasinoLiquidation(models.Model):
@@ -138,7 +141,7 @@ class CasinoLiquidation(models.Model):
         # Log en chatter
         self.message_post(
             body=f'Liquidación confirmada por {self.env.user.name}. '
-                 f'Total a liquidar: ${self.total_net:,.2f}'
+                 f'Total a liquidar: ${self.total_commission:,.2f}'
         )
 
     def action_cancel(self):
@@ -169,3 +172,62 @@ class CasinoLiquidation(models.Model):
             name = f'{record.name} - {record.provider_id.name} ({record.date_from} a {record.date_to})'
             result.append((record.id, name))
         return result
+
+    def action_generate_lines(self):
+        """Genera (o regenera) las líneas de la liquidación usando los criterios
+        de fecha, proveedor y categoría. Reemplaza cualquier línea existente.
+        """
+        for record in self:
+            if record.state != 'draft':
+                raise UserError('Solo se pueden generar líneas en estado Borrador')
+            if not (record.date_from and record.date_to and record.provider_id and record.category_id):
+                raise UserError('Debe completar Fecha Desde, Fecha Hasta, Proveedor y Categoría')
+
+            # Buscar sesiones finalizadas dentro del rango y que coincidan proveedor y categoría
+            domain = [
+                ('game_id.product_tmpl_id.provider_id', '=', record.provider_id.id),
+                ('game_id.product_tmpl_id.public_categ_ids', 'in', [record.category_id.id]),
+                ('start_datetime', '>=', fields.Datetime.to_datetime(record.date_from)),
+                ('start_datetime', '<=', fields.Datetime.to_datetime(record.date_to)),
+                ('state', '=', 'finished'),
+            ]
+            sessions = self.env['casino.game.session'].search(domain)
+            _logger.info('Sesiones encontradas para liquidación %s: %s', record.id, sessions.ids)
+
+            if not sessions:
+                _logger.warning('No se encontraron sesiones para liquidación %s con dominio %s', record.id, domain)
+
+            # Obtener configuración de comisión específica
+            commission_config = self.env['casino.commission.config'].search([
+                ('provider_id', '=', record.provider_id.id),
+                ('category_id', '=', record.category_id.id),
+                ('active', '=', True),
+            ], limit=1)
+
+            commission = commission_config.commission_percentage if commission_config else 35.0
+            if not commission_config:
+                _logger.warning('Usando comisión por defecto 35%% para liquidación %s (sin configuración específica)', record.id)
+            else:
+                _logger.info('Comisión %s%% aplicada en liquidación %s', commission, record.id)
+
+            # Construir nuevas líneas
+            line_vals = []
+            for session in sessions:
+                # Obtener la categoría que coincide con el filtro, o la primera disponible
+                game_categories = session.game_id.product_tmpl_id.public_categ_ids
+                
+                # Intentar usar la categoría que coincide con el filtro de la liquidación
+                session_category = record.category_id if record.category_id in game_categories else (game_categories[:1] if game_categories else False)
+                
+                line_vals.append((0, 0, {
+                    'liquidation_id': record.id,
+                    'session_id': session.id,
+                    'category_id': session_category.id if session_category else False,
+                    'commission_percentage': commission,
+                }))
+
+            # Reemplazar líneas existentes
+            record.write({'line_ids': [(5, 0, 0)] + line_vals})
+            _logger.info('Liquidación %s: %s líneas generadas', record.id, len(line_vals))
+
+        return True
