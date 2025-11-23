@@ -1,0 +1,10 @@
+<odoo>
+  <template id="student_dashboard" name="Dashboard Estudiante">
+    <t t-call="website.layout">
+      <div class="container mt-4">
+        <h2>Mi Dashboard de Aprendizaje</h2>
+        <!-- Aquí podrías mostrar historial, progreso, etc. -->
+      </div>
+    </t>
+  </template>
+</odoo>

@@ -1,0 +1,10 @@
+<odoo>
+  <template id="teacher_dashboard" name="Dashboard Profesor">
+    <t t-call="website.layout">
+      <div class="container mt-4">
+        <h2>Panel de Control del Profesor</h2>
+        <!-- Mostrar estadísticas de estudiantes -->
+      </div>
+    </t>
+  </template>
+</odoo>

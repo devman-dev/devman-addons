@@ -1,0 +1,46 @@
+<odoo>
+    <data>
+
+        <!-- Heredamos la vista formulario de slide.slide -->
+        <record id="view_slide_form_inherit_dificultad" model="ir.ui.view">
+            <field name="name">slide.slide.form.inherit.dificultad</field>
+            <field name="model">slide.slide</field>
+            <field name="inherit_id" ref="website_slides.view_slide_slide_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='channel_id']" position="after">
+                    <field name="nivel_dificultad"/>
+                </xpath>
+            </field>
+        </record>
+
+        <!-- Heredamos la vista árbol de slide.slide -->
+        <record id="view_slide_tree_inherit_dificultad" model="ir.ui.view">
+            <field name="name">slide.slide.tree.inherit.dificultad</field>
+            <field name="model">slide.slide</field>
+            <field name="inherit_id" ref="website_slides.view_slide_slide_tree"/>
+            <field name="arch" type="xml">
+                <xpath expr="//list" position="inside">
+                    <field name="nivel_dificultad"/>
+                </xpath>
+            </field>
+        </record>
+
+
+
+        <!-- Heredamos la vista de búsqueda para agregar filtro por nivel -->
+        <record id="view_slide_search_inherit_dificultad" model="ir.ui.view">
+            <field name="name">slide.slide.search.inherit.nivel_dificultad</field>
+            <field name="model">slide.slide</field>
+            <field name="inherit_id" ref="website_slides.view_slide_slide_search"/>
+            <field name="arch" type="xml">
+                <xpath expr="//search" position="inside">
+                    <filter string="Básico" name="nivel_basico" domain="[('nivel_dificultad','=','basico')]"/>
+                    <filter string="Intermedio" name="nivel_intermedio" domain="[('nivel_dificultad','=','intermedio')]"/>
+                    <filter string="Avanzado" name="nivel_avanzado" domain="[('nivel_dificultad','=','avanzado')]"/>
+                </xpath>
+            </field>
+        </record>
+
+
+    </data>
+</odoo>
