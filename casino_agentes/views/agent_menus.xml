@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <data>
+
+    <!-- Menú categoría dentro de Ajustes -->
+    <menuitem id="menu_casino_agentes_configuration"
+      name="Agentes"
+      parent="base.menu_config"
+      sequence="46"
+      groups="base.group_system" />
+
+    <!-- Submenú Settings que dispara la acción anterior -->
+    <menuitem id="menu_casino_agentes_config"
+      name="Settings"
+      parent="menu_casino_agentes_configuration"
+      action="action_casino_agentes_configuration"
+      sequence="0"
+      groups="base.group_system" />
+  </data>
+</odoo>

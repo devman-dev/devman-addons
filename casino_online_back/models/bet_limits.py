@@ -20,7 +20,7 @@ class BetLimits(models.Model):
             company = self.env['res.company'].sudo().search([], limit=1)
         return company
 
-    company_id = fields.Many2one("res.company", required=True, default=lambda self: self.env.company, index=True)
+    company_id = fields.Many2one("res.company", index=True)
     currency_id = fields.Many2one(related="company_id.currency_id", store=True, readonly=True)
 
     # Límites (0 => sin límite)

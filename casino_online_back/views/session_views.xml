@@ -3,27 +3,50 @@
         <field name="name">casino.game.session.form</field>
         <field name="model">casino.game.session</field>
         <field name="arch" type="xml">
-            <form string="Sesión de Juego">
-                <group>
-                    <field name="transaction_id" />
-                    <field name="internal_transaction_id" string="ID Transacción Interna" />
-                    <field name="game_id" />
-                    <field name="user_id" />
-                    <field name="agent_id" />
-                    <field name="token" />
-                    <field name="start_datetime" />
-                    <field name="end_datetime" />
-                    <field name="initial_balance" />
-                    <field name="amount" />
-                    <field name="final_balance" />
-                    <field name="currency_id" />
-                    <field name="agent_id" />
-                    <field name="agent_commission" />
-                    <field name="result" />
-                    <field name="state" />
-                    <field name="description" />
-                    <field name="json_data" />
-                </group>
+            <form string="Sesión de Juego" class="o_casino_session_form">
+                <sheet>
+                    <group>
+                        <group string="Información de Transacción">
+                            <field name="transaction_id" />
+                            <field name="internal_transaction_id" string="ID Transacción Interna" />
+                            <field name="round_id" />
+                            <field name="token" />
+                        </group>
+                        <group string="Detalles del Juego">
+                            <field name="provider_id" readonly="1" optional="hide" />
+                            <field name="game_id" />
+                            <field name="user_id" />
+                            <field name="agent_id" />
+                            <field name="state" />
+                            <field name="result" />
+                        </group>
+                    </group>
+
+                    <group>
+                        <group string="Periodo">
+                            <field name="start_datetime" />
+                            <field name="end_datetime" />
+                        </group>
+                        <group string="Financiero">
+                            <field name="initial_balance" />
+                            <field name="amount" />
+                            <field name="to_win" />
+                            <field name="final_balance" />
+                            <field name="currency_id" />
+                            <field name="agent_commission" />
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Eventos" name="events_page">
+                            <div class="o_casino_events_container">
+                                <field name="events_html" nolabel="1" readonly="1" />
+                            </div>
+                        </page>
+                    </notebook>
+                    <field name="description" nolabel="1" />
+                    <field name="json_data" nolabel="1" />
+                    <field name="events" nolabel="1" />
+                </sheet>
             </form>
         </field>
     </record>
@@ -39,22 +62,29 @@
                 default_order="id desc, round_id desc">
 
                 <field name="id" string="ID" />
-                <field name="round_id" string="ID Round" />
-                <field name="transaction_id" string="ID Transacción" />
+                <field name="transaction_id" string="ID Apuesta" />
                 <field name="game_id" string="Juego" />
-                <field name="user_id" string="Usuario" />
-                <field name="agent_id" string="Agente" optional="show" />
-                <field name="initial_balance" string="S.Inicial" optional="show" />
-                <field name="amount" string="Monto" />
-                <field name="final_balance" string="S.Final" optional="show" />
-                <field name="agent_commission" string="Comisión Agente" optional="show" />
-                <field name="agent_id" string="Agente" optional="show" />
+                <field name="provider_id" string="Proveedor" optional="hide" />
+                <field name="round_id" string="ID Round" />
                 <field name="start_datetime" string="Inicio" optional="show" />
-                <field name="end_datetime" string="Fin" optional="show" />
-                <field name="result" string="Resultado" />
-                <field name="state" string="Estado" />
-                <field name="internal_transaction_id" string="ID Transacción Interna"
+                <field name="user_id" string="Usuario" />
+                <field name="result" string="Operación" />
+                <field name="amount" string="Monto" widget="monetary" sum="Total" />
+                <field name="final_balance" string="S.Final" widget="monetary" sum="Total"
                     optional="show" />
+                <field name="to_win" string="A Ganar" widget="monetary" sum="Total" />
+                <!-- <field name="end_datetime" string="Fin" optional="show" /> -->
+                <!-- <field name="initial_balance" string="S.Inicial" optional="show" /> -->
+                <!-- <field name="currency_id" string="Moneda" optional="show" /> -->
+
+                <!-- <field name="agent_id" string="Agente" optional="show" />
+                <field name="agent_commission" string="Comisión Agente" optional="show" />
+                <field name="result" string="Resultado" /> -->
+                <field name="token" string="Token" optional="hide" />
+                <field name="internal_transaction_id" string="ID Transacción Interna"
+                    optional="hide" />
+                <!-- Necesario para formatear correctamente campos monetarios y sus totales -->
+                <field name="currency_id" optional="show" />
             </list>
         </field>
     </record>
@@ -67,12 +97,23 @@
             <search string="Buscar Sesiones de Juego">
                 <field name="transaction_id" />
                 <field name="game_id" />
+                <field name="provider_id" />
                 <field name="user_id" />
                 <field name="start_datetime" />
                 <field name="internal_transaction_id" />
                 <!-- <filter string="Agrupar por Transacción"
                     name="group_by_group_display_name"
                     context="{'group_by':'group_display_name'}" /> -->
+                <group expand="0" string="Filtros">
+                    <filter name="op_running" string="Running"
+                        domain="[('result', '=', 'in_progress')]" />
+                    <filter name="op_win" string="Win" domain="[('result', '=', 'win')]" />
+                    <filter name="op_loss" string="Loss" domain="[('result', '=', 'loss')]" />
+                </group>
+                <group expand="1" string="Agrupar por">
+                    <filter string="Proveedor" name="group_by_provider"
+                        context="{'group_by':'provider_id'}" />
+                </group>
             </search>
         </field>
     </record>

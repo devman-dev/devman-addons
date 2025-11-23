@@ -3,7 +3,7 @@ from odoo import models, fields, api, _
 from datetime import datetime, time
 
 class AgentLiquidationWizard(models.TransientModel):
-    _name = 'agent.liquidation.wizard'
+    _name = 'casino.agent.liquidation.wizard'
     _description = 'Liquidación de agentes por comisiones'
 
     date_from = fields.Date(string='Desde', required=True)
@@ -85,7 +85,7 @@ class AgentLiquidationWizard(models.TransientModel):
                 compute_totals(root)
 
         # 5) Crear la liquidación persistente y abrirla
-        liquidation = self.env['agent.liquidation'].create({
+        liquidation = self.env['casino.agent.liquidation'].create({
             'date_from': self.date_from,
             'date_to': self.date_to,
             'agent_id': self.agent_id.id if self.agent_id else False,
@@ -95,13 +95,13 @@ class AgentLiquidationWizard(models.TransientModel):
 
         return {
             'type': 'ir.actions.act_window',
-            'res_model': 'agent.liquidation',
+            'res_model': 'casino.agent.liquidation',
             'res_id': liquidation.id,
             'view_mode': 'form',
             'target': 'current',
         }
 
 class AgentLiquidationResult(models.TransientModel):
-    _name = 'agent.liquidation.result'
+    _name = 'casino.agent.liquidation.result'
     _description = 'Resultado de liquidación de agentes'
     # Reservado para futuras vistas no persistentes (no usado actualmente)

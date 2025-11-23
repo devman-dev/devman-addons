@@ -1,0 +1,54 @@
+.o_casino_global_report_no_save .o_form_buttons_edit,
+.o_casino_global_report_no_save .o_form_buttons_view .o_form_button_save,
+.o_casino_global_report_no_save .o_form_buttons_view .o_form_button_cancel {
+  display: none !important;
+}
+
+/* Ocultar completamente el panel de control superior (paginador) */
+.o_casino_global_report_no_save .o_control_panel {
+  display: none !important;
+}
+
+.o_casino_global_report_no_save .o_cp_top {
+  display: none !important;
+}
+
+.o_casino_global_report_no_save .o_cp_bottom {
+  display: none !important;
+}
+
+/* Estilo para centrar el botón Buscar */
+.o_casino_global_report_no_save .text-center {
+  text-align: center !important;
+  width: 100%;
+  margin-top: 1rem;
+}
+
+.o_casino_global_report_no_save .text-center button {
+  min-width: 120px;
+}
+
+/* Colores dinámicos para las filas de categorías */
+.o_list_table .table-info {
+  background-color: #d1ecf1 !important;
+}
+
+.o_list_table .table-success {
+  background-color: #d4edda !important;
+}
+
+.o_list_table .table-warning {
+  background-color: #fff3cd !important;
+}
+
+.o_list_table .table-danger {
+  background-color: #f8d7da !important;
+}
+
+.o_list_table .table-primary {
+  background-color: #cce5ff !important;
+}
+
+.o_list_table .table-secondary {
+  background-color: #e2e3e5 !important;
+}

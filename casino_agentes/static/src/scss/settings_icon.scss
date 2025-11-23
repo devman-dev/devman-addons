@@ -1,0 +1,20 @@
+/* Ícono para el menú de Agentes en Ajustes */
+[data-menu-xmlid="casino_agentes.menu_casino_agents_root"] .o_menu_icon,
+[data-menu-xmlid="casino_agentes.menu_casino_agents_root"] .o_app_icon {
+  width: 18px;
+  height: 18px;
+  display: inline-block;
+  /* Usamos mask para heredar el color del tema (currentColor) */
+  -webkit-mask: url("/casino_agentes/static/src/description/agents.svg") no-repeat center / contain;
+  mask: url("/casino_agentes/static/src/description/agents.svg") no-repeat center / contain;
+  background-color: currentColor;
+}
+
+/* Fallback por si el navegador no soporta mask */
+@supports not (mask: url("x")) {
+  [data-menu-xmlid="casino_agentes.menu_casino_agents_root"] .o_menu_icon,
+  [data-menu-xmlid="casino_agentes.menu_casino_agents_root"] .o_app_icon {
+    background: url("/casino_agentes/static/src/description/agents.svg") no-repeat center / 18px 18px;
+  }
+}
+

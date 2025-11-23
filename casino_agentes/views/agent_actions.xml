@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <data>
+
+    <record id="action_casino_agentes_configuration" model="ir.actions.act_window">
+      <field name="name">Settings</field>
+      <field name="res_model">res.config.settings</field>
+      <field name="view_mode">form</field>
+      <field name="target">inline</field>
+      <!-- 'module' debe coincidir con el atributo name del <app> -->
+      <field name="context">{'module': 'casino_agentes', 'bin_size': False}</field>
+    </record>
+
+  </data>
+</odoo>
