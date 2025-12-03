@@ -28,7 +28,8 @@
     ],
     'assets': {
         'web.assets_backend': [
-            "casino_online_back/static/src/**/*",
+            # "casino_online_back/static/src/**/*",
+            "casino_online_back/static/src/js/*",
         ],
     },
     "post_init_hook": "post_init_hook",

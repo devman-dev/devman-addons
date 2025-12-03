@@ -26,7 +26,7 @@
     "assets": {
         # CSS puede ir en el bundle frontend estándar
         "web.assets_frontend": [
-            "casino_online/static/src/scss/withdrawals.scss",
+            # "casino_online/static/src/scss/withdrawals.scss",
         ],
         # JS que depende de web.public.widget / web.Dialog debe ir en lazy
         "web.assets_frontend_lazy": [
