@@ -497,6 +497,15 @@ class GameController(http.Controller):
             amount = amount / 100
             result = self._apply_amount(session.id, product_id = gameId, round_id = roundId, amount=amount, op='win', token=token, transaction_id=transactionId, internal_transaction_id=internal_transaction_id)
 
+            if result.get('success'):
+                partner = request.env['res.partner'].sudo().search([('secret_token', '=', token)], limit=1)
+                request.env.company.action_casino_register_cash_movement(
+                    amount=amount,
+                    operation='in',
+                    partner_id=partner.id,
+                    label="Ganancia de juego",
+                )
+
             response = {
                 "balance": int(result.get("balance", 0.0) * 100),
                 "transactionId": internal_transaction_id,

@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
-from odoo import models, fields, api
+from odoo import fields, models, _
+from odoo.exceptions import UserError
 
 class ResCompany(models.Model):
     _inherit = 'res.company'
@@ -38,3 +39,128 @@ class ResCompany(models.Model):
         help='Cuenta contable específica para apuestas/pérdidas de casino. Si no se especifica, se usará la cuenta por defecto del diario.',
         domain=[('deprecated', '=', False)]
     )
+
+    def action_casino_register_cash_movement(
+        self,
+        amount,
+        operation,
+        partner_id=False,
+        date=False,
+        label=False,
+    ):
+        """
+        Registra entrada o salida de dinero usando los diarios configurados en la compañía.
+
+        :param amount: Importe positivo del movimiento.
+        :param operation: 'in' para entrada, 'out' para salida.
+        :param partner_id: (opcional) ID de res.partner asociado al movimiento.
+        :param date: (opcional) fecha del movimiento (fields.Date), si no se pasa se usa hoy.
+        :param label: (opcional) referencia / concepto del movimiento.
+        :return: recordset de account.payment creados.
+        """
+
+        self.ensure_one()
+        company = self
+
+        if amount <= 0:
+            raise UserError(_("El monto debe ser estrictamente positivo."))
+
+        if operation not in ('in', 'out'):
+            raise UserError(_("El parámetro 'operation' debe ser 'in' o 'out'."))
+
+        if not company.casino_deposit_journal_id:
+            raise UserError(_("Configure el diario 'casino_deposit_journal_id' en la compañía."))
+
+        if not company.casino_bet_transfer_journal_id:
+            raise UserError(_("Configure el diario 'casino_bet_transfer_journal_id' en la compañía."))
+
+        deposit_journal = company.casino_deposit_journal_id
+        bet_transfer_journal = company.casino_bet_transfer_journal_id
+
+        date = date or fields.Date.context_today(self)
+        label = label or (operation == 'in' and _("Entrada de dinero") or _("Salida de dinero"))
+
+        Payment = self.env['account.payment']
+        payments = Payment.browse()
+
+        # Helper para obtener método de pago
+        def _get_payment_method(journal, direction):
+            """
+            direction: 'inbound', 'outbound'
+            """
+            if direction == 'inbound':
+                method = journal.inbound_payment_method_line_ids[:1]
+            else:
+                method = journal.outbound_payment_method_line_ids[:1]
+            if not method:
+                raise UserError(_(
+                    "El diario '%s' no tiene ningún método de pago %s configurado."
+                ) % (journal.display_name, direction))
+            return method
+
+        # --------------------------------------------------
+        # ENTRADA: un solo pago inbound al diario de depósitos
+        # --------------------------------------------------
+        if operation == 'in':
+            method_line = _get_payment_method(deposit_journal, 'inbound')
+
+            vals = {
+                'payment_type': 'inbound',
+                'partner_type': partner_id and 'customer' or 'customer',  # ajustá si necesitás supplier/other
+                'partner_id': partner_id or False,
+                'amount': amount,
+                'date': date,
+                'currency_id': deposit_journal.currency_id.id or company.currency_id.id,
+                'journal_id': deposit_journal.id,
+                'payment_method_line_id': method_line.id,
+                'ref': label,
+            }
+            payment = Payment.create(vals)
+            payment.action_post()
+            payments |= payment
+
+        # --------------------------------------------------
+        # SALIDA:
+        # 1) transferencia interna: depósito -> bet_transfer (concepto "Apuesta")
+        # 2) pago outbound desde bet_transfer
+        # --------------------------------------------------
+        elif operation == 'out':
+            # Paso 1: transferencia interna
+            transfer_label = _("Apuesta")
+            transfer_method = _get_payment_method(deposit_journal, 'outbound')
+
+            transfer_vals = {
+                'payment_type': 'transfer',
+                'partner_type': 'customer',  # irrelevante en transfer
+                'partner_id': False,
+                'amount': amount,
+                'date': date,
+                'currency_id': deposit_journal.currency_id.id or company.currency_id.id,
+                'journal_id': deposit_journal.id,
+                'destination_journal_id': bet_transfer_journal.id,
+                'payment_method_line_id': transfer_method.id,
+                'ref': transfer_label,
+            }
+            transfer_payment = Payment.create(transfer_vals)
+            transfer_payment.action_post()
+            payments |= transfer_payment
+
+            # Paso 2: salida real desde diario de apuestas
+            outbound_method = _get_payment_method(bet_transfer_journal, 'outbound')
+
+            outbound_vals = {
+                'payment_type': 'outbound',
+                'partner_type': partner_id and 'customer' or 'customer',  # ajustá según el caso
+                'partner_id': partner_id or False,
+                'amount': amount,
+                'date': date,
+                'currency_id': bet_transfer_journal.currency_id.id or company.currency_id.id,
+                'journal_id': bet_transfer_journal.id,
+                'payment_method_line_id': outbound_method.id,
+                'ref': label,
+            }
+            outbound_payment = Payment.create(outbound_vals)
+            outbound_payment.action_post()
+            payments |= outbound_payment
+
+        return payments
