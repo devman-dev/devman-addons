@@ -21,6 +21,7 @@
         'views/chip_operation_views.xml',
         'wizard/casino_session_report_wizard_views.xml',
         'views/menus.xml',
+        'views/casino_accounting_views.xml',
         'security/ir.model.access.csv',
         'data/ir_cron.xml'
         

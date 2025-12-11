@@ -2,6 +2,7 @@ from . import player
 from . import game
 from . import session
 from . import account_move
+from . import account_payment
 from . import bank
 from . import withdrawals
 from . import bet_limits

@@ -1,6 +1,6 @@
 import uuid
 
-from odoo import fields, models
+from odoo import api, fields, models
 
 
 class ResPartner(models.Model):
@@ -16,10 +16,45 @@ class ResPartner(models.Model):
     cbu = fields.Char('CBU')
     cuil = fields.Char('CUIL')
     nuevo_cbu = fields.Char('Nuevo CBU')
-    token = fields.Char(string='Token', default=lambda self: str(uuid.uuid4()))
-    secret_token = fields.Char(string='Token Secreto', default=lambda self: str(uuid.uuid4()))
+    token = fields.Char(
+        string='Token',
+        default=lambda self: uuid.uuid4().hex,
+        copy=False,
+        index=True,
+    )
+    secret_token = fields.Char(
+        string='Token Secreto',
+        default=lambda self: uuid.uuid4().hex,
+        copy=False,
+        index=True,
+    )
     nickname = fields.Char(string='Nickname')
     balance_game = fields.Float(string='Balance de los Juego')
+
+    @api.model
+    def _generate_unique_token(self, field_name='token'):
+        while True:
+            candidate = uuid.uuid4().hex
+            if not self.search_count([(field_name, '=', candidate)]):
+                return candidate
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        for vals in vals_list:
+            if not vals.get('token'):
+                vals['token'] = self._generate_unique_token('token')
+            if not vals.get('secret_token'):
+                vals['secret_token'] = self._generate_unique_token('secret_token')
+        return super().create(vals_list)
+
+    @api.model
+    def ensure_unique_tokens(self):
+        partners = self.sudo().with_context(active_test=False).search([])
+        for partner in partners:
+            if not partner.token or self.search_count([('token', '=', partner.token)]) > 1:
+                partner.token = self._generate_unique_token('token')
+            if not partner.secret_token or self.search_count([('secret_token', '=', partner.secret_token)]) > 1:
+                partner.secret_token = self._generate_unique_token('secret_token')
 
     def website_wallet_balance(self):
         """Devuelve el saldo (float) a mostrar en el header del Website.

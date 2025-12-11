@@ -206,7 +206,7 @@ class GameControllerVGS(http.Controller):
                COALESCE(bl.spent_daily,   0) - %(amt)s   AS prev_daily,
                COALESCE(bl.spent_weekly,  0) - %(amt)s   AS prev_weekly,
                COALESCE(bl.spent_monthly, 0) - %(amt)s   AS prev_monthly
-        """, {"id": bl.id, "amt": float(amount)})
+        """, {"id": bl.id, "amt": float(amount or 0.0)})
 
         if cr.rowcount == 0:
             # Ya estaba excedido antes: identificar período bloqueante (todo coalesceado)
@@ -285,6 +285,11 @@ class GameControllerVGS(http.Controller):
         partner = request.env['res.partner'].sudo().search([('token', '=', token)], limit=1)
         user = request.env['res.users'].sudo().search([('partner_id', '=', partner.id)], limit=1)
         user_id = user.id
+        to_win = 0.0
+        if not json_data.get('endRound'):
+            to_win_val = json_data.get('to_win')
+            if to_win_val is not None:
+                to_win = float(to_win_val)
 
         _logger.info(f"Casino Iframe: Starting game session for product: {product.id} - {product.name}")
         return {
@@ -299,6 +304,7 @@ class GameControllerVGS(http.Controller):
             'result': result,
             'state': state,
             'amount': amount,
+            'to_win': to_win,
             'initial_balance': initial_balance,
             'final_balance': final_balance,
             'currency_id': request.env.company.currency_id.id,
@@ -493,9 +499,9 @@ class GameControllerVGS(http.Controller):
             if amount > balance:
                 return _xml_envelope(req_xml, _xml_tag("RESULT", "FAILED") + _xml_tag("CODE", "300"))
 
-            result = self._apply_amount(session.id, product_id, round_id = round_id, amount=amount, op="lose" if trntype == "BET" else "tip", token=token, transaction_id=casino_tx, internal_transaction_id=internal_transaction_id)
+            result = self._apply_amount(session.id, product_id, round_id = round_id, amount=amount, to_win=0.0, op="lose" if trntype == "BET" else "tip", token=token, transaction_id=casino_tx, internal_transaction_id=internal_transaction_id)
         elif trntype in ("WIN", "CANCELED_BET"):
-            result = self._apply_amount(session.id, product_id, round_id = round_id, amount=amount, op='win', token=token, transaction_id=casino_tx, internal_transaction_id=internal_transaction_id)
+            result = self._apply_amount(session.id, product_id, round_id = round_id, amount=amount, to_win=0.0, op='win', token=token, transaction_id=casino_tx, internal_transaction_id=internal_transaction_id)
         else:
             # Tipo desconocido: failed genérico 301
             return _xml_envelope(req_xml, _xml_tag("RESULT", "FAILED") + _xml_tag("CODE", "301"))
@@ -670,7 +676,7 @@ class GameControllerVGS(http.Controller):
 
         internal_transaction_id = token #uuid.uuid4().hex
         session = request.env['casino.game.session'].sudo().search([('secret_token', '=', token)], limit=1)
-        result = self._apply_amount(session.id, product_id = gameId, round_id = roundId, amount=amount, op='win', token=token, transaction_id=transactionId, internal_transaction_id=internal_transaction_id)
+        result = self._apply_amount(session.id, product_id = gameId, round_id = roundId, amount=amount, to_win=0.0, op='win', token=token, transaction_id=transactionId, internal_transaction_id=internal_transaction_id)
         
         # s = request.env['casino.game.session'].sudo().browse(int(session_id))
         
@@ -788,7 +794,7 @@ class GameControllerVGS(http.Controller):
             _logger.info('Casino Iframe: api_win called with session_id: %s, amount: %s, transactionId: %s', session.id, amount, transactionId)
             _logger.info('Casino Iframe: Actualizando balance del jugador: %s', json.dumps(kwargs, indent=2, ensure_ascii=False))
             amount = amount / 100
-            result = self._apply_amount(session.id, product_id = gameId, round_id = roundId, amount=amount, op='win', token=token, transaction_id=transactionId, internal_transaction_id=internal_transaction_id)
+            result = self._apply_amount(session.id, product_id = gameId, round_id = roundId, amount=amount, to_win=0.0, op='win', token=token, transaction_id=transactionId, internal_transaction_id=internal_transaction_id)
 
             response = {
                 "balance": int(result.get("balance", 0.0) * 100),
@@ -846,6 +852,12 @@ class GameControllerVGS(http.Controller):
             if not isinstance(amount, (int, float)) or amount <= 0:
                 raise CasinoError(*CasinoErrorCodes.INVALID_AMOUNT)
 
+            to_win = data.get('to_win')
+            if to_win is None:
+                to_win = data.get('params', {}).get('to_win', 0.0)
+            if not isinstance(to_win, (int, float)) or to_win < 0:
+                to_win = 0.0
+
             current_balance = self._get_balance_user(token)
             if amount / 100 > current_balance:
                 raise CasinoError(*CasinoErrorCodes.INSUFFICIENT_FUNDS)
@@ -869,6 +881,7 @@ class GameControllerVGS(http.Controller):
                 product_id=gameId,
                 round_id=roundId,
                 amount=amount,
+                to_wi=to_win,
                 op='lose',
                 token=token,
                 transaction_id=transactionId,
@@ -898,7 +911,7 @@ class GameControllerVGS(http.Controller):
     @http.route('/api/vgs/v1/refund', type='json', auth='public', methods=['POST'], csrf=False)
     def api_refund(self, session_id, amount, **kwargs):
         """Devolución de plata: suma amount al balance (crédito)."""
-        return self._apply_amount(session_id, product_id = 0, round_id=None, amount = amount, op='refund', token="", transaction_id=None)
+        return self._apply_amount(session_id, product_id = 0, round_id=None, amount = amount, to_win=0.0, op='refund', token="", transaction_id=None)
 
     @http.route('/api/vgs/v1/balance', type='http', auth='public', methods=['POST'], csrf=False)
     def api_balance(self, **kwargs):
@@ -936,7 +949,7 @@ class GameControllerVGS(http.Controller):
 
 
     # ----------------- Helper interno -----------------
-    def _apply_amount(self, session_id, product_id, round_id, amount, op, token, transaction_id, internal_transaction_id):
+    def _apply_amount(self, session_id, product_id, round_id, amount, to_win, op, token, transaction_id, internal_transaction_id):
         """
         Ajusta el balance de la sesión y deja nota en description.
         op: 'win' | 'lose' | 'refund'
@@ -1047,7 +1060,7 @@ class GameControllerVGS(http.Controller):
             _logger.info('Valores para session_vals: product_id=%s, user_id=%s, token=%s, current=%s, new_balance=%s, amt=%s, state=%s, result=%s, transaction_id=%s, json_data=%s',
                 product_id, user_id, token, current_balance, new_balance, amt, state, result, transaction_id, json_data)
             try:
-                session_vals = self._prepare_session_vals(product_id, round_id, user_id, token, current_balance, new_balance, amt, state, result, transaction_id, internal_transaction_id, json_data)
+                session_vals = self._prepare_session_vals(product_id, round_id, user_id, token, current_balance, new_balance, amt, to_win, state, result, transaction_id, internal_transaction_id, json_data)
                 # Si es un débito (apuesta perdida), calcular y guardar comisión del agente
                 if op == 'lose':
                     # 1) Determinar agente del jugador (si el módulo de agentes está instalado)

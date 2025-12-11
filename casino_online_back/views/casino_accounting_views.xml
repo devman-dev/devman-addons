@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <!-- Lista mejorada para transferencias bancarias -->
+  <record id="view_bank_transfer_list" model="ir.ui.view">
+    <field name="name">bank.transfer.list</field>
+    <field name="model">account.payment</field>
+    <field name="arch" type="xml">
+      <list string="Asientos"
+        default_order="id desc"
+        decoration-info="state == 'draft'"
+        decoration-muted="state == 'cancel'"
+        create="false"
+        edit="false"
+        delete="false">
+        <field name="date" />
+        <field name="name" string="Número" />
+        <field name="journal_id" string="Diario" />
+        <field name="payment_method_id" string="Payment Method" optional="hide" />
+        <field name="payment_method_line_id" string="Método de pago" optional="hide" />
+        <field name="partner_id" string="Cliente" optional="show" />
+        <field name="amount_signed" string="Importe en divisa"
+          widget="monetary"
+          options="{'currency_field': 'currency_id'}" />
+        <field name="amount_company_currency_signed" string="Importe"
+          sum="Total" />
+        <!-- <field name="currency_id" column_invisible="True" />
+        <field name="state" string="Estado" widget="badge"
+          decoration-danger="state == 'draft'"
+          decoration-success="state == 'posted'"
+          decoration-muted="state == 'cancelled'" /> -->
+      </list>
+    </field>
+  </record>
+
+  <!-- Formulario para transferencias bancarias -->
+  <record id="view_bank_transfer_form" model="ir.ui.view">
+    <field name="name">bank.transfer.form</field>
+    <field name="model">account.payment</field>
+    <field name="arch" type="xml">
+      <form string="Transferencia Bancaria">
+        <header>
+          <button name="action_post" type="object" string="Publicar" class="btn-primary"
+            invisible="state != 'draft'" />
+          <button name="action_cancel" type="object" string="Cancelar"
+            invisible="state not in ['draft', 'posted']" />
+          <button name="action_draft" type="object" string="Volver a Borrador"
+            invisible="state != 'cancel'" />
+          <field name="state" widget="statusbar" readonly="1"
+            statusbar_visible="draft,posted" />
+        </header>
+        <sheet>
+          <group>
+            <group>
+              <field name="date" />
+              <field name="payment_type" />
+              <field name="partner_id" />
+              <field name="partner_type" invisible="1" />
+            </group>
+            <group>
+              <field name="journal_id" />
+              <!-- <field name="destination_journal_id"
+                invisible="payment_type != 'transfer'" />
+              <field name="amount" /> -->
+              <field name="currency_id" />
+              <field name="payment_method_line_id" string="Método de pago" />
+            </group>
+          </group>
+          <group string="Notas">
+            <!-- <field name="ref" string="Referencia" /> -->
+          </group>
+        </sheet>
+        <div class="oe_chatter">
+          <field name="message_follower_ids" widget="mail_followers" />
+          <field name="message_ids" widget="mail_thread" />
+        </div>
+      </form>
+    </field>
+  </record>
+
+  <!-- Vista de búsqueda para transferencias -->
+  <record id="view_bank_transfer_search" model="ir.ui.view">
+    <field name="name">bank.transfer.search</field>
+    <field name="model">account.payment</field>
+    <field name="arch" type="xml">
+      <search string="Buscar Transferencias">
+        <field name="name" string="Número" />
+        <field name="partner_id" />
+        <field name="journal_id" />
+        <!-- <field name="destination_journal_id" /> -->
+        <field name="date" />
+
+        <filter string="Entradas" name="filter_inbound"
+          domain="[('payment_type', '=', 'inbound')]" />
+        <filter string="Salidas" name="filter_outbound"
+          domain="[('payment_type', '=', 'outbound')]" />
+
+        <separator />
+        <filter string="Borrador" name="filter_draft"
+          domain="[('state', '=', 'draft')]" />
+        <filter string="Publicado" name="filter_posted"
+          domain="[('state', '=', 'posted')]" />
+        <filter string="Cancelado" name="filter_cancelled"
+          domain="[('state', '=', 'cancel')]" />
+
+        <group expand="0" string="Agrupar Por">
+          <filter string="Diario Origen" name="group_journal"
+            context="{'group_by': 'journal_id'}" />
+          <!-- <filter string="Diario Destino" name="group_dest_journal"
+            context="{'group_by': 'destination_journal_id'}" /> -->
+          <filter string="Estado" name="group_state"
+            context="{'group_by': 'state'}" />
+          <filter string="Fecha" name="group_date"
+            context="{'group_by': 'date'}" />
+        </group>
+      </search>
+    </field>
+  </record>
+
+  <!-- Acción de ventana para transferencias bancarias -->
+  <record id="action_bank_transfers_window" model="ir.actions.act_window">
+    <field name="name">Transferencias</field>
+    <field name="res_model">account.payment</field>
+    <field name="view_mode">list,form</field>
+    <field name="view_id" ref="view_bank_transfer_list" />
+    <field name="search_view_id" ref="view_bank_transfer_search" />
+    <field name="domain">[('payment_type', 'in', ['inbound','outbound'])]</field>
+    <!-- <field name="context">{'search_default_filter_posted': 1}</field> -->
+    <field name="context">{}</field>
+    <field name="help" type="html">
+      <p class="o_view_nocontent_smiling_face">
+        No hay transferencias registradas
+      </p>
+      <p>
+        Haz clic en "Nuevo" para crear una nueva transferencia entre cuentas.
+      </p>
+    </field>
+  </record>
+
+  <!-- Menu items under Casino > Contabilidad -->
+  <menuitem id="menu_casino_accounting"
+    name="Contabilidad"
+    parent="menu_casino_root"
+    sequence="50" />
+
+  <!--<menuitem
+  id="menu_casino_payments"
+    name="Pagos de Casino"
+    parent="menu_casino_accounting"
+    action="action_casino_payments_window"
+    sequence="10" />
+-->
+  <menuitem id="menu_casino_moves"
+    name="Asientos de Casino"
+    parent="menu_casino_accounting"
+    action="action_bank_transfers_window"
+    sequence="20" />
+
+</odoo>

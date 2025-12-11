@@ -127,7 +127,7 @@ class GameController(http.Controller):
                COALESCE(bl.spent_daily,   0) - %(amt)s   AS prev_daily,
                COALESCE(bl.spent_weekly,  0) - %(amt)s   AS prev_weekly,
                COALESCE(bl.spent_monthly, 0) - %(amt)s   AS prev_monthly
-        """, {"id": bl.id, "amt": float(amount)})
+        """, {"id": bl.id, "amt": float(amount or 0.0)})
 
         if cr.rowcount == 0:
             # Ya estaba excedido antes: identificar período bloqueante (todo coalesceado)
@@ -194,7 +194,7 @@ class GameController(http.Controller):
         }
         return {"allowed": True, "crossed": crossed, "message_map": message_map}
     
-    def _prepare_session_vals(self, game_id, round_id, user_id, token, initial_balance, final_balance, amount, state, result, transaction_id, internal_transaction_id, json_data):
+    def _prepare_session_vals(self, game_id, round_id, user_id, token, initial_balance, final_balance, amount, to_win, state, result, transaction_id, internal_transaction_id, json_data):
         """
         Devuelve los valores para crear una sesión de juego.
         """
@@ -220,6 +220,7 @@ class GameController(http.Controller):
             'result': result,
             'state': state,
             'amount': amount,
+            'to_win': to_win,
             'initial_balance': initial_balance,
             'final_balance': final_balance,
             'currency_id': request.env.company.currency_id.id,
@@ -367,6 +368,10 @@ class GameController(http.Controller):
         if amount is None:
             amount = data.get('params', {}).get('amount', 0.0)
 
+        to_win = float(data.get('to_win'))
+        if to_win is None:
+            to_win = float(data['params'].get('toWin', 0.0))
+        
         token = data.get('token', None)
         if token is None:
             token = data.get('params', {}).get('token')
@@ -376,7 +381,7 @@ class GameController(http.Controller):
 
         internal_transaction_id = token #uuid.uuid4().hex
         session = request.env['casino.game.session'].sudo().search([('secret_token', '=', token)], limit=1)
-        result = self._apply_amount(session.id, product_id = gameId, round_id = roundId, amount=amount, op='win', token=token, transaction_id=transactionId, internal_transaction_id=internal_transaction_id)
+        result = self._apply_amount(session.id, product_id = gameId, round_id = roundId, amount=amount, to_win=to_win, op='win', token=token, transaction_id=transactionId, internal_transaction_id=internal_transaction_id)
         
         # s = request.env['casino.game.session'].sudo().browse(int(session_id))
         
@@ -495,11 +500,11 @@ class GameController(http.Controller):
             _logger.info('Casino Iframe: api_win called with session_id: %s, amount: %s, transactionId: %s', session.id, amount, transactionId)
             _logger.info('Casino Iframe: Actualizando balance del jugador: %s', json.dumps(kwargs, indent=2, ensure_ascii=False))
             amount = amount / 100
-            result = self._apply_amount(session.id, product_id = gameId, round_id = roundId, amount=amount, op='win', token=token, transaction_id=transactionId, internal_transaction_id=internal_transaction_id)
+            result = self._apply_amount(session.id, product_id = gameId, round_id = roundId, amount=amount, to_win=0.0, op='win', token=token, transaction_id=transactionId, internal_transaction_id=internal_transaction_id)
 
             if result.get('success'):
                 partner = request.env['res.partner'].sudo().search([('secret_token', '=', token)], limit=1)
-                request.env.company.action_casino_register_cash_movement(
+                request.env.company.sudo().action_casino_register_cash_movement(
                     amount=amount,
                     operation='in',
                     partner_id=partner.id,
@@ -562,9 +567,19 @@ class GameController(http.Controller):
             if not isinstance(amount, (int, float)) or amount <= 0:
                 raise CasinoError(*CasinoErrorCodes.INVALID_AMOUNT)
 
-            events = data.get('events', None)
-            if events is None:
-                events = data.get('params', {}).get('events')
+            to_win = data.get('to_win')
+            if to_win is None:
+                to_win = data.get('params', {}).get('to_win', 0.0)
+            if not isinstance(to_win, (int, float)) or to_win < 0:
+                to_win = 0.0
+
+            events = data.get('events', [])
+            if not events:
+                events = data.get('params', {}).get('events', [])
+            
+            # Asegurar que events sea una lista válida
+            if not isinstance(events, list):
+                events = []
 
             current_balance = self._get_balance_user(token)
             if amount / 100 > current_balance:
@@ -583,22 +598,34 @@ class GameController(http.Controller):
 
             limit_result = self._update_limits_softcap(user, request.env.company, amount)
             #_logger.info('Casino Iframe: Resultado de límites: %s', limit_result)
-            op = 'pending' if not endRound else 'lose'
+            op = 'in_progress' if not endRound else 'lose'
             result = self._apply_amount(
                 session.id,
                 product_id=gameId,
                 round_id=roundId,
                 amount=amount,
+                to_win=to_win,
                 op=op,
                 token=token,
                 transaction_id=transactionId,
                 internal_transaction_id=internal_transaction_id,
                 events=events
             )
+
             _logger.info('Casino Iframe: Resultado de la aplicación de monto: %s', result)
             limit_messages = []
             
             _logger.info('Casino Iframe: Mensajes de límite: %s', limit_messages)
+
+            if result.get('success'):
+                partner = request.env['res.partner'].sudo().search([('secret_token', '=', token)], limit=1)
+                request.env.company.sudo().action_casino_register_cash_movement(
+                    amount=amount,
+                    operation='out' if not endRound else 'out_final',
+                    partner_id=partner.id,
+                    label="Ganancia de juego",
+                )
+
             response = {
                 "balance": int(result.get("balance", 0.0) * 100),
                 "transactionId": internal_transaction_id,
@@ -619,7 +646,7 @@ class GameController(http.Controller):
     @http.route('/api/v1/refund', type='json', auth='public', methods=['POST'], csrf=False)
     def api_refund(self, session_id, amount, **kwargs):
         """Devolución de plata: suma amount al balance (crédito)."""
-        return self._apply_amount(session_id, product_id = 0, round_id=None, amount = amount, op='refund', token="", transaction_id=None)
+        return self._apply_amount(session_id, product_id = 0, round_id=None, amount = amount, to_win=0.0, op='refund', token="", transaction_id=None)
 
     @http.route('/api/v1/balance', type='http', auth='public', methods=['POST'], csrf=False)
     def api_balance(self, **kwargs):
@@ -657,7 +684,7 @@ class GameController(http.Controller):
 
 
     # ----------------- Helper interno -----------------
-    def _apply_amount(self, session_id, product_id, round_id, amount, op, token, transaction_id, internal_transaction_id, events=None):
+    def _apply_amount(self, session_id, product_id, round_id, amount, to_win, op, token, transaction_id, internal_transaction_id, events=None):
         """
         Ajusta el balance de la sesión y deja nota en description.
         op: 'win' | 'lose' | 'refund'
@@ -731,14 +758,13 @@ class GameController(http.Controller):
                     "amount": amt,
                     "token_live": True,
                 }
-            elif op == 'pending':
+            elif op == 'in_progress':
                 _logger.info('Casino Iframe: Pendiente')
                 new_balance = current_balance - amt
                 user.balance_game = new_balance
-                result = 'pending'
+                result = 'in_progress'
                 state = 'in_progress'
-                debit = amt,
-                events = events,
+                debit = amt
                 json_data = {
                     "token": token,
                     "gameId": product_id,
@@ -747,8 +773,10 @@ class GameController(http.Controller):
                     "transactionId": transaction_id,
                     "amount": amt,
                     "token_live": True,
-                    "events": events
                 }
+                # Solo agregar events si es una lista no vacía
+                if events and isinstance(events, list) and len(events) > 0:
+                    json_data["events"] = events
             elif op == 'refund':
                 _logger.info('Casino Iframe: REFUND')
                 new_balance = current_balance + amt
@@ -786,7 +814,7 @@ class GameController(http.Controller):
             _logger.info('Valores para session_vals: product_id=%s, user_id=%s, token=%s, current=%s, new_balance=%s, amt=%s, state=%s, result=%s, transaction_id=%s, json_data=%s',
                 product_id, user_id, token, current_balance, new_balance, amt, state, result, transaction_id, json_data)
             try:
-                session_vals = self._prepare_session_vals(product_id, round_id, user_id, token, current_balance, new_balance, amt, state, result, transaction_id, internal_transaction_id, json_data)
+                session_vals = self._prepare_session_vals(product_id, round_id, user_id, token, current_balance, new_balance, amt, to_win, state, result, transaction_id, internal_transaction_id, json_data)
             except Exception as e:
                 _logger.error('Error en _prepare_session_vals: %s', str(e))
                 raise
