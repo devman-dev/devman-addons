@@ -24,6 +24,7 @@
           options="{'currency_field': 'currency_id'}" />
         <field name="amount_company_currency_signed" string="Importe"
           sum="Total" />
+        <field name="memo" string="Notas" optional="hide" />
         <!-- <field name="currency_id" column_invisible="True" />
         <field name="state" string="Estado" widget="badge"
           decoration-danger="state == 'draft'"
@@ -67,7 +68,7 @@
             </group>
           </group>
           <group string="Notas">
-            <!-- <field name="ref" string="Referencia" /> -->
+            <field name="memo" string="Notas" />
           </group>
         </sheet>
         <div class="oe_chatter">

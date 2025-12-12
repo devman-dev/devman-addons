@@ -509,6 +509,7 @@ class GameController(http.Controller):
                     operation='in',
                     partner_id=partner.id,
                     label="Ganancia de juego",
+                    memo=transactionId,
                 )
 
             response = {
@@ -624,6 +625,7 @@ class GameController(http.Controller):
                     operation='out' if not endRound else 'out_final',
                     partner_id=partner.id,
                     label="Ganancia de juego",
+                    memo=transactionId,
                 )
 
             response = {

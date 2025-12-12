@@ -47,6 +47,7 @@ class ResCompany(models.Model):
         partner_id=False,
         date=False,
         label=False,
+        memo=False
     ):
         """
         Registra entrada o salida de dinero usando los diarios configurados en la compañía.
@@ -106,24 +107,26 @@ class ResCompany(models.Model):
 
             vals = {
                 'payment_type': 'inbound',
-                'partner_type': partner_id and 'customer' or 'customer',  # ajustá si necesitás supplier/other
+                'partner_type': partner_id and 'customer' or 'customer',
                 'partner_id': partner_id or False,
                 'amount': amount,
                 'date': date,
                 'currency_id': deposit_journal.currency_id.id or company.currency_id.id,
                 'journal_id': deposit_journal.id,
                 'payment_method_line_id': method_line.id,
-                # 'ref': label,
+                'memo': memo or label,
             }
             payment = Payment.create(vals)
             payment.action_post()
+            # Agregar memo al asiento contable
+            if payment.move_id and memo:
+                payment.move_id.narration = memo
             payments |= payment
 
         # --------------------------------------------------
         # SALIDA:
         # 1) salida desde depósito (outbound)
         # 2) ingreso en operativo (inbound)
-        # Si necesitas además pagar hacia afuera, hacelo en un paso separado.
         # --------------------------------------------------
         elif operation in 'out':
             # Paso 1: salida desde diario de depósito
@@ -131,16 +134,19 @@ class ResCompany(models.Model):
 
             transfer_out_vals = {
                 'payment_type': 'outbound',
-                'partner_type': 'customer',  # irrelevante en este flujo interno
+                'partner_type': 'customer',
                 'partner_id': partner_id or False,
                 'amount': amount,
                 'date': date,
                 'currency_id': deposit_journal.currency_id.id or company.currency_id.id,
                 'journal_id': deposit_journal.id,
                 'payment_method_line_id': transfer_method_out.id,
+                'memo': memo or label,
             }
             transfer_out_payment = Payment.create(transfer_out_vals)
             transfer_out_payment.action_post()
+            if transfer_out_payment.move_id and memo:
+                transfer_out_payment.move_id.narration = memo
             payments |= transfer_out_payment
 
             # Paso 2: entrada al diario operativo
@@ -155,9 +161,12 @@ class ResCompany(models.Model):
                 'currency_id': bet_transfer_journal.currency_id.id or company.currency_id.id,
                 'journal_id': bet_transfer_journal.id,
                 'payment_method_line_id': transfer_method_in.id,
+                'memo': memo or label,
             }
             transfer_in_payment = Payment.create(transfer_in_vals)
             transfer_in_payment.action_post()
+            if transfer_in_payment.move_id and memo:
+                transfer_in_payment.move_id.narration = memo
             payments |= transfer_in_payment
         elif operation == 'out_final':
             # Paso único: salida desde diario operativo
@@ -165,16 +174,19 @@ class ResCompany(models.Model):
 
             transfer_out_vals = {
                 'payment_type': 'outbound',
-                'partner_type': 'customer',  # irrelevante en este flujo interno
+                'partner_type': 'customer',
                 'partner_id': partner_id or False,
                 'amount': amount,
                 'date': date,
                 'currency_id': bet_transfer_journal.currency_id.id or company.currency_id.id,
                 'journal_id': bet_transfer_journal.id,
                 'payment_method_line_id': transfer_method_out.id,
+                'memo': memo or label,
             }
             transfer_out_payment = Payment.create(transfer_out_vals)
             transfer_out_payment.action_post()
+            if transfer_out_payment.move_id and memo:
+                transfer_out_payment.move_id.narration = memo
             payments |= transfer_out_payment
             
         return payments
