@@ -8,12 +8,13 @@
                     <button name="action_change_state" type="object" string="Aprobar"
                         class="btn-primary"
                         context="{'new_state': 'approved'}"
-                        state="pending,rejected" />
+                        state="pending,rejected"
+                        invisible="state not in ('pending','rejected')" />
 
                     <button name="action_change_state" type="object" string="Desaprobar"
                         class="btn-secondary"
                         context="{'new_state': 'rejected'}"
-                        state="pending"
+                        invisible="state != 'pending'"
                         confirm="¿Seguro que quieres desaprobar este retiro?" />
 
                     <field name="state" widget="statusbar"
