@@ -26,12 +26,9 @@
                     <field name="description" />
                     <field name="amount" />
                     <field name="state" widget="badge"
-                        options="{
-                        'badge_secondary': [('state','=','pending')],
-                        'badge_success':   [('state','=','approved')],
-                        'badge_danger':    [('state','=','rejected')],
-                        'rounded-pill':    True
-                    }" />
+                        decoration-success="state == 'approved'"
+                        decoration-danger="state == 'rejected'"
+                        decoration-muted="state == 'pending'" />
                 </group>
             </form>
         </field>

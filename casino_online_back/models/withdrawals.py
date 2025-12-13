@@ -51,6 +51,18 @@ class CasinoGameWithdrawals(models.Model):
             })
             self.write(vals)
 
+        if new_state == 'approved':
+            for rec in self:
+                # Registrar el movimiento de caja para retiros aprobados
+                # Operación de salida (out) desde caja operativa
+                self.env.company.sudo().action_casino_register_cash_movement(
+                    amount=rec.amount,
+                    operation='out_only',
+                    partner_id=rec.partner_id.id,
+                    label=rec.description or 'Retiro aprobado',
+                    # memo=rec.transaction_id,
+                )
+            
     # --------------------
     # COMPUTES
     # --------------------

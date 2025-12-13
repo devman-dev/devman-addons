@@ -66,8 +66,8 @@ class ResCompany(models.Model):
         if amount <= 0:
             raise UserError(_("El monto debe ser estrictamente positivo."))
 
-        if operation not in ('in', 'out', 'out_final'):
-            raise UserError(_("El parámetro 'operation' debe ser 'in', 'out' o 'out_final'."))
+        if operation not in ('in', 'out', 'out_final', 'out_only'):
+            raise UserError(_("El parámetro 'operation' debe ser 'in', 'out', 'out_final' o 'out_only'."))
 
         if not company.casino_deposit_journal_id:
             raise UserError(_("Configure el diario 'casino_deposit_journal_id' en la compañía."))
@@ -128,7 +128,7 @@ class ResCompany(models.Model):
         # 1) salida desde depósito (outbound)
         # 2) ingreso en operativo (inbound)
         # --------------------------------------------------
-        elif operation in 'out':
+        elif operation in 'out' or operation == 'out_only':
             # Paso 1: salida desde diario de depósito
             transfer_method_out = _get_payment_method(deposit_journal, 'outbound')
 
@@ -150,24 +150,25 @@ class ResCompany(models.Model):
             payments |= transfer_out_payment
 
             # Paso 2: entrada al diario operativo
-            transfer_method_in = _get_payment_method(bet_transfer_journal, 'inbound')
+            if operation in 'out':
+                transfer_method_in = _get_payment_method(bet_transfer_journal, 'inbound')
 
-            transfer_in_vals = {
-                'payment_type': 'inbound',
-                'partner_type': 'customer',
-                'partner_id': partner_id or False,
-                'amount': amount,
-                'date': date,
-                'currency_id': bet_transfer_journal.currency_id.id or company.currency_id.id,
-                'journal_id': bet_transfer_journal.id,
-                'payment_method_line_id': transfer_method_in.id,
-                'memo': memo or label,
-            }
-            transfer_in_payment = Payment.create(transfer_in_vals)
-            transfer_in_payment.action_post()
-            if transfer_in_payment.move_id and memo:
-                transfer_in_payment.move_id.narration = memo
-            payments |= transfer_in_payment
+                transfer_in_vals = {
+                    'payment_type': 'inbound',
+                    'partner_type': 'customer',
+                    'partner_id': partner_id or False,
+                    'amount': amount,
+                    'date': date,
+                    'currency_id': bet_transfer_journal.currency_id.id or company.currency_id.id,
+                    'journal_id': bet_transfer_journal.id,
+                    'payment_method_line_id': transfer_method_in.id,
+                    'memo': memo or label,
+                }
+                transfer_in_payment = Payment.create(transfer_in_vals)
+                transfer_in_payment.action_post()
+                if transfer_in_payment.move_id and memo:
+                    transfer_in_payment.move_id.narration = memo
+                payments |= transfer_in_payment
         elif operation == 'out_final':
             # Paso único: salida desde diario operativo
             transfer_method_out = _get_payment_method(bet_transfer_journal, 'outbound')
