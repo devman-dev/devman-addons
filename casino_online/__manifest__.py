@@ -32,6 +32,7 @@
         "web.assets_frontend_lazy": [
             ("include", "web.assets_frontend"), # Asegura que los assets core del frontend se carguen para las dependencias
             "casino_online/static/src/js/withdrawal_modal.js",
+            "casino_online/static/src/js/withdrawal_form.js",
             "casino_online/static/src/js/bank_list.js",
         ],
     },

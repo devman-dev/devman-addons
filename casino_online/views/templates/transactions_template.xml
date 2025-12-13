@@ -52,6 +52,142 @@
             </p>
 
             <div class="d-flex justify-content-center gap-3 mb-5">
+                <div class="card withdrawal-option text-center"
+                    role="button"
+                    data-bs-toggle="modal"
+                    data-bs-target="#withdrawalTransferModal"
+                    data-method="transfer"
+                    style="width: 120px; height: 120px; cursor: pointer;">
+                    <div class="card-body">
+                        <img src="/casino_online/static/src/img/transfer_icon.png"
+                            alt="Transferencia Bancaria" class="img-fluid mb-2"
+                            style="max-height: 40px;" />
+                        <p class="card-title" style="font-size: .8rem;">Transferencia Bancaria</p>
+                    </div>
+                </div>
+
+                <div class="card withdrawal-option text-center"
+                    role="button"
+                    data-bs-toggle="modal"
+                    data-bs-target="#withdrawalTransferModal"
+                    data-method="cashier"
+                    style="width: 120px; height: 120px; cursor: pointer;">
+                    <div class="card-body">
+                        <img src="/casino_online/static/src/img/casa_central.png"
+                            alt="Casa Central" class="img-fluid mb-2"
+                            style="max-height: 40px;" />
+                        <p class="card-title" style="font-size: .8rem;">Retiro en Casa Central</p>
+                    </div>
+                </div>
+            </div>
+
+            <div>
+                <div class="card shadow-sm">
+                    <div class="card-header bg-info text-white">
+                        <strong>Detalle de últimos retiros</strong>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-sm table-hover mb-0 o_withdrawals_list_table">
+                                <thead style="font-size:0.9rem;">
+                                    <tr>
+                                        <th>Cuil</th>
+                                        <th>Descripción</th>
+                                        <th>CBU</th>
+                                        <th>Monto</th>
+                                        <th>Fecha</th>
+                                        <th class="text-center">Estado</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="o_casino_withdrawals_table_body"
+                                    style="font-size:0.9rem;">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="card-footer" style="font-size: 0.9rem;">
+                        <div class="o_withdrawal_list_pagination_info text-muted me-auto" />
+                    </div>
+                </div>
+            </div>
+
+            <nav class="align-self-center mt-2" aria-label="Navegación de Retiros">
+                <ul class="pagination justify-content-end o_withdrawal_list_pagination" />
+            </nav>
+        </div>
+
+        <div class="modal fade" id="withdrawalTransferModal" tabindex="-1"
+            aria-labelledby="withdrawalTransferLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg modal-dialog-centered">
+                <div class="modal-content">
+
+                    <div class="modal-header bg-primary text-white">
+                        <h5 class="modal-title" id="withdrawalTransferLabel">
+                            Solicitud de Retiro
+                        </h5>
+                        <button type="button" class="btn-close btn-close-white"
+                            data-bs-dismiss="modal"
+                            aria-label="Cerrar"></button>
+                    </div>
+
+                    <div class="modal-body">
+                        <div class="o_withdrawal_message_container d-none mb-3">
+                            <div class="alert alert-dismissible fade show" role="alert">
+                                <span class="o_withdrawal_message_text"></span>
+                                <button type="button" class="btn-close" aria-label="Cerrar"
+                                    onclick="this.parentElement.parentElement.classList.add('d-none')"></button>
+                            </div>
+                        </div>
+
+                        <form class="o_withdrawal_form">
+
+                            <div class="mb-3">
+                                <label class="form-label">Monto a retirar *</label>
+                                <input type="number" name="amount" class="form-control"
+                                    required="required" min="1" step="0.01" placeholder="0.00" />
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Contraseña de usuario *</label>
+                                <input type="password" name="password"
+                                    class="form-control" required="required"
+                                    placeholder="Ingrese su contraseña actual" />
+                            </div>
+
+                            <div class="mb-3 o_bank_row">
+                                <label class="form-label">Cuenta Destino *</label>
+                                <select name="bank_account" class="form-select"
+                                    id="bank_account_select">
+                                    <option value="">Cargando cuentas...</option>
+                                </select>
+                            </div>
+
+                            <div
+                                class="d-flex justify-content-center justify-content-md-end gap-2 flex-wrap">
+                                <button type="button" class="btn btn-outline-secondary"
+                                    data-bs-dismiss="modal">
+                                    Cancelar
+                                </button>
+                                <button type="button" class="btn btn-primary o_withdrawal_submit">
+                                    Solicitar Retiro
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </template>
+    <template id="portal_retirar_form2" name="Formulario Retirar">
+        <div id="withdrawal_methods_container"
+            name="o_casino_withdrawal_list_container"
+            t-att-data-partner-id="user_id.partner_id.id">
+
+            <p class="text-center mb-4">
+                Por favor seleccioná tu método de retiro preferido y completá los datos.
+            </p>
+
+            <div class="d-flex justify-content-center gap-3 mb-5">
                 <!-- Botón Transferencia -->
                 <div class="card withdrawal-option text-center"
                     role="button"
@@ -127,6 +263,62 @@
             aria-labelledby="withdrawalTransferLabel" aria-hidden="true">
             <div class="modal-dialog modal-lg modal-dialog-centered">
                 <div class="modal-content">
+                    <div class="modal-header bg-primary text-white">
+                        <h5 class="modal-title" id="withdrawalTransferLabel">
+                            Solicitud de Retiro - Transferencia Bancaria
+                        </h5>
+                        <button type="button" class="btn-close btn-close-white"
+                            data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                    </div>
+
+                    <div class="modal-body">
+                        <div class="o_withdrawal_message_container d-none mb-3">
+                            <div class="alert alert-dismissible fade show" role="alert">
+                                <span class="o_withdrawal_message_text"></span>
+                                <button type="button" class="btn-close" aria-label="Cerrar"
+                                    onclick="this.parentElement.parentElement.classList.add('d-none')"></button>
+                            </div>
+                        </div>
+                        <form class="o_withdrawal_form">
+                            <div
+                                class="d-flex justify-content-center justify-content-md-end gap-2 flex-wrap">
+                                <div class="mb-3">
+                                    <label class="form-label">Monto a retirar *</label>
+                                    <input type="number" name="amount" class="form-control"
+                                        required="required" min="1" step="0.01" />
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label">Contraseña de usuario *</label>
+                                    <input type="password" name="password"
+                                        class="form-control" required="required" />
+                                </div>
+
+                                <div class="mb-3 o_bank_row">
+                                    <label class="form-label">Cuenta Destino *</label>
+                                    <select name="bank_account" class="form-select"
+                                        id="bank_account_select">
+                                        <option value="">Seleccione una cuenta</option>
+                                    </select>
+                                </div>
+                                <button type="button" class="btn btn-outline-secondary"
+                                    data-bs-dismiss="modal">
+                                    Cancelar
+                                </button>
+                                <button type="button" class="btn btn-primary o_withdrawal_submit">
+                                    Solicitar Retiro
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade" id="withdrawalTransferModal" tabindex="-1"
+            aria-labelledby="withdrawalTransferLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg modal-dialog-centered">
+                <div class="modal-content">
 
                     <div class="modal-header bg-primary text-white">
                         <h5 class="modal-title" id="withdrawalTransferLabel">
@@ -138,6 +330,14 @@
                     </div>
                     <t t-name="casino_online.withdrawal_modal">
                         <div class="modal-body">
+                            <!-- Contenedor de mensajes -->
+                            <div class="o_withdrawal_message_container d-none mb-3">
+                                <div class="alert alert-dismissible fade show" role="alert">
+                                    <span class="o_withdrawal_message_text"></span>
+                                    <button type="button" class="btn-close" aria-label="Cerrar"
+                                        onclick="this.parentElement.parentElement.classList.add('d-none')"></button>
+                                </div>
+                            </div>
                             <form class="o_withdrawal_form">
                                 <div class="mb-3">
                                     <label class="form-label">Monto a retirar *</label>
@@ -160,11 +360,12 @@
                                 </div>
                                 <div
                                     class="d-flex justify-content-center justify-content-md-end gap-2 flex-wrap">
-                                    <button class="btn btn-outline-secondary"
+                                    <button type="button" class="btn btn-outline-secondary"
                                         data-bs-dismiss="modal">
                                         Cancelar
                                     </button>
-                                    <button class="btn btn-primary o_withdrawal_submit">
+                                    <button type="button"
+                                        class="btn btn-primary o_withdrawal_submit">
                                         Solicitar Retiro
                                     </button>
                                 </div>
