@@ -139,22 +139,15 @@
   </record>
 
   <!-- Menu items under Casino > Contabilidad -->
-  <menuitem id="menu_casino_accounting"
+  <!-- <menuitem id="menu_casino_accounting"
     name="Contabilidad"
     parent="menu_casino_root"
-    sequence="50" />
+    sequence="50" /> -->
 
-  <!--<menuitem
-  id="menu_casino_payments"
-    name="Pagos de Casino"
-    parent="menu_casino_accounting"
-    action="action_casino_payments_window"
-    sequence="10" />
--->
-  <menuitem id="menu_casino_moves"
+  <!-- <menuitem id="menu_casino_moves"
     name="Asientos de Casino"
     parent="menu_casino_accounting"
     action="action_bank_transfers_window"
-    sequence="20" />
+    sequence="20" /> -->
 
 </odoo>

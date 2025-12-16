@@ -66,8 +66,8 @@ class ResCompany(models.Model):
         if amount <= 0:
             raise UserError(_("El monto debe ser estrictamente positivo."))
 
-        if operation not in ('in', 'out', 'out_final', 'out_only'):
-            raise UserError(_("El parámetro 'operation' debe ser 'in', 'out', 'out_final' o 'out_only'."))
+        if operation not in ('in', 'out', 'out_final', 'out_withdrawals'):
+            raise UserError(_("El parámetro 'operation' debe ser 'in', 'out', 'out_final' o 'out_withdrawals'."))
 
         if not company.casino_deposit_journal_id:
             raise UserError(_("Configure el diario 'casino_deposit_journal_id' en la compañía."))
@@ -123,12 +123,15 @@ class ResCompany(models.Model):
                 payment.move_id.narration = memo
             payments |= payment
 
+            partner = self.env['res.partner'].browse(partner_id)
+            partner.balance_game += amount
+
         # --------------------------------------------------
         # SALIDA:
         # 1) salida desde depósito (outbound)
         # 2) ingreso en operativo (inbound)
         # --------------------------------------------------
-        elif operation in 'out' or operation == 'out_only':
+        elif operation in 'out' or operation == 'out_withdrawals':
             # Paso 1: salida desde diario de depósito
             transfer_method_out = _get_payment_method(deposit_journal, 'outbound')
 

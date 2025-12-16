@@ -21,7 +21,7 @@
         'views/templates/portal_mis_limites_partial.xml',
         'views/res_partner_form_casino_online.xml',
         'views/templates/user_options_template.xml',
-        'data/balance_cron.xml',
+        # 'data/balance_cron.xml',
     ],
     "assets": {
         # CSS puede ir en el bundle frontend estándar

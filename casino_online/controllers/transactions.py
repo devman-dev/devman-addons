@@ -16,6 +16,7 @@ from odoo.http import request
 
 from odoo.addons.payment import utils as payment_utils
 from odoo.addons.payment.controllers.portal import PaymentPortal
+from odoo.addons.payment.controllers.post_processing import PaymentPostProcessing
 from odoo.addons.portal.controllers.portal import CustomerPortal
 
 _logger = logging.getLogger(__name__)
@@ -54,12 +55,27 @@ class CasinoHome(CustomerPortal):
         company = request.env.company
         AML = request.env['account.move.line'].sudo()
 
+        # Construir dominio base: partner + company + estado
+        account_types = ['asset_receivable', 'liability_payable']
         base_domain = [
             ('company_id', '=', company.id),
             ('partner_id', '=', partner.id),
-            ('account_id.account_type', 'in', ['asset_receivable', 'liability_payable']),
             ('parent_state', 'in', ['draft', 'posted']),
         ]
+
+        # Incluir también las líneas asociadas al diario de transferencia del casino
+        # (company.casino_deposit_journal_id) si está configurado.
+        # Usamos un OR ('|') entre la condición de diario y la de tipo de cuenta.
+        if company.casino_deposit_journal_id:
+            base_domain += [
+                '|',
+                ('move_id.journal_id', '=', company.casino_deposit_journal_id.id),
+                ('account_id.account_type', 'in', account_types),
+            ]
+        else:
+            base_domain += [
+                ('account_id.account_type', 'in', account_types),
+            ]
 
         # ================================
         # ANTES
@@ -599,17 +615,73 @@ class MiPortalController(http.Controller):
             ('company_id', '=', company.id),
             ('partner_id', '=', partner.id),
             ('account_id.account_type', 'in', ['asset_receivable', 'liability_payable']),
-            ('parent_state', 'in', ['draft', 'posted']),
+            ('parent_state', 'in', ['draft1', 'posted']),
         ]
         _logger.info("Search domain for movements balance: %s", domain)
         lines = request.env['account.move.line'].sudo().search(domain)
         _logger.info("Found %d lines for balance calculation", len(lines))
-        total = sum(
+        total_lines = sum(
             float((l.amount_signed if l.amount_signed is not None else l.balance) or 0.0)
             for l in lines
         )
+
+        # Incluir también los pagos (account.payment) que estén en estado 'posted'
+        Payment = request.env['account.payment'].sudo()
+        payments = Payment.search([
+            ('company_id', '=', company.id),
+            ('partner_id', '=', partner.id),
+            ('state', 'in', ['posted','in_process1']),
+            ('journal_id', '=', company.casino_deposit_journal_id.id),
+        ])
+        _logger.info("Found %d payments for balance calculation", len(payments))
+
+        total_payments = 0.0
+        for p in payments:
+            try:
+                amt = float(p.amount or 0.0)
+            except Exception:
+                amt = 0.0
+            pt = getattr(p, 'payment_type', None)
+            sign = 0
+            if pt == 'inbound':
+                sign = 1
+            elif pt == 'outbound':
+                sign = -1
+            elif pt == 'transfer':
+                # Si es una transferencia y usa el diario de depósito del casino,
+                # considerarlo como entrada (por ejemplo, movimientos internos de casino).
+                if company.casino_deposit_journal_id and p.journal_id and p.journal_id.id == company.casino_deposit_journal_id.id:
+                    sign = 1
+                else:
+                    sign = 0
+            else:
+                sign = 0
+            total_payments += sign * amt
+
+        total = total_lines + total_payments
+        _logger.info("Total from lines: %s, payments: %s, combined total: %s", total_lines, total_payments, total)
         _logger.info("Total movements balance calculated: %s", total)
         return http.Response(
             json.dumps({'balance': round(total, 2)}),
             content_type='application/json'
         )
+
+
+class CasinoPaymentPortal(PaymentPortal):
+    """
+    Heredar PaymentPortal para interceptar la creación de transacciones.
+    El balance_game se actualizará cuando la transacción esté confirmada (state='done').
+    """
+
+    @http.route('/payment/transaction', type='json', auth='public', website=True)
+    def payment_transaction(self, **kwargs):
+        """
+        Override para crear transacciones de depósito.
+        La actualización del balance_game se realiza en el modelo cuando state='done'.
+        """
+        _logger.info("CasinoPaymentPortal: Intercepting /payment/transaction with kwargs: %s", kwargs)
+        
+        # Llamar al método original para crear la transacción
+        result = super().payment_transaction(**kwargs)
+        
+        return result
