@@ -10,21 +10,15 @@
                     <t t-foreach="json.loads(get_attachments_set)" t-as="res">
                         <t t-set="get_attachments_values"
                            t-value="request.env['document.attachment'].sudo().search([('id', '=', res)])"/>
-                        <table class="table">
-                            <t t-foreach="get_attachments_values" t-as="rec">
-                                <tr>
-                                    <th>
-                                        <span t-esc="rec.document"
-                                              class="oe_inline"/>
-                                    </th>
-                                    <td>
-                                        <input type="file"
-                                               class="oe_import_file get_attach"
-                                               required="1"/>
-                                    </td>
-                                </tr>
-                            </t>
-                        </table>
+                        <t t-foreach="get_attachments_values" t-as="rec">
+                            <div class="mb-3 field-login">
+                                <label class="form-label" t-esc="rec.document"/>
+                                <input type="file"
+                                       class="form-control get_attach"
+                                       required="required"
+                                       t-att-aria-label="rec.document"/>
+                            </div>
+                        </t>
                     </t>
                 </t>
             </t>
