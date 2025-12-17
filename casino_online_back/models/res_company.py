@@ -75,8 +75,8 @@ class ResCompany(models.Model):
         # if not company.casino_bet_transfer_journal_id:
         #     raise UserError(_("Configure el diario 'casino_bet_transfer_journal_id' en la compañía."))
 
-        deposit_journal = 7 #company.casino_deposit_journal_id
-        bet_transfer_journal = 6 #company.casino_bet_transfer_journal_id
+        deposit_journal = 6 #company.casino_deposit_journal_id
+        bet_transfer_journal = 7 #company.casino_bet_transfer_journal_id
 
         date = date or fields.Date.context_today(self)
         label = label or (operation == 'in' and _("Entrada de dinero") or _("Salida de dinero"))
