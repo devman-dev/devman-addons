@@ -141,7 +141,7 @@ class ResCompany(models.Model):
                 'journal_id': deposit_journal, #.id,  # Desde diario de depósitos
                 'destination_journal_id': bet_transfer_journal, #.id,  # Hacia diario operativo
                 'payment_reference': memo or label,
-                # 'is_reconciled': True,
+                'is_reconciled': True,
                 'is_internal_transfer': True
             }
             payment = Payment.create(vals)
