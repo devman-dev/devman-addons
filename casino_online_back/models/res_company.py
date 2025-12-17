@@ -159,7 +159,6 @@ class ResCompany(models.Model):
 
             transfer_out_vals = {
                 'payment_type': 'outbound',
-                'partner_type': 'customer',
                 'partner_id': partner_id or False,
                 'amount': amount,
                 'date': date,
