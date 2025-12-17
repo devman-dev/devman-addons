@@ -995,7 +995,7 @@ class GameControllerVGS(http.Controller):
                 user.balance_game = new_balance
                 note = f'Jugada GANADA +{amt}'
                 result = 'win'
-                state = 'in_progress'
+                state = 'finished'
                 credit = amt
                 json_data = {
                     "token": token,
@@ -1012,7 +1012,7 @@ class GameControllerVGS(http.Controller):
                 user.balance_game = new_balance
                 note = f'Jugada PERDIDA -{amt}'
                 result = 'loss'
-                state = 'in_progress'
+                state = 'finished'
                 debit = amt
                 json_data = {
                     "token": token,
@@ -1036,7 +1036,7 @@ class GameControllerVGS(http.Controller):
                 new_balance = current_balance
                 note = f'Estado de Balance: {new_balance}'
                 result = 'balance'
-                state = 'in_progress'
+                state = 'finished'
                 json_data = {
                     "token": token
                 }
