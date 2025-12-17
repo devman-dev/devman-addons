@@ -109,9 +109,9 @@ class ResCompany(models.Model):
                 'partner_id': partner_id or False,
                 'amount': amount,
                 'date': date,
-                'currency_id': deposit_journal.currency_id.id or company.currency_id.id,
+                'currency_id': company.currency_id.id,
                 'journal_id': bet_transfer_journal.id,  # Desde diario operativo
-                'destination_journal_id': deposit_journal.id,  # Hacia diario de depósitos
+                'destination_journal_id': deposit_journal, #.id,  # Hacia diario de depósitos
                 'payment_reference': memo or label,
                 'is_reconciled': True,
                 'is_internal_transfer': True,
@@ -137,9 +137,9 @@ class ResCompany(models.Model):
                 'partner_id': partner_id or False,
                 'amount': amount,
                 'date': date,
-                'currency_id': deposit_journal.currency_id.id or company.currency_id.id,
-                'journal_id': deposit_journal.id,  # Desde diario de depósitos
-                'destination_journal_id': bet_transfer_journal.id,  # Hacia diario operativo
+                'currency_id': company.currency_id.id,
+                'journal_id': deposit_journal, #.id,  # Desde diario de depósitos
+                'destination_journal_id': bet_transfer_journal, #.id,  # Hacia diario operativo
                 'payment_reference': memo or label,
                 # 'is_reconciled': True,
                 'is_internal_transfer': True
@@ -162,9 +162,9 @@ class ResCompany(models.Model):
                 'partner_id': partner_id or False,
                 'amount': amount,
                 'date': date,
-                'currency_id': deposit_journal.currency_id.id or company.currency_id.id,
-                'journal_id': deposit_journal.id,
-                'payment_method_line_id': transfer_method_out.id,
+                'currency_id':company.currency_id.id,
+                'journal_id': deposit_journal, #.id,
+                'payment_method_line_id': transfer_method_out, #.id,
                 'payment_reference': memo or label,
                 # 'is_reconciled': True,
                 'is_internal_transfer': True,
@@ -188,8 +188,8 @@ class ResCompany(models.Model):
                 'partner_id': partner_id or False,
                 'amount': amount,
                 'date': date,
-                'currency_id': bet_transfer_journal.currency_id.id or company.currency_id.id,
-                'journal_id': bet_transfer_journal.id,
+                'currency_id': company.currency_id.id,
+                'journal_id': bet_transfer_journal, #.id,
                 'payment_method_line_id': transfer_method_out.id,
                 'payment_reference': memo or label,
                 # 'is_reconciled': True,
