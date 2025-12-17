@@ -100,21 +100,21 @@ class ResCompany(models.Model):
             return method
 
         # --------------------------------------------------
-        # ENTRADA: un solo pago inbound al diario de depósitos
+        # ENTRADA: transferencia interna al diario de depósitos
         # --------------------------------------------------
         if operation == 'in':
-            method_line = _get_payment_method(deposit_journal, 'inbound')
-
+            # Para transferencias internas no se necesita método de pago específico
             vals = {
                 'payment_type': 'inbound',
-                'partner_type': partner_id and 'customer' or 'customer',
                 'partner_id': partner_id or False,
                 'amount': amount,
                 'date': date,
                 'currency_id': deposit_journal.currency_id.id or company.currency_id.id,
-                'journal_id': deposit_journal.id,
-                'payment_method_line_id': method_line.id,
-                'memo': memo or label,
+                'journal_id': bet_transfer_journal.id,  # Desde diario operativo
+                'destination_journal_id': deposit_journal.id,  # Hacia diario de depósitos
+                'payment_reference': memo or label,
+                'is_reconciled': True,
+                'is_internal_transfer': True,
             }
             payment = Payment.create(vals)
             payment.action_post()
@@ -123,16 +123,38 @@ class ResCompany(models.Model):
                 payment.move_id.narration = memo
             payments |= payment
 
-            partner = self.env['res.partner'].browse(partner_id)
-            partner.balance_game += amount
+            if partner_id:
+                partner = self.env['res.partner'].browse(partner_id)
+                partner.balance_game += amount
 
         # --------------------------------------------------
-        # SALIDA:
-        # 1) salida desde depósito (outbound)
-        # 2) ingreso en operativo (inbound)
+        # SALIDA: transferencia interna desde depósitos a operativo
         # --------------------------------------------------
-        elif operation in 'out' or operation == 'out_withdrawals':
-            # Paso 1: salida desde diario de depósito
+        elif operation in 'out':
+            # Transferencia interna: desde depósitos hacia operativo
+            vals = {
+                'payment_type': 'outbound',
+                'partner_id': partner_id or False,
+                'amount': amount,
+                'date': date,
+                'currency_id': deposit_journal.currency_id.id or company.currency_id.id,
+                'journal_id': deposit_journal.id,  # Desde diario de depósitos
+                'destination_journal_id': bet_transfer_journal.id,  # Hacia diario operativo
+                'payment_reference': memo or label,
+                'is_reconciled': True,
+                'is_internal_transfer': True,
+            }
+            payment = Payment.create(vals)
+            payment.action_post()
+            if payment.move_id and memo:
+                payment.move_id.narration = memo
+            payments |= payment
+
+        # --------------------------------------------------
+        # SALIDA PARA RETIROS: pago outbound a cliente
+        # --------------------------------------------------
+        elif operation == 'out_withdrawals':
+            # Retiro: pago outbound desde diario de depósitos al cliente
             transfer_method_out = _get_payment_method(deposit_journal, 'outbound')
 
             transfer_out_vals = {
@@ -144,7 +166,9 @@ class ResCompany(models.Model):
                 'currency_id': deposit_journal.currency_id.id or company.currency_id.id,
                 'journal_id': deposit_journal.id,
                 'payment_method_line_id': transfer_method_out.id,
-                'memo': memo or label,
+                'payment_reference': memo or label,
+                'is_reconciled': True,
+                'is_internal_transfer': True,
             }
             transfer_out_payment = Payment.create(transfer_out_vals)
             transfer_out_payment.action_post()
@@ -152,28 +176,11 @@ class ResCompany(models.Model):
                 transfer_out_payment.move_id.narration = memo
             payments |= transfer_out_payment
 
-            # Paso 2: entrada al diario operativo
-            if operation in 'out':
-                transfer_method_in = _get_payment_method(bet_transfer_journal, 'inbound')
-
-                transfer_in_vals = {
-                    'payment_type': 'inbound',
-                    'partner_type': 'customer',
-                    'partner_id': partner_id or False,
-                    'amount': amount,
-                    'date': date,
-                    'currency_id': bet_transfer_journal.currency_id.id or company.currency_id.id,
-                    'journal_id': bet_transfer_journal.id,
-                    'payment_method_line_id': transfer_method_in.id,
-                    'memo': memo or label,
-                }
-                transfer_in_payment = Payment.create(transfer_in_vals)
-                transfer_in_payment.action_post()
-                if transfer_in_payment.move_id and memo:
-                    transfer_in_payment.move_id.narration = memo
-                payments |= transfer_in_payment
+        # --------------------------------------------------
+        # SALIDA FINAL: pago outbound desde operativo
+        # --------------------------------------------------
         elif operation == 'out_final':
-            # Paso único: salida desde diario operativo
+            # Salida final: pago outbound desde diario operativo
             transfer_method_out = _get_payment_method(bet_transfer_journal, 'outbound')
 
             transfer_out_vals = {
@@ -185,7 +192,9 @@ class ResCompany(models.Model):
                 'currency_id': bet_transfer_journal.currency_id.id or company.currency_id.id,
                 'journal_id': bet_transfer_journal.id,
                 'payment_method_line_id': transfer_method_out.id,
-                'memo': memo or label,
+                'payment_reference': memo or label,
+                'is_reconciled': True,
+                'is_internal_transfer': True,
             }
             transfer_out_payment = Payment.create(transfer_out_vals)
             transfer_out_payment.action_post()
