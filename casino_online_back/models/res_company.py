@@ -110,7 +110,7 @@ class ResCompany(models.Model):
                 'amount': amount,
                 'date': date,
                 'currency_id': company.currency_id.id,
-                'journal_id': bet_transfer_journal.id,  # Desde diario operativo
+                'journal_id': bet_transfer_journal, #.id,  # Desde diario operativo
                 'destination_journal_id': deposit_journal, #.id,  # Hacia diario de depósitos
                 'payment_reference': memo or label,
                 'is_reconciled': True,
