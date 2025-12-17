@@ -141,8 +141,8 @@ class ResCompany(models.Model):
                 'journal_id': deposit_journal.id,  # Desde diario de depósitos
                 'destination_journal_id': bet_transfer_journal.id,  # Hacia diario operativo
                 'payment_reference': memo or label,
-                'is_reconciled': True,
-                'is_internal_transfer': True,
+                # 'is_reconciled': True,
+                'is_internal_transfer': True
             }
             payment = Payment.create(vals)
             payment.action_post()
@@ -167,7 +167,7 @@ class ResCompany(models.Model):
                 'journal_id': deposit_journal.id,
                 'payment_method_line_id': transfer_method_out.id,
                 'payment_reference': memo or label,
-                'is_reconciled': True,
+                # 'is_reconciled': True,
                 'is_internal_transfer': True,
             }
             transfer_out_payment = Payment.create(transfer_out_vals)
@@ -193,7 +193,7 @@ class ResCompany(models.Model):
                 'journal_id': bet_transfer_journal.id,
                 'payment_method_line_id': transfer_method_out.id,
                 'payment_reference': memo or label,
-                'is_reconciled': True,
+                # 'is_reconciled': True,
                 'is_internal_transfer': True,
             }
             transfer_out_payment = Payment.create(transfer_out_vals)
