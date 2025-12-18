@@ -1,0 +1,33 @@
+<odoo>
+  <data>
+    <record id="view_bdc_test_call_wizard_form" model="ir.ui.view">
+      <field name="name">bdc.test.call.wizard.form</field>
+      <field name="model">bdc.test.call.wizard</field>
+      <field name="arch" type="xml">
+        <form string="BDC Test Console">
+          <sheet>
+            <group>
+              <field name="endpoint_id"/>
+              <field name="timeout"/>
+            </group>
+            <group string="Inputs">
+              <field name="params_json" widget="text"/>
+              <field name="body_json" widget="text"/>
+            </group>
+
+            <footer>
+              <button name="action_execute" type="object" string="Execute" class="btn-primary"/>
+              <button string="Close" class="btn-secondary" special="cancel"/>
+            </footer>
+
+            <group string="Response" attrs="{'invisible': [('response_status', '=', False)]}">
+              <field name="response_status" readonly="1"/>
+              <field name="response_headers" readonly="1" widget="text"/>
+              <field name="response_body" readonly="1" widget="text"/>
+            </group>
+          </sheet>
+        </form>
+      </field>
+    </record>
+  </data>
+</odoo>

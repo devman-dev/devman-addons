@@ -1,0 +1,14 @@
+<odoo>
+    <data>
+        <record id="group_bdc_conecta_user" model="res.groups">
+            <field name="name">BDC Conecta User</field>
+            <field name="category_id" ref="base.module_category_hidden"/>
+        </record>
+
+        <record id="group_bdc_conecta_manager" model="res.groups">
+            <field name="name">BDC Conecta Manager</field>
+            <field name="implied_ids" eval="[(4, ref('bdc_conecta.group_bdc_conecta_user'))]"/>
+            <field name="category_id" ref="base.module_category_hidden"/>
+        </record>
+    </data>
+</odoo>

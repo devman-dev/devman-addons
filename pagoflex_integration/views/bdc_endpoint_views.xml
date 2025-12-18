@@ -1,0 +1,55 @@
+<odoo>
+  <data>
+    <record id="view_bdc_endpoint_tree" model="ir.ui.view">
+      <field name="name">bdc.endpoint.tree</field>
+      <field name="model">bdc.endpoint</field>
+      <field name="arch" type="xml">
+        <tree default_order="code">
+          <field name="active"/>
+          <field name="code"/>
+          <field name="name"/>
+          <field name="method"/>
+          <field name="path"/>
+          <field name="requires_auth"/>
+          <field name="company_id" groups="base.group_multi_company"/>
+        </tree>
+      </field>
+    </record>
+
+    <record id="view_bdc_endpoint_form" model="ir.ui.view">
+      <field name="name">bdc.endpoint.form</field>
+      <field name="model">bdc.endpoint</field>
+      <field name="arch" type="xml">
+        <form>
+          <sheet>
+            <group>
+              <group>
+                <field name="active"/>
+                <field name="company_id" groups="base.group_multi_company"/>
+                <field name="code"/>
+                <field name="name"/>
+              </group>
+              <group>
+                <field name="method"/>
+                <field name="path"/>
+                <field name="requires_auth"/>
+                <field name="openapi_source" readonly="1"/>
+              </group>
+            </group>
+            <notebook>
+              <page string="Description">
+                <field name="description" nolabel="1"/>
+              </page>
+              <page string="Request Schema / Example">
+                <field name="request_schema" nolabel="1"/>
+              </page>
+              <page string="Response Schema / Example">
+                <field name="response_schema" nolabel="1"/>
+              </page>
+            </notebook>
+          </sheet>
+        </form>
+      </field>
+    </record>
+  </data>
+</odoo>

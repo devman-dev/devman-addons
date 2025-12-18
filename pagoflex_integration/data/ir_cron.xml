@@ -1,0 +1,14 @@
+<odoo>
+  <data noupdate="1">
+    <record id="ir_cron_bdc_refresh_token" model="ir.cron">
+      <field name="name">BDC Conecta: Refresh Token (placeholder)</field>
+      <field name="model_id" ref="base.model_ir_cron"/>
+      <field name="state">code</field>
+      <field name="code">env['bdc.api.service'].cron_refresh_token()</field>
+      <field name="interval_type">hours</field>
+      <field name="interval_number">6</field>
+      <field name="numbercall">-1</field>
+      <field name="active">False</field>
+    </record>
+  </data>
+</odoo>

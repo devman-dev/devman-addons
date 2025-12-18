@@ -1,0 +1,7 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_bdc_endpoint_user,bdc.endpoint user,model_bdc_endpoint,bdc_conecta.group_bdc_conecta_user,1,0,0,0
+access_bdc_endpoint_manager,bdc.endpoint manager,model_bdc_endpoint,bdc_conecta.group_bdc_conecta_manager,1,1,1,1
+access_bdc_log_user,bdc.request.log user,model_bdc_request_log,bdc_conecta.group_bdc_conecta_user,1,0,0,0
+access_bdc_log_manager,bdc.request.log manager,model_bdc_request_log,bdc_conecta.group_bdc_conecta_manager,1,1,1,1
+access_bdc_test_call_wizard,bdc.test.call.wizard,model_bdc_test_call_wizard,bdc_conecta.group_bdc_conecta_user,1,1,1,1
+access_bdc_import_openapi_wizard,bdc.import.openapi.wizard,model_bdc_import_openapi_wizard,bdc_conecta.group_bdc_conecta_manager,1,1,1,1

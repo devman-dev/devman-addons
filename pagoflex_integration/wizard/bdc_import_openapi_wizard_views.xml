@@ -1,0 +1,26 @@
+<odoo>
+  <data>
+    <record id="view_bdc_import_openapi_wizard_form" model="ir.ui.view">
+      <field name="name">bdc.import.openapi.wizard.form</field>
+      <field name="model">bdc.import.openapi.wizard</field>
+      <field name="arch" type="xml">
+        <form string="Import OpenAPI (Swagger)">
+          <sheet>
+            <group>
+              <field name="openapi_json_url"/>
+              <field name="prefix_code"/>
+              <field name="timeout"/>
+            </group>
+            <group attrs="{'invisible': [('imported_count', '=', 0)]}">
+              <field name="imported_count" readonly="1"/>
+            </group>
+            <footer>
+              <button name="action_import" type="object" string="Import" class="btn-primary"/>
+              <button string="Close" class="btn-secondary" special="cancel"/>
+            </footer>
+          </sheet>
+        </form>
+      </field>
+    </record>
+  </data>
+</odoo>

@@ -1,0 +1,41 @@
+<odoo>
+  <data>
+    <menuitem id="menu_bdc_root" name="BDC Conecta" sequence="60" groups="bdc_conecta.group_bdc_conecta_user"/>
+    <menuitem id="menu_bdc_configuration" name="Configuration" parent="menu_bdc_root" sequence="10" groups="bdc_conecta.group_bdc_conecta_manager"/>
+    <menuitem id="menu_bdc_operations" name="Operations" parent="menu_bdc_root" sequence="20" groups="bdc_conecta.group_bdc_conecta_user"/>
+
+    <record id="action_bdc_endpoints" model="ir.actions.act_window">
+      <field name="name">Endpoints</field>
+      <field name="res_model">bdc.endpoint</field>
+      <field name="view_mode">tree,form</field>
+      <field name="domain">[('company_id','=',current_company_id)]</field>
+      <field name="context">{'default_company_id': current_company_id}</field>
+    </record>
+
+    <record id="action_bdc_logs" model="ir.actions.act_window">
+      <field name="name">Request Logs</field>
+      <field name="res_model">bdc.request.log</field>
+      <field name="view_mode">tree,form</field>
+      <field name="domain">[('company_id','=',current_company_id)]</field>
+    </record>
+
+    <record id="action_bdc_test_call_wizard" model="ir.actions.act_window">
+      <field name="name">Test Console</field>
+      <field name="res_model">bdc.test.call.wizard</field>
+      <field name="view_mode">form</field>
+      <field name="target">new</field>
+    </record>
+
+    <record id="action_bdc_import_openapi_wizard" model="ir.actions.act_window">
+      <field name="name">Import OpenAPI</field>
+      <field name="res_model">bdc.import.openapi.wizard</field>
+      <field name="view_mode">form</field>
+      <field name="target">new</field>
+    </record>
+
+    <menuitem id="menu_bdc_endpoints" name="Endpoints" parent="menu_bdc_operations" sequence="1" action="action_bdc_endpoints" groups="bdc_conecta.group_bdc_conecta_user"/>
+    <menuitem id="menu_bdc_logs" name="Logs" parent="menu_bdc_operations" sequence="2" action="action_bdc_logs" groups="bdc_conecta.group_bdc_conecta_user"/>
+    <menuitem id="menu_bdc_test_console" name="Test Console" parent="menu_bdc_operations" sequence="3" action="action_bdc_test_call_wizard" groups="bdc_conecta.group_bdc_conecta_user"/>
+    <menuitem id="menu_bdc_import_openapi" name="Import OpenAPI" parent="menu_bdc_configuration" sequence="2" action="action_bdc_import_openapi_wizard" groups="bdc_conecta.group_bdc_conecta_manager"/>
+  </data>
+</odoo>
