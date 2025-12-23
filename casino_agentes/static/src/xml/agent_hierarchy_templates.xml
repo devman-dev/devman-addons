@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <templates xml:space="preserve">
     <t t-name="casino_agentes.HierarchyView" owl="1">
-        <div class="o_agent_hierarchy">
+        <div class="o_agent_hierarchy o_agent_hierarchy--employee-theme">
 
             <!-- Panel de Control Avanzado -->
             <div class="o_control_panel">

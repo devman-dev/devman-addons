@@ -622,7 +622,7 @@ class GameController(http.Controller):
                 partner = request.env['res.partner'].sudo().search([('secret_token', '=', token)], limit=1)
                 request.env.company.sudo().action_casino_register_cash_movement(
                     amount=amount,
-                    operation='out' if not endRound else 'out_final',
+                    operation='out_final' if endRound else 'out',
                     partner_id=partner.id,
                     label="Ganancia de juego",
                     memo=transactionId,

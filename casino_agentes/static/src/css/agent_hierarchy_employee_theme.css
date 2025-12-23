@@ -1,0 +1,142 @@
+/* Scoped estilos solo para organigrama de agentes */
+.o_agent_hierarchy.o_agent_hierarchy--employee-theme {
+  --ah-bg: #f7f8fb;
+  --ah-card-bg: #ffffff;
+  --ah-border: #d9dde3;
+  --ah-primary: #7046d6;
+  --ah-muted: #8b90a0;
+  --ah-connector: #c7ccd6;
+  --ah-shadow: 0 8px 18px rgba(38, 44, 64, 0.08);
+  background: var(--ah-bg);
+  padding: 24px;
+}
+
+.o_agent_hierarchy.o_agent_hierarchy--employee-theme .o_control_panel {
+  background: var(--ah-card-bg);
+  border: 1px solid var(--ah-border);
+  border-radius: 12px;
+  padding: 16px 20px;
+  box-shadow: var(--ah-shadow);
+}
+
+.o_agent_hierarchy.o_agent_hierarchy--employee-theme .o_hierarchy_view {
+  background: var(--ah-card-bg);
+  border: 1px solid var(--ah-border);
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: var(--ah-shadow);
+}
+
+/* Cabecera y stats */
+.o_agent_hierarchy.o_agent_hierarchy--employee-theme h2 {
+  font-weight: 700;
+  color: #2e3342;
+}
+
+.o_agent_hierarchy.o_agent_hierarchy--employee-theme .stat-box-parent {
+  gap: 12px;
+}
+
+.o_agent_hierarchy.o_agent_hierarchy--employee-theme .stat-box {
+  background: #f1f3f8;
+  border: 1px solid var(--ah-border);
+  border-radius: 10px;
+  padding: 10px 14px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: #2e3342;
+}
+
+/* Tarjetas principales (nivel 0) */
+.o_agent_hierarchy.o_agent_hierarchy--employee-theme .main-agents-row {
+  gap: 18px;
+}
+
+.o_agent_hierarchy.o_agent_hierarchy--employee-theme .main-agent-card {
+  background: var(--ah-card-bg);
+  color: #2e3342;
+  border: 1px solid var(--ah-border);
+  box-shadow: var(--ah-shadow);
+  border-radius: 14px;
+  padding: 18px;
+  min-width: 200px;
+  max-width: 240px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.o_agent_hierarchy.o_agent_hierarchy--employee-theme .main-agent-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 20px rgba(38, 44, 64, 0.12);
+}
+
+.o_agent_hierarchy.o_agent_hierarchy--employee-theme .main-agent-card.selected {
+  border-color: var(--ah-primary);
+  box-shadow: 0 12px 24px rgba(112, 70, 214, 0.22);
+}
+
+.o_agent_hierarchy.o_agent_hierarchy--employee-theme .main-agent-avatar {
+  background: #edeafb;
+  border: 2px solid #d3c7f6;
+  color: var(--ah-primary);
+  box-shadow: none;
+}
+
+.o_agent_hierarchy.o_agent_hierarchy--employee-theme .subordinates-badge {
+  background: #eef1f7;
+  border: 1px solid var(--ah-border);
+  color: #2e3342;
+}
+
+/* Nodos subordinados */
+.o_agent_hierarchy.o_agent_hierarchy--employee-theme .subordinate-card {
+  background: var(--ah-card-bg);
+  border: 1px solid var(--ah-border);
+  border-radius: 12px;
+  box-shadow: var(--ah-shadow);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.o_agent_hierarchy.o_agent_hierarchy--employee-theme .subordinate-card:hover,
+.o_agent_hierarchy.o_agent_hierarchy--employee-theme .subordinate-card.expanded {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 18px rgba(38, 44, 64, 0.12);
+  border-color: var(--ah-primary);
+}
+
+.o_agent_hierarchy.o_agent_hierarchy--employee-theme .subordinate-avatar {
+  background: #f3f4f9;
+  border: 2px solid #e2e5ec;
+  color: #2e3342;
+}
+
+/* Jugadores */
+.o_agent_hierarchy.o_agent_hierarchy--employee-theme .player-card {
+  background: #f8fafc;
+  border: 1px solid var(--ah-border);
+}
+
+/* Conectores */
+.o_agent_hierarchy.o_agent_hierarchy--employee-theme .connection-structure .vertical-connector,
+.o_agent_hierarchy.o_agent_hierarchy--employee-theme .connection-structure .horizontal-connector,
+.o_agent_hierarchy.o_agent_hierarchy--employee-theme .connection-structure .subordinate-connector,
+.o_agent_hierarchy.o_agent_hierarchy--employee-theme .horizontal-connector:before,
+.o_agent_hierarchy.o_agent_hierarchy--employee-theme .horizontal-connector:after {
+  background: var(--ah-connector);
+  border-color: var(--ah-connector);
+}
+
+/* Etiquetas y texto mutado */
+.o_agent_hierarchy.o_agent_hierarchy--employee-theme .text-muted,
+.o_agent_hierarchy.o_agent_hierarchy--employee-theme .subordinate-type,
+.o_agent_hierarchy.o_agent_hierarchy--employee-theme .player-type,
+.o_agent_hierarchy.o_agent_hierarchy--employee-theme .hierarchy-subtitle {
+  color: var(--ah-muted) !important;
+}
+
+/* Contenedor general para scroll suave */
+.o_agent_hierarchy.o_agent_hierarchy--employee-theme .full-width-hierarchy-container {
+  background: var(--ah-card-bg);
+  border: 1px solid var(--ah-border);
+  box-shadow: var(--ah-shadow);
+}

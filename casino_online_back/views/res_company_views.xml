@@ -8,7 +8,13 @@
             <xpath expr="//sheet/notebook" position="inside">
                 <page string="Casino">
                     <group string="Configuración Contable">
-                        <group string="Cuentas Bancarias Custodia y operativa">
+                        <group string="Diarios para Custodia y operativa">
+                            <field name="casino_custodia_journal_id" 
+                                   options="{'no_create': True, 'no_open': True}"/>
+                            <field name="casino_operativa_journal_id" 
+                                   options="{'no_create': True, 'no_open': True}"/>
+                        </group>
+                        <!-- <group string="Cuentas Bancarias Custodia y operativa">
                             <field name="casino_deposit_journal_id" 
                                    options="{'no_create': True, 'no_open': True}"/>
                             <field name="casino_bet_transfer_journal_id" 
@@ -19,7 +25,7 @@
                                    options="{'no_create': True, 'no_open': True}"/>
                             <field name="casino_bet_account_id" 
                                    options="{'no_create': True, 'no_open': True}"/>
-                        </group>
+                        </group> -->
                     </group>
                     
                     <group string="Mensajes de Límites de Apuesta">

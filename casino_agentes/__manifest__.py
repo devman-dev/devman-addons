@@ -29,9 +29,7 @@
     ],
     "assets": {
         "web.assets_backend": [
-            # "casino_agentes/static/src/css/agent_hierarchy.css",
-            # "casino_agentes/static/src/css/horizontal_organigrama.css",
-            # "casino_agentes/static/src/scss/settings_icon.scss",
+            "casino_agentes/static/src/css/agent_hierarchy_employee_theme.css",
             "casino_agentes/static/src/js/agent_hierarchy.js",
             "casino_agentes/static/src/xml/agent_hierarchy_templates.xml",
         ],

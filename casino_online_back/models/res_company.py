@@ -2,6 +2,10 @@
 from odoo import fields, models, _
 from odoo.exceptions import UserError
 
+import logging
+
+_logger = logging.getLogger(__name__)
+
 class ResCompany(models.Model):
     _inherit = 'res.company'
 
@@ -11,6 +15,18 @@ class ResCompany(models.Model):
     bet_msg_monthly = fields.Char(string="Mensaje límite mensual",  default="")
 
     # Configuración de diarios bancarios para casino
+    casino_custodia_journal_id = fields.Many2one(
+        'account.journal',
+        string='Cuenta Bancaria de Custodia',
+        help='Diario contable utilizado para registrar los depósitos y ganancias de los usuarios del casino'
+    )
+    
+    casino_operativa_journal_id = fields.Many2one(
+        'account.journal',
+        string='Cuenta Bancaria Operativa',
+        help='Diario contable utilizado para registrar las transferencias de apuestas/pérdidas del casino'
+    )
+
     casino_deposit_journal_id = fields.Many2one(
         'account.journal',
         string='Cuenta Bancaria de Custodia',
@@ -69,14 +85,16 @@ class ResCompany(models.Model):
         if operation not in ('in', 'out', 'out_final', 'out_withdrawals'):
             raise UserError(_("El parámetro 'operation' debe ser 'in', 'out', 'out_final' o 'out_withdrawals'."))
 
-        # if not company.casino_deposit_journal_id:
+        if not company.casino_custodia_journal_id:
+            _logger.error("No está configurado el diario 'Custodia' en la compañía %s.", company.name)
         #     raise UserError(_("Configure el diario 'casino_deposit_journal_id' en la compañía."))
 
-        # if not company.casino_bet_transfer_journal_id:
+        if not company.casino_operativa_journal_id:
+            _logger.error("No está configurado el diario 'Operativa' en la compañía %s.", company.name)
         #     raise UserError(_("Configure el diario 'casino_bet_transfer_journal_id' en la compañía."))
-
-        deposit_journal = 6 #company.casino_deposit_journal_id
-        bet_transfer_journal = 7 #company.casino_bet_transfer_journal_id
+        
+        deposit_custodia = company.casino_custodia_journal_id  #6 #company.casino_deposit_journal_id
+        deposit_operativa = company.casino_operativa_journal_id #7 #company.casino_bet_transfer_journal_id
 
         date = date or fields.Date.context_today(self)
         label = label or (operation == 'in' and _("Entrada de dinero") or _("Salida de dinero"))
@@ -109,9 +127,9 @@ class ResCompany(models.Model):
                 'partner_id': partner_id or False,
                 'amount': amount,
                 'date': date,
-                'currency_id': company.currency_id.id,
-                'journal_id': bet_transfer_journal, #.id,  # Desde diario operativo
-                'destination_journal_id': deposit_journal, #.id,  # Hacia diario de depósitos
+                'currency_id': company.currency_id.id,  # Moneda de la compañía
+                'journal_id': deposit_custodia.id,  # Entra en diario custodia
+                'destination_journal_id': deposit_operativa.id,  # Resta del diario operativa
                 'payment_reference': memo or label,
                 'is_reconciled': True,
                 'is_internal_transfer': True,
@@ -131,15 +149,15 @@ class ResCompany(models.Model):
         # SALIDA: transferencia interna desde depósitos a operativo
         # --------------------------------------------------
         elif operation in 'out':
-            # Transferencia interna: desde depósitos hacia operativo
+            # Transferencia interna por apuesta tipo running
             vals = {
                 'payment_type': 'outbound',
                 'partner_id': partner_id or False,
                 'amount': amount,
                 'date': date,
-                'currency_id': company.currency_id.id,
-                'journal_id': deposit_journal, #.id,  # Desde diario de depósitos
-                'destination_journal_id': bet_transfer_journal, #.id,  # Hacia diario operativo
+                'currency_id': company.currency_id.id,  # Moneda de la compañía
+                'journal_id': deposit_operativa.id,  # Entra el monto apostado en el diario operativa
+                'destination_journal_id': deposit_custodia.id,  # Se retira del diario custodia
                 'payment_reference': memo or label,
                 'is_reconciled': True,
                 'is_internal_transfer': True
@@ -155,7 +173,7 @@ class ResCompany(models.Model):
         # --------------------------------------------------
         elif operation == 'out_withdrawals':
             # Retiro: pago outbound desde diario de depósitos al cliente
-            transfer_method_out = _get_payment_method(deposit_journal, 'outbound')
+            transfer_method_out = _get_payment_method(deposit_custodia, 'outbound')
 
             transfer_out_vals = {
                 'payment_type': 'outbound',
@@ -163,10 +181,10 @@ class ResCompany(models.Model):
                 'amount': amount,
                 'date': date,
                 'currency_id':company.currency_id.id,
-                'journal_id': deposit_journal, #.id,
-                'payment_method_line_id': transfer_method_out, #.id,
+                'journal_id': deposit_custodia.id,
+                'payment_method_line_id': transfer_method_out.id,
                 'payment_reference': memo or label,
-                # 'is_reconciled': True,
+                'is_reconciled': True,
                 'is_internal_transfer': True,
             }
             transfer_out_payment = Payment.create(transfer_out_vals)
@@ -180,7 +198,7 @@ class ResCompany(models.Model):
         # --------------------------------------------------
         elif operation == 'out_final':
             # Salida final: pago outbound desde diario operativo
-            transfer_method_out = _get_payment_method(bet_transfer_journal, 'outbound')
+            transfer_method_out = _get_payment_method(deposit_operativa, 'outbound')
 
             transfer_out_vals = {
                 'payment_type': 'outbound',
@@ -189,8 +207,8 @@ class ResCompany(models.Model):
                 'amount': amount,
                 'date': date,
                 'currency_id': company.currency_id.id,
-                'journal_id': bet_transfer_journal, #.id,
-                'payment_method_line_id': transfer_method_out.id,
+                'journal_id': deposit_operativa.id,  # Entra el monto apostado en el diario operativa
+                'destination_journal_id': deposit_custodia.id,  # Se retira del diario custodia
                 'payment_reference': memo or label,
                 # 'is_reconciled': True,
                 'is_internal_transfer': True,
