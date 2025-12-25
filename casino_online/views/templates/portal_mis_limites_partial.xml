@@ -84,11 +84,12 @@
                                 <span class="input-group-text">
                                     <t t-esc="currency_symbol" />
                                 </span>
-                                <input type="number" min="0" step="0.01"
+                                <input type="text"
+                                    inputmode="decimal"
                                     class="form-control limit-input"
                                     id="limit_daily" name="limit_daily"
-                                    t-att-value="('%.2f' % (bl.limit_daily or 0.0))"
-                                    t-att-data-original="('%.2f' % (bl.limit_daily or 0.0))"
+                                    t-att-value="('%.2f' % float(bl.limit_daily or 0.0))"
+                                    t-att-data-original="('%.2f' % float(bl.limit_daily or 0.0))"
                                     placeholder="0.00" required="required" />
                             </div>
                         </div>
@@ -104,11 +105,12 @@
                                 <span class="input-group-text">
                                     <t t-esc="currency_symbol" />
                                 </span>
-                                <input type="number" min="0" step="0.01"
+                                <input type="text"
+                                    inputmode="decimal"
                                     class="form-control limit-input"
                                     id="limit_weekly" name="limit_weekly"
-                                    t-att-value="('%.2f' % (bl.limit_weekly or 0.0))"
-                                    t-att-data-original="('%.2f' % (bl.limit_weekly or 0.0))"
+                                    t-att-value="('%.2f' % float(bl.limit_weekly or 0.0))"
+                                    t-att-data-original="('%.2f' % float(bl.limit_weekly or 0.0))"
                                     placeholder="0.00" required="required" />
                             </div>
                         </div>
@@ -124,12 +126,33 @@
                                 <span class="input-group-text">
                                     <t t-esc="currency_symbol" />
                                 </span>
-                                <input type="number" min="0" step="0.01"
+                                <input type="text"
+                                    inputmode="decimal"
                                     class="form-control limit-input"
                                     id="limit_monthly" name="limit_monthly"
-                                    t-att-value="('%.2f' % (bl.limit_monthly or 0.0))"
-                                    t-att-data-original="('%.2f' % (bl.limit_monthly or 0.0))"
+                                    t-att-value="('%.2f' % float(bl.limit_monthly or 0.0))"
+                                    t-att-data-original="('%.2f' % float(bl.limit_monthly or 0.0))"
                                     placeholder="0.00" required="required" />
+
+                                <!-- <input type="text"
+                                    inputmode="decimal"
+                                    class="form-control limit-input"
+                                    id="limit_daily" name="limit_daily"
+                                    t-att-value="str(float(bl.limit_daily or 0.0))"
+                                    t-att-data-original="str(float(bl.limit_daily or 0.0))"
+                                    placeholder="0.00" required="required" /> -->
+
+
+
+
+
+                                    <!-- <input type="text"
+                                    inputmode="decimal"
+                                    class="form-control limit-input"
+                                    id="limit_monthly" name="limit_monthly"
+                                    t-att-value="('%.2f' % float(bl.limit_monthly or 0.0))"
+                                    t-att-data-original="('%.2f' % float(bl.limit_monthly or 0.0))"
+                                    placeholder="0.00" required="required" /> -->
                             </div>
                         </div>
                     </div>
@@ -226,13 +249,11 @@
             document.addEventListener('DOMContentLoaded', function(){
             // Formatea inicial según locale a 2 decimales (evita "2,0")
             document.querySelectorAll('#bet_limits_form .limit-input').forEach(function(inp){
-            var v = toNumber(inp.value);
+            var v = parseFloat(inp.value);
             if (isValid(v)) {
             inp.value = fmt2(v);
-            // Alinea también el "original" mostrado (sin cambiar el numérico real)
-            var orig = toNumber(inp.getAttribute('data-original'));
-            if (isValid(orig)) inp.setAttribute('data-original', fmt2(orig));
             }
+            // NO reescribir data-original, dejarlo como viene del servidor (punto decimal)
             });
             bindFormatOnBlur();
             refresh();

@@ -16,13 +16,13 @@
                 <field name="child_agent_ids" />
                 <field name="managed_player_ids" />
                 <templates>
-                    <t t-name="kanban-box">
+                    <t t-name="card">
                         <div class="oe_kanban_card oe_kanban_global_click agent-hierarchy-card"
                             t-att-data-level="record.agent_depth.raw_value">
                             <div class="agent-card-header">
                                 <div class="agent-info">
                                     <h4 class="agent-name">
-                                        <i class="fa fa-user-circle text-primary me-2" />
+                                        <i class="fa fa-user-circle text-primary me-2" title="Agente" />
                                         <field name="name" />
                                     </h4>
                                     <div class="agent-badges">

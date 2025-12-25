@@ -1,9 +1,18 @@
 # -*- coding: utf-8 -*-
+from odoo import fields, models, _
 from odoo import api, models
 
 
 class AccountPayment(models.Model):
     _inherit = 'account.payment'
+
+    casino_operation_type = fields.Selection([
+        ('deposit', 'Depósito'),
+        ('withdrawal', 'Retiro'),
+        ('bet', 'Apuesta'),
+        ('win', 'Ganancia'),
+        ('adjustment', 'Ajuste'),
+    ], string='Tipo de Operación Casino')
 
     @api.model_create_multi
     def create(self, vals_list):

@@ -386,14 +386,28 @@ class MiPortalController(http.Controller):
         def _num(key):
             """Convierte a float, clamp >= 0 y redondea según la moneda."""
             raw = post.get(key)
+            _logger.info("Processing key '%s': raw value = %r (type: %s)", key, raw, type(raw).__name__)
+            s = (raw or "").strip()
+            # Normaliza separadores: si viene "200,50" (coma decimal) => "200.50"; elimina miles.
+            if s:
+                if "," in s and "." not in s:
+                    s = s.replace(".", "").replace(",", ".")
+                else:
+                    s = s.replace(",", "")
             try:
-                x = float(raw or 0.0)
-            except Exception:
+                x = float(s or 0.0)
+                _logger.info("Float conversion successful: %s -> %f (normalized from %r)", s, x, raw)
+            except Exception as e:
+                _logger.warning("Failed to parse '%s' (normalized: %s) as float: %s", raw, s, e)
                 x = 0.0
             if x < 0:
+                _logger.info("Value was negative (%f), clamping to 0", x)
                 x = 0.0
             prec = (bl.currency_id.decimal_places or 2) if bl.currency_id else 2
-            return float_round(x, precision_digits=prec)
+            _logger.info("Using precision: %d digits", prec)
+            result = float_round(x, precision_digits=prec)
+            _logger.info("After float_round: %s -> %.10f (rounded to %d digits)", key, result, prec)
+            return result
 
         vals = {
             'limit_daily': _num('limit_daily'),
@@ -401,8 +415,20 @@ class MiPortalController(http.Controller):
             'limit_monthly': _num('limit_monthly'),
         }
 
+        _logger.info("Writing values to bet_limits record %s: %s", bl.id, vals)
+        _logger.info("Before write - current values: daily=%s, weekly=%s, monthly=%s", 
+                     bl.limit_daily, bl.limit_weekly, bl.limit_monthly)
+        
         # --- 3) Guardar ---
         bl.write(vals)
+        
+        # Forzar commit y refrescar
+        request.env.cr.commit()
+        bl.invalidate_recordset()
+        
+        _logger.info("After write and commit - values: daily=%s, weekly=%s, monthly=%s", 
+                     bl.limit_daily, bl.limit_weekly, bl.limit_monthly)
+        _logger.info("Successfully updated bet_limits record %s", bl.id)
 
         # (Opcional) mensaje flash -> podrías usar web.assets/JS para mostrar toast con ?saved=1
         return request.redirect('/my/home#mis_limites_form')
@@ -630,7 +656,7 @@ class MiPortalController(http.Controller):
         payments = Payment.search([
             ('company_id', '=', company.id),
             ('partner_id', '=', partner.id),
-            ('state', 'in', ['posted','in_process1']),
+            ('state', 'in', ['posted','in_process']),
             ('journal_id', '=', company.casino_deposit_journal_id.id),
         ])
         _logger.info("Found %d payments for balance calculation", len(payments))

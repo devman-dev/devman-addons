@@ -10,14 +10,29 @@
         s = String(s).trim();
         if (!s) return NaN;
 
-        var sample = nf.format(1.1);
-        var dec = sample.match(/[.,]/)?.[0] || '.';
-        var group = (dec === '.') ? ',' : '.';
+        // Detecta el separador decimal presente en la cadena. Si hay ambos, toma el último como decimal.
+        var dotPos = s.lastIndexOf('.');
+        var commaPos = s.lastIndexOf(',');
+        var dec;
 
-        s = s.replace(new RegExp('\\' + group, 'g'), '');
-        if (dec !== '.') s = s.replace(new RegExp('\\' + dec, 'g'), '.');
+        if (dotPos !== -1 && commaPos !== -1) {
+            dec = dotPos > commaPos ? '.' : ',';
+        } else if (dotPos !== -1) {
+            dec = '.';
+        } else if (commaPos !== -1) {
+            dec = ',';
+        } else {
+            var sample = nf.format(1.1);
+            dec = sample.match(/[.,]/)?.[0] || '.';
+        }
 
-        return Number(s);
+        var group = dec === '.' ? ',' : '.';
+
+        // Elimina solo el separador de miles; respeta el decimal detectado.
+        var cleaned = s.replace(new RegExp('\\' + group, 'g'), '');
+        if (dec !== '.') cleaned = cleaned.replace(new RegExp('\\' + dec, 'g'), '.');
+
+        return Number(cleaned);
     }
 
     function toNumber(v) { return parseLocale(v); }
@@ -76,8 +91,15 @@
             var v = toNumber(inp.value);
             if (isValid(v)) {
                 inp.value = fmtInput(v);
+                // var orig = toNumber(inp.getAttribute('data-original'));
+                // if (isValid(orig)) inp.setAttribute('data-original', fmt2(orig));
                 var orig = toNumber(inp.getAttribute('data-original'));
-                if (isValid(orig)) inp.setAttribute('data-original', fmt2(orig));
+                console.log('ORIG: ', orig);
+                if (isValid(orig)) {
+                    inp.setAttribute('data-original', fmtInput(orig));
+                    console.log('DATA ORIG: ', inp.getAttribute('data-original'));
+                }
+
             }
         });
         bindFormatOnBlur();

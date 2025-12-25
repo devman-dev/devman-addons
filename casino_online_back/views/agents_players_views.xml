@@ -24,6 +24,7 @@
           icon="fa-money"
           class="btn btn-link o_icon_button"
           string=""
+          title="Cargar/Retirar fichas"
           help="Cargar/Retirar fichas" />
       </list>
     </field>
@@ -41,7 +42,7 @@
         <field name="role" />
         <field name="create_date" />
         <templates>
-          <t t-name="kanban-box">
+          <t t-name="card">
             <div class="o_kanban_record o_casino_user_card">
               <div class="o_casino_user_header">
                 <div class="o_casino_avatar">
@@ -64,7 +65,7 @@
                       <i class="fa fa-gamepad me-1" />Jugador </span>
                   </div>
                   <div class="o_casino_nickname" t-if="record.nickname.value">
-                    <i class="fa fa-at me-1 text-muted" />
+                    <i class="fa fa-at me-1 text-muted" title="Usuario" />
                     <span t-esc="record.nickname.value" />
                   </div>
                 </div>

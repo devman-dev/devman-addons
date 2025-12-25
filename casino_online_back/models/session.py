@@ -60,6 +60,23 @@ class CasinoGameSession(models.Model):
     json_data = fields.Text(string='JSON Recibido')
     internal_transaction_id = fields.Text(string='Transacción Interna')
 
+    # Sesiones con el mismo transaction_id
+    related_session_ids = fields.Many2many(
+        'casino.game.session',
+        string='Sesiones relacionadas',
+        compute='_compute_related_session_ids',
+        store=False
+    )
+
+    def _compute_related_session_ids(self):
+        for rec in self:
+            if rec.transaction_id:
+                rec.related_session_ids = self.env['casino.game.session'].search(
+                    [('transaction_id', '=', rec.transaction_id)], order='id asc'
+                )
+            else:
+                rec.related_session_ids = self.env['casino.game.session']
+
     group_display_name = fields.Char(
         string="Agrupación Detallada",
         compute="_compute_group_display_name",

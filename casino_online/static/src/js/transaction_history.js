@@ -73,11 +73,11 @@ publicWidget.registry.TransactionHistory = publicWidget.Widget.extend({
         transactionBody.append(
           `<tr>
             <td class='text-center text-nowrap'>${transactions[i].date}</td>
-            <td>${transactions[i].memo || "Pago Manual"}</td>
+            <td>${transactions[i].payment_reference || transactions[i].memo || "Sin referencia"}</td>
             <td class="text-end text-success fw-bold">${formatCurrency(
-              transactions[i].amount,
-              this.currencyId
-            )}</td>
+            transactions[i].amount,
+            this.currencyId
+          )}</td>
           </tr>`
         );
       }
@@ -137,8 +137,8 @@ publicWidget.registry.TransactionHistory = publicWidget.Widget.extend({
         transactionPagination.append(
           `<li class="${class_list.join(" ")}">
             <a class="page-link o_transaction_pagination_move step" data-offset-step="${parseInt(
-              maxTransactions[i][1]
-            )}" href="#">${i + 1}</a>
+            maxTransactions[i][1]
+          )}" href="#">${i + 1}</a>
           </li>`
         );
       }

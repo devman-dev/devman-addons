@@ -42,10 +42,20 @@
                                 <field name="events_html" nolabel="1" readonly="1" />
                             </div>
                         </page>
+                        <page string="Sesiones relacionadas" name="related_sessions_page">
+                            <field name="related_session_ids" nolabel="1">
+                                <list string="Sesiones" default_order="id asc">
+                                    <field name="start_datetime" />
+                                    <field name="result" />
+                                    <field name="amount" string="Importe" widget="monetary" />
+                                    <field name="to_win" widget="monetary" />
+                                </list>
+                            </field>
+                        </page>
                     </notebook>
-                    <field name="description" nolabel="1" />
-                    <field name="json_data" nolabel="1" />
-                    <field name="events" nolabel="1" />
+                    <field name="description" />
+                    <field name="json_data" string="JSON Recibido" />
+                    <!-- <field name="events" nolabel="1" /> -->
                 </sheet>
             </form>
         </field>

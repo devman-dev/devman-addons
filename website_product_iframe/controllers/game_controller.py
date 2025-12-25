@@ -194,7 +194,7 @@ class GameController(http.Controller):
         }
         return {"allowed": True, "crossed": crossed, "message_map": message_map}
     
-    def _prepare_session_vals(self, game_id, round_id, user_id, token, initial_balance, final_balance, amount, to_win, state, result, transaction_id, internal_transaction_id, json_data):
+    def _prepare_session_vals(self, game_id, round_id, user_id, token, initial_balance, final_balance, amount, to_win, state, result, transaction_id, internal_transaction_id, json_data, events=None):
         """
         Devuelve los valores para crear una sesión de juego.
         """
@@ -225,7 +225,8 @@ class GameController(http.Controller):
             'final_balance': final_balance,
             'currency_id': request.env.company.currency_id.id,
             'description': f'Inicio de juego: {product_name}',
-            'json_data': json_data
+            'json_data': json_data,
+            'events': events or [],
         }
 
     def _prepare_move_vals(self, token, product, account, debit, credit, op):
@@ -260,7 +261,7 @@ class GameController(http.Controller):
                     'credit': credit,
                 }),
                 (0, 0, {
-                    'name': 'Ganada' if op == 'win' else 'Perdida' if op == 'lose' else 'Deposito' if op == 'deposit' else 'Retiro',
+                    'name': 'Ganada' if op == 'win' else 'Perdida' if op == 'lose' else 'Deposito' if op == 'deposit' else 'Place Bet' if op == 'in_progress' else 'Retiro',
                     'account_id': cuenta_contrapartida.id,
                     'partner_id': partner.id,
                     'debit': credit,
@@ -271,7 +272,7 @@ class GameController(http.Controller):
 
     def _get_balance_user(self, token):
         try:
-            user = request.env['res.partner'].sudo().search([('secret_token', '=', token)], limit=1)
+            user = request.env['res.partner'].sudo().search(['|', ('secret_token', '=', token), ('token', '=', token)], limit=1)
             if not user:
                 raise CasinoError(*CasinoErrorCodes.INVALID_TOKEN)
 
@@ -403,7 +404,8 @@ class GameController(http.Controller):
         data = request.get_json_data()
         token = data.get('token', None)
         _logger.info('Casino Iframe: token: %s', token)
-        
+        _logger.info('*** Casino Iframe json LOGIN: data: %s', json.dumps(data, indent=2, ensure_ascii=False))
+
         if token is None:
             token = data.get('params', {}).get('token')
         try:
@@ -451,6 +453,8 @@ class GameController(http.Controller):
         try:
             data = request.get_json_data()
             token = data.get('token', None)
+            _logger.info('*** Casino Iframe json CREDIT: data: %s', json.dumps(data, indent=2, ensure_ascii=False))
+
             if token is None:
                 token = data.get('params', {}).get('token')
             if not token:
@@ -531,6 +535,8 @@ class GameController(http.Controller):
         try:
             data = request.get_json_data()
             token = data.get('token', None)
+            _logger.info('*** Casino Iframe json DEBIT: data: %s', json.dumps(data, indent=2, ensure_ascii=False))
+
             if token is None:
                 token = data.get('params', {}).get('token')
             if not token:
@@ -574,13 +580,18 @@ class GameController(http.Controller):
             if not isinstance(to_win, (int, float)) or to_win < 0:
                 to_win = 0.0
 
+            to_win /= 100
+
             events = data.get('events', [])
             if not events:
                 events = data.get('params', {}).get('events', [])
             
             # Asegurar que events sea una lista válida
             if not isinstance(events, list):
-                events = []
+                events = None
+
+            # Convertir events a JSON válido
+            events = json.dumps(events) if isinstance(events, list) else json.dumps([])
 
             current_balance = self._get_balance_user(token)
             if amount / 100 > current_balance:
@@ -656,6 +667,8 @@ class GameController(http.Controller):
         try:
             data = request.get_json_data()
             token = data.get('token', None)
+            _logger.info('*** Casino Iframe json BALANCE: data: %s', json.dumps(data, indent=2, ensure_ascii=False))
+
             if token is None:
                     token = data.get('params', {}).get('token')
             if not token:
@@ -816,7 +829,7 @@ class GameController(http.Controller):
             _logger.info('Valores para session_vals: product_id=%s, user_id=%s, token=%s, current=%s, new_balance=%s, amt=%s, state=%s, result=%s, transaction_id=%s, json_data=%s',
                 product_id, user_id, token, current_balance, new_balance, amt, state, result, transaction_id, json_data)
             try:
-                session_vals = self._prepare_session_vals(product_id, round_id, user_id, token, current_balance, new_balance, amt, to_win, state, result, transaction_id, internal_transaction_id, json_data)
+                session_vals = self._prepare_session_vals(product_id, round_id, user_id, token, current_balance, new_balance, amt, to_win, state, result, transaction_id, internal_transaction_id, json_data, events)
             except Exception as e:
                 _logger.error('Error en _prepare_session_vals: %s', str(e))
                 raise

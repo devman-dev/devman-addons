@@ -83,12 +83,28 @@
                             <field name="line_ids" nolabel="1" readonly="state != 'draft'">
                                 <list string="Líneas" editable="bottom">
                                     <field name="session_date" readonly="1" />
+                                    <field name="transaction_id" readonly="1" />
+                                    <field name="game_template_id" readonly="1" />
                                     <field name="game_id" readonly="1" />
                                     <field name="category_id" readonly="1" />
                                     <field name="session_amount" readonly="1" sum="Total" />
                                     <field name="commission_percentage" readonly="1" />
                                     <field name="commission_amount" readonly="1" sum="Total" />
                                     <field name="net_amount" readonly="1" sum="Total" />
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Estadística" name="statistics">
+                            <field name="line_ids" nolabel="1" readonly="1">
+                                <list string="Estadísticas de Juego">
+                                    <field name="game_id" readonly="1" />
+                                    <field name="round_id" readonly="1" />
+                                    <field name="amount_bet" readonly="1" sum="Total" />
+                                    <field name="profit" readonly="1" sum="Total" />
+                                    <field name="payout_ratio" readonly="1" />
+                                    <field name="prob_payout" readonly="1" />
+                                    <field name="wr_points" readonly="1" sum="Total" />
+                                    <field name="wr_points" readonly="1" sum="Total" />
                                 </list>
                             </field>
                         </page>

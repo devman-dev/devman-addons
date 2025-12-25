@@ -27,9 +27,15 @@ class ResCompany(models.Model):
         help='Diario contable utilizado para registrar las transferencias de apuestas/pérdidas del casino'
     )
 
+    casino_player_losses_journal_id = fields.Many2one(
+        'account.journal',
+        string='Diario de Pérdidas de Jugadores',
+        help='Diario contable utilizado para registrar las pérdidas de los jugadores'
+    )
+
     casino_deposit_journal_id = fields.Many2one(
         'account.journal',
-        string='Cuenta Bancaria de Custodia',
+        string='Cuenta Bancaria de Depósito',
         help='Diario contable utilizado para registrar los depósitos de los usuarios del casino',
         domain=[('type', 'in', ['bank', 'cash'])]
     )
@@ -93,9 +99,13 @@ class ResCompany(models.Model):
             _logger.error("No está configurado el diario 'Operativa' en la compañía %s.", company.name)
         #     raise UserError(_("Configure el diario 'casino_bet_transfer_journal_id' en la compañía."))
         
+        if not company.casino_player_losses_journal_id:
+            _logger.error("No está configurado el diario 'Pérdidas de Jugadores' en la compañía %s.", company.name)
+        
         deposit_custodia = company.casino_custodia_journal_id  #6 #company.casino_deposit_journal_id
         deposit_operativa = company.casino_operativa_journal_id #7 #company.casino_bet_transfer_journal_id
-
+        deposit_player_losses = company.casino_player_losses_journal_id
+        
         date = date or fields.Date.context_today(self)
         label = label or (operation == 'in' and _("Entrada de dinero") or _("Salida de dinero"))
 
@@ -133,6 +143,7 @@ class ResCompany(models.Model):
                 'payment_reference': memo or label,
                 'is_reconciled': True,
                 'is_internal_transfer': True,
+                'casino_operation_type': 'win',
             }
             payment = Payment.create(vals)
             payment.action_post()
@@ -148,6 +159,29 @@ class ResCompany(models.Model):
         # --------------------------------------------------
         # SALIDA: transferencia interna desde depósitos a operativo
         # --------------------------------------------------
+        elif operation == 'out_bck':
+            # Salida directa desde diario operativa (sin mover custodia)
+            transfer_method_out = _get_payment_method(deposit_operativa, 'outbound')
+
+            vals = {
+                'payment_type': 'outbound',
+                'partner_type': 'customer',
+                'partner_id': partner_id or False,
+                'amount': amount,
+                'date': date,
+                'currency_id': company.currency_id.id,
+                'journal_id': deposit_operativa.id,  # Solo impacta diario operativa
+                'payment_reference': memo or label,
+                'is_internal_transfer': False,
+                'payment_method_line_id': transfer_method_out.id,
+                'casino_operation_type': 'bet',
+            }
+
+            payment = Payment.create(vals)
+            payment.action_post()
+            if payment.move_id and memo:
+                payment.move_id.narration = memo
+            payments |= payment
         elif operation in 'out':
             # Transferencia interna por apuesta tipo running
             vals = {
@@ -156,11 +190,12 @@ class ResCompany(models.Model):
                 'amount': amount,
                 'date': date,
                 'currency_id': company.currency_id.id,  # Moneda de la compañía
-                'journal_id': deposit_operativa.id,  # Entra el monto apostado en el diario operativa
-                'destination_journal_id': deposit_custodia.id,  # Se retira del diario custodia
+                'journal_id': deposit_custodia.id,  # Entra el monto apostado en el diario operativa
+                'destination_journal_id': deposit_operativa.id,  # Se retira del diario custodia
                 'payment_reference': memo or label,
                 'is_reconciled': True,
-                'is_internal_transfer': True
+                'is_internal_transfer': True,
+                'casino_operation_type': 'bet',
             }
             payment = Payment.create(vals)
             payment.action_post()
@@ -177,16 +212,19 @@ class ResCompany(models.Model):
 
             transfer_out_vals = {
                 'payment_type': 'outbound',
+                'partner_type': 'customer',
                 'partner_id': partner_id or False,
                 'amount': amount,
                 'date': date,
                 'currency_id':company.currency_id.id,
-                'journal_id': deposit_custodia.id,
-                'payment_method_line_id': transfer_method_out.id,
+                'journal_id': deposit_custodia.id,  # Entra el monto apostado en el diario operativa
+                'destination_journal_id': deposit_operativa.id,  # Se retira del diario custodia
                 'payment_reference': memo or label,
                 'is_reconciled': True,
                 'is_internal_transfer': True,
+                'casino_operation_type': 'withdrawal',
             }
+
             transfer_out_payment = Payment.create(transfer_out_vals)
             transfer_out_payment.action_post()
             if transfer_out_payment.move_id and memo:
@@ -207,11 +245,12 @@ class ResCompany(models.Model):
                 'amount': amount,
                 'date': date,
                 'currency_id': company.currency_id.id,
-                'journal_id': deposit_operativa.id,  # Entra el monto apostado en el diario operativa
-                'destination_journal_id': deposit_custodia.id,  # Se retira del diario custodia
+                'journal_id': deposit_custodia.id,  # Entra el monto apostado en el diario operativa
+                'destination_journal_id': deposit_operativa.id,  # Se retira del diario custodia
                 'payment_reference': memo or label,
-                # 'is_reconciled': True,
+                'is_reconciled': True,
                 'is_internal_transfer': True,
+                'casino_operation_type': 'bet',
             }
             transfer_out_payment = Payment.create(transfer_out_vals)
             transfer_out_payment.action_post()

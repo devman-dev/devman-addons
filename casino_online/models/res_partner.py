@@ -63,13 +63,15 @@ class ResPartner(models.Model):
         """
         self_sudo = self.sudo()
         partner = self_sudo.commercial_partner_id
-        company = self.env.company
-        AML = self.env['account.move.line'].sudo()
+        # company = self.env.company
+        company = self.env['website'].get_current_website().company_id
+        # AML = self.env['account.move.line'].sudo()
+        AML = self.env['account.move.line'].sudo().with_company(company)
         domain = [
             ('company_id', '=', company.id),
             ('partner_id', '=', partner.id),
             ('account_id.account_type', 'in', ['asset_receivable', 'liability_payable']),
-            ('parent_state', 'in', ['draft2', 'posted']),
+            ('parent_state', 'in', ['draft', 'posted', 'in_process']),
         ]
         lines = AML.search(domain)
         total = sum(float((l.amount_signed if l.amount_signed is not None else l.balance) or 0.0) for l in lines)
@@ -79,6 +81,7 @@ class ResPartner(models.Model):
         return [
             "date",
             "memo",
+            "payment_reference",
             "amount",
             "currency_id",
         ]
@@ -87,10 +90,11 @@ class ResPartner(models.Model):
         AccountPayment = self.env["account.payment"].sudo()
         self_sudo = self.sudo()
         domain = [
-            ("payment_type", "=", "inbound"),
+            # ("payment_type", "in", ["inbound"]),
             ("state", "in", ("in_process", "paid")),
             ("partner_id", "=", self_sudo.id),
-            ("move_id", "!=", False)
+            # ("move_id", "!=", False),
+            ("casino_operation_type", "=", "deposit")
         ]
         payments = AccountPayment.search_read(domain, self._deposit_payments_fields())
         for payment in payments:

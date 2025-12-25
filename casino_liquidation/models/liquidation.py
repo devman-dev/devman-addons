@@ -188,11 +188,12 @@ class CasinoLiquidation(models.Model):
                 ('game_id.product_tmpl_id.provider_id', '=', record.provider_id.id),
                 ('game_id.product_tmpl_id.public_categ_ids', 'in', [record.category_id.id]),
                 ('start_datetime', '>=', fields.Datetime.to_datetime(record.date_from)),
-                ('start_datetime', '<=', fields.Datetime.to_datetime(record.date_to)),
-                ('state', '=', 'finished'),
+                ('end_datetime', '<=', fields.Datetime.to_datetime(record.date_to)),
+                ('state', 'ilike', 'finished'),
             ]
             sessions = self.env['casino.game.session'].search(domain)
             _logger.info('Sesiones encontradas para liquidación %s: %s', record.id, sessions.ids)
+            _logger.info('Sessions data: %s', [(s.id, s.game_id.id, s.game_id.product_tmpl_id.provider_id.id, s.amount, s.state) for s in sessions])
 
             if not sessions:
                 _logger.warning('No se encontraron sesiones para liquidación %s con dominio %s', record.id, domain)

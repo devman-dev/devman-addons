@@ -31,9 +31,12 @@
         # JS que depende de web.public.widget / web.Dialog debe ir en lazy
         "web.assets_frontend_lazy": [
             ("include", "web.assets_frontend"), # Asegura que los assets core del frontend se carguen para las dependencias
+            "casino_online/static/src/js/transaction_history.js",
+            "casino_online/static/src/js/withdrawal_list.js",
             "casino_online/static/src/js/withdrawal_modal.js",
             "casino_online/static/src/js/withdrawal_form.js",
             "casino_online/static/src/js/bank_list.js",
+            "casino_online/static/src/js/limits_form.js",
         ],
     },
     'installable': True,
