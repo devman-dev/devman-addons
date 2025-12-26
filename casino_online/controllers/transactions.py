@@ -61,21 +61,22 @@ class CasinoHome(CustomerPortal):
             ('company_id', '=', company.id),
             ('partner_id', '=', partner.id),
             ('parent_state', 'in', ['draft', 'posted']),
+            ('account_id.account_type', 'in', account_types),
         ]
 
         # Incluir también las líneas asociadas al diario de transferencia del casino
         # (company.casino_deposit_journal_id) si está configurado.
         # Usamos un OR ('|') entre la condición de diario y la de tipo de cuenta.
-        if company.casino_deposit_journal_id:
-            base_domain += [
-                '|',
-                ('move_id.journal_id', '=', company.casino_deposit_journal_id.id),
-                ('account_id.account_type', 'in', account_types),
-            ]
-        else:
-            base_domain += [
-                ('account_id.account_type', 'in', account_types),
-            ]
+        # if company.casino_deposit_journal_id:
+        #     base_domain += [
+        #         '|',
+        #         ('move_id.journal_id', '=', company.casino_deposit_journal_id.id),
+        #         ('account_id.account_type', 'in', account_types),
+        #     ]
+        # else:
+        #     base_domain += [
+        #         ('account_id.account_type', 'in', account_types),
+        #     ]
 
         # ================================
         # ANTES
