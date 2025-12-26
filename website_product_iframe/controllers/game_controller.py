@@ -489,7 +489,7 @@ class GameController(http.Controller):
             amount = data.get('amount', 0.0)
             if amount is None:
                 amount = data.get('params', {}).get('amount', 0.0)
-            if not isinstance(amount, (int, float)) or amount <= 0:
+            if not isinstance(amount, (int, float)) or amount < 0:
                 raise CasinoError(*CasinoErrorCodes.INVALID_AMOUNT)
 
             internal_transaction_id = uuid.uuid4().hex
@@ -571,7 +571,7 @@ class GameController(http.Controller):
             amount = data.get('amount', 0.0)
             if amount is None:
                 amount = data.get('params', {}).get('amount', 0.0)
-            if not isinstance(amount, (int, float)) or amount <= 0:
+            if not isinstance(amount, (int, float)) or amount < 0:
                 raise CasinoError(*CasinoErrorCodes.INVALID_AMOUNT)
 
             to_win = data.get('to_win')
