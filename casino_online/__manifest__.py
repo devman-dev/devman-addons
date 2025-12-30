@@ -37,6 +37,7 @@
             "casino_online/static/src/js/withdrawal_form.js",
             "casino_online/static/src/js/bank_list.js",
             "casino_online/static/src/js/limits_form.js",
+            "casino_online/static/src/js/wallet_balance.js",
         ],
     },
     'installable': True,

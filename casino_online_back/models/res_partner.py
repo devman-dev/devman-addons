@@ -168,7 +168,7 @@ class ResPartner(models.Model):
 
     @api.model
     def cron_update_balance_game(self):
-        # Este método debe estar alineado con el método website_wallet_balance
+        # Este método debe estar alineado con el método website_wallet_balance y my/home
         # Buscar todos los partners con token
         partners = self.env['res.partner'].sudo().search([('token', '!=', False)])
         for partner in partners:
@@ -179,6 +179,11 @@ class ResPartner(models.Model):
                 ('account_id.account_type', 'in', ['asset_receivable', 'liability_payable']),
                 ('parent_state', 'in', ['draft', 'posted']),
             ]
+
+            # Filtrar solo movimientos del journal de custodia si está configurado
+            # if company.casino_custodia_journal_id:
+            #     domain.append(('move_id.journal_id', '=', company.casino_custodia_journal_id.id))    
+            
             lines = self.env['account.move.line'].sudo().search(domain)
             total = sum(
                 float((l.amount_signed if l.amount_signed is not None else l.balance) or 0.0)

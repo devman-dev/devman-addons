@@ -60,9 +60,13 @@ class CasinoHome(CustomerPortal):
         base_domain = [
             ('company_id', '=', company.id),
             ('partner_id', '=', partner.id),
-            ('parent_state', 'in', ['draft', 'posted']),
             ('account_id.account_type', 'in', account_types),
+            ('parent_state', 'in', ['draft', 'posted', 'in_process']),
         ]
+
+        # Filtrar solo movimientos del journal de custodia si está configurado
+        # if company.casino_custodia_journal_id:
+        #     base_domain.append(('move_id.journal_id', '=', company.casino_custodia_journal_id.id))
 
         # Incluir también las líneas asociadas al diario de transferencia del casino
         # (company.casino_deposit_journal_id) si está configurado.

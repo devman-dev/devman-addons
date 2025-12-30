@@ -838,9 +838,12 @@ class GameController(http.Controller):
             session = request.env['casino.game.session'].sudo().create(session_vals)
             _logger.info('Casino Iframe: Sesión creada en _apply_amount: %s', session)
             _logger.info('Casino Iframe: Sesión creada en _apply_amount: %s', session.read())
+            request.env['bus.bus']._sendone(
+                partner, "casino_wallet_update", {"partner_id": partner.id, "balance": partner.balance_game}
+            )
             
             account = request.env['account.account'].sudo().search([
-                ('code', '=', '400001')  # Ajusta según tu plan contable
+                ('code', '=', '400001')
             ], limit=1)
             
             if not account:

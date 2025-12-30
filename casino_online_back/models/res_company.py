@@ -259,3 +259,23 @@ class ResCompany(models.Model):
             payments |= transfer_out_payment
             
         return payments
+    
+    def action_open_casino_account_moves(self):
+        """Abre la vista de cuenta corriente casino con dominio dinámico filtrado por journal de custodia."""
+        self.ensure_one()
+        domain = [('account_id.account_type', 'in', ['asset_receivable', 'liability_payable'])]
+        
+        # Filtrar solo por el journal de custodia si está configurado
+        if self.casino_custodia_journal_id:
+            domain.append(('move_id.journal_id', '=', self.casino_custodia_journal_id.id))
+        
+        return {
+            'name': 'Cuenta Corriente Casino',
+            'type': 'ir.actions.act_window',
+            'res_model': 'account.move.line',
+            'view_mode': 'list,form',
+            'domain': domain,
+            'context': {
+                'search_default_group_by_partner': 1
+            }
+        }
