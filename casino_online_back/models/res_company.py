@@ -146,7 +146,8 @@ class ResCompany(models.Model):
                 'casino_operation_type': 'win',
             }
             payment = Payment.create(vals)
-            payment.action_post()
+            if payment.state == 'draft':
+                payment.action_post()
             # Agregar memo al asiento contable
             if payment.move_id and memo:
                 payment.move_id.narration = memo
@@ -178,7 +179,8 @@ class ResCompany(models.Model):
             }
 
             payment = Payment.create(vals)
-            payment.action_post()
+            if payment.state == 'draft':
+                payment.action_post()
             if payment.move_id and memo:
                 payment.move_id.narration = memo
             payments |= payment
@@ -198,7 +200,8 @@ class ResCompany(models.Model):
                 'casino_operation_type': 'bet',
             }
             payment = Payment.create(vals)
-            payment.action_post()
+            if payment.state == 'draft':
+                payment.action_post()
             if payment.move_id and memo:
                 payment.move_id.narration = memo
             payments |= payment
@@ -226,7 +229,8 @@ class ResCompany(models.Model):
             }
 
             transfer_out_payment = Payment.create(transfer_out_vals)
-            transfer_out_payment.action_post()
+            if transfer_out_payment.state == 'draft':
+                transfer_out_payment.action_post()
             if transfer_out_payment.move_id and memo:
                 transfer_out_payment.move_id.narration = memo
             payments |= transfer_out_payment
