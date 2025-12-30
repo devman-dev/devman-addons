@@ -257,7 +257,8 @@ class ResCompany(models.Model):
                 'casino_operation_type': 'bet',
             }
             transfer_out_payment = Payment.create(transfer_out_vals)
-            transfer_out_payment.action_post()
+            if transfer_out_payment.state == 'draft':
+                transfer_out_payment.action_post()
             if transfer_out_payment.move_id and memo:
                 transfer_out_payment.move_id.narration = memo
             payments |= transfer_out_payment
