@@ -16,6 +16,27 @@ class AccountPayment(models.Model):
 
     @api.model_create_multi
     def create(self, vals_list):
+        payments = super().create(vals_list)
+
+        # Evitar auto-post en escenarios donde Odoo ya está en un action_post
+        # o cuando es transferencia interna (paired payment incluido).
+        ctx = self.env.context
+        if ctx.get("from_action_post"):
+            return payments
+
+        for pay, vals in zip(payments, vals_list):
+            is_transfer = vals.get("is_internal_transfer") or vals.get("destination_journal_id") or pay.is_internal_transfer
+            if is_transfer:
+                continue  # la transferencia se postea explícitamente (o por el flujo estándar)
+            if ctx.get("skip_auto_post"):
+                continue
+
+            # Si realmente necesitás auto-post para otros pagos casino (no transferencias), que sea aquí.
+            pay.sudo().action_post()
+
+        return payments
+        
+    def create2(self, vals_list):
         """
         Auto-publica los pagos en diarios de casino al crear.
         """
@@ -95,3 +116,10 @@ class AccountMove(models.Model):
                 'search_default_filter_posted': 1,
             },
         }
+
+    def _synchronize_to_moves(self, changed_fields):
+        posted = self.filtered(lambda p: p.move_id and p.move_id.state == "posted")
+        todo = self - posted
+        if todo:
+            return super(AccountPayment, todo)._synchronize_to_moves(changed_fields)
+        return

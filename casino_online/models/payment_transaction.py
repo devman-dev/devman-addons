@@ -45,6 +45,8 @@ class PaymentTransaction(models.Model):
                                 "PaymentTransaction: Marked payment %s as casino deposit for tx %s",
                                 tx.payment_id.id, tx.id
                             )
+                            if tx.payment_id.state == 'draft':
+                                tx.payment_id.action_post()
                         
                     else:
                         _logger.warning(

@@ -9,3 +9,4 @@ from . import bet_limits
 from . import res_partner
 from . import res_company
 from . import global_report
+from . import casino_transfer_service

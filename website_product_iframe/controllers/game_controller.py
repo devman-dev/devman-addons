@@ -506,15 +506,23 @@ class GameController(http.Controller):
             amount = amount / 100
             result = self._apply_amount(session.id, product_id = gameId, round_id = roundId, amount=amount, to_win=0.0, op='win', token=token, transaction_id=transactionId, internal_transaction_id=internal_transaction_id)
 
-            if result.get('success'):
-                partner = request.env['res.partner'].sudo().search([('secret_token', '=', token)], limit=1)
-                request.env.company.sudo().action_casino_register_cash_movement(
-                    amount=amount,
-                    operation='in',
-                    partner_id=partner.id,
-                    label="Ganancia de juego",
-                    memo=transactionId,
-                )
+            # if result.get('success'):
+            #     partner = request.env['res.partner'].sudo().search([('secret_token', '=', token)], limit=1)
+            #     request.env.company.sudo().action_casino_register_cash_movement(
+            #         amount=amount,
+            #         operation='in',
+            #         partner_id=partner.id,
+            #         label="Ganancia de juego",
+            #         memo=transactionId,
+            #     )
+                # payment = self.env["casino.transfer.service"].create_internal_transfer_payment(
+                #     journal_src=request.env.company.casino_custodia_journal_id,
+                #     journal_dst=request.env.casino_operativa_journal_id,
+                #     amount=amount,
+                #     date=fields.Date.from_string("2025-12-31"),
+                #     memo=transactionId,
+                #     casino_operation_type="win",
+                # )
 
             response = {
                 "balance": int(result.get("balance", 0.0) * 100),
@@ -605,7 +613,7 @@ class GameController(http.Controller):
 
             # Validar fondos insuficientes (no aplica para débito, pero puedes agregar otras validaciones aquí)
 
-            _logger.info('Casino Iframe: api_lose called with session_id: %s, amount: %s, transactionId: %s', session.id, amount, transactionId)
+            _logger.info('Casino Iframe: api_debit called with session_id: %s, amount: %s, transactionId: %s', session.id, amount, transactionId)
             amount = amount / 100
 
             limit_result = self._update_limits_softcap(user, request.env.company, amount)
@@ -631,13 +639,27 @@ class GameController(http.Controller):
 
             if result.get('success'):
                 partner = request.env['res.partner'].sudo().search([('secret_token', '=', token)], limit=1)
-                request.env.company.sudo().action_casino_register_cash_movement(
-                    amount=amount,
-                    operation='out_final' if endRound else 'out',
-                    partner_id=partner.id,
-                    label="Ganancia de juego",
-                    memo=transactionId,
-                )
+                # request.env.company.sudo().action_casino_register_cash_movement(
+                #     amount=amount,
+                #     operation='out_final' if endRound else 'out',
+                #     partner_id=partner.id,
+                #     label="Ganancia de juego",
+                #     memo=transactionId,
+                # )
+
+                Session = request.env['casino.game.session'].sudo()
+                already_settled = Session.search_count([('transaction_id', '=', transactionId)]) > 1
+                if already_settled or op == 'lose':
+                    _logger.info("Ya hay sesión para transaction_id=%s; o bien en una jugada pérdida directa (%s), por lo que no se crea pago.", transactionId, op)
+                else:
+                    payment = request.env["casino.transfer.service"].sudo().create_internal_transfer_payment(
+                        journal_src=request.env.company.casino_custodia_journal_id,
+                        journal_dst=request.env.company.casino_operativa_journal_id,
+                        amount=amount,
+                        date=fields.Date.from_string("2025-12-31"),
+                        memo=transactionId,
+                        casino_operation_type="bet" if not endRound else "lose",
+                    )
 
             response = {
                 "balance": int(result.get("balance", 0.0) * 100),
@@ -653,6 +675,7 @@ class GameController(http.Controller):
             return error_response(ce)
         except Exception as e:
             _logger.error('Casino Iframe: Error inesperado en api debit: %s', str(e))
+            _logger.exception('Casino Iframe: Error inesperado en api debit')
             ce = CasinoError(*CasinoErrorCodes.GENERIC_ERROR)
             return error_response(ce)
     
@@ -857,8 +880,9 @@ class GameController(http.Controller):
             _logger.info('Casino Iframe: Cuenta contable encontrada o creada: %s', account)
             move_vals = self._prepare_move_vals(token, product_id, account, debit, credit, op)
             try:
-                move = request.env['account.move'].sudo().create(move_vals)
-                _logger.info('Asiento contable creado correctamente: %s', move)
+                if op in ['win', 'lose', 'balance']:
+                    move = request.env['account.move'].sudo().create(move_vals)
+                    _logger.info('Asiento contable creado correctamente: %s', move)
             except Exception as e:
                 _logger.error('Error al crear el asiento contable: %s', str(e))
                 raise

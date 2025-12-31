@@ -86,10 +86,14 @@ class ResCompany(models.Model):
         company = self
 
         if amount <= 0:
-            raise UserError(_("El monto debe ser estrictamente positivo."))
+            # raise UserError(_("El monto debe ser estrictamente positivo."))
+            _logger.error("El monto debe ser estrictamente positivo.")
+            return
 
         if operation not in ('in', 'out', 'out_final', 'out_withdrawals'):
-            raise UserError(_("El parámetro 'operation' debe ser 'in', 'out', 'out_final' o 'out_withdrawals'."))
+            # raise UserError(_("El parámetro 'operation' debe ser 'in', 'out', 'out_final' o 'out_withdrawals'."))
+            _logger.error(_("El parámetro 'operation' debe ser 'in', 'out', 'out_final' o 'out_withdrawals'."))
+            return
 
         if not company.casino_custodia_journal_id:
             _logger.error("No está configurado el diario 'Custodia' en la compañía %s.", company.name)
@@ -141,7 +145,7 @@ class ResCompany(models.Model):
                 'journal_id': deposit_custodia.id,  # Entra en diario custodia
                 'destination_journal_id': deposit_operativa.id,  # Resta del diario operativa
                 'payment_reference': memo or label,
-                'is_reconciled': True,
+                # 'is_reconciled': True,
                 'is_internal_transfer': True,
                 'casino_operation_type': 'win',
             }
@@ -195,12 +199,13 @@ class ResCompany(models.Model):
                 'journal_id': deposit_custodia.id,  # Entra el monto apostado en el diario operativa
                 'destination_journal_id': deposit_operativa.id,  # Se retira del diario custodia
                 'payment_reference': memo or label,
-                'is_reconciled': True,
-                'is_internal_transfer': True,
+                # 'is_reconciled': True,
+                # 'is_internal_transfer': True,
                 'casino_operation_type': 'bet',
             }
-            payment = Payment.create(vals)
-            if payment.state == 'draft':
+            # payment = Payment.create(vals)
+            payment = Payment.with_context(force_draft=True).create(vals)
+            if payment.state == 'draft' or payment.state == 'in_process':
                 payment.action_post()
             if payment.move_id and memo:
                 payment.move_id.narration = memo
