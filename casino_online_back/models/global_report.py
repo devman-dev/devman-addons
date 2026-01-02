@@ -111,25 +111,36 @@ class CasinoGlobalReport(models.TransientModel):
         # elif self.filter_type == 'agent' and self.agent_id:
         #     session_domain.append(('agent_id', '=', self.agent_id.id))
         
+        # Obtener todas las categorías públicas existentes
+        all_categories = self.env['product.public.category'].search([])
+        
+        # Inicializar category_data con todas las categorías en 0
+        category_data = {}
+        for category in all_categories:
+            category_data[category.name] = {
+                'apostado': 0.0,
+                'ganado': 0.0,
+                'netwin': 0.0,
+                'rake': 0.0,
+            }
+        
         # Obtener sesiones
         sessions = self.env['casino.game.session'].search(session_domain)
         
-        # Agrupar por categoría
-        category_data = {}
-        
+        # Procesar sesiones y acumular datos
         for session in sessions:
             if session.game_id and session.game_id.public_categ_ids:
                 category_name = session.game_id.public_categ_ids[0].name
             else:
                 category_name = 'Sin Categoría'
-            
-            if category_name not in category_data:
-                category_data[category_name] = {
-                    'apostado': 0.0,
-                    'ganado': 0.0,
-                    'netwin': 0.0,
-                    'rake': 0.0,
-                }
+                # Si no existe en el diccionario, agregarla
+                if category_name not in category_data:
+                    category_data[category_name] = {
+                        'apostado': 0.0,
+                        'ganado': 0.0,
+                        'netwin': 0.0,
+                        'rake': 0.0,
+                    }
             
             # Calcular valores
             apostado = session.amount or 0.0
@@ -150,9 +161,9 @@ class CasinoGlobalReport(models.TransientModel):
             category_data[category_name]['netwin'] += netwin
             category_data[category_name]['rake'] += rake
         
-        # Crear líneas del reporte para categorías
+        # Crear líneas del reporte para todas las categorías (incluso las que están en 0)
         line_vals = []
-        for categoria, datos in category_data.items():
+        for categoria, datos in sorted(category_data.items()):
             line_vals.append((0, 0, {
                 'categoria': categoria,
                 'apostado': datos['apostado'],
@@ -321,7 +332,7 @@ class CasinoGlobalReportLine(models.TransientModel):
                 # Generar un índice de color consistente basado en el hash del nombre
                 hash_value = hash(line.categoria)
                 # Odoo soporta colores del 0 al 11
-                line.color = abs(hash_value) % 12
+                line.color = 0 #abs(hash_value) % 12
             else:
                 line.color = 0
 

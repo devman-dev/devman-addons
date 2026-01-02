@@ -18,11 +18,7 @@ class CasinoLiquidationLine(models.Model):
         readonly=True,
         help='Referencia a la sesión de juego'
     )
-    session_date = fields.Datetime(
-        string='Fecha de Sesión',
-        readonly=True,
-        related='session_id.start_datetime'
-    )
+    
     # Campo de transacción (basado en casino_game_session.transaction_id)
     transaction_id = fields.Text(
         string='Ticket',
@@ -30,38 +26,74 @@ class CasinoLiquidationLine(models.Model):
         related='session_id.transaction_id',
         help='ID de transacción de la sesión de juego'
     )
-    # Campo de juego/CID (basado en product_template.game_id)
-    game_template_id = fields.Many2one(
-        'product.template',
+
+    # Campo CID - Nickname del jugador de la sesión
+    cid = fields.Char(
         string='CID',
         readonly=True,
-        related='session_id.game_id.product_tmpl_id',
-        help='Game ID del producto plantilla'
+        related='session_id.user_id.nickname',
+        help='Nickname del jugador de la sesión'
     )
+    
+    category_id = fields.Many2one(
+        'product.public.category',
+        string='Categoría',
+        help='Categoría del producto/juego'
+    )
+    
     game_id = fields.Many2one(
         'product.product',
         string='Juego',
         readonly=True,
         related='session_id.game_id'
     )
-    category_id = fields.Many2one(
-        'product.public.category',
-        string='Categoría',
-        help='Categoría del producto/juego'
+
+    session_date = fields.Datetime(
+        string='Fecha de Sesión',
+        readonly=True,
+        related='session_id.start_datetime'
     )
+
     session_amount = fields.Monetary(
-        string='Importe Sesión (BET)',
+        string='Monto',
         readonly=True,
         help='Importe total de la sesión',
         related='session_id.amount',
         currency_field='currency_id'
     )
+
     currency_id = fields.Many2one(
         'res.currency',
         string='Moneda',
         readonly=True,
         related='session_id.currency_id'
     )
+    
+    provider_id = fields.Many2one(
+        'res.partner',
+        string='Proveedor',
+        readonly=True,
+        related='session_id.provider_id',
+        help='Proveedor asociado al juego de la sesión'
+    )
+
+    round_id = fields.Text(
+        string='ID Round',
+        readonly=True,
+        related='session_id.round_id',
+        help='ID de la ronda de juego'
+    )
+
+    
+    # Campo de juego/CID (basado en product_template.game_id)
+    game_template_id = fields.Many2one(
+        'product.template',
+        string='CID2',
+        readonly=True,
+        related='session_id.game_id.product_tmpl_id',
+        help='Game ID del producto plantilla'
+    )
+    
     commission_percentage = fields.Float(
         string='% Comisión',
         readonly=True,
@@ -80,15 +112,7 @@ class CasinoLiquidationLine(models.Model):
         readonly=True,
         help='Importe después de comisión'
     )
-    
-    # Campos para estadísticas de juego
-    round_id = fields.Text(
-        string='ID Round',
-        readonly=True,
-        related='session_id.round_id',
-        help='ID de la ronda de juego'
-    )
-    
+        
     # Campo amount relacionado
     amount = fields.Monetary(
         string='Amount',

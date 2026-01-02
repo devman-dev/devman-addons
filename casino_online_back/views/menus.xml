@@ -45,7 +45,7 @@
     <menuitem id="menu_casino_account_players"
         name="Cuenta Corriente"
         parent="menu_casino_players"
-        action="action_casino_session_report_wizard"
+        action="action_casino_account_move_line"
         sequence="10" />
     <menuitem id="menu_casino_deposits_and_withdrawals_players"
         name="Cargas y Retiros de Fichas"
@@ -53,7 +53,7 @@
         action="action_casino_chip_operations"
         sequence="15" />
 
-    <menuitem id="menu_casino_history_players"
+    <!-- <menuitem id="menu_casino_history_players"
         name="Historial"
         parent="menu_casino_players"
         action="action_casino_account_move_line"
@@ -63,7 +63,7 @@
         name="Finanzas"
         parent="menu_casino_players"
         action="action_casino_account_move_line"
-        sequence="25" />
+        sequence="25" /> -->
 
     <!-- VER SI ESTE MENÜ DEBE ESTAR AQUÍ -->
     <menuitem id="menu_casino_withdrawals"

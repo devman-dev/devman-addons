@@ -71,16 +71,41 @@ class GenerateLiquidationWizard(models.TransientModel):
             )
         # Buscar sesiones en el período que pertenezcan a juegos de este proveedor y categoría
         try:
-            sessions = self.env['casino.game.session'].search([
-                ('game_id.product_tmpl_id.provider_id', '=', self.provider_id.id),
-                ('game_id.product_tmpl_id.public_categ_ids', 'in', [self.category_id.id]),
-                ('start_datetime', '>=', fields.Datetime.to_datetime(self.date_from)),
-                ('start_datetime', '<=', fields.Datetime.to_datetime(self.date_to)),
-                ('state', '=', 'finished'),  # Solo sesiones finalizadas
+            # Primero, buscar plantillas de producto que coincidan con proveedor y categoría
+            product_templates = self.env['product.template'].search([
+                ('provider_id', '=', self.provider_id.id),
+                ('public_categ_ids', 'in', [self.category_id.id]),
             ])
-            _logger.info('Sesiones encontradas para liquidación %s: %s', liquidation.id, sessions.ids)
+            _logger.info('Product templates encontradas: %s (IDs: %s)', len(product_templates), product_templates.ids)
+            
+            # Obtener todos los product.product de esas plantillas
+            products = self.env['product.product'].search([
+                ('product_tmpl_id', 'in', product_templates.ids),
+            ])
+            _logger.info('Products encontrados: %s (IDs: %s)', len(products), products.ids)
+            
+            # Log de fechas para validar conversión
+            date_from_datetime = fields.Datetime.to_datetime(self.date_from)
+            date_to_datetime = fields.Datetime.to_datetime(self.date_to) + __import__('datetime').timedelta(days=1)
+            _logger.info('Buscando sesiones entre %s y %s', date_from_datetime, date_to_datetime)
+            
+            # Buscar sesiones para esos juegos en el período especificado
+            sessions = self.env['casino.game.session'].search([
+                ('game_id', 'in', products.ids),
+                ('start_datetime', '>=', date_from_datetime),
+                ('start_datetime', '<=', date_to_datetime),
+                # ('state', '=', 'finished'),  # Solo sesiones finalizadas
+            ])
+            _logger.info('Sesiones encontradas para liquidación %s: %s (IDs: %s)', liquidation.id, len(sessions), sessions.ids)
+            
+            # Si no hay sesiones, log adicional para debuggeo
+            if not sessions and products:
+                all_sessions = self.env['casino.game.session'].search([
+                    ('game_id', 'in', products.ids),
+                ])
+                _logger.warning('No hay sesiones en el rango de fechas, pero existen %s sesiones para estos productos', len(all_sessions))
         except Exception as e:
-            _logger.error(f'Error al buscar sesiones: {e}')
+            _logger.error(f'Error al buscar sesiones: {e}', exc_info=True)
             raise UserError(f'Error al buscar sesiones: {e}')
 
         # if not sessions:
