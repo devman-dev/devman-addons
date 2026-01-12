@@ -348,6 +348,12 @@ class GameController(http.Controller):
         roundId = data.get('roundId', None)
         if roundId is None:
             roundId = data.get('params', {}).get('roundId')
+        # Decodificar si viene como string escapado (ej: "\"9118648\"")
+        if isinstance(roundId, str):
+            try:
+                roundId = json.loads(roundId)
+            except (json.JSONDecodeError, ValueError):
+                pass  # Mantener el valor original si no se puede decodificar
 
         gameId = data.get('gameId', None)
         if gameId is None:
@@ -473,6 +479,12 @@ class GameController(http.Controller):
             roundId = data.get('roundId', None)
             if roundId is None:
                 roundId = data.get('params', {}).get('roundId')
+            # Decodificar si viene como string escapado
+            if isinstance(roundId, str):
+                try:
+                    roundId = json.loads(roundId)
+                except (json.JSONDecodeError, ValueError):
+                    pass
 
             endGame = data.get('endGame', None)
             if endGame is None:
@@ -504,7 +516,7 @@ class GameController(http.Controller):
             _logger.info('Casino Iframe: api_win called with session_id: %s, amount: %s, transactionId: %s', session.id, amount, transactionId)
             _logger.info('Casino Iframe: Actualizando balance del jugador: %s', json.dumps(kwargs, indent=2, ensure_ascii=False))
             amount = amount / 100
-            result = self._apply_amount(session.id, product_id = gameId, round_id = roundId, amount=amount, to_win=0.0, op='win', token=token, transaction_id=transactionId, internal_transaction_id=internal_transaction_id)
+            result = self._apply_amount(session.id, product_id = gameId, round_id = roundId, amount=amount, to_win=0.0, op='win' if amount > 0 else 'lose', token=token, transaction_id=transactionId, internal_transaction_id=internal_transaction_id)
 
             # if result.get('success'):
             #     partner = request.env['res.partner'].sudo().search([('secret_token', '=', token)], limit=1)
@@ -563,6 +575,12 @@ class GameController(http.Controller):
             roundId = data.get('roundId', None)
             if roundId is None:
                 roundId = data.get('params', {}).get('roundId')
+            # Decodificar si viene como string escapado
+            if isinstance(roundId, str):
+                try:
+                    roundId = json.loads(roundId)
+                except (json.JSONDecodeError, ValueError):
+                    pass
 
             endRound = data.get('endRound', None)
             if endRound is None:
@@ -774,7 +792,7 @@ class GameController(http.Controller):
                     "token": token,
                     "gameId": product_id,
                     "endRound": False,
-                    "roundId": "roundId",
+                    "roundId": round_id,
                     "transactionId": transaction_id,
                     "amount": amt,
                     "token_live": True,
@@ -791,7 +809,7 @@ class GameController(http.Controller):
                     "token": token,
                     "gameId": product_id,
                     "endRound": False,
-                    "roundId": "roundId",
+                    "roundId": round_id,
                     "transactionId": transaction_id,
                     "amount": amt,
                     "token_live": True,
@@ -807,7 +825,7 @@ class GameController(http.Controller):
                     "token": token,
                     "gameId": product_id,
                     "endRound": False,
-                    "roundId": "roundId",
+                    "roundId": round_id,
                     "transactionId": transaction_id,
                     "amount": amt,
                     "token_live": True,

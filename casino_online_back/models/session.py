@@ -8,6 +8,16 @@ class CasinoGameSession(models.Model):
 
     token = fields.Char(string='Token')
     game_id = fields.Many2one('product.product', string='Juego')
+    end_round = fields.Boolean(string='Fin de la ronda')
+    round_id = fields.Text(string='Ronda')
+    transaction_id = fields.Text(string='Transacción')
+    amount = fields.Monetary(string='BET')
+    event_id = fields.Text(string='Event ID')
+    event_date = fields.Datetime(string='Event Date')
+    market_id = fields.Text(string='Market ID')
+    start = fields.Datetime(string='Inicio')
+    token_live = fields.Boolean(string='Token Live')
+
     provider_id = fields.Many2one(
         'res.partner',
         string='Proveedor',
@@ -17,11 +27,6 @@ class CasinoGameSession(models.Model):
         help='Proveedor (publisher) asociado al juego de la sesión.'
     )
     endGame = fields.Boolean(string='Fin del Juego')
-    round_id = fields.Text(string='Ronda')
-    transaction_id = fields.Text(string='Transacción')
-    amount = fields.Monetary(string='BET')
-    token_live = fields.Boolean(string='Token Live')
-
     user_id = fields.Many2one('res.users', string='Jugador', required=True)
     agent_id = fields.Many2one('res.partner', string='Agente', domain=[('is_company', '=', False)],  help='Agente asociado al jugador.')
     start_datetime = fields.Datetime(string='Inicio')
@@ -70,9 +75,9 @@ class CasinoGameSession(models.Model):
 
     def _compute_related_session_ids(self):
         for rec in self:
-            if rec.transaction_id:
+            if rec.round_id:
                 rec.related_session_ids = self.env['casino.game.session'].search(
-                    [('transaction_id', '=', rec.transaction_id)], order='id asc'
+                    [('round_id', '=', rec.round_id)], order='id asc'
                 )
             else:
                 rec.related_session_ids = self.env['casino.game.session']
