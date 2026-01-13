@@ -61,6 +61,15 @@ class CasinoLiquidationLine(models.Model):
         related='session_id.amount',
         currency_field='currency_id'
     )
+    session_amount_signed = fields.Monetary(
+        string='Monto Neto',
+        readonly=True,
+        compute='_compute_session_amount_signed',
+        store=True,
+        currency_field='currency_id',
+        help='Monto con signo; resta si el resultado es loss o in_progress'
+    )
+
 
     currency_id = fields.Many2one(
         'res.currency',
@@ -188,6 +197,14 @@ class CasinoLiquidationLine(models.Model):
     def _compute_net_amount(self):
         for line in self:
             line.net_amount = line.session_amount - line.commission_amount
+
+    @api.depends('session_amount', 'result')
+    def _compute_session_amount_signed(self):
+        for line in self:
+            amount = line.session_amount or 0.0
+            if line.result in ('loss', 'in_progress'):
+                amount = -amount
+            line.session_amount_signed = amount
 
     @api.depends('session_id.amount', 'session_id.result')
     def _compute_amount_bet(self):

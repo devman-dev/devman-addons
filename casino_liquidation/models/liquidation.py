@@ -65,6 +65,13 @@ class CasinoLiquidation(models.Model):
         'liquidation_id',
         string='Detalles de Liquidación'
     )
+    stat_line_ids = fields.One2many(
+        'casino.liquidation.stat',
+        'liquidation_id',
+        string='Estadisticas',
+        readonly=True
+    )
+
 
     # Totales
     total_sessions = fields.Integer(
@@ -124,6 +131,12 @@ class CasinoLiquidation(models.Model):
             if record.date_from > record.date_to:
                 raise ValidationError('La fecha desde no puede ser mayor a la fecha hasta')
 
+    def write(self, vals):
+        res = super().write(vals)
+        if 'line_ids' in vals:
+            self._rebuild_stat_lines()
+        return res
+
     def action_confirm(self):
         """Confirmar la liquidación"""
         if self.state != 'draft':
@@ -172,6 +185,38 @@ class CasinoLiquidation(models.Model):
             name = f'{record.name} - {record.provider_id.name} ({record.date_from} a {record.date_to})'
             result.append((record.id, name))
         return result
+
+    def _rebuild_stat_lines(self):
+        for record in self:
+            record.stat_line_ids.unlink()
+            if not record.line_ids:
+                continue
+            grouped = {}
+            for line in record.line_ids:
+                category = line.category_id
+                if not category:
+                    continue
+                key = category.id
+                data = grouped.setdefault(key, {
+                    'liquidation_id': record.id,
+                    'category_id': category.id,
+                    'currency_id': line.currency_id.id,
+                    'rounds_count': 0,
+                    'amount_bet': 0.0,
+                    'profit': 0.0,
+                    'wr_points': 0,
+                    'session_amount_signed': 0.0,
+                })
+                data['rounds_count'] += 1
+                data['amount_bet'] += line.amount_bet or 0.0
+                profit = line.profit or 0.0
+                if line.result in ('loss', 'in_progress'):
+                    profit = -profit
+                data['profit'] += profit
+                data['wr_points'] += line.wr_points or 0
+                data['session_amount_signed'] += line.session_amount_signed or 0.0
+            if grouped:
+                record.stat_line_ids = [(0, 0, vals) for vals in grouped.values()]
 
     def action_generate_lines(self):
         """Genera (o regenera) las líneas de la liquidación usando los criterios
@@ -229,6 +274,7 @@ class CasinoLiquidation(models.Model):
 
             # Reemplazar líneas existentes
             record.write({'line_ids': [(5, 0, 0)] + line_vals})
+            record._rebuild_stat_lines()
             _logger.info('Liquidación %s: %s líneas generadas', record.id, len(line_vals))
 
         return True

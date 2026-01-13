@@ -92,9 +92,26 @@
                                     <field name="currency_id" readonly="1" />
                                     <field name="provider_id" readonly="1" />
                                     <field name="round_id" readonly="1" />
+                                    <field name="session_amount_signed" readonly="1" sum="Total" />
                                 </list>
                             </field>
                         </page>
+
+                        <page string="Estadística" name="statistics">
+                            <field name="stat_line_ids" nolabel="1" readonly="1">
+                                <list string="Estadisticas por Categoria" create="0" edit="0">
+                                    <field name="category_id" readonly="1" />
+                                    <field name="rounds_count" readonly="1" sum="Total" />
+                                    <field name="amount_bet" readonly="1" sum="Total" />
+                                    <field name="profit" readonly="1" sum="Total" />
+                                    <field name="payout_ratio" readonly="1" />
+                                    <field name="prob_payout" readonly="1" />
+                                    <field name="wr_points" readonly="1" sum="Total" />
+                                    <field name="session_amount_signed" readonly="1" sum="Total" />
+                                </list>
+                            </field>
+                        </page>
+                        
                         <page string="Notas" name="notes">
                             <field name="notes" nolabel="1"
                                 placeholder="Agregar notas sobre esta liquidación..."

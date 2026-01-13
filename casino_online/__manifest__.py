@@ -29,6 +29,9 @@
             # "casino_online/static/src/scss/withdrawals.scss",
         ],
         # JS que depende de web.public.widget / web.Dialog debe ir en lazy
+        "web.assets_frontend": [
+            "casino_online/static/src/js/wallet_balance.js",
+        ],
         "web.assets_frontend_lazy": [
             ("include", "web.assets_frontend"), # Asegura que los assets core del frontend se carguen para las dependencias
             "casino_online/static/src/js/transaction_history.js",
@@ -37,7 +40,6 @@
             "casino_online/static/src/js/withdrawal_form.js",
             "casino_online/static/src/js/bank_list.js",
             "casino_online/static/src/js/limits_form.js",
-            "casino_online/static/src/js/wallet_balance.js",
         ],
     },
     'installable': True,

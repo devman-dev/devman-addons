@@ -229,24 +229,37 @@ class GameController(http.Controller):
             'events': events or [],
         }
 
-    def _prepare_move_vals(self, token, product, account, debit, credit, op):
+    def _prepare_move_vals(self, token, product, account, debit, credit, op, round_id=None, transaction_id=None):
         """
         Devuelve los valores para crear un asiento contable balanceado en account.move con dos líneas (account.move.line).
         """
         partner = request.env['res.partner'].sudo().search([('secret_token', '=', token)], limit=1)
         cuenta_ingreso = account
-        cuenta_contrapartida = request.env['account.account'].sudo().search([
-            ('code', '=', '110101')  # Ajusta el código según tu plan contable (ejemplo: caja/banco)
-        ], limit=1)
-        if not cuenta_contrapartida:
-            cuenta_contrapartida = request.env['account.account'].sudo().create({
-                'name': 'Contrapartida Casino',
-                'code': '110101',
-                'account_type': 'asset_receivable',
-            })
+        
+        # Usar cuenta del diario de Custodia
+        custodia_journal = request.env.company.sudo().casino_custodia_journal_id
+        if custodia_journal and custodia_journal.default_account_id:
+            cuenta_contrapartida = custodia_journal.default_account_id
+        else:
+            # Fallback a búsqueda por código
+            cuenta_contrapartida = request.env['account.account'].sudo().search([('code', '=', '110101')], limit=1)
+            if not cuenta_contrapartida:
+                cuenta_contrapartida = request.env['account.account'].sudo().create({
+                    'name': 'Contrapartida Casino',
+                    'code': '110101',
+                    'account_type': 'asset_receivable',
+                })
 
+        # Generar nombre único usando transaction_id y round_id
+        unique_name = f'Juego: {product}'
+        if transaction_id:
+            unique_name = f'{unique_name} - {transaction_id}'
+        if round_id:
+            unique_name = f'{unique_name} - {round_id}'
+        # if op == 'in_progress':
+        #     debit, credit = credit, debit  # Invertir para "in_progress"
         return {
-            'name': f'Juego: {product}',
+            'name': unique_name,
             'journal_id': request.env['account.journal'].sudo().search([
                 ('type', '=', 'general')], limit=1
             ).id,
@@ -490,10 +503,6 @@ class GameController(http.Controller):
             if endGame is None:
                 endGame = data.get('params', {}).get('endGame')
 
-            roundId = data.get('roundId', None)
-            if roundId is None:
-                roundId = data.get('params', {}).get('roundId')
-
             transactionId = data.get('transactionId', None)
             if transactionId is None:
                 transactionId = data.get('params', {}).get('transactionId')
@@ -586,10 +595,6 @@ class GameController(http.Controller):
             if endRound is None:
                 endRound = data.get('params', {}).get('endRound')
 
-            roundId = data.get('roundId', None)
-            if roundId is None:
-                roundId = data.get('params', {}).get('roundId')
-
             transactionId = data.get('transactionId', None)
             if transactionId is None:
                 transactionId = data.get('params', {}).get('transactionId')
@@ -600,6 +605,10 @@ class GameController(http.Controller):
             if not isinstance(amount, (int, float)) or amount < 0:
                 raise CasinoError(*CasinoErrorCodes.INVALID_AMOUNT)
 
+            event_id = data.get('event_id', None)
+            if event_id is None:
+                event_id = data.get('params', {}).get('event_id')
+            
             to_win = data.get('to_win')
             if to_win is None:
                 to_win = data.get('params', {}).get('to_win', 0.0)
@@ -700,7 +709,7 @@ class GameController(http.Controller):
     @http.route('/api/v1/refund', type='json', auth='public', methods=['POST'], csrf=False)
     def api_refund(self, session_id, amount, **kwargs):
         """Devolución de plata: suma amount al balance (crédito)."""
-        return self._apply_amount(session_id, product_id = 0, round_id=None, amount = amount, to_win=0.0, op='refund', token="", transaction_id=None)
+        return self._apply_amount(session_id, product_id = 0, round_id=None, amount = amount, to_win=0.0, op='refund', token="", transaction_id=None, internal_transaction_id=None)
 
     @http.route('/api/v1/balance', type='http', auth='public', methods=['POST'], csrf=False)
     def api_balance(self, **kwargs):
@@ -736,7 +745,7 @@ class GameController(http.Controller):
     @http.route('/api/v1/end', type='json', auth='public', methods=['POST'], csrf=False)
     def api_end(self, session_id, **kwargs):
         """Terminación: alias de end_game."""
-        return self.end_game(session_id)
+        return self.end_game(session_id, 0.0)
 
 
     # ----------------- Helper interno -----------------
@@ -820,6 +829,7 @@ class GameController(http.Controller):
                 user.balance_game = new_balance
                 result = 'in_progress'
                 state = 'in_progress'
+                credit = 0.0
                 debit = amt
                 json_data = {
                     "token": token,
@@ -883,24 +893,75 @@ class GameController(http.Controller):
                 partner, "casino_wallet_update", {"partner_id": partner.id, "balance": partner.balance_game}
             )
             
-            account = request.env['account.account'].sudo().search([
-                ('code', '=', '400001')
-            ], limit=1)
-            
-            if not account:
-                # Crear cuenta si no existe
-                account = request.env['account.account'].sudo().create({
-                    'name': 'Cuenta Juegos Casino',
-                    'code': '400001',
-                    'account_type': 'income',
-                })
+            # Usar cuenta del diario operativa para ingresos de juegos
+            operativa_journal = request.env.company.sudo().casino_operativa_journal_id
+            if operativa_journal and operativa_journal.default_account_id:
+                account = operativa_journal.default_account_id
+            else:
+                # Fallback a búsqueda por código
+                account = request.env['account.account'].sudo().search([('code', '=', '400001')], limit=1)
+                if not account:
+                    # Crear cuenta si no existe
+                    account = request.env['account.account'].sudo().create({
+                        'name': 'Cuenta Juegos Casino',
+                        'code': '400001',
+                        'account_type': 'income',
+                    })
 
             _logger.info('Casino Iframe: Cuenta contable encontrada o creada: %s', account)
-            move_vals = self._prepare_move_vals(token, product_id, account, debit, credit, op)
+            move_vals = self._prepare_move_vals(token, product_id, account, debit, credit, op, round_id=round_id, transaction_id=transaction_id)
             try:
-                if op in ['win', 'lose', 'balance']:
+                # Para in_progress, solo crear movimiento de custodia; para win/lose crear movimiento general
+                if op in ['win', 'lose']:
                     move = request.env['account.move'].sudo().create(move_vals)
                     _logger.info('Asiento contable creado correctamente: %s', move)
+                    
+                    # Postear el move para que se registren las líneas en la contabilidad
+                    if move.state == 'draft':
+                        move.action_post()
+                        _logger.info('Asiento contable posteado: %s', move.id)
+                    
+                # Si es in_progress, crear movimiento desde el diario de Custodia
+                if op == 'in_progress':
+                    custodia_journal = request.env.company.sudo().casino_custodia_journal_id
+                    if custodia_journal:
+                        _logger.info('Creando movimiento de salida desde Custodia para in_progress')
+                        
+                        # Obtener la cuenta default del journal con sudo
+                        default_account = custodia_journal.sudo().default_account_id
+                        if not default_account:
+                            default_account = request.env['account.account'].sudo().search([('code', '=', '110101')], limit=1)
+                        
+                        custodia_move_vals = {
+                            'name': f'Salida Custodia - Juego {product_id} - {transaction_id}',
+                            'journal_id': custodia_journal.id,
+                            'date': fields.Date.today(),
+                            'ref': f'Casino Game In Progress - {product_id}',
+                            'line_ids': [
+                                (0, 0, {
+                                    'name': f'Salida de custodia para juego',
+                                    'account_id': default_account.id,
+                                    'partner_id': partner.id,
+                                    'debit': 0.0,
+                                    'credit': amt,
+                                }),
+                                (0, 0, {
+                                    'name': f'Contrapartida - Juego en progreso',
+                                    'account_id': account.id,
+                                    'partner_id': partner.id,
+                                    'debit': amt,
+                                    'credit': 0.0,
+                                }),
+                            ]
+                        }
+                        custodia_move = request.env['account.move'].sudo().create(custodia_move_vals)
+                        _logger.info('Movimiento de Custodia creado: %s', custodia_move.id)
+                        
+                        if custodia_move.state == 'draft':
+                            custodia_move.action_post()
+                            _logger.info('Movimiento de Custodia posteado: %s', custodia_move.id)
+                    else:
+                        _logger.warning('No se encontró diario de Custodia en la compañía')
             except Exception as e:
                 _logger.error('Error al crear el asiento contable: %s', str(e))
                 raise

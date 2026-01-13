@@ -55,7 +55,7 @@
                     </notebook>
                     <field name="description" />
                     <field name="json_data" string="JSON Recibido" />
-                    <!-- <field name="events" nolabel="1" /> -->
+                    <field name="events" nolabel="1" />
                 </sheet>
             </form>
         </field>

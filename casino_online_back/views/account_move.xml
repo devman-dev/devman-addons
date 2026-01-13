@@ -17,23 +17,20 @@
         </field>
     </record>
 
-    <!-- Vista tree personalizada (opcional) -->
-    <!-- <record id="account_move_line_view_tree_inherit_casino" model="ir.ui.view">
+    <!-- Vista tree personalizada para mostrar amount_signed en lugar de debit/credit -->
+    <record id="account_move_line_view_tree_inherit_casino" model="ir.ui.view">
         <field name="name">account.move.line.view.tree.inherit.casino</field>
         <field name="model">account.move.line</field>
         <field name="inherit_id" ref="account.view_move_line_tree"/>
         <field name="arch" type="xml">
-            <field name="debit" position="after">
-                <field name="balance" string="Importe" sum="Total"/>
-            </field>
-            <field name="debit" position="attributes">
-                <attribute name="optional">hide</attribute>
+            <field name="debit" position="replace">
+                <field name="amount_signed" string="Monto" sum="Total"/>
             </field>
             <field name="credit" position="attributes">
-                <attribute name="optional">hide</attribute>
+                <attribute name="invisible">1</attribute>
             </field>
         </field>
-    </record> -->
+    </record>
 
     <!-- Acción para cuenta corriente casino -->
     <record id="action_casino_account_move_line" model="ir.actions.act_window">
@@ -43,6 +40,7 @@
         <!-- Use only a safe search view to avoid loading inherited search views
              that may reference a non-existing field `user_id` or other custom fields. -->
         <field name="search_view_id" ref="account_move_line_view_search_inherit_casino"/>
+        <field name="view_ids" eval="[(5,0,0), (0,0,{'view_mode': 'list', 'view_id': ref('account_move_line_view_tree_inherit_casino')})]"/>
         <field name="domain">[('account_id.account_type', 'in', ['asset_receivable', 'liability_payable'])]</field>
         <field name="context">{
             'search_default_group_by_partner': 1

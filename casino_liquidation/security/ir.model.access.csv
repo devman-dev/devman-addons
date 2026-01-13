@@ -5,4 +5,6 @@ access_casino_liquidation_user,casino_liquidation user,model_casino_liquidation,
 access_casino_liquidation_admin,casino_liquidation admin,model_casino_liquidation,base.group_system,1,1,1,1
 access_casino_liquidation_line_user,casino_liquidation_line user,model_casino_liquidation_line,base.group_user,1,0,0,0
 access_casino_liquidation_line_admin,casino_liquidation_line admin,model_casino_liquidation_line,base.group_system,1,1,1,1
+access_casino_liquidation_stat_user,casino_liquidation_stat user,model_casino_liquidation_stat,base.group_user,1,0,0,0
+access_casino_liquidation_stat_admin,casino_liquidation_stat admin,model_casino_liquidation_stat,base.group_system,1,1,1,1
 access_casino_liquidation_wizard_user,casino_liquidation_wizard user,model_casino_liquidation_wizard,base.group_user,1,1,1,1
