@@ -50,7 +50,8 @@ class CasinoGameSession(models.Model):
         ('abandoned', 'Abandoned'),
         ('balance', 'Balance'),
         ('started', 'Started'),
-        ('in_progress', 'Running')
+        ('in_progress', 'Running'),
+        ('cancelled', 'Cancelled')
     ], string='Resultado')
     
     state = fields.Selection([

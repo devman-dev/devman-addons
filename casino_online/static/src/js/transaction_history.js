@@ -8,7 +8,7 @@ const paymentState = {
   draft: ["Borrador", "bg-info"],
   in_process: ["En Proceso", "bg-warning"],
   paid: ["Pagado", "bg-success"],
-  canceled: ["Cancelada", ""],
+  cancelled: ["Cancelada", ""],
   rejected: ["Rechazado", ""],
 };
 

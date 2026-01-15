@@ -139,7 +139,8 @@ class CasinoLiquidationLine(models.Model):
         ('abandoned', 'Abandoned'),
         ('balance', 'Balance'),
         ('started', 'Started'),
-        ('in_progress', 'Running')
+        ('in_progress', 'Running'),
+        ('cancelled', 'Cancelled')
     ], 
         string='Resultado',
         readonly=True,
@@ -164,7 +165,7 @@ class CasinoLiquidationLine(models.Model):
         compute='_compute_profit',
         store=True,
         currency_field='currency_id',
-        help='Ganancia/Pérdida (si result es loss)'
+        help='Ganancia'
     )
 
     payout_ratio = fields.Float(
@@ -212,7 +213,7 @@ class CasinoLiquidationLine(models.Model):
         Bet es igual al amount si result es 'win'
         """
         for line in self:
-            if line.session_id and line.session_id.result == 'win':
+            if line.session_id and line.session_id.result not in [ 'win', 'cancelled']:
                 line.amount_bet = line.session_id.amount or 0
             else:
                 line.amount_bet = 0
@@ -220,10 +221,10 @@ class CasinoLiquidationLine(models.Model):
     @api.depends('session_id.amount', 'session_id.result')
     def _compute_profit(self):
         """
-        Profit es igual al amount si result es 'loss'
+        Profit es igual al amount si result es 'win' o 'cancelled'
         """
         for line in self:
-            if line.session_id and line.session_id.result == 'loss':
+            if line.session_id and line.session_id.result in [ 'win', 'cancelled']:
                 line.profit = line.session_id.amount or 0
             else:
                 line.profit = 0

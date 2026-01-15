@@ -274,7 +274,7 @@ class GameController(http.Controller):
                     'credit': credit,
                 }),
                 (0, 0, {
-                    'name': 'Ganada' if op == 'win' else 'Perdida' if op == 'lose' else 'Deposito' if op == 'deposit' else 'Place Bet' if op == 'in_progress' else 'Retiro',
+                    'name': 'WIN' if op == 'win' else 'LOSE' if op == 'lose' else 'DEPOSIT' if op == 'deposit' else 'PLACE BET' if op == 'in_progress' else 'WITHDRAW',
                     'account_id': cuenta_contrapartida.id,
                     'partner_id': partner.id,
                     'debit': credit,
@@ -525,7 +525,9 @@ class GameController(http.Controller):
             _logger.info('Casino Iframe: api_win called with session_id: %s, amount: %s, transactionId: %s', session.id, amount, transactionId)
             _logger.info('Casino Iframe: Actualizando balance del jugador: %s', json.dumps(kwargs, indent=2, ensure_ascii=False))
             amount = amount / 100
-            result = self._apply_amount(session.id, product_id = gameId, round_id = roundId, amount=amount, to_win=0.0, op='win' if amount > 0 else 'lose', token=token, transaction_id=transactionId, internal_transaction_id=internal_transaction_id)
+
+            op = 'cancelled' if 'CANCELLED' in str(transactionId).upper() else ('win' if amount > 0 else 'lose')
+            result = self._apply_amount(session.id, product_id = gameId, round_id = roundId, amount=amount, to_win=0.0, op=op, token=token, transaction_id=transactionId, internal_transaction_id=internal_transaction_id)
 
             # if result.get('success'):
             #     partner = request.env['res.partner'].sudo().search([('secret_token', '=', token)], limit=1)
@@ -788,13 +790,12 @@ class GameController(http.Controller):
             
             json_data = {}
             
-            if op == 'win':
+            if op == 'win' or op == 'cancelled':
                 _logger.info('Casino Iframe: WIN')
 
                 new_balance = current_balance + amt
                 user.balance_game = new_balance
-                note = f'Jugada GANADA +{amt}'
-                result = 'win'
+                result = 'win' if op == 'win' else 'cancelled'
                 state = 'finished'
                 credit = amt
                 json_data = {
@@ -810,7 +811,6 @@ class GameController(http.Controller):
                 _logger.info('Casino Iframe: LOSE')
                 new_balance = current_balance - amt
                 user.balance_game = new_balance
-                note = f'Jugada PERDIDA -{amt}'
                 result = 'loss'
                 state = 'finished'
                 debit = amt
@@ -847,14 +847,12 @@ class GameController(http.Controller):
                 _logger.info('Casino Iframe: REFUND')
                 new_balance = current_balance + amt
                 user.balance_game = new_balance
-                note = f'Devolución +{amt}'
                 result = 'abandoned'
                 state = 'finished'
                 debit = amt
             elif op == 'balance':
                 _logger.info('Casino Iframe: BALANCE')
                 new_balance = current_balance
-                note = f'Estado de Balance: {new_balance}'
                 result = 'balance'
                 state = 'finished'
                 json_data = {
@@ -863,7 +861,6 @@ class GameController(http.Controller):
             elif op == 'finished':
                 _logger.info('Casino Iframe: FINISHED')
                 new_balance = current_balance + amt
-                note = f'Juego terminado. Balance final: {new_balance}'
                 result = 'win'
                 state = 'finished'
                 credit = amt
@@ -887,6 +884,18 @@ class GameController(http.Controller):
             _logger.info('Casino Iframe: Session creada %s', session_vals)
 
             session = request.env['casino.game.session'].sudo().create(session_vals)
+            
+            # Si existe una sesión previa con mismo roundId y result='in_progress', finalizarla
+            if round_id:
+                previous_sessions = request.env['casino.game.session'].sudo().search([
+                    ('round_id', '=', round_id),
+                    ('result', '=', 'in_progress'),
+                    ('id', '!=', session.id)
+                ])
+                if previous_sessions:
+                    previous_sessions.write({'state': 'finished'})
+                    _logger.info('Casino Iframe: Sesiones previas finalizadas para roundId %s: %s', round_id, previous_sessions.ids)
+            
             _logger.info('Casino Iframe: Sesión creada en _apply_amount: %s', session)
             _logger.info('Casino Iframe: Sesión creada en _apply_amount: %s', session.read())
             request.env['bus.bus']._sendone(
@@ -912,7 +921,7 @@ class GameController(http.Controller):
             move_vals = self._prepare_move_vals(token, product_id, account, debit, credit, op, round_id=round_id, transaction_id=transaction_id)
             try:
                 # Para in_progress, solo crear movimiento de custodia; para win/lose crear movimiento general
-                if op in ['win', 'lose']:
+                if op in ['win', 'lose'] and amount > 0:
                     move = request.env['account.move'].sudo().create(move_vals)
                     _logger.info('Asiento contable creado correctamente: %s', move)
                     
@@ -933,20 +942,20 @@ class GameController(http.Controller):
                             default_account = request.env['account.account'].sudo().search([('code', '=', '110101')], limit=1)
                         
                         custodia_move_vals = {
-                            'name': f'Salida Custodia - Juego {product_id} - {transaction_id}',
+                            'name': f'{transaction_id} - {product_id}',
                             'journal_id': custodia_journal.id,
                             'date': fields.Date.today(),
                             'ref': f'Casino Game In Progress - {product_id}',
                             'line_ids': [
                                 (0, 0, {
-                                    'name': f'Salida de custodia para juego',
+                                    'name': f'BET',
                                     'account_id': default_account.id,
                                     'partner_id': partner.id,
                                     'debit': 0.0,
                                     'credit': amt,
                                 }),
                                 (0, 0, {
-                                    'name': f'Contrapartida - Juego en progreso',
+                                    'name': f'{transaction_id} - {product_id} - Contrapartida - Juego en progreso',
                                     'account_id': account.id,
                                     'partner_id': partner.id,
                                     'debit': amt,

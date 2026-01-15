@@ -9,7 +9,8 @@
             <list>
                 <field name="name"/>
                 <field name="email"/>
-                <field name="password"/>
+                <field name="for_approval_menu" widget="badge" decoration-success="for_approval_menu == True" decoration-danger="hide_button and not for_approval_menu" decoration-muted="not hide_button and not for_approval_menu"/>
+                <!-- <field name="password"/> -->
             </list>
         </field>
     </record>

@@ -66,9 +66,11 @@
         <field name="model">casino.game.session</field>
         <field name="arch" type="xml">
             <list string="Sesiones de Juego"
-                decoration-success="state=='finished'"
-                decoration-warning="state=='in_progress'"
+                decoration-info="state=='finished'"
                 decoration-muted="state=='pending'"
+                decoration-success="result=='win'"
+                decoration-danger="result=='loss'"
+                decoration-warning="result=='in_progress'"
                 default_order="id desc, round_id desc">
 
                 <field name="id" string="ID" />
@@ -79,10 +81,10 @@
                 <field name="start_datetime" string="Inicio" optional="show" />
                 <field name="user_id" string="Usuario" />
                 <field name="result" string="Operación" />
-                <field name="amount" string="Monto" widget="monetary" sum="Total" />
-                <field name="final_balance" string="S.Final" widget="monetary" sum="Total"
+                <field name="amount" string="Monto" widget="monetary" />
+                <field name="final_balance" string="S.Final" widget="monetary"
                     optional="show" />
-                <field name="to_win" string="A Ganar" widget="monetary" sum="Total" />
+                <field name="to_win" string="A Ganar" widget="monetary" />
                 <!-- <field name="end_datetime" string="Fin" optional="show" /> -->
                 <!-- <field name="initial_balance" string="S.Inicial" optional="show" /> -->
                 <!-- <field name="currency_id" string="Moneda" optional="show" /> -->

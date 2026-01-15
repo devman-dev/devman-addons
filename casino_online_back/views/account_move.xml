@@ -42,9 +42,7 @@
         <field name="search_view_id" ref="account_move_line_view_search_inherit_casino"/>
         <field name="view_ids" eval="[(5,0,0), (0,0,{'view_mode': 'list', 'view_id': ref('account_move_line_view_tree_inherit_casino')})]"/>
         <field name="domain">[('account_id.account_type', 'in', ['asset_receivable', 'liability_payable'])]</field>
-        <field name="context">{
-            'search_default_group_by_partner': 1
-        }</field>
+        <field name="context">{'search_default_group_by_partner': 1, 'default_order': 'id desc'}</field>
     </record>
 
 </odoo>

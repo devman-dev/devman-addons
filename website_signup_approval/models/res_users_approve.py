@@ -19,6 +19,8 @@
 #    If not, see <http://www.gnu.org/licenses/>.
 #
 #############################################################################
+import random
+
 from odoo import fields, models
 
 
@@ -53,7 +55,9 @@ class ResUsersApprove(models.Model):
             user = self.env['res.users'].sudo().create({
                 'login': self.email,
                 'name': self.name,
+                'email': self.email,
                 'password': self.password,
+                'nickname': self._generate_random_nickname(),
                 'groups_id': [(4, self.env.ref('base.group_portal').id)]
             })
             template = self.env.ref(
@@ -71,3 +75,16 @@ class ResUsersApprove(models.Model):
         user = self.env['res.users'].sudo().search([('login', '=', self.email)])
         if user:
             user.unlink()
+
+    def _generate_random_nickname(self):
+        """Create a simple nickname: bird name plus a 4-digit number."""
+        bird_names = [
+            'sparrow', 'falcon', 'eagle', 'hawk', 'owl', 'finch', 'heron',
+            'ibis', 'kestrel', 'loon', 'magpie', 'oriole', 'pelican',
+            'quail', 'raven', 'robin', 'stork', 'swallow', 'tern', 'wren',
+            'albatross', 'auk', 'buzzard', 'canary', 'cockatoo', 'condor',
+            'cormorant', 'crane', 'crow', 'dove', 'flamingo', 'gull',
+            'hummingbird', 'kingfisher', 'macaw', 'ostrich', 'parrot',
+            'penguin', 'seagull', 'vulture'
+        ]
+        return f"{random.choice(bird_names)}{random.randint(1000, 9999)}"

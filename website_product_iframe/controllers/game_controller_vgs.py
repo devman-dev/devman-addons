@@ -344,7 +344,7 @@ class GameControllerVGS(http.Controller):
                     'credit': credit,
                 }),
                 (0, 0, {
-                    'name': 'Ganada' if op == 'win' else 'Perdida' if op == 'lose' else 'Deposito' if op == 'deposit' else 'Retiro',
+                    'name': 'WIN' if op == 'win' else 'LOSE' if op == 'lose' else 'DEPOSIT' if op == 'deposit' else 'WITHDRAW',
                     'account_id': cuenta_contrapartida.id,
                     'partner_id': partner.id,
                     'debit': credit,
@@ -491,7 +491,7 @@ class GameControllerVGS(http.Controller):
         amount = amount #Viene con decimales
         # Política de saldo:
         # - BET: debita; si no hay fondos suficientes -> FAILED + code 300 y NO tocar balance
-        # - WIN / CANCELED_BET: acredita (puede venir 0 en WIN para correlación) -> OK
+        # - WIN / CANCELLED_BET: acredita (puede venir 0 en WIN para correlación) -> OK
         # - TIP: debita como BET (si quieres separar, extiende)
         internal_transaction_id = token
         new_balance = balance
@@ -500,7 +500,7 @@ class GameControllerVGS(http.Controller):
                 return _xml_envelope(req_xml, _xml_tag("RESULT", "FAILED") + _xml_tag("CODE", "300"))
 
             result = self._apply_amount(session.id, product_id, round_id = round_id, amount=amount, to_win=0.0, op="lose" if trntype == "BET" else "tip", token=token, transaction_id=casino_tx, internal_transaction_id=internal_transaction_id)
-        elif trntype in ("WIN", "CANCELED_BET"):
+        elif trntype in ("WIN", "CANCELLED_BET"):
             result = self._apply_amount(session.id, product_id, round_id = round_id, amount=amount, to_win=0.0, op='win', token=token, transaction_id=casino_tx, internal_transaction_id=internal_transaction_id)
         else:
             # Tipo desconocido: failed genérico 301
