@@ -15,6 +15,7 @@
         'views/bet_limits_views.xml',
         'views/res_company_views.xml',
         'wizard/casino_session_report_wizard_views.xml',
+        'wizard/exposure_report_wizard_views.xml',
         'views/global_report_views.xml',
         'views/agents_players_views.xml',
         'wizard/chip_operation_wizard_views.xml',

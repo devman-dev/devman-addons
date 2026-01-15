@@ -7,11 +7,23 @@
         action="product.product_template_action_all"
         sequence="10" />
 
+    <menuitem id="menu_casino_reportes"
+        name="Reportes"
+        parent="menu_casino_root"
+        groups="base.group_system"
+        sequence="20" />
+
     <menuitem id="menu_casino_sessions"
         name="Sesiones de Juego"
-        parent="menu_casino_root"
+        parent="menu_casino_reportes"
         action="action_casino_session_report_wizard"
-        sequence="20" />
+        sequence="5" />
+
+    <menuitem id="menu_casino_exposure_running"
+        name="Exposición al Riesgo"
+        parent="menu_casino_reportes"
+        action="action_casino_exposure_report_wizard"
+        sequence="10" />
 
     <menuitem id="menu_casino_users"
         name="Usuarios Registrados"

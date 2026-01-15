@@ -1,0 +1,53 @@
+<odoo>
+    <!-- Wizard Form View -->
+    <record id="view_casino_exposure_report_wizard" model="ir.ui.view">
+        <field name="name">casino.exposure.report.wizard.form</field>
+        <field name="model">casino.exposure.report.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Exposición: Sesiones en curso">
+                <header>
+                    <button name="action_calculate" type="object" class="oe_highlight" string="Calcular"/>
+                </header>
+                <sheet>
+                    <group string="Filtros">
+                        <group>
+                            <field name="date_from"/>
+                            <field name="date_to"/>
+                        </group>
+                        <group>
+                            <field name="provider_id"/>
+                        </group>
+                    </group>
+                    <group string="Resultados">
+                        <field name="line_ids" nolabel="1" context="{'tree_view_ref': 'casino_online_back.view_casino_exposure_report_line_tree'}"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Tree view for lines -->
+    <record id="view_casino_exposure_report_line_tree" model="ir.ui.view">
+        <field name="name">casino.exposure.report.line.tree</field>
+        <field name="model">casino.exposure.report.line</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="user_id"/>
+                <field name="partner_id"/>
+                <field name="sessions_count"/>
+                <field name="currency_id"/>
+                <field name="total_to_win" sum="Total" />
+                <field name="company_profit" sum="Total" />
+            </list>
+        </field>
+    </record>
+
+    <!-- Action -->
+    <record id="action_casino_exposure_report_wizard" model="ir.actions.act_window">
+        <field name="name">Exposición sesiones en curso</field>
+        <field name="res_model">casino.exposure.report.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="view_casino_exposure_report_wizard"/>
+        <field name="target">current</field>
+    </record>
+</odoo>

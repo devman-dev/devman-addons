@@ -143,15 +143,13 @@ class CasinoGlobalReport(models.TransientModel):
                     }
             
             # Calcular valores
-            apostado = session.amount or 0.0
+            apostado = 0.0 #session.amount or 0.0
             ganado = 0.0
             
-            if session.result == 'win':
-                ganado = apostado + (session.net_loss or 0.0)
-            elif session.result == 'loss':
-                ganado = 0.0
-            elif session.result == 'draw':
-                ganado = apostado
+            if session.result in ['win', 'cancelled']:
+                ganado += (session.amount or 0.0)
+            else:
+                apostado += (session.amount or 0.0)
             
             netwin = ganado - apostado
             rake = session.agent_commission or 0.0

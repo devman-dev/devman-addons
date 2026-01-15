@@ -30,74 +30,106 @@
     </field>
   </record>
 
-  <!-- Vista Kanban: Agentes y Jugadores -->
+  <!-- Vista Kanban: Agentes y Jugadores (UX similar a Contactos) -->
   <record id="view_casino_agents_players_kanban" model="ir.ui.view">
     <field name="name">res.partner.agents.players.kanban</field>
     <field name="model">res.partner</field>
     <field name="arch" type="xml">
-      <kanban class="o_kanban_small_column">
+      <!--
+        Notas de UX:
+        - Usa el layout estándar tipo Contactos: imagen + detalles.
+        - Mantiene el botón de "Cargar/Retirar fichas" como acción primaria.
+      -->
+      <kanban class="o_res_partner_kanban">
         <!-- Campos necesarios para el template -->
         <field name="name" />
         <field name="nickname" />
         <field name="role" />
-        <field name="create_date" />
+        <field name="email" />
+        <field name="phone" />
+        <field name="mobile" />
+        <field name="image_128" />
+        <field name="supervisor_agent_id" />
         <templates>
-          <t t-name="card">
-            <div class="o_kanban_record o_casino_user_card">
-              <div class="o_casino_user_header">
-                <div class="o_casino_avatar">
-                  <t t-set="initials"
-                    t-value="(record.name.value || '??')[0].toUpperCase() + ((record.name.value || '??').split(' ')[1] || ' ')[0].toUpperCase()" />
-                  <div class="o_casino_avatar_circle"
-                    t-att-class="'avatar-' + (record.role.raw_value || 'default')">
-                    <span class="o_casino_initials" t-esc="initials" />
-                  </div>
-                </div>
-                <div class="o_casino_user_info">
-                  <div class="o_casino_name_row">
-                    <strong class="o_casino_name" t-esc="record.name.value" />
-                    <span class="o_casino_badge"
-                      t-att-class="'badge-' + (record.role.raw_value or 'default')"
-                      t-if="record.role.raw_value == 'agent'">
-                      <i class="fa fa-user-tie me-1" />Agente </span>
-                    <span class="o_casino_badge badge-player"
-                      t-if="record.role.raw_value == 'player'">
-                      <i class="fa fa-gamepad me-1" />Jugador </span>
-                  </div>
-                  <div class="o_casino_nickname" t-if="record.nickname.value">
-                    <i class="fa fa-at me-1 text-muted" title="Usuario" />
-                    <span t-esc="record.nickname.value" />
-                  </div>
-                </div>
+          <t t-name="kanban-box">
+            <div class="o_kanban_record o_kanban_global_click">
+              <div class="o_kanban_image">
+                <img class="o_kanban_image_fill" loading="lazy" alt="Avatar"
+                    t-att-src="kanban_image('res.partner', 'image_128', record.id.raw_value)"/>
               </div>
 
-              <!-- <div class="o_casino_user_details">
-                <div class="o_casino_detail_item" t-if="record.supervisor_agent_id.value">
-                  <i class="fa fa-user-shield text-primary me-2" />
-                  <div class="o_casino_detail_content">
-                    <small class="o_casino_label">Agente superior</small>
-                    <span class="o_casino_value" t-esc="record.supervisor_agent_id.value" />
-                  </div>
-                </div>
-                <div class="o_casino_detail_item"
-                  t-if="record.create_date and record.create_date.value">
-                  <i class="fa fa-calendar-plus text-success me-2" />
-                  <div class="o_casino_detail_content">
-                    <small class="o_casino_label">Fecha de alta</small>
-                    <span class="o_casino_value" t-esc="record.create_date.value" />
-                  </div>
-                </div>
-              </div> -->
+              <div class="o_kanban_details">
+                <div class="o_kanban_details_title">
+                  <strong>
+                    <span t-esc="record.name.value"/>
+                  </strong>
 
-              <div class="o_casino_user_footer">
-                <button type="object" class="btn btn-sm btn-primary o_casino_action_btn"
-                  groups="base.group_system"
-                  name="action_open_load_chips_wizard">
-                  <i class="fa fa-coins me-1" />Cargar Fichas </button>
+                  <t t-if="record.role &amp;&amp; record.role.raw_value">
+                    <span class="badge rounded-pill ms-2"
+                          t-att-class="record.role.raw_value === 'agent' ? 'text-bg-primary' : 'text-bg-success'">
+                      <t t-esc="record.role.raw_value === 'agent' ? 'Agente' : 'Jugador'"/>
+                    </span>
+                  </t>
+                </div>
+
+                <t t-if="record.nickname &amp;&amp; record.nickname.value">
+                  <div class="text-muted">
+                    <i class="fa fa-at me-1" aria-label="Nickname" title="Nickname"/>
+                    <t t-esc="record.nickname.value"/>
+                  </div>
+                </t>
+
+                <t t-if="record.supervisor_agent_id &amp;&amp; record.supervisor_agent_id.value &amp;&amp; record.role &amp;&amp; record.role.raw_value === 'player'">
+                  <div class="text-muted">
+                    <i class="fa fa-user-shield me-1" aria-label="Agente superior" title="Agente superior"/>
+                    <span t-esc="record.supervisor_agent_id.value"/>
+                  </div>
+                </t>
+
+                <div class="mt-2">
+                  <t t-if="record.email &amp;&amp; record.email.value">
+                    <div class="o_kanban_inline">
+                      <i class="fa fa-envelope me-1" aria-label="Correo electrónico" title="Correo electrónico"/>
+                      <a class="text-break"
+                        t-att-href="'mailto:' + record.email.value">
+                        <t t-esc="record.email.value"/>
+                      </a>
+                    </div>
+                  </t>
+
+                  <t t-if="record.phone &amp;&amp; record.phone.value">
+                    <div class="o_kanban_inline">
+                      <i class="fa fa-phone me-1" aria-label="Teléfono" title="Teléfono"/>
+                      <a t-att-href="'tel:' + record.phone.value">
+                        <t t-esc="record.phone.value"/>
+                      </a>
+                    </div>
+                  </t>
+
+                  <t t-if="(!record.phone || !record.phone.value) &amp;&amp; record.mobile &amp;&amp; record.mobile.value">
+                    <div class="o_kanban_inline">
+                      <i class="fa fa-mobile me-1" aria-label="Celular" title="Celular"/>
+                      <a t-att-href="'tel:' + record.mobile.value">
+                        <t t-esc="record.mobile.value"/>
+                      </a>
+                    </div>
+                  </t>
+                </div>
+
+                <div class="mt-3">
+                  <button type="object"
+                          name="action_open_load_chips_wizard"
+                          class="btn btn-sm btn-primary w-100 oe_kanban_action"
+                          title="Cargar/Retirar fichas">
+                    <i class="fa fa-coins me-1"/>
+                    Cargar / Retirar fichas
+                  </button>
+                </div>
               </div>
             </div>
           </t>
         </templates>
+
       </kanban>
     </field>
   </record>
