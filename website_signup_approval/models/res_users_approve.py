@@ -58,6 +58,7 @@ class ResUsersApprove(models.Model):
                 'email': self.email,
                 'password': self.password,
                 'nickname': self._generate_random_nickname(),
+                'is_player': True,
                 'groups_id': [(4, self.env.ref('base.group_portal').id)]
             })
             template = self.env.ref(
