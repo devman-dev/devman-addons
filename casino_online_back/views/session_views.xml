@@ -10,7 +10,10 @@
                             <field name="transaction_id" />
                             <field name="internal_transaction_id" string="ID Transacción Interna" />
                             <field name="round_id" />
+                            <field name="event_id" />
+                            <field name="market_id" />
                             <field name="token" />
+                            <field name="token_live" />
                         </group>
                         <group string="Detalles del Juego">
                             <field name="provider_id" readonly="1" optional="hide" />
@@ -24,8 +27,9 @@
 
                     <group>
                         <group string="Periodo">
+                            <field name="event_date" />
+                            <field name="start" />
                             <field name="start_datetime" />
-                            <field name="end_datetime" />
                         </group>
                         <group string="Financiero">
                             <field name="initial_balance" />
@@ -74,24 +78,26 @@
                 default_order="id desc, round_id desc">
 
                 <field name="id" string="ID" />
-                <field name="transaction_id" string="ID Apuesta" />
                 <field name="game_id" string="Juego" />
+                <field name="end_round" string="Ronda Final" optional="show" />
+                <field name="round_id" string="Ronda" />
+                <field name="transaction_id" string="ID Apuesta" />
+                <field name="event_id" string="ID Evento" />
+                <field name="event_date" string="Fecha Apuesta" />
+                <field name="market_id" string="Apuesta" />
                 <field name="provider_id" string="Proveedor" optional="hide" />
-                <field name="round_id" string="ID Round" />
-                <field name="start_datetime" string="Inicio" optional="show" />
+                <field name="start" string="Inicio de Juego" />
                 <field name="user_id" string="Usuario" />
                 <field name="result" string="Operación" />
                 <field name="amount" string="Monto" widget="monetary" />
                 <field name="final_balance" string="S.Final" widget="monetary"
                     optional="show" />
                 <field name="to_win" string="A Ganar" widget="monetary" />
-                <!-- <field name="end_datetime" string="Fin" optional="show" /> -->
                 <!-- <field name="initial_balance" string="S.Inicial" optional="show" /> -->
                 <!-- <field name="currency_id" string="Moneda" optional="show" /> -->
 
                 <!-- <field name="agent_id" string="Agente" optional="show" />
-                <field name="agent_commission" string="Comisión Agente" optional="show" />
-                <field name="result" string="Resultado" /> -->
+                <field name="agent_commission" string="Comisión Agente" optional="show" /> -->
                 <field name="token" string="Token" optional="hide" />
                 <field name="internal_transaction_id" string="ID Transacción Interna"
                     optional="hide" />
@@ -113,6 +119,8 @@
                 <field name="user_id" />
                 <field name="start_datetime" />
                 <field name="internal_transaction_id" />
+                <field name="transaction_id"/>
+                <field name="market_id"/>
                 <!-- <filter string="Agrupar por Transacción"
                     name="group_by_group_display_name"
                     context="{'group_by':'group_display_name'}" /> -->

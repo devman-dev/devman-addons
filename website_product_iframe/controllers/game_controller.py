@@ -1,4 +1,6 @@
 from datetime import timedelta, datetime
+from dataclasses import dataclass, asdict
+from typing import Optional, List
 import token
 
 import requests
@@ -7,9 +9,41 @@ from odoo.http import request, route, Response
 import logging
 import time
 import uuid
+from dataclasses import replace
 import json
-
 _logger = logging.getLogger(__name__)
+
+@dataclass
+class CasinoTransaction:
+    session_id: int
+    product_id: int
+    round_id: Optional[str]
+    amount: float
+    to_win: float
+    op: str  # 'win' | 'lose' | 'in_progress' | 'refund' | 'balance' | 'finished'
+    token: str
+    transaction_id: Optional[str]
+    internal_transaction_id: Optional[str]
+    result: Optional[str] = None
+    state: Optional[str] = None
+    initial_balance: Optional[float] = None
+    final_balance: Optional[float] = None
+    currency_id: Optional[int] = None
+    description: Optional[str] = None
+    events: Optional[List] = None
+    event_id: Optional[str] = None
+    event_date: Optional[str] = None
+    market_id: Optional[str] = None
+    start: Optional[str] = None
+    json_data: Optional[dict] = None
+
+    def __post_init__(self):
+        """Validar datos al crear"""
+        if self.amount < 0:
+            raise ValueError(f"Monto inválido: {self.amount}")
+        if self.op not in ['win', 'lose', 'in_progress', 'refund', 'balance', 'finished', 'cancelled']:
+            raise ValueError(f"Operación inválida: {self.op}")
+
 class CasinoError(Exception):
     def __init__(self, code, message, http_status=400):
         super().__init__(message)
@@ -194,39 +228,45 @@ class GameController(http.Controller):
         }
         return {"allowed": True, "crossed": crossed, "message_map": message_map}
     
-    def _prepare_session_vals(self, game_id, round_id, user_id, token, initial_balance, final_balance, amount, to_win, state, result, transaction_id, internal_transaction_id, json_data, events=None):
+    #def _prepare_session_vals(self, game_id, round_id, user_id, token, initial_balance, final_balance, amount, to_win, state, result, transaction_id, internal_transaction_id, json_data, events=None):
+    def _prepare_session_vals(self, transaction: CasinoTransaction):
         """
         Devuelve los valores para crear una sesión de juego.
         """
         product_name = ""
         # if not product_id is None and product_id != 0:
-        product = request.env['product.product'].sudo().search([('game_id', '=', game_id)], limit=1)
+        product = request.env['product.product'].sudo().search([('game_id', '=', transaction.product_id)], limit=1)
         #     product_name = product.name
 
-        partner = request.env['res.partner'].sudo().search([('secret_token', '=', token)], limit=1)
+        partner = request.env['res.partner'].sudo().search([('secret_token', '=', transaction.token)], limit=1)
         user = request.env['res.users'].sudo().search([('partner_id', '=', partner.id)], limit=1)
         user_id = user.id
 
         _logger.info(f"Casino Iframe: Starting game session for product: {product.id} - {product.name}")
         return {
             'game_id': product.id,
-            'round_id': round_id,
+            'round_id': transaction.round_id,
             'user_id': user_id,
-            'token': token,
-            'transaction_id': transaction_id,
-            'internal_transaction_id': internal_transaction_id,
+            'token': transaction.token,
+            'transaction_id': transaction.transaction_id,
+            'internal_transaction_id': transaction.internal_transaction_id,
             'start_datetime': fields.Datetime.now(),
-            'end_datetime': fields.Datetime.now() + timedelta(hours=1),
-            'result': result,
-            'state': state,
-            'amount': amount,
-            'to_win': to_win,
-            'initial_balance': initial_balance,
-            'final_balance': final_balance,
+            # 'end_datetime': fields.Datetime.now() + timedelta(hours=1),
+            'result': transaction.result,
+            'state': transaction.state,
+            'amount': transaction.amount,
+            'to_win': transaction.to_win,
+            'initial_balance': transaction.initial_balance,
+            'final_balance': transaction.final_balance,
             'currency_id': request.env.company.currency_id.id,
             'description': f'Inicio de juego: {product_name}',
-            'json_data': json_data,
-            'events': events or [],
+            'json_data': transaction.json_data,
+            'events': transaction.events or [],
+            'event_id': transaction.event_id,
+            'event_date': transaction.event_date,
+            'market_id': transaction.market_id,
+            'start': transaction.start,
+            'json_data': transaction.json_data
         }
 
     def _prepare_move_vals(self, token, product, account, debit, credit, op, round_id=None, transaction_id=None):
@@ -401,7 +441,19 @@ class GameController(http.Controller):
 
         internal_transaction_id = token #uuid.uuid4().hex
         session = request.env['casino.game.session'].sudo().search([('secret_token', '=', token)], limit=1)
-        result = self._apply_amount(session.id, product_id = gameId, round_id = roundId, amount=amount, to_win=to_win, op='win', token=token, transaction_id=transactionId, internal_transaction_id=internal_transaction_id)
+        
+        transaction = CasinoTransaction(
+            session_id=session.id,
+            product_id=gameId,
+            round_id=roundId,
+            amount=amount,
+            to_win=to_win,
+            op='win',
+            token=token,
+            transaction_id=transactionId,
+            internal_transaction_id=internal_transaction_id
+        )
+        result = self._apply_amount(transaction)
         
         # s = request.env['casino.game.session'].sudo().browse(int(session_id))
         
@@ -527,7 +579,19 @@ class GameController(http.Controller):
             amount = amount / 100
 
             op = 'cancelled' if 'CANCELLED' in str(transactionId).upper() else ('win' if amount > 0 else 'lose')
-            result = self._apply_amount(session.id, product_id = gameId, round_id = roundId, amount=amount, to_win=0.0, op=op, token=token, transaction_id=transactionId, internal_transaction_id=internal_transaction_id)
+            # result = self._apply_amount(session.id, product_id = gameId, round_id = roundId, amount=amount, to_win=0.0, op=op, token=token, transaction_id=transactionId, internal_transaction_id=internal_transaction_id)
+            transaction = CasinoTransaction(
+                session_id=session.id,
+                product_id=gameId,
+                round_id=roundId,
+                amount=amount,
+                to_win=0.0,
+                op=op,
+                token=token,
+                transaction_id=transactionId,
+                internal_transaction_id=internal_transaction_id
+            )
+            result = self._apply_amount(transaction)
 
             # if result.get('success'):
             #     partner = request.env['res.partner'].sudo().search([('secret_token', '=', token)], limit=1)
@@ -619,6 +683,18 @@ class GameController(http.Controller):
 
             to_win /= 100
 
+            event_date = data.get('event_date', None)
+            if event_date is None:
+                event_date = data.get('params', {}).get('event_date')
+
+            market_id = data.get('market_id', None)
+            if market_id is None:
+                market_id = data.get('params', {}).get('market_id')
+
+            start = data.get('start', None)
+            if start is None:
+                start = data.get('params', {}).get('start')
+
             events = data.get('events', [])
             if not events:
                 events = data.get('params', {}).get('events', [])
@@ -648,8 +724,9 @@ class GameController(http.Controller):
             limit_result = self._update_limits_softcap(user, request.env.company, amount)
             #_logger.info('Casino Iframe: Resultado de límites: %s', limit_result)
             op = 'in_progress' if not endRound else 'lose'
-            result = self._apply_amount(
-                session.id,
+            
+            transaction = CasinoTransaction(
+                session_id=session.id,
                 product_id=gameId,
                 round_id=roundId,
                 amount=amount,
@@ -658,8 +735,15 @@ class GameController(http.Controller):
                 token=token,
                 transaction_id=transactionId,
                 internal_transaction_id=internal_transaction_id,
-                events=events
+                events=json.loads(events) if isinstance(events, str) else events,
+                event_id=event_id,
+                event_date=event_date,
+                market_id=market_id,
+                start=start,
+                json_data=data
             )
+            
+            result = self._apply_amount(transaction)
 
             _logger.info('Casino Iframe: Resultado de la aplicación de monto: %s', result)
             limit_messages = []
@@ -709,9 +793,20 @@ class GameController(http.Controller):
             return error_response(ce)
     
     @http.route('/api/v1/refund', type='json', auth='public', methods=['POST'], csrf=False)
-    def api_refund(self, session_id, amount, **kwargs):
+    def api_refund(self, session_id, amount, token, **kwargs):
         """Devolución de plata: suma amount al balance (crédito)."""
-        return self._apply_amount(session_id, product_id = 0, round_id=None, amount = amount, to_win=0.0, op='refund', token="", transaction_id=None, internal_transaction_id=None)
+        transaction = CasinoTransaction(
+            session_id=session_id,
+            product_id=0,
+            round_id=None,
+            amount=amount,
+            to_win=0.0,
+            op='refund',
+            token=token,
+            transaction_id=None,
+            internal_transaction_id=uuid.uuid4().hex
+        )
+        return self._apply_amount(transaction)
 
     @http.route('/api/v1/balance', type='http', auth='public', methods=['POST'], csrf=False)
     def api_balance(self, **kwargs):
@@ -751,18 +846,39 @@ class GameController(http.Controller):
 
 
     # ----------------- Helper interno -----------------
-    def _apply_amount(self, session_id, product_id, round_id, amount, to_win, op, token, transaction_id, internal_transaction_id, events=None):
+    #def _apply_amount(self, session_id, product_id, round_id, amount, to_win, op, token, transaction_id, internal_transaction_id, events=None):
+    def _apply_amount(self, transaction: CasinoTransaction):
         """
         Ajusta el balance de la sesión y deja nota en description.
         op: 'win' | 'lose' | 'refund'
+        
+        Args:
+            transaction: CasinoTransaction con todos los parámetros de la transacción
         """
-        _logger.info('Casino Iframe: Aplicando monto: %s, operación: %s', amount, op)
+        # Extraer todos los campos del dataclass
+        amt = float(transaction.amount or 0.0)
+        op = transaction.op
+        token = transaction.token
+        product_id = transaction.product_id
+        round_id = transaction.round_id
+        transaction_id = transaction.transaction_id
+        internal_transaction_id = transaction.internal_transaction_id
+        to_win = transaction.to_win
+        events = transaction.events
+        session_id = transaction.session_id
+        event_id = transaction.event_id
+        event_date = transaction.event_date
+        market_id = transaction.market_id
+        start = transaction.start
+        full_data = transaction.json_data
+        
+        # Obtener producto para el nombre
+        product = request.env['product.product'].sudo().search([('game_id', '=', product_id)], limit=1)
+        product_name = product.name if product else "Desconocido"
+        product_game_id = product.game_id if product else product_id
+        
+        _logger.info('Casino Iframe: Aplicando monto: %s, operación: %s', amt, op)
         try:
-            #s = request.env['casino.game.session'].sudo().browse(int(session_id))
-            # if not s.exists():
-            #     return {'error': 'Sesión no encontrada'}
-
-            amt = float(amount or 0.0)
             if amt < 0:
                 _logger.error('Casino Iframe: Monto negativo inválido: %s', amt)
                 return {'error': 'Monto inválido'}
@@ -877,7 +993,13 @@ class GameController(http.Controller):
             _logger.info('Valores para session_vals: product_id=%s, user_id=%s, token=%s, current=%s, new_balance=%s, amt=%s, state=%s, result=%s, transaction_id=%s, json_data=%s',
                 product_id, user_id, token, current_balance, new_balance, amt, state, result, transaction_id, json_data)
             try:
-                session_vals = self._prepare_session_vals(product_id, round_id, user_id, token, current_balance, new_balance, amt, to_win, state, result, transaction_id, internal_transaction_id, json_data, events)
+                #session_vals = self._prepare_session_vals(product_id, round_id, user_id, token, current_balance, new_balance, amt, to_win, state, result, transaction_id, internal_transaction_id, full_data, events)
+                # transaction.new_balance = new_balance
+                # transaction.current_balance = current_balance
+                # transaction.partner_id = partner.id
+                # transaction.user_id = user_id
+                new_transaction = replace(transaction, result=result, state=state)
+                session_vals = self._prepare_session_vals(new_transaction)
             except Exception as e:
                 _logger.error('Error en _prepare_session_vals: %s', str(e))
                 raise
@@ -921,7 +1043,7 @@ class GameController(http.Controller):
             move_vals = self._prepare_move_vals(token, product_id, account, debit, credit, op, round_id=round_id, transaction_id=transaction_id)
             try:
                 # Para in_progress, solo crear movimiento de custodia; para win/lose crear movimiento general
-                if op in ['win', 'lose'] and amount > 0:
+                if op in ['win', 'lose'] and amt > 0:
                     move = request.env['account.move'].sudo().create(move_vals)
                     _logger.info('Asiento contable creado correctamente: %s', move)
                     
@@ -941,21 +1063,70 @@ class GameController(http.Controller):
                         if not default_account:
                             default_account = request.env['account.account'].sudo().search([('code', '=', '110101')], limit=1)
                         
+                        # Construir nombre limpio sin tuplas
+                        # Formatear fecha de forma que no sea interpretada como fecha real
+                        meses = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 
+                                'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre']
+                        
+                        # Convertir day_event a fecha real si existe, sino usar hoy
+                        if transaction.event_date:
+                            try:
+                                # Si viene como string ISO (ej: "2026-01-15"), parsearlo
+                                from datetime import datetime
+                                if isinstance(transaction.event_date, str):
+                                    event_date_obj = datetime.fromisoformat(transaction.event_date).date()
+                                else:
+                                    event_date_obj = transaction.event_date
+                                fecha_formateada = f"En {event_date_obj.day} de {meses[event_date_obj.month - 1]}"
+                            except (ValueError, AttributeError):
+                                # Si falla el parseo, usar hoy
+                                today = fields.Date.today()
+                                fecha_formateada = f"En {today.day} de {meses[today.month - 1]}"
+                        else:
+                            today = fields.Date.today()
+                            fecha_formateada = f"En {today.day} de {meses[today.month - 1]}"
+                        
+                        if transaction.start:
+                            try:
+                                # Si viene como string ISO (ej: "2026-01-15"), parsearlo
+                                from datetime import datetime
+                                if isinstance(transaction.start, str):
+                                    event_date_obj = datetime.fromisoformat(transaction.start).date()
+                                else:
+                                    event_date_obj = transaction.start
+                                fecha_start_formateada = f"En {event_date_obj.day} de {meses[event_date_obj.month - 1]}"
+                            except (ValueError, AttributeError):
+                                # Si falla el parseo, usar hoy
+                                today = fields.Date.today()
+                                fecha_start_formateada = f"En {today.day} de {meses[today.month - 1]}"
+                        else:
+                            today = fields.Date.today()
+                            fecha_start_formateada = f"En {today.day} de {meses[today.month - 1]}"
+
+                        name_parts = [
+                            str(event_id).strip("(),'\"") if event_id else "N/A",
+                            # fecha_formateada,  # Formato: "En 16 de Enero"
+                            str(market_id).strip("(),'\"") if market_id else "N/A",
+                            # fecha_start_formateada,
+                            product_name
+                        ]
+                        name = " - ".join(name_parts)
+                        
                         custodia_move_vals = {
-                            'name': f'{transaction_id} - {product_id}',
+                            'name': name,
                             'journal_id': custodia_journal.id,
                             'date': fields.Date.today(),
-                            'ref': f'Casino Game In Progress - {product_id}',
+                            'ref': f'Casino Game In Progress - {product_game_id}',
                             'line_ids': [
                                 (0, 0, {
-                                    'name': f'BET',
+                                    'name': name, #f'BET',
                                     'account_id': default_account.id,
                                     'partner_id': partner.id,
                                     'debit': 0.0,
                                     'credit': amt,
                                 }),
                                 (0, 0, {
-                                    'name': f'{transaction_id} - {product_id} - Contrapartida - Juego en progreso',
+                                    'name': f'{transaction_id} - {product_game_id} - Contrapartida - Juego en progreso',
                                     'account_id': account.id,
                                     'partner_id': partner.id,
                                     'debit': amt,
