@@ -219,7 +219,7 @@ publicWidget.registry.ProductIframe = publicWidget.Widget.extend({
         const btnBalance = this._makeBtn('💰 Balance', () => this._getBalance(sessionIdGetter(), '/api/v1/balance'));
         const btnEnd = this._makeBtn('🛑 Terminar', () => this._endSession(sessionIdGetter(), '/api/v1/end_game'));
 
-        toolbar.append(btnLogin, btnWin, btnLose, btnRefund, btnBalance, btnEnd);
+        // toolbar.append(btnLogin, btnWin, btnLose, btnRefund, btnBalance, btnEnd);
 
         // Badge
         const badge = document.createElement('span');

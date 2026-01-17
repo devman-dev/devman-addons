@@ -17,6 +17,7 @@ _logger = logging.getLogger(__name__)
 class CasinoTransaction:
     session_id: int
     product_id: int
+    end_round: bool
     round_id: Optional[str]
     amount: float
     to_win: float
@@ -245,6 +246,7 @@ class GameController(http.Controller):
         _logger.info(f"Casino Iframe: Starting game session for product: {product.id} - {product.name}")
         return {
             'game_id': product.id,
+            'end_round': transaction.end_round,
             'round_id': transaction.round_id,
             'user_id': user_id,
             'token': transaction.token,
@@ -269,7 +271,7 @@ class GameController(http.Controller):
             'json_data': transaction.json_data
         }
 
-    def _prepare_move_vals(self, token, product, account, debit, credit, op, round_id=None, transaction_id=None):
+    def _prepare_move_vals(self, token, product, account, debit, credit, op, round_id=None, transaction_id=None, event_id=None, event_date=None, market_id=None, start=None):
         """
         Devuelve los valores para crear un asiento contable balanceado en account.move con dos líneas (account.move.line).
         """
@@ -290,14 +292,24 @@ class GameController(http.Controller):
                     'account_type': 'asset_receivable',
                 })
 
-        # Generar nombre único usando transaction_id y round_id
-        unique_name = f'Juego: {product}'
-        if transaction_id:
-            unique_name = f'{unique_name} - {transaction_id}'
-        if round_id:
-            unique_name = f'{unique_name} - {round_id}'
-        # if op == 'in_progress':
-        #     debit, credit = credit, debit  # Invertir para "in_progress"
+        name_parts = []
+        if event_id:
+            name_parts.append(str(event_id).strip("(),'\""))
+        if market_id:
+            name_parts.append(str(market_id).strip("(),'\""))
+        name_parts.append(product)
+        name_parts.append(transaction_id)
+
+        name = " - ".join(name_parts)
+        name_line = 'WIN' if op == 'win' else 'LOSE' if op == 'lose' else 'DEPOSIT' if op == 'deposit' else 'PLACE BET' if op == 'in_progress' else 'WITHDRAW'
+        name_line += ' - ' + name
+
+        unique_name = name
+        # if transaction_id:
+        #     unique_name = f'{unique_name} - {transaction_id}'
+        # if round_id:
+        #     unique_name = f'{unique_name} - {round_id}'
+
         return {
             'name': unique_name,
             'journal_id': request.env['account.journal'].sudo().search([
@@ -314,7 +326,7 @@ class GameController(http.Controller):
                     'credit': credit,
                 }),
                 (0, 0, {
-                    'name': 'WIN' if op == 'win' else 'LOSE' if op == 'lose' else 'DEPOSIT' if op == 'deposit' else 'PLACE BET' if op == 'in_progress' else 'WITHDRAW',
+                    'name': name_line, #'WIN' if op == 'win' else 'LOSE' if op == 'lose' else 'DEPOSIT' if op == 'deposit' else 'PLACE BET' if op == 'in_progress' else 'WITHDRAW',
                     'account_id': cuenta_contrapartida.id,
                     'partner_id': partner.id,
                     'debit': credit,
@@ -541,6 +553,10 @@ class GameController(http.Controller):
             if not gameId:
                 raise CasinoError(*CasinoErrorCodes.INVALID_GAME)
 
+            end_round = data.get('endRound')
+            if end_round is None:
+                end_round = data.get('params', {}).get('endRound', False)
+
             roundId = data.get('roundId', None)
             if roundId is None:
                 roundId = data.get('params', {}).get('roundId')
@@ -580,17 +596,26 @@ class GameController(http.Controller):
 
             op = 'cancelled' if 'CANCELLED' in str(transactionId).upper() else ('win' if amount > 0 else 'lose')
             # result = self._apply_amount(session.id, product_id = gameId, round_id = roundId, amount=amount, to_win=0.0, op=op, token=token, transaction_id=transactionId, internal_transaction_id=internal_transaction_id)
+            
             transaction = CasinoTransaction(
                 session_id=session.id,
                 product_id=gameId,
+                end_round=end_round,
                 round_id=roundId,
                 amount=amount,
                 to_win=0.0,
                 op=op,
                 token=token,
                 transaction_id=transactionId,
-                internal_transaction_id=internal_transaction_id
+                internal_transaction_id=internal_transaction_id,
+                # events=json.loads(events) if isinstance(events, str) else events,
+                # event_id=event_id,
+                # event_date=event_date,
+                # market_id=market_id,
+                # start=start,
+                json_data=data
             )
+
             result = self._apply_amount(transaction)
 
             # if result.get('success'):
@@ -647,6 +672,10 @@ class GameController(http.Controller):
             if not gameId:
                 raise CasinoError(*CasinoErrorCodes.INVALID_GAME)
 
+            end_round = data.get('endRound', False)
+            if end_round is None:
+                end_round = data.get('params', {}).get('endRound', False)
+                
             roundId = data.get('roundId', None)
             if roundId is None:
                 roundId = data.get('params', {}).get('roundId')
@@ -728,6 +757,7 @@ class GameController(http.Controller):
             transaction = CasinoTransaction(
                 session_id=session.id,
                 product_id=gameId,
+                end_round=end_round,
                 round_id=roundId,
                 amount=amount,
                 to_win=to_win,
@@ -860,6 +890,7 @@ class GameController(http.Controller):
         op = transaction.op
         token = transaction.token
         product_id = transaction.product_id
+        end_round = transaction.end_round
         round_id = transaction.round_id
         transaction_id = transaction.transaction_id
         internal_transaction_id = transaction.internal_transaction_id
@@ -1040,10 +1071,10 @@ class GameController(http.Controller):
                     })
 
             _logger.info('Casino Iframe: Cuenta contable encontrada o creada: %s', account)
-            move_vals = self._prepare_move_vals(token, product_id, account, debit, credit, op, round_id=round_id, transaction_id=transaction_id)
+            move_vals = self._prepare_move_vals(token, product_name, account, debit, credit, op, round_id=round_id, transaction_id=transaction_id, event_id=event_id, market_id=market_id)
             try:
                 # Para in_progress, solo crear movimiento de custodia; para win/lose crear movimiento general
-                if op in ['win', 'lose'] and amt > 0:
+                if op in ['win', 'lose'] and amt >= 0:
                     move = request.env['account.move'].sudo().create(move_vals)
                     _logger.info('Asiento contable creado correctamente: %s', move)
                     
@@ -1103,13 +1134,15 @@ class GameController(http.Controller):
                             today = fields.Date.today()
                             fecha_start_formateada = f"En {today.day} de {meses[today.month - 1]}"
 
-                        name_parts = [
-                            str(event_id).strip("(),'\"") if event_id else "N/A",
-                            # fecha_formateada,  # Formato: "En 16 de Enero"
-                            str(market_id).strip("(),'\"") if market_id else "N/A",
-                            # fecha_start_formateada,
-                            product_name
-                        ]
+                        # Construir name_parts dinámicamente: solo agregar si existe
+                        name_parts = []
+                        if event_id:
+                            name_parts.append(str(event_id).strip("(),'\""))
+                        if market_id:
+                            name_parts.append(str(market_id).strip("(),'\""))
+                        name_parts.append(product_name)
+                        name_parts.append(transaction_id)
+
                         name = " - ".join(name_parts)
                         
                         custodia_move_vals = {
@@ -1119,7 +1152,7 @@ class GameController(http.Controller):
                             'ref': f'Casino Game In Progress - {product_game_id}',
                             'line_ids': [
                                 (0, 0, {
-                                    'name': name, #f'BET',
+                                    'name': 'BET ' + name, #f'BET',
                                     'account_id': default_account.id,
                                     'partner_id': partner.id,
                                     'debit': 0.0,

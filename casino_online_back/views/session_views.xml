@@ -79,7 +79,7 @@
 
                 <field name="id" string="ID" />
                 <field name="game_id" string="Juego" />
-                <field name="end_round" string="Ronda Final" optional="show" />
+                <field name="end_round" string="Ronda Final" optional="hide" />
                 <field name="round_id" string="Ronda" />
                 <field name="transaction_id" string="ID Apuesta" />
                 <field name="event_id" string="ID Evento" />
@@ -98,9 +98,9 @@
 
                 <!-- <field name="agent_id" string="Agente" optional="show" />
                 <field name="agent_commission" string="Comisión Agente" optional="show" /> -->
-                <field name="token" string="Token" optional="hide" />
-                <field name="internal_transaction_id" string="ID Transacción Interna"
-                    optional="hide" />
+                <!-- <field name="token" string="Token" optional="hide" /> -->
+                <!-- <field name="internal_transaction_id" string="ID Transacción Interna"
+                    optional="hide" /> -->
                 <!-- Necesario para formatear correctamente campos monetarios y sus totales -->
                 <field name="currency_id" optional="show" />
             </list>

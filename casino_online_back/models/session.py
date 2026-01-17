@@ -29,7 +29,7 @@ class CasinoGameSession(models.Model):
     endGame = fields.Boolean(string='Fin del Juego')
     user_id = fields.Many2one('res.users', string='Jugador', required=True)
     agent_id = fields.Many2one('res.partner', string='Agente', domain=[('is_company', '=', False)],  help='Agente asociado al jugador.')
-    start_datetime = fields.Datetime(string='Inicio')
+    start_datetime = fields.Datetime(string='Día y Hora de Apuesta')
     end_datetime = fields.Datetime(string='Fin')
     initial_balance = fields.Monetary(string='Saldo Inicial')
     net_loss = fields.Monetary(string='Pérdida Neta', currency_field='currency_id')
