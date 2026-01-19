@@ -57,9 +57,10 @@ class AuthSignupHome(Home):
                   k in SIGN_UP_REQUEST_PARAMS}
         signup_approval = request.env['ir.config_parameter'].sudo().get_param(
             'website_signup_approval.auth_signup_approval')
-        if values:
-            if signup_approval:
-                return request.redirect('/success')
+        # Comentado: ahora el JS maneja la redirección tras RPC
+        # if values:
+        #     if signup_approval:
+        #         return request.redirect('/success')
         if not qcontext.get('token') and not qcontext.get('signup_enabled'):
             raise werkzeug.exceptions.NotFound()
         if 'error' not in qcontext and request.httprequest.method == 'POST':
@@ -114,12 +115,16 @@ class SignUpApproveController(http.Controller):
     def create_attachment(self, **dat):
         """Create approval request and attachment in backend"""
         data_list = []
+        auto_approve_param = request.env['ir.config_parameter'].sudo().get_param(
+            'website_signup_approval.auto_approve_portal_signup')
+        auto_approve_enabled = str(auto_approve_param).lower() == 'true'
         for data in dat['data']:
             data = data.split('base64')[1] if data else False
             data_list.append((0, 0, {'attachments': data}))
         if request.env['res.users.approve'].sudo().search(
                 [('email', '=', dat['email'])]):
-            pass
+            # Ya existe una solicitud para este email
+            return {'status': 'exists'}
         else:
             attach = request.env['res.users.approve'].sudo().create(
                 {'name': dat['username'],
@@ -136,3 +141,100 @@ class SignUpApproveController(http.Controller):
                      'res_id': attach.id,
                      }
                 )
+            if auto_approve_enabled:
+                attach.action_approve_login()
+                self._add_initial_balance(attach)
+                # Redirigir a la pantalla de login con el email precargado
+                user = request.env['res.users'].sudo().search([('email', '=', dat['email'])], limit=1)
+                login_val = user.login if user else dat['email']
+                return {
+                    'redirect_url': '/web/login?%s' % url_encode({'login': login_val, 'redirect': '/web'})
+                }
+            # Si no hay auto-aprobación, responder OK para que el front actúe según corresponda
+            return {'status': 'ok'}
+    
+    def _add_initial_balance(self, approval_record):
+        """Agregar saldo inicial de 100000 al usuario aprobado y crear asiento"""
+        try:
+            from odoo import fields
+            from datetime import datetime
+            
+            # Buscar el usuario creado
+            user = request.env['res.users'].sudo().search(
+                [('email', '=', approval_record.email)], limit=1)
+            if not user:
+                _logger.warning(f"No se encontró usuario para email {approval_record.email}")
+                return
+            
+            partner = user.partner_id
+            if not partner:
+                _logger.warning(f"No se encontró partner para usuario {user.id}")
+                return
+            
+            # Agregar 100000 de saldo inicial
+            user.balance_game = 100000.00
+            _logger.info(f"Saldo inicial agregado al usuario {user.id}: 100000")
+            
+            # Crear asiento contable de depósito inicial
+            try:
+                # Obtener journal de ingresos
+                operativa_journal = request.env.company.sudo().casino_operativa_journal_id
+                if operativa_journal and operativa_journal.default_account_id:
+                    account = operativa_journal.default_account_id
+                else:
+                    account = request.env['account.account'].sudo().search(
+                        [('code', '=', '400001')], limit=1)
+                    if not account:
+                        account = request.env['account.account'].sudo().create({
+                            'name': 'Cuenta Juegos Casino',
+                            'code': '400001',
+                            'account_type': 'income',
+                        })
+                
+                # Formatear fecha en lenguaje natural
+                meses = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+                        'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre']
+                today = fields.Date.today()
+                fecha_formateada = f"En {today.day} de {meses[today.month - 1]}"
+                
+                # Crear líneas del asiento
+                move_lines = [
+                    (0, 0, {
+                        'name': f'BONO de Bienvenida {user.nickname or user.name}',
+                        'account_id': account.id,
+                        'partner_id': partner.id,
+                        'debit': 0.0,
+                        'credit': 1000000.00,
+                    }),
+                    (0, 0, {
+                        'name': f'BONO de Bienvenida {user.nickname or user.name}',
+                        'account_id': partner.property_account_receivable_id.id or account.id,
+                        'partner_id': partner.id,
+                        'debit': 1000000.00,
+                        'credit': 0.0,
+                    }),
+                ]
+                
+                # Crear el asiento
+                move_vals = {
+                    'move_type': 'entry',
+                    'journal_id': operativa_journal.id,
+                    'partner_id': partner.id,
+                    'date': today,
+                    'name': f'BONO {user.nickname or user.name}',
+                    'line_ids': move_lines,
+                }
+                
+                move = request.env['account.move'].sudo().create(move_vals)
+                
+                # Postear el asiento
+                if move.state == 'draft':
+                    move.action_post()
+                    _logger.info(f"Asiento de depósito inicial creado y posteado: {move.id}")
+                
+            except Exception as e:
+                _logger.error(f"Error al crear asiento de depósito inicial: {str(e)}")
+                # No bloquear si falla el asiento, ya se actualizó el balance
+        
+        except Exception as e:
+            _logger.error(f"Error al agregar saldo inicial: {str(e)}")
