@@ -322,6 +322,108 @@ class MiPortalController(http.Controller):
         }
         return request.render('casino_online.portal_movimientos', ctx)
 
+    @http.route('/my/movimientos/data', type='json', auth='user', website=True)
+    def portal_movements_data(self, **kwargs):
+        args = kwargs or {}
+        start_date_s = args.get('start_date') or None
+        end_date_s = args.get('end_date') or None
+        selected_types = args.get('types') or None
+        if isinstance(selected_types, str):
+            selected_types = [selected_types]
+        if selected_types == []:
+            selected_types = None
+
+        start_date = fields.Date.to_date(start_date_s) if start_date_s else None
+        end_date = fields.Date.to_date(end_date_s) if end_date_s else None
+
+        try:
+            page = max(int(args.get('page', 1)), 1)
+        except Exception:
+            page = 1
+        try:
+            page_size = min(max(int(args.get('page_size', 10)), 1), 100)
+        except Exception:
+            page_size = 10
+
+        partner = request.env.user.partner_id.commercial_partner_id
+        company = request.env.company
+        AML = request.env['account.move.line'].sudo()
+
+        account_types = ['asset_receivable', 'liability_payable']
+        base_domain = [
+            ('company_id', '=', company.id),
+            ('partner_id', '=', partner.id),
+            ('account_id.account_type', 'in', account_types),
+            ('parent_state', 'in', ['draft', 'posted', 'in_process']),
+        ]
+
+        lines_all = AML.search(base_domain, order='date asc, id asc')
+
+        def _eff_date(line):
+            return line.date or line.move_id.date or date.min
+
+        if start_date or end_date:
+            lines = [line for line in lines_all
+                    if (not start_date or _eff_date(line) >= start_date)
+                    and (not end_date or _eff_date(line) <= end_date)]
+        else:
+            lines = list(lines_all)
+
+        def _classify(line):
+            mt = line.move_id.move_type or ''
+            jn = (line.journal_id and line.journal_id.name or '').lower()
+            jt = (line.journal_id.type or '').lower() if line.journal_id else ''
+            if any(x in jn for x in ('bonus', 'promo', 'bono')):
+                return 'Saldo de Bonus', 'bonus'
+            if jt in ('bank', 'cash'):
+                return 'Dep./Retiros', 'deposito_retiro'
+            if mt in ('out_invoice', 'out_refund', 'in_invoice', 'in_refund'):
+                return ('Transacciones de Juegos', 'juego') if 'juego' in jn else ('Facturaci¢n', 'juego')
+            if mt == 'entry':
+                return 'Ajustes', 'ajuste'
+            return 'Ajustes', 'ajuste'
+
+        prepared = []
+        selset = set(selected_types) if selected_types else None
+        for line in lines:
+            label, key = _classify(line)
+            if selset and key not in selset:
+                continue
+            amt = line.amount_signed if line.amount_signed is not None else line.balance
+            iso_date = _eff_date(line).isoformat()
+            date_obj = datetime.strptime(iso_date, '%Y-%m-%d')
+            formatted_date = date_obj.strftime('%d-%m-%Y')
+            prepared.append({
+                'id': line.id,
+                'date': formatted_date,
+                'description': line.name or line.move_id.ref or line.move_id.name or 'Movimiento contable',
+                'type_display': label,
+                'type_key': key,
+                'amount': round(float(amt or 0.0), 2),
+                'state': line.parent_state or line.move_id.state or '',
+            })
+
+        running = 0.0
+        for mv in prepared:
+            running += mv['amount']
+            mv['balance'] = round(running, 2)
+
+        prepared_desc = list(reversed(prepared))
+        total = len(prepared_desc)
+        page_count = max(math.ceil(total / page_size), 1)
+        if page > page_count:
+            page = page_count
+        offset = (page - 1) * page_size
+        rows = prepared_desc[offset: offset + page_size]
+
+        return {
+            'movements': rows,
+            'total_movements': total,
+            'page': page,
+            'page_count': page_count,
+            'page_size': page_size,
+        }
+
     @http.route('/mi-cuenta/movimientos', type='http', auth='user', website=True)
     def portal_movements_alias(self, **kw):
         qs = request.httprequest.query_string.decode() or ''

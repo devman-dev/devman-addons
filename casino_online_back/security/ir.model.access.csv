@@ -4,11 +4,11 @@ access_casino_game_session_portal,casino.game.session.portal,casino_online_back.
 access_casino_game_session_public,casino.game.session.public,casino_online_back.model_casino_game_session,,1,0,0,0
 
 access_casino_game_withdrawals_user,casino.game.withdrawals.user,casino_online_back.model_casino_game_withdrawals,,1,1,1,1
-access_casino_game_withdrawals_portal,casino.game.withdrawals.portal,casino_online_back.model_casino_game_withdrawals,,1,0,0,0
+access_casino_game_withdrawals_portal,casino.game.withdrawals.portal,casino_online_back.model_casino_game_withdrawals,,1,1,1,0
 access_casino_game_withdrawals_public,casino.game.withdrawals.public,casino_online_back.model_casino_game_withdrawals,,1,0,0,0
 
 access_casino_game_bank_user,casino.game.bank.user,casino_online_back.model_casino_game_bank,,1,1,1,1
-access_casino_game_bank_portal,casino.game.bank.portal,casino_online_back.model_casino_game_bank,,1,0,0,0
+access_casino_game_bank_portal,casino.game.bank.portal,casino_online_back.model_casino_game_bank,,1,1,1,0
 access_casino_game_bank_public,casino.game.bank.public,casino_online_back.model_casino_game_bank,,1,0,0,0
 
 access_bet_casino_game_limits_user_user,casino.game.bet.limits.bank.user,casino_online_back.model_casino_game_bet_limits,,1,1,1,1

@@ -171,9 +171,9 @@ class SignUpApproveController(http.Controller):
                 _logger.warning(f"No se encontró partner para usuario {user.id}")
                 return
             
-            # Agregar 100000 de saldo inicial
-            user.balance_game = 100000.00
-            _logger.info(f"Saldo inicial agregado al usuario {user.id}: 100000")
+            # Agregar 1000000 de saldo inicial
+            user.balance_game = 1000000.00
+            _logger.info(f"Saldo inicial agregado al usuario {user.id}: 1000000")
             
             # Crear asiento contable de depósito inicial
             try:

@@ -50,55 +50,276 @@
 
     <template id="custom_portal_my_home" inherit_id="portal.portal_my_home">
         <xpath expr="//div[contains(@class, 'o_portal_my_home')]" position="before">
-            <!-- Script original -->
-            <script type="text/javascript">
+            <style>
+                /* Estilos responsivos para navegación del cajero */
+                .casino-nav-link {
+                    display: block;
+                    padding: 0.75rem 1rem;
+                    text-decoration: none;
+                    color: #212529;
+                    border-radius: 0.375rem;
+                    margin-bottom: 0.5rem;
+                    transition: all 0.2s ease;
+                    border-left: 4px solid transparent;
+                    position: relative;
+                }
+                .casino-nav-link:hover {
+                    background-color: #f8f9fa;
+                    border-left-color: #0dcaf0;
+                    color: #212529;
+                    transform: translateX(2px);
+                }
+                /* Estado Activo - Muy visible */
+                .casino-nav-link.active {
+                    background-color: #0dcaf0;
+                    color: white;
+                    border-left-color: #0a9fbb;
+                    font-weight: 600;
+                    box-shadow: 0 2px 8px rgba(13, 202, 240, 0.3);
+                }
+                .casino-nav-link.active:hover {
+                    background-color: #0ba5cc;
+                    transform: translateX(4px);
+                }
+                .casino-nav-link.primary {
+                    font-weight: 600;
+                    padding: 1rem;
+                }
+                .casino-nav-link.success { background-color: #d1e7dd; border-left-color: #198754; }
+                .casino-nav-link.warning { background-color: #fff3cd; border-left-color: #ffc107; }
+                .casino-nav-link.info { background-color: #cff4fc; border-left-color: #0dcaf0; }
+                .casino-nav-link.success:hover { background-color: #c0dbd3; }
+                .casino-nav-link.warning:hover { background-color: #ffe9a8; }
+                .casino-nav-link.info:hover { background-color: #b6effb; }
+                /* Active para links con color base */
+                .casino-nav-link.success.active { background-color: #198754; color: white; }
+                .casino-nav-link.warning.active { background-color: #ffc107; color: #212529; }
+                .casino-nav-link.info.active { background-color: #0dcaf0; color: white; }
+                
+                /* Colores específicos para opciones de Cajero */
+                /* Movimientos - Azul Grisáceo Profundo (Neutralidad profesional) */
+                .casino-nav-link.movements {
+                    /*background-color: #e8eef5;
+                    border-left-color: #263238;*/
+                    color: #0449b3;
+                }
+                .casino-nav-link.movements:hover {
+                    background-color: #E3F2FD;
+                    border-left-color: #0093ff;
+                }
+                .casino-nav-link.movements.active {
+                    background-color: #55a8d1;
+                    color: white;
+                    border-left-color: #55a8d1;
+                }
+                
+                /* Mis Medios de Pago - Verde Bosque (Confianza + dinero) */
+                .casino-nav-link.payment-methods {
+                    /* background-color: #e8f5e9;
+                    border-left-color: #1B5E20; */
+                    color: #1B5E20;
+                }
+                .casino-nav-link.payment-methods:hover {
+                    background-color: #c8e6c9;
+                    border-left-color: #0d3817;
+                }
+                .casino-nav-link.payment-methods.active {
+                    background-color: #0d3817;
+                    color: white;
+                    border-left-color: #0d3817;
+                }
+                
+                /* Mis Límites - Ocre/Oro Viejo (Precaución + reglas) */
+                .casino-nav-link.limits {
+                    /*background-color: #f9f6f0;
+                    border-left-color: #827717;*/
+                    color: #827717;
+                }
+                .casino-nav-link.limits:hover {
+                    background-color: #f3ede0;
+                    border-left-color: #6b6310;
+                }
+                .casino-nav-link.limits.active {
+                    background-color: #827717;
+                    color: white;
+                    border-left-color: #6b6310;
+                }
+                
+                /* Mis Datos Bancarios - Púrpura Profundo (Seguridad institucional) */
+                .casino-nav-link.bank-data {
+                    /*background-color: #f3e5f5;
+                    border-left-color: #4A148C;*/
+                    color: #4A148C;
+                }
+                .casino-nav-link.bank-data:hover {
+                    background-color: #e1bee7;
+                    border-left-color: #320064;
+                }
+                .casino-nav-link.bank-data.active {
+                    background-color: #4A148C;
+                    color: white;
+                    border-left-color: #320064;
+                }
+                
+                /* Mensaje de confianza/helper text */
+                .casino-nav-helper {
+                    font-size: 0.75rem;
+                    color: #6c757d;
+                    margin: -0.4rem 0 0.75rem 1rem;
+                    padding-left: 0.35rem;
+                    border-left: 2px solid #ffc107;
+                    padding-left: 0.5rem;
+                    font-weight: 500;
+                    display: block;
+                    line-height: 1.2;
+                }
+                
+                .casino-sidebar {
+                    position: sticky;
+                    top: 1rem;
+                    max-height: calc(100vh - 2rem);
+                    overflow-y: auto;
+                }
+                
+                .casino-section-title {
+                    font-size: 0.875rem;
+                    font-weight: 700;
+                    text-transform: uppercase;
+                    color: #6c757d;
+                    margin: 1.5rem 0 0.75rem 0;
+                    padding-left: 1rem;
+                }
+                
+                /* Mobile: menú hamburguesa */
+                @media (max-width: 991.98px) {
+                    .casino-sidebar-desktop { display: none !important; }
+                    .casino-mobile-menu {
+                        position: fixed;
+                        bottom: 0;
+                        left: 0;
+                        right: 0;
+                        background: white;
+                        border-top: 2px solid #dee2e6;
+                        z-index: 1030;
+                        box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+                    }
+                    .casino-mobile-toggle {
+                        width: 100%;
+                        padding: 1rem;
+                        background: #0dcaf0;
+                        color: white;
+                        border: none;
+                        font-weight: 600;
+                    }
+                    .casino-mobile-collapse {
+                        max-height: 0;
+                        overflow: hidden;
+                        transition: max-height 0.3s ease;
+                    }
+                    .casino-mobile-collapse.show {
+                        max-height: 80vh;
+                        overflow-y: auto;
+                    }
+                    .casino-content-mobile { padding-bottom: 80px; }
+                    .casino-nav-link { font-size: 0.95rem; }
+                }
+                
+                /* Desktop */
+                @media (min-width: 992px) {
+                    .casino-mobile-menu { display: none !important; }
+                }
+            </style>
+            
+            <script type="text/javascript"><![CDATA[
                 document.addEventListener("DOMContentLoaded", function () {
-                const buttons = document.querySelectorAll("button[data-target]");
-                buttons.forEach((button) => {
-                button.addEventListener("click", function () {
-                const targetId = this.getAttribute("data-target");
-                const allDivs = document.querySelectorAll(".w-75 > div");
-                allDivs.forEach((div) => { div.classList.add("d-none"); });
-                const targetDiv = document.querySelector(targetId);
-                if (targetDiv) { targetDiv.classList.remove("d-none"); }
-                if (targetId) {
-                history.replaceState(null, "", targetId);
-                }
+                    // Manejar clicks en links de navegación
+                    const navLinks = document.querySelectorAll("a[data-target]");
+                    navLinks.forEach((link) => {
+                        link.addEventListener("click", function (e) {
+                            e.preventDefault();
+                            const targetId = this.getAttribute("data-target");
+                            const allDivs = document.querySelectorAll(".casino-content-area > div");
+                            allDivs.forEach((div) => { div.classList.add("d-none"); });
+                            const targetDiv = document.querySelector(targetId);
+                            if (targetDiv) { 
+                                targetDiv.classList.remove("d-none");
+                                // Cerrar menú móvil si está abierto
+                                const mobileCollapse = document.querySelector(".casino-mobile-collapse");
+                                if (mobileCollapse) mobileCollapse.classList.remove("show");
+                                // Scroll to top en móvil
+                                if (window.innerWidth < 992) {
+                                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                                }
+                            }
+                            if (targetId) {
+                                history.replaceState(null, "", targetId);
+                            }
+                            // Marcar link activo
+                            navLinks.forEach(l => l.classList.remove('active'));
+                            this.classList.add('active');
+                        });
+                    });
+
+                    // Toggle menú móvil
+                    const mobileToggle = document.querySelector(".casino-mobile-toggle");
+                    if (mobileToggle) {
+                        mobileToggle.addEventListener("click", function() {
+                            const collapse = document.querySelector(".casino-mobile-collapse");
+                            collapse.classList.toggle("show");
+                        });
+                    }
+
+                    // Si llega con hash, mostrar esa sección
+                    if (window.location.hash) {
+                        const allDivs = document.querySelectorAll(".casino-content-area > div");
+                        allDivs.forEach((div) => { div.classList.add("d-none"); });
+                        const targetDiv = document.querySelector(window.location.hash);
+                        if (targetDiv) { 
+                            targetDiv.classList.remove("d-none");
+                            // Marcar link activo
+                            const activeLink = document.querySelector(`a[data-target="${window.location.hash}"]`);
+                            if (activeLink) activeLink.classList.add('active');
+                        }
+                    }
                 });
-                });
+            ]]></script>
 
-                // Si llega con hash #movimientos_form, mostrar esa sección
-                if (window.location.hash === "#movimientos_form") {
-                const allDivs = document.querySelectorAll(".w-75 > div");
-                allDivs.forEach((div) => { div.classList.add("d-none"); });
-                const targetDiv = document.querySelector("#movimientos_form");
-                if (targetDiv) { targetDiv.classList.remove("d-none"); }
-                }
-                });
-            </script>
+            <div id="portal_client_category_1" class="o_portal_category">
+                <!-- Sidebar Desktop -->
+                <div class="row">
+                    <div class="col-lg-3 casino-sidebar-desktop">
+                        <nav class="casino-sidebar">
+                            <!-- Acciones Principales -->
+                            <a href="#" class="casino-nav-link primary success" data-target="#depositar_form">
+                                <i class="fa fa-plus-circle me-2"></i>Depositar
+                            </a>
+                            <a href="#" class="casino-nav-link primary warning" data-target="#retirar_form">
+                                <i class="fa fa-minus-circle me-2"></i>Retirar
+                            </a>
+                            <a href="#" class="casino-nav-link primary info" data-target="#registrar_bonus_form">
+                                <i class="fa fa-gift me-2"></i>Registrar Bonus
+                            </a>
 
-            <div id="portal_client_category_1" class="o_portal_category row g-2 d-flex">
-                <div class="w-25">
-                    <button type="button" class="btn btn-success w-100 mb-2"
-                        data-target="#depositar_form">Depositar</button>
-                    <button type="button" class="btn btn-warning w-100 mb-2"
-                        data-target="#retirar_form">Retirar</button>
-                    <button type="button" class="btn btn-info w-100 mb-2"
-                        data-target="#registrar_bonus_form">Registrar Bonus</button>
+                            <!-- Sección Cajero -->
+                            <div class="casino-section-title">Cajero</div>
+                            <a href="#" class="casino-nav-link movements" data-target="#movimientos_form">
+                                <i class="fa fa-list me-2"></i>Movimientos
+                            </a>
+                            <a href="#" class="casino-nav-link payment-methods" data-target="#medios_pagos_form">
+                                <i class="fa fa-credit-card me-2"></i>Mis Medios de Pago
+                            </a>
+                            <a href="#" class="casino-nav-link limits" data-target="#mis_limites_form">
+                                <i class="fa fa-shield me-2"></i>Mis Límites
+                            </a>
+                            <a href="#" class="casino-nav-link bank-data" data-target="#datos_bancarios_form">
+                                <i class="fa fa-bank me-2"></i>Mis Datos Bancarios
+                            </a>
+                        </nav>
+                    </div>
 
-                    <h4>Cajero</h4>
-
-                    <button type="button" class="btn btn-info w-100 mb-2"
-                        data-target="#movimientos_form">Movimientos</button>
-                    <button type="button" class="btn btn-info w-100 mb-2"
-                        data-target="#medios_pagos_form">Mis Medios de Pago</button>
-                    <button type="button" class="btn btn-info w-100 mb-2"
-                        data-target="#mis_limites_form">Mis Limites</button>
-                    <button type="button" class="btn btn-info w-100 mb-2"
-                        data-target="#datos_bancarios_form">Mis Datos Bancarios</button>
-                </div>
-
-                <div class="w-75 my-0 ps-4">
+                    <!-- Contenido Principal -->
+                    <div class="col-lg-9 casino-content-mobile">
+                        <div class="casino-content-area">
                     <div id="depositar_form">
                         <div class="card mb-4 shadow-sm">
                             <div class="card-header bg-primary text-white">
@@ -190,7 +411,7 @@
                         <div class="o_portal_movements">
 
                             <!-- ===== Card de Filtros ===== -->
-                            <div class="card mb-4 shadow-sm">
+                            <!-- <div class="card mb-4 shadow-sm">
                                 <div class="card-header bg-primary text-white">
                                     <strong>Filtros de búsqueda</strong>
                                 </div>
@@ -199,7 +420,6 @@
                                         t-attf-action="{{ request.httprequest.path }}#movimientos_form"
                                         class="o_movements_filters">
 
-                                        <!-- Fechas -->
                                         <div class="row mb-3">
                                             <div class="col">
                                                 <div class="d-flex align-items-center">
@@ -220,10 +440,7 @@
                                             </div>
                                         </div>
 
-                                        <!-- Tipos -->
                                         <div class="mb-3">
-                                            <!-- <label class="form-label d-block">Buscar por
-                                            Tipo</label> -->
                                             <div class="d-flex flex-wrap align-items-center gap-3">
                                                 <div class="form-check">
                                                     <input class="form-check-input" type="checkbox"
@@ -250,7 +467,6 @@
                                                         t-att-checked="'checked' if (selected_types and 'ajuste' in selected_types) else None" />
                                                     <label class="form-check-label">Ajustes</label>
                                                 </div>
-                                                <!-- Botón Filtrar -->
                                                 <div class="d-flex justify-content-end">
                                                     <button type="submit" class="btn btn-primary">
                                                         Filtrar
@@ -259,14 +475,13 @@
                                             </div>
                                         </div>
 
-                                        <!-- Reset y paginación oculta -->
                                         <input type="hidden" name="page" value="1" />
                                         <input type="hidden" name="page_size"
                                             t-att-value="page_size or 10" />
 
                                     </form>
                                 </div>
-                            </div>
+                            </div> -->
                             <!-- ===== /Card de Filtros ===== -->
 
                             <!-- Separador -->
@@ -279,14 +494,16 @@
                                 </div>
                                 <div class="card-body p-0">
 
-                                    <div class="table-responsive">
+                                    <div class="o_movements_results_owl"
+                                        data-endpoint="/my/movimientos/data"
+                                        data-refresh-interval="5000">
+                                        <div class="table-responsive">
                                         <table
                                             class="table table-sm table-hover mb-0 o_transaction_list_table">
                                             <thead style="font-size:0.9rem;">
                                                 <tr>
                                                     <th>Fecha</th>
                                                     <th>Descripción</th>
-                                                    <!-- <th>Tipo</th> -->
                                                     <th class="text-end">Monto</th>
                                                     <th class="text-end">Saldo</th>
                                                 </tr>
@@ -300,13 +517,7 @@
                                                         <td>
                                                             <t t-esc="movement['description']" />
                                                         </td>
-                                                        <!-- <td>
-                                                            <span class="badge bg-secondary">
-                                                                <t t-esc="movement['type_display']" />
-                                                            </span>
-                                                        </td> -->
-
-                                                        <!-- Calcular montos -->
+                                                        
                                                         <t t-set="is_fact"
                                                             t-value="movement['type_display'] in ('Facturación','facturacion','Factura')" />
                                                         <t t-set="signed_amount"
@@ -346,7 +557,7 @@
                                             </tbody>
                                         </table>
                                     </div>
-
+                                    </div>
                                     <!-- ===== Paginación ===== -->
 
                                     <t t-set="q"
@@ -490,9 +701,63 @@
                             </div>
                         </div>
                     </div>
-                </div>
+
+                <!-- Cerrar contenido principal -->
+                </div> <!-- .casino-content-area -->
+            </div> <!-- .col-lg-9 -->
+        </div> <!-- .row -->
+
+        <!-- Menú Móvil (Bottom Navigation) -->
+        <div class="casino-mobile-menu">
+            <button class="casino-mobile-toggle" type="button">
+                <i class="fa fa-bars me-2"></i>Menú del Cajero
+            </button>
+            <div class="casino-mobile-collapse">
+                <nav class="p-3">
+                    <!-- Saldo visible en móvil -->
+                    <t t-set="_partner_mobile" t-value="request.env.user.partner_id.commercial_partner_id" />
+                    <t t-set="saldo_mobile" t-value="_partner_mobile.sudo().balance_game" />
+                    <div class="mb-3 p-3 rounded" style="background-color: #d1e7dd; border-left: 4px solid #198754;">
+                        <div class="d-flex align-items-center justify-content-between">
+                            <span class="fw-bold" style="color: #198754;">Saldo:</span>
+                            <span t-att-class="'badge rounded-pill fs-6 ' + ('bg-success' if saldo_mobile >= 0 else 'bg-danger')">
+                                <t t-if="saldo_mobile >= 0">
+                                    <t t-esc="request.env['ir.qweb.field.monetary'].value_to_html(saldo_mobile, {'display_currency': request.env.company.currency_id})" />
+                                </t>
+                                <t t-else="">
+                                    -<t t-esc="request.env['ir.qweb.field.monetary'].value_to_html(abs(saldo_mobile), {'display_currency': request.env.company.currency_id})" />
+                                </t>
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <a href="#" class="casino-nav-link primary success" data-target="#depositar_form">
+                        <i class="fa fa-plus-circle me-2"></i>Depositar
+                    </a>
+                    <a href="#" class="casino-nav-link primary warning" data-target="#retirar_form">
+                        <i class="fa fa-minus-circle me-2"></i>Retirar
+                    </a>
+                    <a href="#" class="casino-nav-link primary info" data-target="#registrar_bonus_form">
+                        <i class="fa fa-gift me-2"></i>Registrar Bonus
+                    </a>
+                    <div class="casino-section-title">Cajero</div>
+                    <a href="#" class="casino-nav-link movements" data-target="#movimientos_form">
+                        <i class="fa fa-list me-2"></i>Movimientos
+                    </a>
+                    <a href="#" class="casino-nav-link payment-methods" data-target="#medios_pagos_form">
+                        <i class="fa fa-credit-card me-2"></i>Mis Medios de Pago
+                    </a>
+                    <a href="#" class="casino-nav-link limits" data-target="#mis_limites_form">
+                        <i class="fa fa-shield me-2"></i>Mis Límites
+                    </a>
+                    <a href="#" class="casino-nav-link bank-data" data-target="#datos_bancarios_form">
+                        <i class="fa fa-bank me-2"></i>Mis Datos Bancarios
+                    </a>
+                </nav>
             </div>
-        </xpath>
+        </div>
+    </div> <!-- #portal_client_category_1 -->
+    </xpath>
     </template>
 
 </odoo>

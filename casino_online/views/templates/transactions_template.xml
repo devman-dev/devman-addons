@@ -109,6 +109,9 @@
                         <div class="o_withdrawal_list_pagination_info text-muted me-auto" />
                     </div>
                 </div>
+                <small class="d-block mt-3" style="color: #6c757d; border-left: 2px solid #827717; padding-left: 0.5rem; font-weight: 500;">
+                    <i class="fa fa-clock-o me-1"></i>Procesamos retiros en 1 hora
+                </small>
             </div>
 
             <nav class="align-self-center mt-2" aria-label="Navegación de Retiros">

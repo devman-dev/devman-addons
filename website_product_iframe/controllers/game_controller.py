@@ -580,7 +580,7 @@ class GameController(http.Controller):
                 amount = data.get('params', {}).get('amount', 0.0)
             if not isinstance(amount, (int, float)) or amount < 0:
                 raise CasinoError(*CasinoErrorCodes.INVALID_AMOUNT)
-
+                
             internal_transaction_id = uuid.uuid4().hex
 
             session = request.env['casino.game.session'].sudo().search([('token', '=', token)], limit=1)
@@ -590,15 +590,41 @@ class GameController(http.Controller):
             # Validar fondos insuficientes
             current_balance = self._get_balance_user(token)
 
-            _logger.info('Casino Iframe: api_win called with session_id: %s, amount: %s, transactionId: %s', session.id, amount, transactionId)
+            # _logger.info('Casino Iframe: api_win called with session_id: %s, amount: %s, transactionId: %s', session.id, amount, transactionId)
             _logger.info('Casino Iframe: Actualizando balance del jugador: %s', json.dumps(kwargs, indent=2, ensure_ascii=False))
             amount = amount / 100
 
             op = 'cancelled' if 'CANCELLED' in str(transactionId).upper() else ('win' if amount > 0 else 'lose')
             # result = self._apply_amount(session.id, product_id = gameId, round_id = roundId, amount=amount, to_win=0.0, op=op, token=token, transaction_id=transactionId, internal_transaction_id=internal_transaction_id)
             
+
+            events = data.get('events', [])
+            if not events:
+                events = data.get('params', {}).get('events', [])
+            
+            # Asegurar que events sea una lista válida
+            if not isinstance(events, list):
+                events = None
+
+            # Convertir events a JSON válido
+            events = json.dumps(events) if isinstance(events, list) else json.dumps([])
+
+            previous_sessions = request.env['casino.game.session'].sudo().search([
+                ('round_id', '=', roundId)
+            ], limit=1)
+            
+            event_id = None
+            event_date = None
+            market_id = None
+            start = None
+
+            if previous_sessions:
+                event_id = previous_sessions.event_id
+                event_date = previous_sessions.event_date
+                market_id = previous_sessions.market_id
+
             transaction = CasinoTransaction(
-                session_id=session.id,
+                session_id=1, #session.id,
                 product_id=gameId,
                 end_round=end_round,
                 round_id=roundId,
@@ -608,11 +634,11 @@ class GameController(http.Controller):
                 token=token,
                 transaction_id=transactionId,
                 internal_transaction_id=internal_transaction_id,
-                # events=json.loads(events) if isinstance(events, str) else events,
-                # event_id=event_id,
-                # event_date=event_date,
-                # market_id=market_id,
-                # start=start,
+                events=events,
+                event_id=event_id,
+                event_date=event_date,
+                market_id=market_id,
+                start=start,
                 json_data=data
             )
 

@@ -24,16 +24,13 @@
         # 'data/balance_cron.xml',
     ],
     "assets": {
-        # CSS puede ir en el bundle frontend estándar
-        "web.assets_frontend": [
-            # "casino_online/static/src/scss/withdrawals.scss",
-        ],
-        # JS que depende de web.public.widget / web.Dialog debe ir en lazy
+        # JS que debe estar disponible en frontend
         "web.assets_frontend": [
             "casino_online/static/src/js/wallet_balance.js",
+            # "casino_online/static/src/js/movements_live.js",
         ],
+        # JS lazy-loaded para optimización
         "web.assets_frontend_lazy": [
-            ("include", "web.assets_frontend"), # Asegura que los assets core del frontend se carguen para las dependencias
             "casino_online/static/src/js/transaction_history.js",
             "casino_online/static/src/js/withdrawal_list.js",
             "casino_online/static/src/js/withdrawal_modal.js",
