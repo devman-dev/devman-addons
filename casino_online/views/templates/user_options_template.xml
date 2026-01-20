@@ -189,6 +189,7 @@
                     top: 1rem;
                     max-height: calc(100vh - 2rem);
                     overflow-y: auto;
+                    overflow: hidden;
                 }
                 
                 .casino-section-title {

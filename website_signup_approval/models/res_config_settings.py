@@ -53,6 +53,15 @@ class ResConfigSettings(models.TransientModel):
         params = self.env['ir.config_parameter'].sudo()
         limits = params.get_param(
             'website_signup_approval.documents_ids')
-        res.update(documents_ids=[
-            (6, 0, literal_eval(limits))] if limits else False)
+        if limits:
+            try:
+                doc_ids = literal_eval(limits)
+                # Verificar que los registros existan antes de asignarlos
+                existing_docs = self.env['document.attachment'].sudo().search([('id', 'in', doc_ids)])
+                res.update(documents_ids=[(6, 0, existing_docs.ids)])
+            except (ValueError, SyntaxError):
+                # Si hay error al parsear, usar valor vacío
+                res.update(documents_ids=[(6, 0, [])])
+        else:
+            res.update(documents_ids=[(6, 0, [])])
         return res
