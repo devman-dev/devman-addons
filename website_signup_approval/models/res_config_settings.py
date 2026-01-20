@@ -31,15 +31,15 @@ class ResConfigSettings(models.TransientModel):
                                           config_parameter='website_signup_approval.auth_signup_approval',
                                           help="Signup request send only if "
                                                "it is enabled")
+    documents_ids = fields.Many2many('document.attachment',
+                                     string='Documents',
+                                     help="Select the type of document")
     auto_approve_portal_signup = fields.Boolean(
         string='Auto Approve Portal Signups',
         config_parameter='website_signup_approval.auto_approve_portal_signup',
         help="Approve portal signup requests automatically without manual "
              "review.")
-    documents_ids = fields.Many2many('document.attachment',
-                                     string='Documents',
-                                     help="Select the type of document")
-
+    
     def set_values(self):
         """Set values for the field"""
         super(ResConfigSettings, self).set_values()

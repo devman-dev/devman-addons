@@ -57,10 +57,9 @@ class AuthSignupHome(Home):
                   k in SIGN_UP_REQUEST_PARAMS}
         signup_approval = request.env['ir.config_parameter'].sudo().get_param(
             'website_signup_approval.auth_signup_approval')
-        # Comentado: ahora el JS maneja la redirección tras RPC
-        # if values:
-        #     if signup_approval:
-        #         return request.redirect('/success')
+        if values:
+            if signup_approval:
+                return request.redirect('/success')
         if not qcontext.get('token') and not qcontext.get('signup_enabled'):
             raise werkzeug.exceptions.NotFound()
         if 'error' not in qcontext and request.httprequest.method == 'POST':
@@ -115,16 +114,12 @@ class SignUpApproveController(http.Controller):
     def create_attachment(self, **dat):
         """Create approval request and attachment in backend"""
         data_list = []
-        auto_approve_param = request.env['ir.config_parameter'].sudo().get_param(
-            'website_signup_approval.auto_approve_portal_signup')
-        auto_approve_enabled = str(auto_approve_param).lower() == 'true'
         for data in dat['data']:
             data = data.split('base64')[1] if data else False
             data_list.append((0, 0, {'attachments': data}))
         if request.env['res.users.approve'].sudo().search(
                 [('email', '=', dat['email'])]):
-            # Ya existe una solicitud para este email
-            return {'status': 'exists'}
+            pass
         else:
             attach = request.env['res.users.approve'].sudo().create(
                 {'name': dat['username'],
@@ -141,18 +136,29 @@ class SignUpApproveController(http.Controller):
                      'res_id': attach.id,
                      }
                 )
-            if auto_approve_enabled:
-                attach.action_approve_login()
+        
+        auto_approve_param = request.env['ir.config_parameter'].sudo().get_param(
+            'website_signup_approval.auto_approve_portal_signup')
+        auto_approve_enabled = str(auto_approve_param).lower() == 'true'
+        if auto_approve_enabled:
+            attach.action_approve_login()
+            request.env.cr.commit()
+            # Verificar que el usuario fue creado antes de agregar saldo
+            user = request.env['res.users'].sudo().search([('email', '=', dat['email'])], limit=1)
+            if user:
                 self._add_initial_balance(attach)
-                # Redirigir a la pantalla de login con el email precargado
-                user = request.env['res.users'].sudo().search([('email', '=', dat['email'])], limit=1)
-                login_val = user.login if user else dat['email']
-                return {
-                    'redirect_url': '/web/login?%s' % url_encode({'login': login_val, 'redirect': '/web'})
-                }
-            # Si no hay auto-aprobación, responder OK para que el front actúe según corresponda
-            return {'status': 'ok'}
-    
+                login_val = user.login
+            else:
+                _logger.error(f"Usuario no fue creado después de aprobación para {dat['email']}")
+                login_val = dat['email']
+            
+            return {
+                'redirect_url': '/web/login?%s' % url_encode({'login': login_val, 'redirect': '/web'})
+            }
+        
+        # Si no hay auto-aprobación, responder OK para que el front actúe según corresponda
+        return {'status': 'ok'}
+
     def _add_initial_balance(self, approval_record):
         """Agregar saldo inicial de 100000 al usuario aprobado y crear asiento"""
         try:
@@ -177,20 +183,27 @@ class SignUpApproveController(http.Controller):
             
             # Crear asiento contable de depósito inicial
             try:
-                # Obtener journal de ingresos
+                # Obtener journals custodia y operativa
                 operativa_journal = request.env.company.sudo().casino_operativa_journal_id
                 if operativa_journal and operativa_journal.default_account_id:
                     account = operativa_journal.default_account_id
                 else:
-                    account = request.env['account.account'].sudo().search(
-                        [('code', '=', '400001')], limit=1)
+                    # Fallback a búsqueda por código
+                    account = request.env['account.account'].sudo().search([('code', '=', '400001')], limit=1)
                     if not account:
+                        # Crear cuenta si no existe
                         account = request.env['account.account'].sudo().create({
                             'name': 'Cuenta Juegos Casino',
                             'code': '400001',
                             'account_type': 'income',
                         })
-                
+
+                custodia_journal = request.env.company.sudo().casino_custodia_journal_id
+                if custodia_journal:
+                    default_account = custodia_journal.sudo().default_account_id
+                    if not default_account:
+                        default_account = request.env['account.account'].sudo().search([('code', '=', '110101')], limit=1)
+                    
                 # Formatear fecha en lenguaje natural
                 meses = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
                         'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre']
@@ -208,7 +221,7 @@ class SignUpApproveController(http.Controller):
                     }),
                     (0, 0, {
                         'name': f'BONO de Bienvenida {user.nickname or user.name}',
-                        'account_id': partner.property_account_receivable_id.id or account.id,
+                        'account_id': default_account.id,
                         'partner_id': partner.id,
                         'debit': 1000000.00,
                         'credit': 0.0,
@@ -218,10 +231,11 @@ class SignUpApproveController(http.Controller):
                 # Crear el asiento
                 move_vals = {
                     'move_type': 'entry',
-                    'journal_id': operativa_journal.id,
                     'partner_id': partner.id,
-                    'date': today,
                     'name': f'BONO {user.nickname or user.name}',
+                    'journal_id': custodia_journal.id,
+                    'date': today,
+                    'ref': f'BONO {user.nickname or user.name}',
                     'line_ids': move_lines,
                 }
                 

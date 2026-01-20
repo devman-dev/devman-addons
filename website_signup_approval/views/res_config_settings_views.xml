@@ -18,7 +18,14 @@
                     </div>
                     <div class="o_setting_right_pane">
                         <label for="auth_signup_approval" readonly="false"/>
-                        <div class="text-muted">Attachment Data</div>
+                        <div class="text-muted">
+                            Attachment Data
+                        </div>
+                        <div class="content-group mt16"
+                             invisible="auth_signup_approval == False">
+                            <field name="documents_ids"
+                                   widget="many2many_tags" required="auth_signup_approval == True"/>
+                        </div>
                         <div class="content-group mt16"
                              invisible="auth_signup_approval == False">
                             <field name="auto_approve_portal_signup"/>
@@ -26,11 +33,6 @@
                             <div class="text-muted">
                                 Approve portal signup requests automatically without manual review.
                             </div>
-                        </div>
-                        <div class="content-group mt16"
-                             invisible="auth_signup_approval == False">
-                            <field name="documents_ids"
-                                   widget="many2many_tags" required="auth_signup_approval == True"/>
                         </div>
                     </div>
                 </div>
