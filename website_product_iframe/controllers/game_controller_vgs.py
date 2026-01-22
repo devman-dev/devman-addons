@@ -335,6 +335,7 @@ class GameControllerVGS(http.Controller):
             ).id,
             'date': fields.Datetime.today(),
             'ref': f'Casino Game - {product}',
+            'partner_id': partner.id,
             'line_ids': [
                 (0, 0, {
                     'name': f'Ingreso juego: {product}',
