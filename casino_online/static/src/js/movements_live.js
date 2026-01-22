@@ -30,7 +30,7 @@ class CasinoMovementsResults extends Component {
                 <th>Fecha333</th>
                 <th>Descripcion</th>
                 <th class="text-end">Monto</th>
-                <th class="text-end">Saldo</th>
+                <th class="text-end o-movements-balance-col">Saldo</th>
                 <th class="text-center">Detalle</th>
               </tr>
             </thead>
@@ -59,7 +59,7 @@ class CasinoMovementsResults extends Component {
                       $<t t-esc="formatMoney(signedAmount)" />
                     </span>
                   </td>
-                  <td class="text-end">
+                  <td class="text-end o-movements-balance-col">
                     <strong>
                       <span t-if="signedBalance &gt;= 0" class="text-success">
                         $<t t-esc="formatMoney(signedBalance)" />

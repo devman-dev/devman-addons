@@ -242,6 +242,13 @@
                 @media (min-width: 992px) {
                     .casino-mobile-menu { display: none !important; }
                 }
+
+                /* Ocultar columna Saldo en pantallas chicas */
+                @media (max-width: 575.98px) {
+                    .o-movements-balance-col {
+                        display: none !important;
+                    }
+                }
             </style>
             
             <script type="text/javascript"><![CDATA[
@@ -519,7 +526,7 @@
                                                     <th>Fecha</th>
                                                     <th>Descripción</th>
                                                     <th class="text-end">Monto</th>
-                                                    <th class="text-end">Saldo</th>
+                                                    <th class="text-end o-movements-balance-col">Saldo</th>
                                                     <th class="text-center">Detalle</th>
                                                 </tr>
                                             </thead>
@@ -555,7 +562,7 @@
                                                         <t t-set="signed_balance_fmt"
                                                             t-value="signed_balance" />
 
-                                                        <td class="text-end">
+                                                        <td class="text-end o-movements-balance-col">
                                                             <strong>
                                                                 <span t-if="signed_balance &gt;= 0"
                                                                     class="text-success"> $<t
