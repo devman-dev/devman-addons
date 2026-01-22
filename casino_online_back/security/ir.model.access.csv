@@ -25,3 +25,4 @@ access_casino_game_withdrawals_user,casino.game.withdrawals.user,model_casino_ga
 access_chip_operation_wizard_user,chip.operation.wizard.user,model_chip_operation_wizard,base.group_user,1,1,1,1
 access_casino_exposure_report_wizard_user,casino.exposure.report.wizard.user,casino_online_back.model_casino_exposure_report_wizard,base.group_user,1,1,1,1
 access_casino_exposure_report_line_user,casino.exposure.report.line.user,casino_online_back.model_casino_exposure_report_line,base.group_user,1,1,1,1
+access_casino_account_move_line_wizard_user,casino.account.move.line.wizard.user,casino_online_back.model_casino_account_move_line_wizard,base.group_user,1,1,1,1

@@ -1,0 +1,33 @@
+<odoo>
+    <record id="view_casino_account_move_line_wizard_form" model="ir.ui.view">
+        <field name="name">casino.account.move.line.wizard.form</field>
+        <field name="model">casino.account.move.line.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Cuenta Corriente Casino">
+                <sheet>
+                    <group string="Filtros">
+                        <group>
+                            <field name="date_from"/>
+                            <field name="date_to"/>
+                        </group>
+                        <group>
+                            <field name="partner_id"/>
+                        </group>
+                    </group>
+                </sheet>
+                <footer>
+                    <button name="action_open_account_moves" type="object" class="oe_highlight" string="Generar Reporte"/>
+                    <button string="Cancelar" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_casino_account_move_line_wizard" model="ir.actions.act_window">
+        <field name="name">Cuenta Corriente Casino</field>
+        <field name="res_model">casino.account.move.line.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="view_casino_account_move_line_wizard_form"/>
+        <field name="target">new</field>
+    </record>
+</odoo>
