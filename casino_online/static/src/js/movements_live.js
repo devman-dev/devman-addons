@@ -31,12 +31,13 @@ class CasinoMovementsResults extends Component {
                 <th>Descripcion</th>
                 <th class="text-end">Monto</th>
                 <th class="text-end">Saldo</th>
+                <th class="text-center">Detalle</th>
               </tr>
             </thead>
             <tbody style="font-size:0.9rem;">
               <t t-if="state.movements.length === 0">
                 <tr>
-                  <td class="text-center" colspan="4">Sin movimientos.</td>
+                  <td class="text-center" colspan="5">Sin movimientos.</td>
                 </tr>
               </t>
               <t t-foreach="state.movements" t-as="movement" t-key="movement.id">
@@ -67,6 +68,68 @@ class CasinoMovementsResults extends Component {
                         -$<t t-esc="formatMoney(Math.abs(signedBalance))" />
                       </span>
                     </strong>
+                  </td>
+                  <td class="text-center">
+                    <t t-if="movement.session">
+                      <button type="button"
+                        class="btn btn-outline-secondary btn-sm"
+                        t-att-data-bs-toggle="'collapse'"
+                        t-att-data-bs-target="'#session-details-' + movement.id"
+                        t-att-aria-controls="'session-details-' + movement.id"
+                        aria-expanded="false"
+                        title="Ver detalle">
+                        <i class="fa fa-search" />
+                      </button>
+                    </t>
+                    <t t-else="">
+                      <span class="text-muted">-</span>
+                    </t>
+                  </td>
+                </tr>
+                <tr t-if="movement.session">
+                  <td colspan="5" class="p-0">
+                    <div class="collapse" t-att-id="'session-details-' + movement.id">
+                      <div class="card card-body border-0 border-top">
+                        <div class="row g-2">
+                          <div class="col-md-6 col-lg-4">
+                            <strong>Juego:</strong>
+                            <t t-esc="movement.session.game || '-'" />
+                          </div>
+                          <div class="col-md-6 col-lg-4">
+                            <strong>Round ID:</strong>
+                            <t t-esc="movement.session.round_id || '-'" />
+                          </div>
+                          <div class="col-md-6 col-lg-4">
+                            <strong>Transaction ID:</strong>
+                            <t t-esc="movement.session.transaction_id || '-'" />
+                          </div>
+                          <div class="col-md-6 col-lg-4">
+                            <strong>End Round:</strong>
+                            <t t-esc="movement.session.end_round ? 'true' : 'false'" />
+                          </div>
+                          <div class="col-md-6 col-lg-4">
+                            <strong>Amount:</strong>
+                            $<t t-esc="formatMoney(movement.session.amount)" />
+                          </div>
+                          <div class="col-md-6 col-lg-4">
+                            <strong>Event ID:</strong>
+                            <t t-esc="movement.session.event_id || '-'" />
+                          </div>
+                          <div class="col-md-6 col-lg-4">
+                            <strong>Event Date:</strong>
+                            <t t-esc="movement.session.event_date || '-'" />
+                          </div>
+                          <div class="col-md-6 col-lg-4">
+                            <strong>Market ID:</strong>
+                            <t t-esc="movement.session.market_id || '-'" />
+                          </div>
+                          <div class="col-md-6 col-lg-4">
+                            <strong>Start:</strong>
+                            <t t-esc="movement.session.start || '-'" />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
                   </td>
                 </tr>
               </t>
