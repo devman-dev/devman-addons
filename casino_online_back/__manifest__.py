@@ -14,6 +14,7 @@
         'views/account_move.xml',
         'views/bet_limits_views.xml',
         'views/res_company_views.xml',
+        'wizard/account_move_line_wizard_views.xml',
         'wizard/casino_session_report_wizard_views.xml',
         'wizard/exposure_report_wizard_views.xml',
         'views/global_report_views.xml',

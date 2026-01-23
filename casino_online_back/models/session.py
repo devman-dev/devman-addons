@@ -323,6 +323,7 @@ class CasinoGameSession(models.Model):
             'journal_id': journal.id,
             'date': fields.Date.today(),
             'ref': f"Depósito - {self.transaction_id}",
+            'partner_id': self.user_id.partner_id.id,
             'game_session_id': self.id,
             'line_ids': [
                 (0, 0, {
@@ -364,6 +365,7 @@ class CasinoGameSession(models.Model):
             'journal_id': journal.id,
             'date': fields.Date.today(),
             'ref': f"Apuesta - {self.transaction_id}",
+            'partner_id': self.user_id.partner_id.id,
             'game_session_id': self.id,
             'line_ids': [
                 (0, 0, {
@@ -431,6 +433,7 @@ class CasinoGameSession(models.Model):
             'journal_id': journal.id,
             'date': fields.Date.today(),
             'ref': f"Depósito - {self.transaction_id}",
+            'partner_id': self.user_id.partner_id.id,
             'game_session_id': self.id,
             'line_ids': [
                 (0, 0, {
@@ -472,6 +475,7 @@ class CasinoGameSession(models.Model):
             'journal_id': journal.id,
             'date': fields.Date.today(),
             'ref': f"Apuesta - {self.transaction_id}",
+            'partner_id': self.user_id.partner_id.id,
             'game_session_id': self.id,
             'line_ids': [
                 (0, 0, {
@@ -539,6 +543,7 @@ class CasinoGameSession(models.Model):
             'journal_id': journal.id,
             'date': fields.Date.today(),
             'ref': f"Depósito - {self.transaction_id}",
+            'partner_id': self.user_id.partner_id.id,
             'game_session_id': self.id,
             'line_ids': [
                 (0, 0, {
@@ -580,6 +585,7 @@ class CasinoGameSession(models.Model):
             'journal_id': journal.id,
             'date': fields.Date.today(),
             'ref': f"Apuesta - {self.transaction_id}",
+            'partner_id': self.user_id.partner_id.id,
             'game_session_id': self.id,
             'line_ids': [
                 (0, 0, {

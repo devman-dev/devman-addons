@@ -21,6 +21,23 @@ from odoo.addons.portal.controllers.portal import CustomerPortal
 
 _logger = logging.getLogger(__name__)
 
+
+def _serialize_game_session(session):
+    if not session:
+        return False
+    return {
+        'id': session.id,
+        'game': session.game_id.display_name or session.game_id.name or '',
+        'end_round': bool(session.end_round),
+        'round_id': session.round_id or '',
+        'transaction_id': session.transaction_id or '',
+        'amount': float(session.amount or 0.0),
+        'event_id': session.event_id or '',
+        'event_date': fields.Datetime.to_string(session.event_date) if session.event_date else '',
+        'market_id': session.market_id or '',
+        'start': fields.Datetime.to_string(session.start) if session.start else '',
+    }
+
 class CasinoHome(CustomerPortal):
     @http.route(['/my', '/my/home'], type='http', auth='user', website=True)
     def home(self, **kw):
@@ -150,6 +167,7 @@ class CasinoHome(CustomerPortal):
             if selset and key not in selset:
                 continue
             amt = l.amount_signed if l.amount_signed is not None else l.balance
+            session = l.move_id.game_session_id if l.move_id else False
 
             iso_date = _eff_date(l).isoformat()
             date_obj = datetime.strptime(iso_date, '%Y-%m-%d')
@@ -163,6 +181,7 @@ class CasinoHome(CustomerPortal):
                 'type_key': key,
                 'amount': round(float(amt or 0.0), 2),
                 'state': l.parent_state or l.move_id.state or '',
+                'session': _serialize_game_session(session),
             })
 
         # saldo progresivo sobre el subconjunto filtrado (ascendente para calcular balance)
@@ -390,6 +409,7 @@ class MiPortalController(http.Controller):
             if selset and key not in selset:
                 continue
             amt = line.amount_signed if line.amount_signed is not None else line.balance
+            session = line.move_id.game_session_id if line.move_id else False
             iso_date = _eff_date(line).isoformat()
             date_obj = datetime.strptime(iso_date, '%Y-%m-%d')
             formatted_date = date_obj.strftime('%d-%m-%Y')
@@ -401,6 +421,7 @@ class MiPortalController(http.Controller):
                 'type_key': key,
                 'amount': round(float(amt or 0.0), 2),
                 'state': line.parent_state or line.move_id.state or '',
+                'session': _serialize_game_session(session),
             })
 
         running = 0.0
