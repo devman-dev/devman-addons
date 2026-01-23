@@ -548,11 +548,15 @@
                                                             t-value="'{:.2f}'.format(signed_amount)" />
 
                                                         <td class="text-end">
-                                                            <span t-if="signed_amount &gt;= 0"
-                                                                class="text-success"> +$<t
+                                                            <span t-if="signed_amount &gt; 0"
+                                                                style="color: #2ECC71;"> +$<t
                                                                     t-esc="signed_amount_fmt" />
                                                             </span>
-                                                            <span t-else="" class="text-danger"> $<t
+                                                            <span t-elif="signed_amount == 0"
+                                                                style="color: #7F8C8D;"> $<t
+                                                                    t-esc="signed_amount_fmt" />
+                                                            </span>
+                                                            <span t-else="" style="color: #F5A623;"> $<t
                                                                     t-esc="signed_amount_fmt" />
                                                             </span>
                                                         </td>
@@ -564,11 +568,15 @@
 
                                                         <td class="text-end o-movements-balance-col">
                                                             <strong>
-                                                                <span t-if="signed_balance &gt;= 0"
-                                                                    class="text-success"> $<t
+                                                                <span t-if="signed_balance &gt; 0"
+                                                                    style="color: #2ECC71;"> $<t
                                                                         t-esc="'{:.2f}'.format(signed_balance_fmt)" />
                                                                 </span>
-                                                                <span t-else="" class="text-danger">
+                                                                <span t-elif="signed_balance == 0"
+                                                                    style="color: #7F8C8D;"> $<t
+                                                                        t-esc="'{:.2f}'.format(signed_balance_fmt)" />
+                                                                </span>
+                                                                <span t-else="" style="color: #E67E22;">
                                                                     -$<t
                                                                         t-esc="'{:.2f}'.format(abs(signed_balance_fmt))" />
                                                                 </span>

@@ -78,12 +78,13 @@
                 default_order="id desc, round_id desc">
 
                 <field name="id" string="ID" />
+                <field name="start_datetime" />
                 <field name="game_id" string="Juego" />
                 <field name="end_round" string="Ronda Final" optional="hide" />
                 <field name="round_id" string="Ronda" />
                 <field name="transaction_id" string="ID Apuesta" />
                 <field name="event_id" string="ID Evento" />
-                <field name="event_date" string="Fecha Apuesta" />
+                <field name="event_date" string="Fecha Apuesta" optional="hide" />
                 <field name="market_id" string="Apuesta" />
                 <field name="provider_id" string="Proveedor" optional="hide" />
                 <field name="start" string="Inicio de Juego" />
