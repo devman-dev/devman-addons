@@ -607,4 +607,19 @@ class CasinoGameSession(models.Model):
         
         move = self.env['account.move'].create(move_vals)
         return move
+    
+    def action_view_account_moves(self):
+        """Muestra los asientos contables relacionados con esta sesión"""
+        self.ensure_one()
+        return {
+            'name': f'Asientos Contables - Sesión {self.transaction_id or self.id}',
+            'type': 'ir.actions.act_window',
+            'res_model': 'account.move',
+            'view_mode': 'list,form',
+            'domain': [('game_session_id', '=', self.id)],
+            'context': {
+                'default_game_session_id': self.id,
+                'search_default_game_session_id': self.id,
+            },
+        }
             

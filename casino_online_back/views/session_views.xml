@@ -77,6 +77,10 @@
                 decoration-warning="result=='in_progress'"
                 default_order="id desc, round_id desc">
 
+                <button name="action_view_account_moves" type="object" 
+                    icon="fa-book" 
+                    title="Cta Cte"
+                    class="btn-link"/>
                 <field name="id" string="ID" />
                 <field name="start_datetime" />
                 <field name="game_id" string="Juego" />

@@ -95,6 +95,8 @@ class CasinoGlobalReport(models.TransientModel):
         datetime_from = fields.Datetime.to_datetime(self.date_from)
         datetime_to = fields.Datetime.to_datetime(self.date_to)
         
+        user = self.user_id
+
         # Ajustar por horas
         datetime_from = datetime_from.replace(hour=int(self.time_from), minute=int((self.time_from % 1) * 60))
         datetime_to = datetime_to.replace(hour=int(self.time_to), minute=int((self.time_to % 1) * 60))
@@ -103,6 +105,7 @@ class CasinoGlobalReport(models.TransientModel):
         session_domain = [
             ('start_datetime', '>=', datetime_from),
             ('start_datetime', '<=', datetime_to),
+            ('user_id', '=', user.id) if user else None,
         ]
         
         # # Filtrar por usuario o agente
