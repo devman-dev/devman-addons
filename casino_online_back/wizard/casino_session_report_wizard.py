@@ -21,11 +21,14 @@ class CasinoSessionReportWizard(models.TransientModel):
     # Filtros de entidad
     user_id = fields.Many2one(
         'res.users',
-        string='Jugador'
+        string='Jugador',
+        domain=[('is_player', '=', True)]
     )
+
     agent_id = fields.Many2one(
         'res.partner',
-        string='Agente'
+        string='Agente',
+        domain=[('is_agent', '=', True)]
     )
     
     # Filtros: Categoría y Proveedor

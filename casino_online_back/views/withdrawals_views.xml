@@ -24,6 +24,7 @@
                 <group>
                     <field name="transaction_id" />
                     <field name="date" />
+                    <field name="partner_id" />
                     <field name="description" />
                     <field name="amount" />
                     <field name="state" widget="badge"
@@ -42,6 +43,7 @@
             <list string="Sesiones de Juego">
                 <field name="transaction_id" string="ID Transacción" />
                 <field name="date" string="Fecha" />
+                <field name="partner_id" string="Jugador" />
                 <field name="description" string="Descripción" />
                 <field name="amount" string="Monto" />
 

@@ -14,12 +14,16 @@ class CasinoGlobalReportWizard(models.TransientModel):
     time_from = fields.Float(string='Hora Desde', default=0.0)
     time_to = fields.Float(string='Hora Hasta', default=23.99)
     
-    filter_type = fields.Selection([
-        ('user', 'Jugador'),
-        ('agent', 'Agente'),
-    ], string='Filtrar por', default='user')
-    
-    user_id = fields.Many2one('res.users', string='Jugador')
+    provider_id = fields.Many2one(
+        'res.partner',
+        string='Proveedor'
+    )
+
+    user_id = fields.Many2one(
+        'res.users',
+        string='Jugador',
+        domain=[('is_player', '=', True)]
+    )
     
     def action_generate_report(self):
         """Genera y muestra el reporte con los filtros aplicados"""
@@ -31,7 +35,7 @@ class CasinoGlobalReportWizard(models.TransientModel):
             'date_to': self.date_to,
             'time_from': self.time_from,
             'time_to': self.time_to,
-            'filter_type': self.filter_type,
+            'provider_id': self.provider_id.id if self.provider_id else False,
             'user_id': self.user_id.id if self.user_id else False,
         })
         
@@ -61,14 +65,22 @@ class CasinoGlobalReport(models.TransientModel):
     time_from = fields.Float(string='Hora Desde', readonly=True)
     time_to = fields.Float(string='Hora Hasta', readonly=True)
     
-    filter_type = fields.Selection([
-        ('user', 'Jugador'),
-        ('agent', 'Agente'),
-    ], string='Filtrar por', readonly=True)
+    # filter_type = fields.Selection([
+    #     ('user', 'Jugador'),
+    #     ('agent', 'Agente'),
+    # ], string='Filtrar por', readonly=True)
     
-    user_id = fields.Many2one('res.users', string='Jugador', readonly=True)
-    # agent_id = fields.Many2one('res.partner', string='Agente', domain=[('is_agent', '=', True)])
+    provider_id = fields.Many2one(
+        'res.partner',
+        string='Proveedor'
+    )
     
+    user_id = fields.Many2one(
+        'res.users',
+        string='Jugador',
+        domain=[('is_player', '=', True)]
+    )
+
     # Líneas del reporte (almacenadas temporalmente)
     line_ids = fields.One2many('casino.global.report.line', 'report_id', string='Líneas de Reporte')
     
@@ -95,6 +107,8 @@ class CasinoGlobalReport(models.TransientModel):
         datetime_from = fields.Datetime.to_datetime(self.date_from)
         datetime_to = fields.Datetime.to_datetime(self.date_to)
         
+        provider = self.provider_id
+
         user = self.user_id
 
         # Ajustar por horas
@@ -104,15 +118,14 @@ class CasinoGlobalReport(models.TransientModel):
         # Dominio base para sesiones
         session_domain = [
             ('start_datetime', '>=', datetime_from),
-            ('start_datetime', '<=', datetime_to),
-            ('user_id', '=', user.id) if user else None,
+            ('start_datetime', '<=', datetime_to)
         ]
         
-        # # Filtrar por usuario o agente
-        # if self.filter_type == 'user' and self.user_id:
-        #     session_domain.append(('user_id', '=', self.user_id.id))
-        # elif self.filter_type == 'agent' and self.agent_id:
-        #     session_domain.append(('agent_id', '=', self.agent_id.id))
+        if provider:
+            session_domain.append(('provider_id', '=', provider.id))
+
+        if user:
+            session_domain.append(('user_id', '=', user.id))
         
         # Obtener todas las categorías públicas existentes
         all_categories = self.env['product.public.category'].search([])
@@ -181,10 +194,14 @@ class CasinoGlobalReport(models.TransientModel):
         withdrawal_domain = [
             ('date', '>=', dt_from),
             ('date', '<=', dt_to),
+            ('state', '=', 'approved')
         ]
-        if self.filter_type == 'user' and self.user_id:
-            withdrawal_domain.append(('partner_id', '=', self.user_id.partner_id.id))
+        # if self.provider_id:
+        #     withdrawal_domain.append(('provider_id', '=', self.provider_id.id))
         
+        if self.user_id:
+            withdrawal_domain.append(('partner_id', '=', self.user_id.id))
+
         withdrawals = self.env['casino.game.withdrawals'].search(withdrawal_domain)
         
         # Calcular total (cargas son positivas, retiros son negativos)
@@ -215,7 +232,8 @@ class CasinoGlobalReport(models.TransientModel):
             'date_to': self.date_to,
             'time_from': self.time_from,
             'time_to': self.time_to,
-            'filter_type': self.filter_type,
+            # 'filter_type': self.filter_type,
+            'provider_id': self.provider_id.id if self.provider_id else False,
             'user_id': self.user_id.id if self.user_id else False,
         })
         return {
@@ -243,8 +261,10 @@ class CasinoGlobalReport(models.TransientModel):
         self.ensure_one()
         dt_from, dt_to = self._get_datetime_range()
         domain = [('date', '>=', dt_from), ('date', '<=', dt_to)]
-        if self.filter_type == 'user' and self.user_id:
-            domain.append(('partner_id', '=', self.user_id.partner_id.id))
+        # if self.provider_id:
+        #     domain.append(('provider_id', '=', self.provider_id.id))
+        if self.user_id:
+            domain.append(('partner_id', '=', self.user_id.id))
 
         return {
             'type': 'ir.actions.act_window',
@@ -253,7 +273,7 @@ class CasinoGlobalReport(models.TransientModel):
             'view_mode': 'list,form',
             'domain': domain,
             'target': 'current',
-            'context': {'search_default_group_by_partner': 0},
+            'context': {'search_default_group_by_user': 0},
         }
 
     def action_view_sessions(self):
@@ -261,7 +281,9 @@ class CasinoGlobalReport(models.TransientModel):
         self.ensure_one()
         dt_from, dt_to = self._get_datetime_range()
         domain = [('start_datetime', '>=', dt_from), ('start_datetime', '<=', dt_to)]
-        if self.filter_type == 'user' and self.user_id:
+        if self.provider_id:
+            domain.append(('provider_id', '=', self.provider_id.id))
+        if self.user_id:
             domain.append(('user_id', '=', self.user_id.id))
 
         return {
@@ -275,7 +297,7 @@ class CasinoGlobalReport(models.TransientModel):
 
     @api.depends(
         'line_ids.apostado', 'line_ids.ganado', 'line_ids.netwin', 'line_ids.rake',
-        'date_from', 'date_to', 'time_from', 'time_to', 'filter_type', 'user_id'
+        'date_from', 'date_to', 'time_from', 'time_to', 'provider_id', 'user_id'
     )
     def _compute_totals(self):
         """Calcula los totales basándose en las líneas"""
@@ -298,8 +320,10 @@ class CasinoGlobalReport(models.TransientModel):
                 ('date', '>=', dt_from),
                 ('date', '<=', dt_to),
             ]
+            # if report.provider_id:
+            #     withdrawal_domain.append(('provider_id', '=', report.provider_id.id))
             if report.user_id:
-                withdrawal_domain.append(('partner_id', '=', report.user_id.partner_id.id))
+                withdrawal_domain.append(('partner_id', '=', report.user_id.id))
 
             withdrawals = self.env['casino.game.withdrawals'].search(withdrawal_domain)
             # Cargas: registros con operation_type == 'load'

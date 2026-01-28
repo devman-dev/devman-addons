@@ -13,6 +13,9 @@
                 <field name="date"/>
                 <field name="journal_id"/>
                 <field name="account_id"/>
+                <group expand="1" string="Agrupar por">
+                    <filter string="Saldo Jugador" name="group_by_partner" context="{'group_by':'partner_id'}"/>
+                </group>
             </search>
         </field>
     </record>
@@ -42,7 +45,7 @@
         <field name="search_view_id" ref="account_move_line_view_search_inherit_casino"/>
         <field name="view_ids" eval="[(5,0,0), (0,0,{'view_mode': 'list', 'view_id': ref('account_move_line_view_tree_inherit_casino')})]"/>
         <field name="domain">[('account_id.account_type', 'in', ['asset_receivable', 'liability_payable'])]</field>
-        <field name="context">{'search_default_group_by_partner': 1, 'default_order': 'id desc'}</field>
+        <field name="context">{'search_default_group_by_account_type': 1, 'search_default_group_by_partner': 1, 'default_order': 'id desc'}</field>
     </record>
 
 </odoo>

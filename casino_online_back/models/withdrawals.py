@@ -27,7 +27,7 @@ class CasinoGameWithdrawals(models.Model):
         readonly=True
     )
 
-    partner_id = fields.Many2one("res.partner", string="Cliente", required=True)
+    partner_id = fields.Many2one("res.partner", string="Jugador", required=True)
     bank_id = fields.Many2one("casino.game.bank", string="Cuenta Bancaria")
     
     operation_type = fields.Selection([

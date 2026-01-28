@@ -51,8 +51,8 @@
               </div>
             </group>
             <group>
-              <field name="filter_type" widget="radio" options="{'horizontal': true}" />
-              <field name="user_id" invisible="filter_type != 'user'" />
+              <field name="provider_id" />
+              <field name="user_id"></field>
             </group>
           </group>
           <footer>
@@ -97,8 +97,8 @@
               </div>
             </group>
             <group>
-              <field name="filter_type" widget="radio" readonly="1" />
-              <field name="user_id" invisible="filter_type != 'user'" readonly="1" />
+              <field name="provider_id" readonly="1" />
+              <field name="user_id" readonly="1" />
             </group>
           </group>
 

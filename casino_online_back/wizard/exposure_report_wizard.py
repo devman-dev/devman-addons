@@ -8,6 +8,7 @@ class CasinoExposureReportWizard(models.TransientModel):
     date_from = fields.Datetime(string='Desde')
     date_to = fields.Datetime(string='Hasta')
     provider_id = fields.Many2one('res.partner', string='Proveedor')
+    user_id = fields.Many2one('res.users', string='Jugador', domain=[('is_player', '=', True)])
 
     line_ids = fields.One2many('casino.exposure.report.line', 'wizard_id', string='Exposición por jugador', readonly=True)
 
@@ -21,6 +22,8 @@ class CasinoExposureReportWizard(models.TransientModel):
             domain.append(('start_datetime', '<=', self.date_to))
         if self.provider_id:
             domain.append(('provider_id', '=', self.provider_id.id))
+        if self.user_id:
+            domain.append(('user_id', '=', self.user_id.id))
 
         # Limpiar líneas previas
         self.line_ids.unlink()
@@ -47,7 +50,7 @@ class CasinoExposureReportWizard(models.TransientModel):
             aggregated[key]['sessions_count'] += 1
             
             # Sumar to_win para sesiones win o cancelled
-            if session.result in ('win', 'cancelled'):
+            if session.result in ('win', 'cancelled') or (session.result == 'in_progress' and session.state != 'finished'):
                 aggregated[key]['total_to_win'] += session.amount or 0.0
             else:
                 # Sumar a ganancia de la empresa (sesiones que no son win ni cancelled)
