@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Herencia del template de login para personalizar el estilo del enlace "¿No tiene una cuenta?" -->
+    <template id="login_inherit_signup_link" inherit_id="auth_signup.login">
+        <xpath expr="//a[@t-if='signup_enabled']" position="attributes">
+            <attribute name="style">font-size: larger; font-weight: 500;</attribute>
+        </xpath>
+    </template>
+</odoo>

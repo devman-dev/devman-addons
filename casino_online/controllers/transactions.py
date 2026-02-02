@@ -138,6 +138,10 @@ class CasinoHome(CustomerPortal):
             # prioridad: línea.date, si no existe usar fecha del asiento
             return l.date or l.move_id.date or date.min
 
+        def _eff_create_date(l):
+            # prioridad: línea.date, si no existe usar fecha del asiento
+            return l.create_date or l.move_id.create_date or date.min
+
         # filtro por fecha si vienen parámetros
         if start_date or end_date:
             lines = [l for l in lines_all
@@ -169,9 +173,9 @@ class CasinoHome(CustomerPortal):
             amt = l.amount_signed if l.amount_signed is not None else l.balance
             session = l.move_id.game_session_id if l.move_id else False
 
-            iso_date = _eff_date(l).isoformat()
-            date_obj = datetime.strptime(iso_date, '%Y-%m-%d')
-            formatted_date = date_obj.strftime('%d-%m-%Y')
+            iso_date = _eff_create_date(l).isoformat()
+            date_obj = datetime.fromisoformat(iso_date.replace('Z', '+00:00'))
+            formatted_date = date_obj.strftime('%d-%m-%Y %H:%M')
             _logger.info("Fecha formateada Transaction.py: %s", formatted_date)
             prepared.append({
                 'id': l.id,
@@ -381,6 +385,9 @@ class MiPortalController(http.Controller):
         def _eff_date(line):
             return line.date or line.move_id.date or date.min
 
+        def _eff_create_date(l):
+            return l.create_date or l.move_id.create_date or date.min
+
         if start_date or end_date:
             lines = [line for line in lines_all
                     if (not start_date or _eff_date(line) >= start_date)
@@ -410,9 +417,9 @@ class MiPortalController(http.Controller):
                 continue
             amt = line.amount_signed if line.amount_signed is not None else line.balance
             session = line.move_id.game_session_id if line.move_id else False
-            iso_date = _eff_date(line).isoformat()
-            date_obj = datetime.strptime(iso_date, '%Y-%m-%d')
-            formatted_date = date_obj.strftime('%d-%m-%Y')
+            iso_date = _eff_create_date(line).isoformat()
+            date_obj = datetime.fromisoformat(iso_date.replace('Z', '+00:00'))
+            formatted_date = date_obj.strftime('%d-%m-%Y %H:%M')
             prepared.append({
                 'id': line.id,
                 'date': formatted_date,

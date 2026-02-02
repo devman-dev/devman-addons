@@ -12,7 +12,7 @@
         ...
     """,
     'images': ['static/description/icon.png'],
-    'depends': ['website_sale', 'portal', 'account', 'payment', 'web'],
+    'depends': ['website_sale', 'portal', 'account', 'payment', 'web', 'auth_signup'],
     'data': [
         'security/ir.model.access.csv',
         'views/templates/transactions_template.xml',
@@ -21,6 +21,7 @@
         'views/templates/portal_mis_limites_partial.xml',
         'views/res_partner_form_casino_online.xml',
         'views/templates/user_options_template.xml',
+        'views/web_login_inherit.xml',
         # 'data/balance_cron.xml',
     ],
     "assets": {

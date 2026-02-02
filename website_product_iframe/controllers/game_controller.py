@@ -2,6 +2,7 @@ from datetime import timedelta, datetime
 from dataclasses import dataclass, asdict
 from typing import Optional, List
 import token
+import pytz
 
 import requests
 from odoo import http, fields
@@ -243,6 +244,52 @@ class GameController(http.Controller):
         user = request.env['res.users'].sudo().search([('partner_id', '=', partner.id)], limit=1)
         user_id = user.id
 
+        # Convertir event_date a Datetime UTC naive (lo que Odoo espera)
+        # Objetivo: que 2026-01-23 se muestre como 23/01/2026 00:00 en la zona del usuario
+        event_date_converted = None
+        if transaction.event_date:
+            try:
+                tz_name = (request.env.user.tz or request.env.context.get('tz') or 'UTC')
+                tz = pytz.timezone(tz_name)
+                if isinstance(transaction.event_date, str):
+                    # Si llega solo la fecha, tómala como medianoche local y conviértela a UTC naive
+                    event_date_obj = datetime.fromisoformat(transaction.event_date).date()
+                    local_dt = tz.localize(datetime.combine(event_date_obj, datetime.min.time()))
+                    event_date_converted = local_dt.astimezone(pytz.utc).replace(tzinfo=None)
+                else:
+                    # Si ya es datetime, asumir que es local y llevarlo a UTC naive
+                    if transaction.event_date.tzinfo:
+                        event_date_converted = transaction.event_date.astimezone(pytz.utc).replace(tzinfo=None)
+                    else:
+                        # Sin tzinfo: asumir ya en UTC naive
+                        event_date_converted = transaction.event_date
+            except (ValueError, AttributeError):
+                event_date_converted = None
+
+        # Convertir start a Datetime UTC naive si viene como string
+        start_converted = None
+        if transaction.start:
+            try:
+                tz_name = (request.env.user.tz or request.env.context.get('tz') or 'UTC')
+                tz = pytz.timezone(tz_name)
+                if isinstance(transaction.start, str):
+                    # Ej: '2026-01-24 02:30:00' -> interpretarlo como hora local y pasarlo a UTC naive
+                    # fromisoformat soporta 'YYYY-MM-DD HH:MM:SS'
+                    start_dt = datetime.fromisoformat(transaction.start)
+                    if start_dt.tzinfo:
+                        start_converted = start_dt.astimezone(pytz.utc).replace(tzinfo=None)
+                    else:
+                        local_dt = tz.localize(start_dt)
+                        start_converted = local_dt.astimezone(pytz.utc).replace(tzinfo=None)
+                else:
+                    # datetime ya provisto
+                    if transaction.start.tzinfo:
+                        start_converted = transaction.start.astimezone(pytz.utc).replace(tzinfo=None)
+                    else:
+                        start_converted = transaction.start
+            except Exception:
+                start_converted = None
+
         _logger.info(f"Casino Iframe: Starting game session for product: {product.id} - {product.name}")
         return {
             'game_id': product.id,
@@ -265,9 +312,9 @@ class GameController(http.Controller):
             'json_data': transaction.json_data,
             'events': transaction.events or [],
             'event_id': transaction.event_id,
-            'event_date': transaction.event_date,
+            'event_date': event_date_converted,
             'market_id': transaction.market_id,
-            'start': transaction.start,
+            'start': start_converted,
             'json_data': transaction.json_data
         }
 
@@ -1131,6 +1178,7 @@ class GameController(http.Controller):
                                 from datetime import datetime
                                 if isinstance(transaction.event_date, str):
                                     event_date_obj = datetime.fromisoformat(transaction.event_date).date()
+                                    event_date_obj = fields.Date.to_date(event_date_obj)
                                 else:
                                     event_date_obj = transaction.event_date
                                 fecha_formateada = f"En {event_date_obj.day} de {meses[event_date_obj.month - 1]}"

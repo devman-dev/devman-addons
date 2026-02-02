@@ -301,6 +301,18 @@
                             const activeLink = document.querySelector(`a[data-target="${window.location.hash}"]`);
                             if (activeLink) activeLink.classList.add('active');
                         }
+                    } else {
+                        // Por defecto mostrar Movimientos si no hay hash
+                        const allDivs = document.querySelectorAll(".casino-content-area > div");
+                        allDivs.forEach((div) => { div.classList.add("d-none"); });
+                        const movimientosDiv = document.querySelector("#movimientos_form");
+                        if (movimientosDiv) {
+                            movimientosDiv.classList.remove("d-none");
+                        }
+                        // Marcar link de Movimientos como activo
+                        navLinks.forEach(l => l.classList.remove('active'));
+                        const movimientosLink = document.querySelector('a[data-target="#movimientos_form"]');
+                        if (movimientosLink) movimientosLink.classList.add('active');
                     }
                 });
             ]]></script>
@@ -341,7 +353,7 @@
                     <!-- Contenido Principal -->
                     <div class="col-lg-9 casino-content-mobile">
                         <div class="casino-content-area">
-                    <div id="depositar_form">
+                    <div id="depositar_form" class="d-none">
                         <div class="card mb-4 shadow-sm">
                             <div class="card-header bg-primary text-white">
                                 <strong>Depositar Dinero</strong>
@@ -428,7 +440,7 @@
                     </div>
 
                     <!-- ===== Movimientos ===== -->
-                    <div id="movimientos_form" class="d-none">
+                    <div id="movimientos_form">
                         <div class="o_portal_movements">
 
                             <!-- ===== Card de Filtros ===== -->

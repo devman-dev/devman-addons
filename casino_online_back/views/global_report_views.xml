@@ -7,7 +7,7 @@
     <field name="model">casino.global.report.line</field>
     <field name="arch" type="xml">
       <list string="Detalle por Categoría" create="0" edit="0" delete="0"
-        default_order="netwin desc" >
+        default_order="categoria desc" class="o_casino_global_report_list" >
         <!-- decoration-info="color == 0 or color == 6"
         decoration-success="color == 1 or color == 7"
         decoration-warning="color == 2 or color == 8"
@@ -20,6 +20,7 @@
         <field name="apostado" sum="Total Apostado" widget="monetary" />
         <field name="ganado" sum="Total Ganado" widget="monetary" />
         <field name="netwin" sum="Total Netwin" widget="monetary" />
+        <field name="pendiente" sum="Total Pendiente" widget="monetary" />
         <field name="rake" sum="Total Rake" widget="monetary" />
         <field name="participacion" string="Peso %" widget="percentage" />
         <field name="currency_id" column_invisible="1" />

@@ -88,6 +88,7 @@ class CasinoGlobalReport(models.TransientModel):
     total_apostado = fields.Monetary(string='Total Apostado', compute='_compute_totals', store=False)
     total_ganado = fields.Monetary(string='Total Ganado', compute='_compute_totals', store=False)
     total_netwin = fields.Monetary(string='Total Netwin', compute='_compute_totals', store=False)
+    total_pendiente = fields.Monetary(string='Total Pendiente', compute='_compute_totals', store=False)
     total_rake = fields.Monetary(string='Total Rake', compute='_compute_totals', store=False)
     total_cargas = fields.Monetary(string='Total Cargas', compute='_compute_totals', store=False)
     total_retiros = fields.Monetary(string='Total Retiros', compute='_compute_totals', store=False)
@@ -137,6 +138,7 @@ class CasinoGlobalReport(models.TransientModel):
                 'apostado': 0.0,
                 'ganado': 0.0,
                 'netwin': 0.0,
+                'pendiente': 0.0,
                 'rake': 0.0,
             }
         
@@ -155,24 +157,29 @@ class CasinoGlobalReport(models.TransientModel):
                         'apostado': 0.0,
                         'ganado': 0.0,
                         'netwin': 0.0,
+                        'pendiente': 0.0,
                         'rake': 0.0,
                     }
             
             # Calcular valores
             apostado = 0.0 #session.amount or 0.0
             ganado = 0.0
-            
+            pending = 0.0
+
             if session.result in ['win', 'cancelled']:
                 ganado += (session.amount or 0.0)
+            elif session.result == 'in_progress' and session.state == 'in_progress':
+                pending += (session.amount or 0.0)
             else:
                 apostado += (session.amount or 0.0)
             
-            netwin = ganado - apostado
+            netwin = apostado - ganado
             rake = session.agent_commission or 0.0
             
             category_data[category_name]['apostado'] += apostado
             category_data[category_name]['ganado'] += ganado
             category_data[category_name]['netwin'] += netwin
+            category_data[category_name]['pendiente'] += pending
             category_data[category_name]['rake'] += rake
         
         # Crear líneas del reporte para todas las categorías (incluso las que están en 0)
@@ -183,44 +190,45 @@ class CasinoGlobalReport(models.TransientModel):
                 'apostado': datos['apostado'],
                 'ganado': datos['ganado'],
                 'netwin': datos['netwin'],
+                'pendiente': datos['pendiente'],
                 'rake': datos['rake'],
             }))
         
-        # Agregar línea de Cargas y Retiros al final
-        # Calcular el total de Cargas y Retiros en el mismo período
-        dt_from = datetime_from
-        dt_to = datetime_to
+        # # Agregar línea de Cargas y Retiros al final
+        # # Calcular el total de Cargas y Retiros en el mismo período
+        # dt_from = datetime_from
+        # dt_to = datetime_to
         
-        withdrawal_domain = [
-            ('date', '>=', dt_from),
-            ('date', '<=', dt_to),
-            ('state', '=', 'approved')
-        ]
-        # if self.provider_id:
-        #     withdrawal_domain.append(('provider_id', '=', self.provider_id.id))
+        # withdrawal_domain = [
+        #     ('date', '>=', dt_from),
+        #     ('date', '<=', dt_to),
+        #     ('state', '=', 'approved')
+        # ]
+        # # if self.provider_id:
+        # #     withdrawal_domain.append(('provider_id', '=', self.provider_id.id))
         
-        if self.user_id:
-            withdrawal_domain.append(('partner_id', '=', self.user_id.id))
+        # if self.user_id:
+        #     withdrawal_domain.append(('partner_id', '=', self.user_id.id))
 
-        withdrawals = self.env['casino.game.withdrawals'].search(withdrawal_domain)
+        # withdrawals = self.env['casino.game.withdrawals'].search(withdrawal_domain)
         
-        # Calcular total (cargas son positivas, retiros son negativos)
-        # Cargas: operation_type == 'load'
-        total_cargas = sum(withdrawals.filtered(lambda w: w.operation_type == 'load').mapped('amount'))
-        # Retiros: sin operation_type o operation_type == 'withdrawal'
-        total_retiros = sum(withdrawals.filtered(lambda w: not w.operation_type or w.operation_type == 'withdrawal').mapped('amount'))
+        # # Calcular total (cargas son positivas, retiros son negativos)
+        # # Cargas: operation_type == 'load'
+        # total_cargas = sum(withdrawals.filtered(lambda w: w.operation_type == 'load').mapped('amount'))
+        # # Retiros: sin operation_type o operation_type == 'withdrawal'
+        # total_retiros = sum(withdrawals.filtered(lambda w: not w.operation_type or w.operation_type == 'withdrawal').mapped('amount'))
         
-        # Total neto: cargas - retiros
-        total_cargas_retiros = total_cargas - total_retiros
+        # # Total neto: cargas - retiros
+        # total_cargas_retiros = total_cargas - total_retiros
         
-        # Agregar línea al final del listado
-        line_vals.append((0, 0, {
-            'categoria': 'Cargas y Retiros',
-            'apostado': total_cargas_retiros,  # Total neto en columna Apostado
-            'ganado': 0.0,
-            'netwin': total_cargas_retiros,    # Netwin = total neto
-            'rake': 0.0,
-        }))
+        # # Agregar línea al final del listado
+        # line_vals.append((0, 0, {
+        #     'categoria': 'Cargas y Retiros',
+        #     'apostado': total_cargas_retiros,  # Total neto en columna Apostado
+        #     'ganado': 0.0,
+        #     'netwin': total_cargas_retiros,    # Netwin = total neto
+        #     'rake': 0.0,
+        # }))
         
         self.line_ids = line_vals
 
@@ -296,7 +304,7 @@ class CasinoGlobalReport(models.TransientModel):
         }
 
     @api.depends(
-        'line_ids.apostado', 'line_ids.ganado', 'line_ids.netwin', 'line_ids.rake',
+        'line_ids.apostado', 'line_ids.ganado', 'line_ids.netwin', 'line_ids.pendiente', 'line_ids.rake',
         'date_from', 'date_to', 'time_from', 'time_to', 'provider_id', 'user_id'
     )
     def _compute_totals(self):
@@ -305,9 +313,9 @@ class CasinoGlobalReport(models.TransientModel):
             report.total_apostado = sum(report.line_ids.mapped('apostado'))
             report.total_ganado = sum(report.line_ids.mapped('ganado'))
             report.total_netwin = sum(report.line_ids.mapped('netwin'))
+            report.total_pendiente = sum(report.line_ids.mapped('pendiente'))
             report.total_rake = sum(report.line_ids.mapped('rake'))
 
-            # Calcular Cargas y Retiros como totales separados (no en el listado por categoría)
             # Construir el rango datetime a partir de fecha+hora
             dt_from = fields.Datetime.to_datetime(report.date_from)
             dt_to = fields.Datetime.to_datetime(report.date_to)
@@ -344,6 +352,7 @@ class CasinoGlobalReportLine(models.TransientModel):
     apostado = fields.Monetary(string='Apostado', currency_field='currency_id')
     ganado = fields.Monetary(string='Ganado', currency_field='currency_id')
     netwin = fields.Monetary(string='Netwin', currency_field='currency_id')
+    pendiente = fields.Monetary(string='Pendiente', currency_field='currency_id')
     rake = fields.Monetary(string='Rake', currency_field='currency_id')
     participacion = fields.Float(string='Peso %', compute='_compute_participacion', digits=(16, 4))
     currency_id = fields.Many2one('res.currency', related='report_id.currency_id')

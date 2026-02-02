@@ -52,3 +52,9 @@
 .o_list_table .table-secondary {
   background-color: #e2e3e5 !important;
 }
+
+/* Evitar el fondo gris de la columna ordenada en el reporte global */
+.o_casino_global_report_list .o_list_renderer .o_list_table thead th.table-active {
+  background: #ffffff;
+  box-shadow: none;
+}
