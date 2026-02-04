@@ -19,12 +19,10 @@ class GenerateLiquidationWizard(models.TransientModel):
     provider_id = fields.Many2one(
         'res.partner',
         string='Proveedor',
-        required=True
     )
     category_id = fields.Many2one(
         'product.public.category',
         string='Categoría',
-        required=True,
         help='Categoría de productos a liquidar'
     )
 
@@ -72,10 +70,13 @@ class GenerateLiquidationWizard(models.TransientModel):
         # Buscar sesiones en el período que pertenezcan a juegos de este proveedor y categoría
         try:
             # Primero, buscar plantillas de producto que coincidan con proveedor y categoría
-            product_templates = self.env['product.template'].search([
-                ('provider_id', '=', self.provider_id.id),
-                ('public_categ_ids', 'in', [self.category_id.id]),
-            ])
+            domain = []
+            if self.provider_id:
+                domain.append(('provider_id', '=', self.provider_id.id))
+            if self.category_id:
+                domain.append(('public_categ_ids', '=', self.category_id.id))
+
+            product_templates = self.env['product.template'].search(domain)
             _logger.info('Product templates encontradas: %s (IDs: %s)', len(product_templates), product_templates.ids)
             
             # Obtener todos los product.product de esas plantillas
@@ -115,11 +116,13 @@ class GenerateLiquidationWizard(models.TransientModel):
         #     )
 
         # Buscar configuración de comisión para este proveedor y categoría
-        commission_config = self.env['casino.commission.config'].search([
-            ('provider_id', '=', self.provider_id.id),
-            ('category_id', '=', self.category_id.id),
-            ('active', '=', True),
-        ], limit=1)
+        domain_commission = [('active', '=', True)]
+        if self.provider_id:
+            domain_commission.append(('provider_id', '=', self.provider_id.id))
+        if self.category_id:
+            domain_commission.append(('category_id', '=', self.category_id.id))
+
+        commission_config = self.env['casino.commission.config'].search(domain_commission, limit=1)
 
         if not commission_config:
             commission = 35

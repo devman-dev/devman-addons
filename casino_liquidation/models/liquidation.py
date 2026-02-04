@@ -47,7 +47,6 @@ class CasinoLiquidation(models.Model):
     provider_id = fields.Many2one(
         'res.partner',
         string='Proveedor',
-        required=True,
         tracking=True
     )
 
@@ -55,7 +54,6 @@ class CasinoLiquidation(models.Model):
     category_id = fields.Many2one(
         'product.public.category',
         string='Categoría',
-        required=True,
         help='Categoría de productos'
     )
 
@@ -225,17 +223,21 @@ class CasinoLiquidation(models.Model):
         for record in self:
             if record.state != 'draft':
                 raise UserError('Solo se pueden generar líneas en estado Borrador')
-            if not (record.date_from and record.date_to and record.provider_id and record.category_id):
+            if not (record.date_from and record.date_to):
                 raise UserError('Debe completar Fecha Desde, Fecha Hasta, Proveedor y Categoría')
 
             # Buscar sesiones finalizadas dentro del rango y que coincidan proveedor y categoría
             domain = [
-                ('game_id.product_tmpl_id.provider_id', '=', record.provider_id.id),
-                ('game_id.product_tmpl_id.public_categ_ids', 'in', [record.category_id.id]),
                 ('start_datetime', '>=', fields.Datetime.to_datetime(record.date_from)),
                 ('end_datetime', '<=', fields.Datetime.to_datetime(record.date_to)),
                 ('state', 'ilike', 'finished'),
             ]
+            if record.provider_id:
+                domain.append(('game_id.product_tmpl_id.provider_id', '=', record.provider_id.id))
+            if record.category_id:
+                # Filtrar juegos que tengan la categoría seleccionada
+                domain.append(('game_id.product_tmpl_id.public_categ_ids', '=', record.category_id.id))
+                
             sessions = self.env['casino.game.session'].search(domain)
             _logger.info('Sesiones encontradas para liquidación %s: %s', record.id, sessions.ids)
             _logger.info('Sessions data: %s', [(s.id, s.game_id.id, s.game_id.product_tmpl_id.provider_id.id, s.amount, s.state) for s in sessions])

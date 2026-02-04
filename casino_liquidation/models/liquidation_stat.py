@@ -15,7 +15,6 @@ class CasinoLiquidationStat(models.Model):
     category_id = fields.Many2one(
         'product.public.category',
         string='Categoria',
-        required=True
     )
     currency_id = fields.Many2one(
         'res.currency',

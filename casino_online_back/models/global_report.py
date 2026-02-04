@@ -173,6 +173,7 @@ class CasinoGlobalReport(models.TransientModel):
             else:
                 apostado += (session.amount or 0.0)
             
+            apostado += pending
             netwin = apostado - ganado
             rake = session.agent_commission or 0.0
             

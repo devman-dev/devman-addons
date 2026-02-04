@@ -58,3 +58,19 @@
   background: #ffffff;
   box-shadow: none;
 }
+
+/* Color rojo para el totalizador de Netwin cuando es negativo */
+.o_casino_global_report_list .o_list_table tfoot tr td:nth-child(3) {
+  color: #dc3545 !important;
+  font-weight: bold;
+}
+
+.o_casino_global_report_list .o_list_table tfoot tr td:nth-child(4) {
+  color: #660d39 !important;
+  font-weight: bold;
+}
+
+.o_casino_global_report_list .o_list_table tfoot tr td:nth-child(6) {
+  color: #9d74cc !important;
+  font-weight: bold;
+}

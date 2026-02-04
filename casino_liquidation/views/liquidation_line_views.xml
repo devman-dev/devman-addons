@@ -63,8 +63,8 @@
                             <field name="date_to" required="1" readonly="state != 'draft'" />
                         </group>
                         <group>
-                            <field name="provider_id" required="1" readonly="state != 'draft'" />
-                            <field name="category_id" required="1" readonly="state != 'draft'" />
+                            <field name="provider_id" readonly="state != 'draft'" />
+                            <field name="category_id" readonly="state != 'draft'" />
                         </group>
                     </group>
 
