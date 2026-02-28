@@ -1,0 +1,41 @@
+/* Estilos personalizados para el dashboard de proyectos */
+
+.card {
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    transition: transform 0.2s;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
+
+.progress {
+    height: 25px;
+}
+
+.progress-bar {
+    font-weight: bold;
+}
+
+.table-hover tbody tr:hover {
+    background-color: rgba(0,123,255,0.05);
+}
+
+.badge {
+    padding: 0.5em 0.8em;
+    font-size: 0.875rem;
+}
+
+/* KPI Cards */
+.card-body h2 {
+    font-size: 2.5rem;
+    font-weight: bold;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .card-body h2 {
+        font-size: 2rem;
+    }
+}
