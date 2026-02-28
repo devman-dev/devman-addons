@@ -1,0 +1,394 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Agregar entrada en el menú del portal -->
+    <template id="portal_my_home_menu_goals" name="Portal My Home Menu - Goals" inherit_id="portal.portal_my_home" priority="25">
+        <xpath expr="//div[hasclass('o_portal_docs')]" position="before">
+            <t t-set="portal_goal_count" t-value="request.env['project.milestone'].sudo().search_count([])"/>
+            <t t-call="portal.portal_docs_entry">
+                <t t-set="icon" t-value="'/project/static/description/icon.png'"/>
+                <t t-set="title">Objetivos</t>
+                <t t-set="url" t-value="'/my/goals'"/>
+                <t t-set="text">Seguimiento de objetivos</t>
+                <t t-set="count" t-value="portal_goal_count"/>
+            </t>
+        </xpath>
+    </template>
+
+    <!-- Vista principal: Lista de objetivos con KPIs -->
+    <template id="portal_my_goals" name="My Goals">
+        <t t-call="portal.portal_layout">
+            <t t-set="breadcrumbs_searchbar" t-value="True"/>
+
+            <t t-call="portal.portal_searchbar">
+                <t t-set="title">Objetivos</t>
+            </t>
+
+            <div class="container mt-4">
+                <!-- KPIs Dashboard -->
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <h3 class="mb-3">Dashboard de Objetivos</h3>
+                    </div>
+                    
+                    <!-- KPI: Total de Objetivos -->
+                    <div class="col-lg-3 col-md-6 mb-3">
+                        <div class="card border-primary">
+                            <div class="card-body text-center">
+                                <i class="fa fa-bullseye fa-3x text-primary mb-2"></i>
+                                <h2 class="text-primary mb-0">
+                                    <t t-esc="kpis.get('total', 0)"/>
+                                </h2>
+                                <p class="text-muted mb-0">Total Objetivos</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- KPI: Objetivos Alcanzados -->
+                    <div class="col-lg-3 col-md-6 mb-3">
+                        <div class="card border-success">
+                            <div class="card-body text-center">
+                                <i class="fa fa-check-circle fa-3x text-success mb-2"></i>
+                                <h2 class="text-success mb-0">
+                                    <t t-esc="kpis.get('achieved', 0)"/>
+                                </h2>
+                                <p class="text-muted mb-1">Alcanzados</p>
+                                <small class="text-muted">
+                                    <t t-esc="kpi_percentages.get('achieved', 0)"/>%
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- KPI: Objetivos En Progreso -->
+                    <div class="col-lg-3 col-md-6 mb-3">
+                        <div class="card border-warning">
+                            <div class="card-body text-center">
+                                <i class="fa fa-hourglass-half fa-3x text-warning mb-2"></i>
+                                <h2 class="text-warning mb-0">
+                                    <t t-esc="kpis.get('in_progress', 0)"/>
+                                </h2>
+                                <p class="text-muted mb-1">En Progreso</p>
+                                <small class="text-muted">
+                                    <t t-esc="kpi_percentages.get('in_progress', 0)"/>%
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- KPI: Objetivos Pendientes -->
+                    <div class="col-lg-3 col-md-6 mb-3">
+                        <div class="card border-secondary">
+                            <div class="card-body text-center">
+                                <i class="fa fa-clock-o fa-3x text-secondary mb-2"></i>
+                                <h2 class="text-secondary mb-0">
+                                    <t t-esc="kpis.get('pending', 0)"/>
+                                </h2>
+                                <p class="text-muted mb-1">Pendientes</p>
+                                <small class="text-muted">
+                                    <t t-esc="kpi_percentages.get('pending', 0)"/>%
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Gráfico de progreso -->
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5>Progreso General de Objetivos</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="progress" style="height: 40px;">
+                                    <div class="progress-bar bg-success" role="progressbar" 
+                                         t-att-style="'width: ' + str(kpi_percentages.get('achieved', 0)) + '%'"
+                                         t-att-aria-valuenow="kpi_percentages.get('achieved', 0)"
+                                         aria-valuemin="0" aria-valuemax="100">
+                                        <strong>
+                                            <t t-esc="kpis.get('achieved', 0)"/> Alcanzados
+                                            (<t t-esc="kpi_percentages.get('achieved', 0)"/>%)
+                                        </strong>
+                                    </div>
+                                    <div class="progress-bar bg-warning" role="progressbar" 
+                                         t-att-style="'width: ' + str(kpi_percentages.get('pending', 0)) + '%'"
+                                         t-att-aria-valuenow="kpi_percentages.get('pending', 0)"
+                                         aria-valuemin="0" aria-valuemax="100">
+                                        <strong>
+                                            <t t-esc="kpis.get('pending', 0)"/> Pendientes
+                                            (<t t-esc="kpi_percentages.get('pending', 0)"/>%)
+                                        </strong>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Lista de Objetivos -->
+                <div class="row">
+                    <div class="col-12">
+                        <h4 class="mb-3">Lista de Objetivos</h4>
+                        <t t-if="len(goals_data) == 0">
+                            <div class="alert alert-info">
+                                No hay objetivos disponibles.
+                            </div>
+                        </t>
+                        <t t-else="">
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Objetivo</th>
+                                            <th>Proyecto</th>
+                                            <th>Estado</th>
+                                            <th>Fecha Límite</th>
+                                            <th>Progreso</th>
+                                            <th>Acciones</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <t t-foreach="goals_data" t-as="goal_data">
+                                            <t t-set="goal" t-value="goal_data['goal']"/>
+                                            <tr>
+                                                <td>
+                                                    <strong><t t-esc="goal.name"/></strong>
+                                                </td>
+                                                <td>
+                                                    <t t-if="goal.project_id">
+                                                        <t t-esc="goal.project_id.name"/>
+                                                    </t>
+                                                    <t t-else="">
+                                                        <span class="text-muted">-</span>
+                                                    </t>
+                                                </td>
+                                                <td>
+                                                    <t t-if="goal.is_reached">
+                                                        <span class="badge bg-success">
+                                                            <i class="fa fa-check"></i> Alcanzado
+                                                        </span>
+                                                    </t>
+                                                    <t t-else="">
+                                                        <span class="badge bg-warning">
+                                                            <i class="fa fa-hourglass-half"></i> En Progreso
+                                                        </span>
+                                                    </t>
+                                                </td>
+                                                <td>
+                                                    <t t-if="goal.deadline">
+                                                        <t t-esc="goal.deadline.strftime('%d/%m/%Y')"/>
+                                                    </t>
+                                                    <t t-else="">
+                                                        <span class="text-muted">Sin fecha</span>
+                                                    </t>
+                                                </td>
+                                                <td>
+                                                    <div class="progress" style="height: 20px; min-width: 100px;">
+                                                        <div class="progress-bar" role="progressbar" 
+                                                             t-att-style="'width: ' + str(goal_data['progress']) + '%'"
+                                                             t-att-class="'bg-success' if goal.is_reached else 'bg-warning'">
+                                                            <small>
+                                                                <t t-esc="goal_data['completed_tasks']"/>/<t t-esc="goal_data['total_tasks']"/>
+                                                            </small>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <a t-attf-href="/goal/#{goal.id}" 
+                                                       class="btn btn-sm btn-primary">
+                                                        Ver Detalle
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                        </t>
+                                    </tbody>
+                                </table>
+                            </div>
+                            
+                            <!-- Paginación -->
+                            <div t-if="pager" class="o_portal_pager text-center">
+                                <t t-call="portal.pager"/>
+                            </div>
+                        </t>
+                    </div>
+                </div>
+            </div>
+        </t>
+    </template>
+
+    <!-- Vista de detalle de objetivo -->
+    <template id="portal_my_goal_detail" name="My Goal Detail">
+        <t t-call="portal.portal_layout">
+            <div class="container mt-4">
+                <!-- Breadcrumb -->
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="/">Inicio</a></li>
+                    <li class="breadcrumb-item"><a href="/goals">Objetivos</a></li>
+                    <li class="breadcrumb-item active"><t t-esc="goal.name"/></li>
+                </ol>
+
+                <!-- Cabecera del Objetivo -->
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header text-white" t-attf-class="bg-{{ 'success' if goal.is_reached else 'warning' }}">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <h3 class="mb-0">
+                                        <i t-attf-class="fa fa-{{ 'check-circle' if goal.is_reached else 'hourglass-half' }}"></i>
+                                        <t t-esc="goal.name"/>
+                                    </h3>
+                                    <span class="badge bg-light text-dark">
+                                        <t t-if="goal.is_reached">Alcanzado</t>
+                                        <t t-else="">En Progreso</t>
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <p><strong>Proyecto:</strong> 
+                                            <t t-if="goal.project_id">
+                                                <a t-attf-href="/project/#{goal.project_id.id}">
+                                                    <t t-esc="goal.project_id.name"/>
+                                                </a>
+                                            </t>
+                                            <t t-else="">-</t>
+                                        </p>
+                                        <p><strong>Fecha Límite:</strong> 
+                                            <t t-if="goal.deadline">
+                                                <t t-esc="goal.deadline.strftime('%d/%m/%Y')"/>
+                                            </t>
+                                            <t t-else="">Sin fecha establecida</t>
+                                        </p>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <p><strong>Tareas Completadas:</strong> 
+                                            <t t-esc="task_kpis['done']"/> / <t t-esc="task_kpis['total']"/>
+                                        </p>
+                                        <p><strong>Progreso:</strong></p>
+                                        <div class="progress" style="height: 30px;">
+                                            <div class="progress-bar" role="progressbar" 
+                                                 t-att-style="'width: ' + str(progress_percentage) + '%'"
+                                                 t-att-class="'bg-success' if goal.is_reached else 'bg-warning'">
+                                                <strong><t t-esc="progress_percentage"/>%</strong>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- KPIs del Objetivo -->
+                <div class="row mb-4">
+                    <div class="col-md-4">
+                        <div class="card border-primary">
+                            <div class="card-body text-center">
+                                <i class="fa fa-tasks fa-2x text-primary mb-2"></i>
+                                <h2 class="text-primary mb-0">
+                                    <t t-esc="task_kpis['total']"/>
+                                </h2>
+                                <p class="text-muted mb-0">Total Tareas</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card border-success">
+                            <div class="card-body text-center">
+                                <i class="fa fa-check-square fa-2x text-success mb-2"></i>
+                                <h2 class="text-success mb-0">
+                                    <t t-esc="task_kpis['done']"/>
+                                </h2>
+                                <p class="text-muted mb-0">Tareas Completadas</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card border-warning">
+                            <div class="card-body text-center">
+                                <i class="fa fa-spinner fa-2x text-warning mb-2"></i>
+                                <h2 class="text-warning mb-0">
+                                    <t t-esc="task_kpis['in_progress']"/>
+                                </h2>
+                                <p class="text-muted mb-0">Tareas en Progreso</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Lista de Tareas asociadas al Objetivo -->
+                <div class="row">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <h4 class="mb-0">Tareas Asociadas al Objetivo</h4>
+                            </div>
+                            <div class="card-body">
+                                <t t-if="not tasks">
+                                    <p class="text-muted">No hay tareas asociadas a este objetivo.</p>
+                                </t>
+                                <t t-else="">
+                                    <div class="table-responsive">
+                                        <table class="table table-hover">
+                                            <thead class="table-light">
+                                                <tr>
+                                                    <th>Tarea</th>
+                                                    <th>Proyecto</th>
+                                                    <th>Asignado a</th>
+                                                    <th>Estado</th>
+                                                    <th>Prioridad</th>
+                                                    <th>Fecha Límite</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <t t-foreach="tasks" t-as="task">
+                                                    <tr>
+                                                        <td><t t-esc="task.name"/></td>
+                                                        <td>
+                                                            <t t-if="task.project_id">
+                                                                <t t-esc="task.project_id.name"/>
+                                                            </t>
+                                                            <t t-else="">-</t>
+                                                        </td>
+                                                        <td>
+                                                            <t t-if="task.user_ids">
+                                                                <t t-esc="', '.join(task.user_ids.mapped('name'))"/>
+                                                            </t>
+                                                            <t t-else="">-</t>
+                                                        </td>
+                                                        <td>
+                                                            <span class="badge" 
+                                                                  t-attf-class="badge bg-{{ 'success' if task.stage_id.fold else 'warning' }}">
+                                                                <t t-esc="task.stage_id.name"/>
+                                                            </span>
+                                                        </td>
+                                                        <td>
+                                                            <t t-if="task.priority == '1'">
+                                                                <span class="badge bg-danger">Alta</span>
+                                                            </t>
+                                                            <t t-elif="task.priority == '0'">
+                                                                <span class="badge bg-secondary">Normal</span>
+                                                            </t>
+                                                        </td>
+                                                        <td>
+                                                            <t t-if="task.date_deadline">
+                                                                <t t-esc="task.date_deadline.strftime('%d/%m/%Y')"/>
+                                                            </t>
+                                                            <t t-else="">-</t>
+                                                        </td>
+                                                    </tr>
+                                                </t>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </t>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </t>
+    </template>
+
+</odoo>
