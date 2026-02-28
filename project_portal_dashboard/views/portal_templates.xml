@@ -23,39 +23,43 @@
                 <t t-set="title">Proyectos</t>
             </t>
 
-            <div class="container mt-4">
+            <div class="container mt-2">
                 <!-- KPIs Dashboard -->
-                <div class="row mb-4">
+                <div class="row mb-2">
                     <div class="col-12">
-                        <h3 class="mb-3">Dashboard de Proyectos</h3>
+                        <h4 class="mb-1">Dashboard de Proyectos</h4>
                     </div>
                     
                     <!-- KPI: Total de Proyectos -->
-                    <div class="col-lg-3 col-md-6 mb-3">
-                        <div class="card border-primary">
-                            <div class="card-body text-center">
+                    <div class="col-lg-3 col-md-6 mb-1">
+                        <div class="card border-primary kpi-card">
+                            <div class="card-body">
                                 <h2 class="text-primary mb-0">
                                     <t t-esc="kpis.get('total', 0)"/>
                                 </h2>
-                                <p class="text-muted mb-0">Total Proyectos</p>
+                                <div class="kpi-content">
+                                    <p class="text-muted mb-0">Total Proyectos</p>
+                                </div>
                             </div>
                         </div>
                     </div>
 
                     <!-- KPIs por Estado -->
                     <t t-foreach="stages" t-as="stage">
-                        <div class="col-lg-3 col-md-6 mb-3">
-                            <div class="card border-info">
-                                <div class="card-body text-center">
+                        <div class="col-lg-3 col-md-6 mb-1">
+                            <div class="card border-info kpi-card">
+                                <div class="card-body">
                                     <h2 class="text-info mb-0">
                                         <t t-esc="kpis.get(stage.name, 0)"/>
                                     </h2>
-                                    <p class="text-muted mb-1">
-                                        <t t-esc="stage.name"/>
-                                    </p>
-                                    <small class="text-muted">
-                                        <t t-esc="kpi_percentages.get(stage.name, 0)"/>%
-                                    </small>
+                                    <div class="kpi-content">
+                                        <p class="text-muted mb-0">
+                                            <t t-esc="stage.name"/>
+                                            <small class="text-muted">
+                                                (<t t-esc="kpi_percentages.get(stage.name, 0)"/>%)
+                                            </small>
+                                        </p>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -63,9 +67,9 @@
                 </div>
 
                 <!-- Gráfico de barras simple con CSS -->
-                <div class="row mb-4">
+                <div class="row mb-2">
                     <div class="col-12">
-                        <div class="card">
+                        <div class="card distribution-card">
                             <div class="card-header">
                                 <h5>Distribución de Proyectos por Estado</h5>
                             </div>
@@ -94,7 +98,7 @@
                 <!-- Lista de Proyectos -->
                 <div class="row">
                     <div class="col-12">
-                        <h4 class="mb-3">Lista de Proyectos</h4>
+                        <h5 class="mb-1">Lista de Proyectos</h5>
                         <t t-if="not projects">
                             <div class="alert alert-info">
                                 No hay proyectos disponibles.

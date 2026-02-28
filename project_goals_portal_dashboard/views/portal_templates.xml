@@ -23,84 +23,98 @@
                 <t t-set="title">Objetivos</t>
             </t>
 
-            <div class="container mt-4">
+            <div class="container mt-2">
                 <!-- KPIs Dashboard -->
-                <div class="row mb-4">
+                <div class="row mb-2">
                     <div class="col-12">
-                        <h3 class="mb-3">Dashboard de Objetivos</h3>
+                        <h4 class="mb-1">Dashboard de Objetivos</h4>
                     </div>
                     
                     <!-- KPI: Total de Objetivos -->
-                    <div class="col-lg-3 col-md-6 mb-3">
-                        <div class="card border-primary">
-                            <div class="card-body text-center">
-                                <i class="fa fa-bullseye fa-3x text-primary mb-2"></i>
-                                <h2 class="text-primary mb-0">
-                                    <t t-esc="kpis.get('total', 0)"/>
-                                </h2>
-                                <p class="text-muted mb-0">Total Objetivos</p>
+                    <div class="col-lg-3 col-md-6 mb-1">
+                        <div class="card border-primary kpi-card">
+                            <div class="card-body">
+                                <i class="fa fa-bullseye fa-3x text-primary"></i>
+                                <div class="kpi-content">
+                                    <h2 class="text-primary mb-0">
+                                        <t t-esc="kpis.get('total', 0)"/>
+                                    </h2>
+                                    <p class="text-muted mb-0">Total Objetivos</p>
+                                </div>
                             </div>
                         </div>
                     </div>
 
                     <!-- KPI: Objetivos Alcanzados -->
-                    <div class="col-lg-3 col-md-6 mb-3">
-                        <div class="card border-success">
-                            <div class="card-body text-center">
-                                <i class="fa fa-check-circle fa-3x text-success mb-2"></i>
-                                <h2 class="text-success mb-0">
-                                    <t t-esc="kpis.get('achieved', 0)"/>
-                                </h2>
-                                <p class="text-muted mb-1">Alcanzados</p>
-                                <small class="text-muted">
-                                    <t t-esc="kpi_percentages.get('achieved', 0)"/>%
-                                </small>
+                    <div class="col-lg-3 col-md-6 mb-1">
+                        <div class="card border-success kpi-card">
+                            <div class="card-body">
+                                <i class="fa fa-check-circle fa-3x text-success"></i>
+                                <div class="kpi-content">
+                                    <h2 class="text-success mb-0">
+                                        <t t-esc="kpis.get('achieved', 0)"/>
+                                    </h2>
+                                    <p class="text-muted mb-0">
+                                        Alcanzados
+                                        <small class="text-muted">
+                                            (<t t-esc="kpi_percentages.get('achieved', 0)"/>%)
+                                        </small>
+                                    </p>
+                                </div>
                             </div>
                         </div>
                     </div>
 
                     <!-- KPI: Objetivos En Progreso -->
-                    <div class="col-lg-3 col-md-6 mb-3">
-                        <div class="card border-warning">
-                            <div class="card-body text-center">
-                                <i class="fa fa-hourglass-half fa-3x text-warning mb-2"></i>
-                                <h2 class="text-warning mb-0">
-                                    <t t-esc="kpis.get('in_progress', 0)"/>
-                                </h2>
-                                <p class="text-muted mb-1">En Progreso</p>
-                                <small class="text-muted">
-                                    <t t-esc="kpi_percentages.get('in_progress', 0)"/>%
-                                </small>
+                    <div class="col-lg-3 col-md-6 mb-1">
+                        <div class="card border-warning kpi-card">
+                            <div class="card-body">
+                                <i class="fa fa-hourglass-half fa-3x text-warning"></i>
+                                <div class="kpi-content">
+                                    <h2 class="text-warning mb-0">
+                                        <t t-esc="kpis.get('in_progress', 0)"/>
+                                    </h2>
+                                    <p class="text-muted mb-0">
+                                        En Progreso
+                                        <small class="text-muted">
+                                            (<t t-esc="kpi_percentages.get('in_progress', 0)"/>%)
+                                        </small>
+                                    </p>
+                                </div>
                             </div>
                         </div>
                     </div>
 
                     <!-- KPI: Objetivos Pendientes -->
-                    <div class="col-lg-3 col-md-6 mb-3">
-                        <div class="card border-secondary">
-                            <div class="card-body text-center">
-                                <i class="fa fa-clock-o fa-3x text-secondary mb-2"></i>
-                                <h2 class="text-secondary mb-0">
-                                    <t t-esc="kpis.get('pending', 0)"/>
-                                </h2>
-                                <p class="text-muted mb-1">Pendientes</p>
-                                <small class="text-muted">
-                                    <t t-esc="kpi_percentages.get('pending', 0)"/>%
-                                </small>
+                    <div class="col-lg-3 col-md-6 mb-1">
+                        <div class="card border-secondary kpi-card">
+                            <div class="card-body">
+                                <i class="fa fa-clock-o fa-3x text-secondary"></i>
+                                <div class="kpi-content">
+                                    <h2 class="text-secondary mb-0">
+                                        <t t-esc="kpis.get('pending', 0)"/>
+                                    </h2>
+                                    <p class="text-muted mb-0">
+                                        Pendientes
+                                        <small class="text-muted">
+                                            (<t t-esc="kpi_percentages.get('pending', 0)"/>%)
+                                        </small>
+                                    </p>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
 
                 <!-- Gráfico de progreso -->
-                <div class="row mb-4">
+                <div class="row mb-2">
                     <div class="col-12">
-                        <div class="card">
+                        <div class="card progress-card">
                             <div class="card-header">
                                 <h5>Progreso General de Objetivos</h5>
                             </div>
                             <div class="card-body">
-                                <div class="progress" style="height: 40px;">
+                                <div class="progress" style="height: 25px;">
                                     <div class="progress-bar bg-success" role="progressbar" 
                                          t-att-style="'width: ' + str(kpi_percentages.get('achieved', 0)) + '%'"
                                          t-att-aria-valuenow="kpi_percentages.get('achieved', 0)"
@@ -128,7 +142,7 @@
                 <!-- Lista de Objetivos -->
                 <div class="row">
                     <div class="col-12">
-                        <h4 class="mb-3">Lista de Objetivos</h4>
+                        <h5 class="mb-1">Lista de Objetivos</h5>
                         <t t-if="len(goals_data) == 0">
                             <div class="alert alert-info">
                                 No hay objetivos disponibles.

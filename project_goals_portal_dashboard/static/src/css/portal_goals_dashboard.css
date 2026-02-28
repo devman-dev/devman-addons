@@ -1,22 +1,24 @@
 /* Estilos personalizados para el dashboard de objetivos */
 
 .card {
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
     transition: all 0.3s ease;
 }
 
 .card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+    transform: translateY(-3px);
+    box-shadow: 0 3px 6px rgba(0,0,0,0.12);
 }
 
 .progress {
-    height: 25px;
-    border-radius: 10px;
+    height: 16px;
+    border-radius: 8px;
 }
 
 .progress-bar {
     font-weight: bold;
+    font-size: 0.7rem;
+    line-height: 16px;
     transition: width 0.6s ease;
 }
 
@@ -25,18 +27,53 @@
 }
 
 .badge {
-    padding: 0.5em 0.8em;
-    font-size: 0.875rem;
+    padding: 0.25em 0.5em;
+    font-size: 0.75rem;
+    line-height: 1;
 }
 
-/* KPI Cards */
+/* KPI Cards - Máxima compactación horizontal */
 .card-body h2 {
-    font-size: 2.5rem;
+    font-size: 1.3rem;
     font-weight: bold;
+    margin-bottom: 0 !important;
+    line-height: 1;
+}
+
+.card-body p {
+    margin-bottom: 0;
+    font-size: 0.75rem;
+    line-height: 1;
+}
+
+.card-body small {
+    font-size: 0.7rem;
+    line-height: 1;
 }
 
 .card-body i.fa {
     opacity: 0.7;
+    margin-bottom: 0 !important;
+}
+
+.card-body i.fa-3x {
+    font-size: 1.3em !important;
+}
+
+/* KPI Cards específicos - disposición horizontal */
+.kpi-card .card-body {
+    padding: 0.4rem 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+}
+
+.kpi-card .kpi-content {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    line-height: 1;
 }
 
 /* Goal Status Colors */
@@ -50,6 +87,56 @@
 
 .bg-goal-pending {
     background-color: #6c757d !important;
+}
+
+/* Progreso general más compacto */
+.progress-card .card-body {
+    padding: 0.75rem;
+}
+
+.progress-card .card-header {
+    padding: 0.5rem 0.75rem;
+}
+
+.progress-card .card-header h5 {
+    margin-bottom: 0;
+    font-size: 0.95rem;
+    line-height: 1.2;
+}
+
+/* Tabla más compacta */
+.table {
+    margin-bottom: 0.5rem;
+}
+
+.table td, .table th {
+    padding: 0.35rem 0.4rem;
+    font-size: 0.85rem;
+    line-height: 1.2;
+    vertical-align: middle;
+}
+
+.table thead th {
+    font-size: 0.8rem;
+    padding: 0.4rem 0.4rem;
+    line-height: 1.2;
+}
+
+.btn-sm {
+    font-size: 0.75rem;
+    padding: 0.2rem 0.4rem;
+    line-height: 1.2;
+}
+
+/* Títulos de sección */
+h4, h5 {
+    line-height: 1.2;
+    margin-bottom: 0.5rem !important;
+}
+
+/* Contenedor principal */
+.container {
+    line-height: 1.2;
 }
 
 /* Animations */
@@ -71,10 +158,10 @@
 /* Responsive adjustments */
 @media (max-width: 768px) {
     .card-body h2 {
-        font-size: 2rem;
+        font-size: 1.4rem;
     }
     
     .card-body i.fa-3x {
-        font-size: 2em;
+        font-size: 1.5em !important;
     }
 }
