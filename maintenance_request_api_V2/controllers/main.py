@@ -48,9 +48,6 @@ class MaintenanceRequestAPI(http.Controller):
 
         # 3️⃣ Normalizar espacios
         text = re.sub(r'\s+', ' ', text).strip()
-        git
-        add
-        maintenance_request_api_V2
         # 4️⃣ Buscar "tipo:" en cualquier parte del texto
         match = re.search(r'(?i)tipo\s*:\s*(.*?)(?=\s*descripcion\s*:|\s*estado\s*:|$)', text)
 
