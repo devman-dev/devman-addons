@@ -7,6 +7,7 @@ import logging
 import datetime
 import json
 import re
+from html import unescape
 
 _logger = logging.getLogger(__name__)
 
@@ -36,23 +37,28 @@ class MaintenanceRequestAPI(http.Controller):
         # -----------------------------
 
     def _extract_tipo_mant(self, text):
-
         if not text:
             return None
-        pattern = r'(?is)\btipo(?:\s+de)?(?:\s+mantenim(?:iento)?)?\s*[:=\-]\s*(.*?)(?=\s+\w[\w\s]{0,30}\s*[:=\-]|$)'
 
-        m = re.search(pattern, text)
-        if not m:
-            return None
+        # 1️⃣ Eliminar etiquetas HTML
+        text = re.sub(r'<[^>]+>', ' ', text)
 
-        value = (m.group(1) or "").strip()
+        # 2️⃣ Convertir entidades HTML
+        text = unescape(text)
 
-        # Limpieza opcional por si queda algún separador final suelto
-        value = re.sub(r'\s+$', '', value).strip()
-        value = value.rstrip(" /|-,")
+        # 3️⃣ Normalizar espacios
+        text = re.sub(r'\s+', ' ', text).strip()
+        git
+        add
+        maintenance_request_api_V2
+        # 4️⃣ Buscar "tipo:" en cualquier parte del texto
+        match = re.search(r'(?i)tipo\s*:\s*(.*?)(?=\s*descripcion\s*:|\s*estado\s*:|$)', text)
 
-        return value[:128] if value else None
-    
+        if match:
+            value = match.group(1).strip()
+            return value[:128] if value else None
+
+        return None
     @http.route('/api/v1/maintenance/requests', auth='public', methods=['GET'], type='http', csrf=False)
     def list_requests(self, **kwargs):
         if not self._check_auth():
