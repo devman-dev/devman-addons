@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_casino_provider_config_tree" model="ir.ui.view">
+        <field name="name">casino.provider.config.tree</field>
+        <field name="model">casino.provider.config</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="name"/>
+                <field name="provider_code"/>
+                <field name="provider_name_yaml" optional="show"/>
+                <field name="base_url_yaml" optional="show"/>
+                <field name="file_name"/>
+                <field name="is_active"/>
+                <field name="last_validation_status"/>
+                <field name="last_loaded_at"/>
+                <field name="last_written_at"/>
+                <field name="loaded_from_disk"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_casino_provider_config_search" model="ir.ui.view">
+        <field name="name">casino.provider.config.search</field>
+        <field name="model">casino.provider.config</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="provider_code"/>
+                <field name="file_name"/>
+                <filter name="active_only" string="Activos" domain="[('is_active', '=', True)]"/>
+                <filter name="with_errors" string="Con error" domain="[('last_validation_status', '=', 'invalid')]"/>
+                <filter name="loaded_from_disk" string="Desde disco" domain="[('loaded_from_disk', '=', True)]"/>
+            </search>
+        </field>
+    </record>
+
+    <record id="view_casino_provider_config_form" model="ir.ui.view">
+        <field name="name">casino.provider.config.form</field>
+        <field name="model">casino.provider.config</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_validate_yaml" string="Validar YAML" type="object" class="oe_highlight"/>
+                    <button name="action_write_to_disk" string="Guardar en disco" type="object"/>
+                    <button name="action_overwrite_file" string="Sobrescribir archivo" type="object"/>
+                    <button name="action_create_template" string="Crear plantilla" type="object"/>
+                    <button name="action_sync_from_disk" string="Cargar desde disco" type="object"/>
+                </header>
+                <sheet>
+                    <group>
+                        <group string="Datos generales">
+                            <field name="name"/>
+                            <field name="provider_code"/>
+                            <field name="provider_name_yaml" readonly="1"/>
+                            <field name="provider_type_yaml" readonly="1"/>
+                            <field name="base_url_yaml" readonly="1"/>
+                            <field name="file_name"/>
+                            <field name="is_active"/>
+                            <field name="loaded_from_disk" readonly="1"/>
+                            <field name="version" readonly="1"/>
+                        </group>
+                        <group string="Estado tecnico">
+                            <field name="file_path" readonly="1"/>
+                            <field name="last_loaded_at" readonly="1"/>
+                            <field name="last_written_at" readonly="1"/>
+                            <field name="last_validation_status" readonly="1"/>
+                            <field name="last_validation_message" readonly="1" widget="text"/>
+                            <field name="yaml_parse_error" readonly="1" widget="text" invisible="not yaml_parse_error"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Resumen YAML">
+                            <group>
+                                <group string="Identidad">
+                                    <field name="agency_id_yaml" readonly="1"/>
+                                    <field name="agency_code_yaml" readonly="1"/>
+                                    <field name="operation_names_yaml" readonly="1"/>
+                                </group>
+                                <group string="Autenticacion">
+                                    <field name="auth_mode_yaml" readonly="1"/>
+                                    <field name="auth_session_operation_yaml" readonly="1"/>
+                                    <field name="auth_token_field_yaml" readonly="1"/>
+                                    <field name="auth_token_location_yaml" readonly="1"/>
+                                    <field name="auth_hash_field_yaml" readonly="1"/>
+                                    <field name="auth_hash_location_yaml" readonly="1"/>
+                                </group>
+                            </group>
+                            <group>
+                                <group string="Capacidades">
+                                    <field name="supports_session_authorization_yaml" readonly="1"/>
+                                    <field name="supports_balance_check_yaml" readonly="1"/>
+                                    <field name="supports_operation_status_yaml" readonly="1"/>
+                                    <field name="supports_wallet_operation_yaml" readonly="1"/>
+                                    <field name="supports_round_close_yaml" readonly="1"/>
+                                    <field name="supports_reversal_yaml" readonly="1"/>
+                                </group>
+                                <group string="Timeouts y reintentos">
+                                    <field name="timeout_connect_ms_yaml" readonly="1"/>
+                                    <field name="timeout_read_ms_yaml" readonly="1"/>
+                                    <field name="retry_max_attempts_yaml" readonly="1"/>
+                                    <field name="retry_on_yaml" readonly="1" widget="text"/>
+                                </group>
+                            </group>
+                            <group>
+                                <group string="Validaciones">
+                                    <field name="require_currency_yaml" readonly="1"/>
+                                    <field name="require_hash_yaml" readonly="1"/>
+                                    <field name="require_remote_player_id_yaml" readonly="1"/>
+                                    <field name="require_operation_id_yaml" readonly="1"/>
+                                    <field name="require_round_id_for_stake_yaml" readonly="1"/>
+                                    <field name="require_round_id_for_payout_yaml" readonly="1"/>
+                                    <field name="amount_min_yaml" readonly="1"/>
+                                    <field name="transaction_id_max_length_yaml" readonly="1"/>
+                                </group>
+                            </group>
+                        </page>
+                        <page string="Mapeos">
+                            <group>
+                                <group string="Mapeo de estados">
+                                    <field name="status_mapping_yaml" nolabel="1" readonly="1" widget="text"/>
+                                </group>
+                                <group string="Mapeo de errores">
+                                    <field name="error_mapping_yaml" nolabel="1" readonly="1" widget="text"/>
+                                </group>
+                            </group>
+                            <group string="Metadata del proveedor">
+                                <field name="provider_metadata_yaml" nolabel="1" readonly="1" widget="text"/>
+                            </group>
+                        </page>
+                        <page string="Operaciones">
+                            <field name="operations_detail_yaml" nolabel="1" readonly="1" widget="text"/>
+                        </page>
+                        <page string="Contenido YAML">
+                            <field name="yaml_content" nolabel="1" widget="text"/>
+                        </page>
+                        <page string="Notas">
+                            <field name="notes" nolabel="1" widget="text"/>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_casino_provider_config" model="ir.actions.act_window">
+        <field name="name">Configuraciones YAML</field>
+        <field name="res_model">casino.provider.config</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="view_casino_provider_config_search"/>
+    </record>
+
+    <record id="action_casino_provider_config_sync" model="ir.actions.server">
+        <field name="name">Cargar YAML desde disco</field>
+        <field name="model_id" ref="model_casino_provider_config"/>
+        <field name="state">code</field>
+        <field name="code">action = model.action_sync_from_disk()</field>
+    </record>
+
+    <menuitem id="casino_api_yaml_root_menu" name="Configuraciones YAML" parent="casino_api_root_menu" sequence="40" groups="casino_api_gateway.group_provider_config_manager,base.group_system"/>
+    <menuitem id="casino_api_yaml_provider_menu" name="Proveedores YAML" parent="casino_api_yaml_root_menu" action="action_casino_provider_config" sequence="10" groups="casino_api_gateway.group_provider_config_manager,base.group_system"/>
+    <menuitem id="casino_api_yaml_tools_menu" name="Herramientas" parent="casino_api_yaml_root_menu" sequence="20" groups="casino_api_gateway.group_provider_config_manager,base.group_system"/>
+    <menuitem id="casino_api_yaml_sync_menu" name="Cargar desde disco" parent="casino_api_yaml_tools_menu" action="action_casino_provider_config_sync" sequence="10" groups="casino_api_gateway.group_provider_config_manager,base.group_system"/>
+    <menuitem id="casino_api_yaml_open_menu" name="Proveedores YAML" parent="casino_api_yaml_tools_menu" action="action_casino_provider_config" sequence="20" groups="casino_api_gateway.group_provider_config_manager,base.group_system"/>
+</odoo>

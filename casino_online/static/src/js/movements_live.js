@@ -120,7 +120,7 @@ class CasinoMovementsResults extends Component {
                             <t t-esc="movement.session.event_date || '-'" />
                           </div>
                           <div class="col-md-6 col-lg-4">
-                            <strong>Market ID:</strong>
+                            <strong>Description:</strong>
                             <t t-esc="movement.session.market_id || '-'" />
                           </div>
                           <div class="col-md-6 col-lg-4">

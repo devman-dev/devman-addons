@@ -646,7 +646,7 @@
                                                                             <t t-esc="movement['session'].get('event_date') or '-'" />
                                                                         </div>
                                                                         <div class="col-md-6 col-lg-4">
-                                                                            <strong>Market ID:</strong>
+                                                                            <strong>Description:</strong>
                                                                             <t t-esc="movement['session'].get('market_id') or '-'" />
                                                                         </div>
                                                                         <div class="col-md-6 col-lg-4">

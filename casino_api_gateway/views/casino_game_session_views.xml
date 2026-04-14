@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="casino_game_session_gateway_form_inherit" model="ir.ui.view">
+        <field name="name">casino.game.session.gateway.form.inherit</field>
+        <field name="model">casino.game.session</field>
+        <field name="inherit_id" ref="casino_online_back.view_casino_game_session_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='game_id']" position="after">
+                <field name="provider_game_id"/>
+            </xpath>
+            <xpath expr="//field[@name='json_data']" position="after">
+                <field name="provider_request_payload_json" string="Payload Proveedor"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="casino_game_session_gateway_tree_inherit" model="ir.ui.view">
+        <field name="name">casino.game.session.gateway.tree.inherit</field>
+        <field name="model">casino.game.session</field>
+        <field name="inherit_id" ref="casino_online_back.view_casino_game_session_tree"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='game_id']" position="after">
+                <field name="provider_game_id" string="Game ID Prov." optional="show"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="casino_game_session_gateway_search_inherit" model="ir.ui.view">
+        <field name="name">casino.game.session.gateway.search.inherit</field>
+        <field name="model">casino.game.session</field>
+        <field name="inherit_id" ref="casino_online_back.view_casino_game_session_search"/>
+        <field name="arch" type="xml">
+            <xpath expr="//search" position="inside">
+                <field name="provider_game_id"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

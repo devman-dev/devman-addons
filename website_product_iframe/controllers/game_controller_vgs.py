@@ -140,6 +140,41 @@ class GameControllerVGS(http.Controller):
         else:
             # code suelto
             raise CasinoError(ct, override_msg or "Error")
+
+    def _is_gateway_active(self):
+        module = request.env['ir.module.module'].sudo()
+        return bool(module.search_count([
+            ('name', '=', 'casino_api_gateway'),
+            ('state', '=', 'installed'),
+        ]))
+
+    def _gateway_provider_code(self, data):
+        params = data.get('params', {}) if isinstance(data, dict) else {}
+        provider_code = (
+            (data.get('provider_code') if isinstance(data, dict) else None)
+            or (params.get('provider_code') if isinstance(params, dict) else None)
+            or request.env['ir.config_parameter'].sudo().get_param('casino_api_gateway.default_provider_code')
+        )
+        if provider_code:
+            return provider_code
+        provider = request.env['casino.api.provider'].sudo().search([('active', '=', True)], limit=1)
+        return provider.code if provider else False
+
+    def _gateway_call(self, operation_code, payload):
+        service = request.env['casino.api.gateway.service'].sudo()
+        return service.handle_http_request(
+            operation_code,
+            payload,
+            request.httprequest.headers,
+            response_format='legacy',
+        )
+
+    def _gateway_error_response(self, gateway_body, status_code, fallback_message):
+        errors = gateway_body.get('errors') if isinstance(gateway_body, dict) else []
+        first = errors[0] if errors else {}
+        message = first.get('message') or fallback_message
+        code = first.get('code') or CasinoErrorCodes.GENERIC_ERROR[0]
+        return error_response(CasinoError(code, message, http_status=status_code))
         
     def _update_limits_softcap(self, partner, company, amount):
         """
@@ -273,7 +308,7 @@ class GameControllerVGS(http.Controller):
         }
         return {"allowed": True, "crossed": crossed, "message_map": message_map}
     
-    def _prepare_session_vals(self, game_id, round_id, user_id, token, initial_balance, final_balance, amount, state, result, transaction_id, internal_transaction_id, json_data):
+    def _prepare_session_vals(self, game_id, round_id, user_id, token, initial_balance, final_balance, amount, state, result, transaction_id, internal_transaction_id, json_data, trn_type=None):
         """
         Devuelve los valores para crear una sesión de juego.
         """
@@ -294,6 +329,7 @@ class GameControllerVGS(http.Controller):
         _logger.info(f"Casino Iframe: Starting game session for product: {product.id} - {product.name}")
         return {
             'game_id': product.id,
+            'trn_type': trn_type,
             'round_id': round_id,
             'user_id': user_id,
             'token': token,
@@ -500,9 +536,9 @@ class GameControllerVGS(http.Controller):
             if amount > balance:
                 return _xml_envelope(req_xml, _xml_tag("RESULT", "FAILED") + _xml_tag("CODE", "300"))
 
-            result = self._apply_amount(session.id, product_id, round_id = round_id, amount=amount, to_win=0.0, op="lose" if trntype == "BET" else "tip", token=token, transaction_id=casino_tx, internal_transaction_id=internal_transaction_id)
+            result = self._apply_amount(session.id, product_id, round_id = round_id, amount=amount, to_win=0.0, op="lose" if trntype == "BET" else "tip", token=token, transaction_id=casino_tx, internal_transaction_id=internal_transaction_id, trn_type=trntype)
         elif trntype in ("WIN", "CANCELLED_BET"):
-            result = self._apply_amount(session.id, product_id, round_id = round_id, amount=amount, to_win=0.0, op='win', token=token, transaction_id=casino_tx, internal_transaction_id=internal_transaction_id)
+            result = self._apply_amount(session.id, product_id, round_id = round_id, amount=amount, to_win=0.0, op='win', token=token, transaction_id=casino_tx, internal_transaction_id=internal_transaction_id, trn_type=trntype)
         else:
             # Tipo desconocido: failed genérico 301
             return _xml_envelope(req_xml, _xml_tag("RESULT", "FAILED") + _xml_tag("CODE", "301"))
@@ -702,6 +738,40 @@ class GameControllerVGS(http.Controller):
         if token is None:
             token = data.get('params', {}).get('token')
         try:
+            if self._is_gateway_active():
+                provider_code = self._gateway_provider_code(data)
+                if not provider_code:
+                    return self._gateway_error_response({}, 422, 'No se pudo resolver provider_code para gateway.')
+                payload = {
+                    'meta': {
+                        'api_version': 'v1',
+                        'provider_code': provider_code,
+                        'operation': 'session.authorize',
+                        'trace_id': uuid.uuid4().hex,
+                        'request_id': uuid.uuid4().hex,
+                    },
+                    'data': {
+                        'session_token': token,
+                    },
+                    'provider_request_payload': data,
+                }
+                body, status = self._gateway_call('session.authorize', payload)
+                if status >= 400:
+                    return self._gateway_error_response(body, status, 'Error al autorizar sesion en gateway.')
+                result = body.get('result', {})
+                balance_cents = result.get('provider_balance')
+                if balance_cents is None:
+                    balance_cents = int(float(result.get('balance') or 0.0) * 100)
+                response = {
+                    'token': result.get('session_token') or token,
+                    'balance': int(balance_cents),
+                    'currency': result.get('currency') or 0,
+                    'nickname': result.get('nickname') or '',
+                    'timestamp': result.get('timestamp') or int(time.time() * 1000),
+                    'country': result.get('country') or 'AR',
+                }
+                return Response(json.dumps(response), content_type='application/json')
+
             user = request.env['res.partner'].sudo().search(['|', ('token', '=', token), ('secret_token', '=', token)], limit=1)
             if not user:
                 raise CasinoError(*CasinoErrorCodes.INVALID_TOKEN)
@@ -783,6 +853,47 @@ class GameControllerVGS(http.Controller):
             if not isinstance(amount, (int, float)) or amount <= 0:
                 raise CasinoError(*CasinoErrorCodes.INVALID_AMOUNT)
 
+            end_round = data.get('endRound')
+            if end_round is None:
+                end_round = data.get('params', {}).get('endRound', False)
+
+            if self._is_gateway_active():
+                provider_code = self._gateway_provider_code(data)
+                if not provider_code:
+                    return self._gateway_error_response({}, 422, 'No se pudo resolver provider_code para gateway.')
+                operation_id = str(transactionId or uuid.uuid4().hex)
+                payload = {
+                    'meta': {
+                        'api_version': 'v1',
+                        'provider_code': provider_code,
+                        'operation': 'wallet.apply_operation',
+                        'trace_id': uuid.uuid4().hex,
+                        'request_id': uuid.uuid4().hex,
+                    },
+                    'data': {
+                        'session_token': token,
+                        'operation_id': operation_id,
+                        'operation_type': 'payout',
+                        'amount': int(amount or 0),
+                        'round_id': str(roundId or ''),
+                        'round_finished': bool(end_round),
+                    },
+                    'provider_request_payload': data,
+                }
+                body, status = self._gateway_call('wallet.apply_operation', payload)
+                if status >= 400:
+                    return self._gateway_error_response(body, status, 'Error al aplicar operacion de credito en gateway.')
+                result = body.get('result', {})
+                balance_cents = result.get('balance')
+                if balance_cents is None:
+                    balance_cents = int(float(result.get('provider_balance') or 0.0))
+                response = {
+                    'balance': int(balance_cents),
+                    'transactionId': result.get('response_transaction_id') or operation_id,
+                    'timestamp': result.get('timestamp') or int(time.time() * 1000),
+                }
+                return Response(json.dumps(response), content_type='application/json')
+
             internal_transaction_id = uuid.uuid4().hex
 
             session = request.env['casino.game.session'].sudo().search([('token', '=', token)], limit=1)
@@ -852,6 +963,47 @@ class GameControllerVGS(http.Controller):
                 amount = data.get('params', {}).get('amount', 0.0)
             if not isinstance(amount, (int, float)) or amount <= 0:
                 raise CasinoError(*CasinoErrorCodes.INVALID_AMOUNT)
+
+            end_round = data.get('endRound')
+            if end_round is None:
+                end_round = data.get('params', {}).get('endRound', False)
+
+            if self._is_gateway_active():
+                provider_code = self._gateway_provider_code(data)
+                if not provider_code:
+                    return self._gateway_error_response({}, 422, 'No se pudo resolver provider_code para gateway.')
+                operation_id = str(transactionId or uuid.uuid4().hex)
+                payload = {
+                    'meta': {
+                        'api_version': 'v1',
+                        'provider_code': provider_code,
+                        'operation': 'wallet.apply_operation',
+                        'trace_id': uuid.uuid4().hex,
+                        'request_id': uuid.uuid4().hex,
+                    },
+                    'data': {
+                        'session_token': token,
+                        'operation_id': operation_id,
+                        'operation_type': 'stake',
+                        'amount': int(amount or 0),
+                        'round_id': str(roundId or ''),
+                        'round_finished': bool(end_round),
+                    },
+                    'provider_request_payload': data,
+                }
+                body, status = self._gateway_call('wallet.apply_operation', payload)
+                if status >= 400:
+                    return self._gateway_error_response(body, status, 'Error al aplicar operacion de debito en gateway.')
+                result = body.get('result', {})
+                balance_cents = result.get('balance')
+                if balance_cents is None:
+                    balance_cents = int(float(result.get('provider_balance') or 0.0))
+                response = {
+                    'balance': int(balance_cents),
+                    'transactionId': result.get('response_transaction_id') or operation_id,
+                    'timestamp': result.get('timestamp') or int(time.time() * 1000),
+                }
+                return Response(json.dumps(response), content_type='application/json')
 
             to_win = data.get('to_win')
             if to_win is None:
@@ -924,6 +1076,37 @@ class GameControllerVGS(http.Controller):
                     token = data.get('params', {}).get('token')
             if not token:
                 raise CasinoError(*CasinoErrorCodes.INVALID_TOKEN)
+
+            if self._is_gateway_active():
+                provider_code = self._gateway_provider_code(data)
+                if not provider_code:
+                    return self._gateway_error_response({}, 422, 'No se pudo resolver provider_code para gateway.')
+                payload = {
+                    'meta': {
+                        'api_version': 'v1',
+                        'provider_code': provider_code,
+                        'operation': 'wallet.get_balance',
+                        'trace_id': uuid.uuid4().hex,
+                        'request_id': uuid.uuid4().hex,
+                    },
+                    'data': {
+                        'session_token': token,
+                    },
+                    'provider_request_payload': data,
+                }
+                body, status = self._gateway_call('wallet.get_balance', payload)
+                if status >= 400:
+                    return self._gateway_error_response(body, status, 'Error al obtener balance en gateway.')
+                result = body.get('result', {})
+                balance_cents = result.get('provider_balance')
+                if balance_cents is None:
+                    balance_cents = int(float(result.get('balance') or 0.0) * 100)
+                response = {
+                    'balance': int(balance_cents),
+                    'timestamp': result.get('timestamp') or int(time.time() * 1000),
+                }
+                return Response(json.dumps(response), content_type='application/json')
+
             _logger.info('Casino Iframe: api_balance called with token: %s', token)
             user = request.env['res.partner'].sudo().search([('secret_token', '=', token)], limit=1)
             if not user:
@@ -950,7 +1133,7 @@ class GameControllerVGS(http.Controller):
 
 
     # ----------------- Helper interno -----------------
-    def _apply_amount(self, session_id, product_id, round_id, amount, to_win, op, token, transaction_id, internal_transaction_id):
+    def _apply_amount(self, session_id, product_id, round_id, amount, to_win, op, token, transaction_id, internal_transaction_id, trn_type=None):
         """
         Ajusta el balance de la sesión y deja nota en description.
         op: 'win' | 'lose' | 'refund'
@@ -1061,7 +1244,7 @@ class GameControllerVGS(http.Controller):
             _logger.info('Valores para session_vals: product_id=%s, user_id=%s, token=%s, current=%s, new_balance=%s, amt=%s, state=%s, result=%s, transaction_id=%s, json_data=%s',
                 product_id, user_id, token, current_balance, new_balance, amt, state, result, transaction_id, json_data)
             try:
-                session_vals = self._prepare_session_vals(product_id, round_id, user_id, token, current_balance, new_balance, amt, to_win, state, result, transaction_id, internal_transaction_id, json_data)
+                session_vals = self._prepare_session_vals(product_id, round_id, user_id, token, current_balance, new_balance, amt, state, result, transaction_id, internal_transaction_id, json_data, trn_type=trn_type)
                 # Si es un débito (apuesta perdida), calcular y guardar comisión del agente
                 if op == 'lose':
                     # 1) Determinar agente del jugador (si el módulo de agentes está instalado)

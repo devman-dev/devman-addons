@@ -1,0 +1,4 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_casino_api_provider_manager,casino.api.provider,model_casino_api_provider,base.group_system,1,1,1,0
+access_casino_api_operation_manager,casino.api.operation,model_casino_api_operation,base.group_system,1,1,1,0
+access_casino_api_audit_event_manager,casino.api.audit.event,model_casino_api_audit_event,base.group_system,1,0,1,0

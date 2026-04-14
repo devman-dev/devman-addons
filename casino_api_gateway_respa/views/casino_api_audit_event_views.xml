@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="casino_api_audit_event_view_list" model="ir.ui.view">
+        <field name="name">casino.api.audit.event.list</field>
+        <field name="model">casino.api.audit.event</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="event_ts"/>
+                <field name="trace_id"/>
+                <field name="event_type"/>
+                <field name="operation_id"/>
+                <field name="http_status"/>
+                <field name="message"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="casino_api_audit_event_view_form" model="ir.ui.view">
+        <field name="name">casino.api.audit.event.form</field>
+        <field name="model">casino.api.audit.event</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <field name="operation_id"/>
+                        <field name="trace_id"/>
+                        <field name="event_type"/>
+                        <field name="event_ts"/>
+                        <field name="http_status"/>
+                        <field name="job_uuid"/>
+                        <field name="message"/>
+                    </group>
+                    <notebook>
+                        <page string="Payload">
+                            <field name="payload_json" widget="text"/>
+                        </page>
+                        <page string="Headers">
+                            <field name="headers_json" widget="text"/>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+</odoo>

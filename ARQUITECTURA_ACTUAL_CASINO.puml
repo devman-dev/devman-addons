@@ -1,0 +1,125 @@
+@startuml Diagrama1
+' Arquitectura actual de modulos casino en Odoo 18
+' Enfocado en lo que hoy existe en el codigo
+
+title Arquitectura Actual - Ecosistema Casino (Odoo 18)
+left to right direction
+skinparam componentStyle rectangle
+skinparam packageStyle rectangle
+skinparam shadowing false
+skinparam defaultTextAlignment left
+
+actor "Usuario Web" as User
+actor "Operador Backoffice" as Ops
+
+cloud "Proveedores de pago\n(Odoo payment.provider)" as PayProviders
+cloud "Proveedor de juego\n(configurado por juego)" as GameProvider
+
+rectangle "Odoo Core" as OdooCore {
+  component "website_sale" as WebsiteSale
+  component "portal" as Portal
+  component "account" as Account
+  component "payment" as Payment
+  component "auth_signup" as AuthSignup
+}
+
+package "Modulo casino_online\n(Presentacion + Portal + Depositos)" as CasinoOnline {
+  component "controllers/transactions.py" as CO_Transactions
+  component "controllers/withdrawal_controller.py" as CO_WithdrawCtrl
+  component "models/res_partner.py\n(token, balance_game, datos bancarios)" as CO_Partner
+  component "models/payment_transaction.py\n(_set_done deposita y postea)" as CO_PayTx
+}
+
+package "Modulo casino_online_back\n(Core casino + Contabilidad + Reportes)" as CasinoBack {
+  component "models/game.py\n(product.template inherit)\nprovider_id + urls integracion" as CB_Game
+  component "models/session.py\n(casino.game.session)" as CB_Session
+  component "models/res_company.py\n(wallet/accounting ops)" as CB_Company
+  component "models/bet_limits.py\n(casino.game.bet.limits)" as CB_Limits
+  component "models/withdrawals.py\n(casino.game.withdrawals)" as CB_Withdrawals
+  component "models/casino_transfer_service.py" as CB_TransferSvc
+  component "models/global_report.py" as CB_GlobalReport
+}
+
+package "Modulo casino_liquidation\n(Liquidacion por proveedor/categoria)" as CasinoLiq {
+  component "models/commission_config.py\n(casino.commission.config)" as CL_Commission
+  component "models/liquidation.py\n(casino.liquidation)" as CL_Liquidation
+  component "models/liquidation_line.py\n(casino.liquidation.line)" as CL_LiquidationLine
+  component "wizards/generate_liquidation_wizard.py" as CL_Wizard
+}
+
+package "Modulo casino_agentes\n(Jerarquia y comisiones de agentes)" as CasinoAgents {
+  component "models/res_partner.py\n(is_agent, is_player, jerarquia)" as CA_Partner
+}
+
+database "DB Odoo" as DB {
+  collections "res.partner / res.users" as TPartners
+  collections "product.template / product.product" as TProducts
+  collections "casino.game.session" as TSessions
+  collections "casino.game.withdrawals" as TWithdrawals
+  collections "casino.game.bet.limits" as TLimits
+  collections "account.move / account.payment" as TAccounting
+  collections "casino.liquidation*" as TLiquidation
+}
+
+' Dependencias de modulos (manifest)
+CasinoBack ..> CasinoOnline : depends
+CasinoLiq ..> CasinoBack : depends
+CasinoAgents ..> CasinoBack : depends
+
+' Entradas de usuarios
+User --> CO_Transactions : portal /my/*
+User --> CO_WithdrawCtrl : retiros y bancos
+Ops --> CB_GlobalReport : reportes
+Ops --> CL_Wizard : generar liquidaciones
+
+' Integracion pagos
+CO_Transactions --> Payment
+CO_Transactions --> PayProviders : seleccion metodo pago
+CO_PayTx --> Account : crea/account.payment
+CO_PayTx --> CO_Partner : actualiza balance_game
+
+' Core casino
+CO_Transactions --> CB_Limits : consulta/actualiza limites
+CO_WithdrawCtrl --> CB_Withdrawals : alta/listado retiros
+CB_Withdrawals --> CB_Company : action_casino_register_cash_movement
+CB_Company --> Account : account.payment/account.move
+CB_TransferSvc --> Account
+
+' Juego / sesiones
+CB_Session --> CB_Game : provider related por game
+CB_Game --> GameProvider : urls/codigos guardados
+note right of CB_Game
+  En el estado actual, las URLs del proveedor
+  estan modeladas en product.template, pero
+  no hay una capa formal de adapter por proveedor.
+end note
+
+' Liquidacion
+CL_Wizard --> TSessions : busca sesiones por rango
+CL_Wizard --> CL_Commission : comision por proveedor/categoria
+CL_Wizard --> CL_LiquidationLine : genera lineas
+CL_Liquidation --> TLiquidation
+
+' Persistencia principal
+CO_Partner --> TPartners
+CB_Game --> TProducts
+CB_Session --> TSessions
+CB_Withdrawals --> TWithdrawals
+CB_Limits --> TLimits
+CB_Company --> TAccounting
+CO_PayTx --> TAccounting
+
+' Acoplamientos relevantes
+CB_Session --> TSessions : provider_id related
+CL_Liquidation --> TSessions : filtra provider_id
+CA_Partner --> TPartners
+
+legend right
+  Arquitectura ACTUAL (as-is)
+  1. casino_online: portal/pagos
+  2. casino_online_back: core + accounting + sesiones
+  3. casino_liquidation: liquidacion por proveedor
+  4. casino_agentes: jerarquia de agentes
+endlegend
+
+@enduml

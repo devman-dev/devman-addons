@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="casino_api_operation_view_list" model="ir.ui.view">
+        <field name="name">casino.api.operation.list</field>
+        <field name="model">casino.api.operation</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="create_date"/>
+                <field name="request_id"/>
+                <field name="trace_id"/>
+                <field name="provider_code"/>
+                <field name="operation_code"/>
+                <field name="state"/>
+                <field name="error_code"/>
+                <field name="processed_at"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="casino_api_operation_view_form" model="ir.ui.view">
+        <field name="name">casino.api.operation.form</field>
+        <field name="model">casino.api.operation</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <field name="name"/>
+                        <field name="request_id"/>
+                        <field name="trace_id"/>
+                        <field name="provider_id"/>
+                        <field name="provider_code"/>
+                        <field name="operation_code"/>
+                        <field name="state"/>
+                    </group>
+                    <group>
+                        <field name="idempotency_key"/>
+                        <field name="operation_key"/>
+                        <field name="business_key"/>
+                        <field name="job_uuid"/>
+                        <field name="attempt_count"/>
+                        <field name="processed_at"/>
+                    </group>
+                    <group>
+                        <field name="error_code"/>
+                        <field name="error_message"/>
+                    </group>
+                    <notebook>
+                        <page string="Request">
+                            <field name="request_payload_json" widget="text"/>
+                        </page>
+                        <page string="Normalizado">
+                            <field name="normalized_payload_json" widget="text"/>
+                        </page>
+                        <page string="Response">
+                            <field name="response_payload_json" widget="text"/>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+</odoo>

@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <menuitem id="casino_api_root_menu" name="Casino API" sequence="90"/>
+
+    <record id="casino_api_operation_action" model="ir.actions.act_window">
+        <field name="name">Operaciones API</field>
+        <field name="res_model">casino.api.operation</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <record id="casino_api_provider_action" model="ir.actions.act_window">
+        <field name="name">Proveedores API</field>
+        <field name="res_model">casino.api.provider</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <record id="casino_api_audit_action" model="ir.actions.act_window">
+        <field name="name">Auditoria API</field>
+        <field name="res_model">casino.api.audit.event</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <menuitem id="casino_api_operation_menu" name="Operaciones" parent="casino_api_root_menu" action="casino_api_operation_action" sequence="10"/>
+    <menuitem id="casino_api_provider_menu" name="Proveedores" parent="casino_api_root_menu" action="casino_api_provider_action" sequence="20"/>
+    <menuitem id="casino_api_audit_menu" name="Auditoria" parent="casino_api_root_menu" action="casino_api_audit_action" sequence="30"/>
+</odoo>

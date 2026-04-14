@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="casino_api_provider_view_list" model="ir.ui.view">
+        <field name="name">casino.api.provider.list</field>
+        <field name="model">casino.api.provider</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="code"/>
+                <field name="name"/>
+                <field name="active"/>
+                <field name="legacy_mode"/>
+                <field name="require_round_id_for_stake"/>
+                <field name="require_round_id_for_payout"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="casino_api_provider_view_form" model="ir.ui.view">
+        <field name="name">casino.api.provider.form</field>
+        <field name="model">casino.api.provider</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <field name="name"/>
+                        <field name="code"/>
+                        <field name="active"/>
+                        <field name="legacy_mode"/>
+                    </group>
+                    <group>
+                        <field name="supports_round_close"/>
+                        <field name="supports_reversal"/>
+                        <field name="require_round_id_for_stake"/>
+                        <field name="require_round_id_for_payout"/>
+                        <field name="duplicate_window_sec"/>
+                    </group>
+                    <group>
+                        <field name="notes"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+</odoo>

@@ -1,0 +1,75 @@
+@startuml arquitectura_actual_casino_ejecutiva
+' Vista ejecutiva (cliente no tecnico)
+
+title Arquitectura Actual Casino - Vista Ejecutiva
+left to right direction
+skinparam shadowing false
+skinparam packageStyle rectangle
+skinparam defaultTextAlignment center
+skinparam ArrowThickness 1
+
+actor "Jugador" as Player
+actor "Operacion\n(Backoffice)" as Ops
+actor "Finanzas" as Finance
+
+cloud "Proveedor de Pago" as PSP
+cloud "Proveedor de Juego\n(actual: 1)" as GameVendor
+
+rectangle "Plataforma Odoo" as Odoo {
+  package "Canales" {
+    rectangle "Portal Web\n(casino_online)" as Portal
+    rectangle "Backoffice\n(casino_online_back)" as Backoffice
+  }
+
+  package "Core de negocio" {
+    rectangle "Wallet y Movimientos\n(account.payment / account.move)" as Wallet
+    rectangle "Sesiones de Juego\n(casino.game.session)" as Sessions
+    rectangle "Limites y Retiros\n(bet_limits / withdrawals)" as LimitsWithdrawals
+  }
+
+  package "Liquidacion" {
+    rectangle "Liquidacion por Proveedor/Categoria\n(casino_liquidation)" as Liquidation
+  }
+
+  database "Base de Datos Odoo" as DB
+}
+
+' Interaccion de usuarios
+Player --> Portal : Deposita / Retira / Consulta movimientos
+Ops --> Backoffice : Opera sesiones, retiros y reportes
+Finance --> Liquidation : Revisa y confirma liquidaciones
+
+' Flujo principal actual
+Portal --> PSP : Cobro deposito
+PSP --> Portal : Confirmacion de pago
+Portal --> Wallet : Registra movimiento contable
+
+Portal --> Sessions : Consulta detalle de transacciones
+Backoffice --> LimitsWithdrawals : Gestion de limites y retiros
+LimitsWithdrawals --> Wallet : Impacta en caja/banco
+
+Backoffice --> Sessions : Seguimiento de sesiones
+Sessions --> GameVendor : Configuracion por juego\n(guardada en producto)
+
+Sessions --> Liquidation : Datos de sesiones por proveedor
+Liquidation --> DB : Guarda cabeceras y lineas
+Wallet --> DB
+Sessions --> DB
+LimitsWithdrawals --> DB
+Portal --> DB
+
+note bottom of GameVendor
+  En la arquitectura actual, la integracion de proveedor
+  esta acoplada a configuracion por juego.
+  Aun no existe una capa formal de adaptadores por proveedor.
+end note
+
+legend right
+  Mensaje clave para cliente:
+  - Hay una base funcional solida para operar.
+  - Ya se liquida por proveedor/categoria.
+  - El siguiente paso de madurez es desacoplar
+    la integracion para escalar a multiples proveedores.
+endlegend
+
+@enduml

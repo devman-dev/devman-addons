@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+    <record id="casino_api_provider_vgs" model="casino.api.provider">
+        <field name="name">VivoGameSystem</field>
+        <field name="code">vgs</field>
+        <field name="supports_reversal">True</field>
+        <field name="legacy_mode">transitional</field>
+    </record>
+
+    <record id="casino_api_provider_caballos" model="casino.api.provider">
+        <field name="name">Caballos</field>
+        <field name="code">caballos</field>
+        <field name="require_round_id_for_stake">True</field>
+        <field name="require_round_id_for_payout">True</field>
+        <field name="legacy_mode">transitional</field>
+    </record>
+</odoo>
