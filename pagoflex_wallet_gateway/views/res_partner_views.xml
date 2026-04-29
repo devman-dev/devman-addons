@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_partner_form_pagoflex_wallet_gateway" model="ir.ui.view">
+        <field name="name">res.partner.form.pagoflex.wallet.gateway</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_partner_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//sheet/notebook" position="inside">
+                <page string="Comisionistas" invisible="not is_company">
+                    <group>
+                        <field name="gateway_commission_agent_total_percentage" readonly="1"/>
+                    </group>
+                    <field name="gateway_commission_agent_line_ids">
+                        <list editable="bottom">
+                            <field name="sequence" widget="handle"/>
+                            <field name="agent_partner_id"/>
+                            <field name="agent_code"/>
+                            <field name="percentage"/>
+                            <field name="company_total_percentage" readonly="1"/>
+                            <field name="max_percentage" readonly="1"/>
+                            <field name="company_gateway_user_id" optional="hide"/>
+                            <field name="active"/>
+                        </list>
+                    </field>
+                </page>
+                <page string="PagoFlex">
+                    <group>
+                        <group string="Comisionista">
+                            <field name="is_gateway_commission_agent"/>
+                            <field name="gateway_commission_agent_code" invisible="not is_gateway_commission_agent"/>
+                            <field name="gateway_min_commission_percentage" invisible="not is_gateway_commission_agent"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Usuarios gateway">
+                            <field name="gateway_user_ids" readonly="1">
+                                <list>
+                                    <field name="name"/>
+                                    <field name="external_id"/>
+                                    <field name="email"/>
+                                    <field name="parent_company_gateway_user_id"/>
+                                    <field name="cuit_owner"/>
+                                    <field name="active"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Cuentas empresas">
+                            <field name="gateway_company_ids" readonly="1">
+                                <list>
+                                    <field name="name"/>
+                                    <field name="external_id"/>
+                                    <field name="cuit"/>
+                                    <field name="contact_email"/>
+                                    <field name="active"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Reglas como comisionista" invisible="not is_gateway_commission_agent">
+                            <field name="gateway_company_commission_line_ids" readonly="1">
+                                <list>
+                                    <field name="company_gateway_user_id"/>
+                                    <field name="company_partner_id"/>
+                                    <field name="percentage"/>
+                                    <field name="active"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </page>
+            </xpath>
+        </field>
+    </record>
+</odoo>

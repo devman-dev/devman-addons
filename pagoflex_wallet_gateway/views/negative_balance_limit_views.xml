@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_pf_gateway_negative_balance_limit_tree" model="ir.ui.view">
+        <field name="name">pf.gateway.negative.balance.limit.tree</field>
+        <field name="model">pf.gateway.negative.balance.limit</field>
+        <field name="arch" type="xml">
+            <list>
+                <header>
+                    <button name="action_sync_from_gateway" type="object" string="Sincronizar" class="btn-primary" display="always"/>
+                </header>
+                <field name="name"/>
+                <field name="cvu_cbu"/>
+                <field name="bank_account_id"/>
+                <field name="limit_amount"/>
+                <field name="is_active"/>
+                <field name="updated_at"/>
+                <field name="last_sync_at"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_pf_gateway_negative_balance_limit_form" model="ir.ui.view">
+        <field name="name">pf.gateway.negative.balance.limit.form</field>
+        <field name="model">pf.gateway.negative.balance.limit</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_push_to_gateway" type="object" string="Enviar al gateway" class="btn-primary"/>
+                    <button name="action_sync_from_gateway" type="object" string="Sincronizar"/>
+                </header>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="name" readonly="1"/>
+                            <field name="external_id" readonly="1"/>
+                            <field name="cvu_cbu"/>
+                            <field name="bank_account_id"/>
+                            <field name="bank_account_external_id" readonly="1"/>
+                        </group>
+                        <group>
+                            <field name="limit_amount"/>
+                            <field name="is_active"/>
+                            <field name="active"/>
+                            <field name="created_at" readonly="1"/>
+                            <field name="updated_at" readonly="1"/>
+                            <field name="last_sync_at" readonly="1"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Payload crudo" groups="pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_admin,pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_operator">
+                            <field name="raw_payload" widget="text" readonly="1"/>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_pf_gateway_negative_balance_limit_search" model="ir.ui.view">
+        <field name="name">pf.gateway.negative.balance.limit.search</field>
+        <field name="model">pf.gateway.negative.balance.limit</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="cvu_cbu"/>
+                <field name="bank_account_id"/>
+                <field name="bank_account_external_id"/>
+                <filter name="filter_active_gateway" string="Activos en gateway" domain="[('is_active', '=', True)]"/>
+                <filter name="filter_inactive_gateway" string="Inactivos en gateway" domain="[('is_active', '=', False)]"/>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_pf_gateway_negative_balance_limit" model="ir.actions.act_window">
+        <field name="name">Limites de saldo negativo</field>
+        <field name="res_model">pf.gateway.negative.balance.limit</field>
+        <field name="view_mode">list,form</field>
+        <field name="context">{'search_default_filter_active_gateway': 1}</field>
+    </record>
+
+    <menuitem id="menu_pf_gateway_negative_balance_limit"
+              name="Limites de saldo negativo"
+              parent="menu_pagoflex_wallet_gateway_config"
+              action="action_pf_gateway_negative_balance_limit"
+              sequence="35"
+              groups="pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_admin,pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_operator"/>
+</odoo>

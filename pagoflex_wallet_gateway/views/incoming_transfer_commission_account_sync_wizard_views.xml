@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_pf_gateway_incoming_transfer_commission_account_sync_wizard_form" model="ir.ui.view">
+        <field name="name">pf.gateway.incoming.transfer.commission.account.sync.wizard.form</field>
+        <field name="model">pf.gateway.incoming.transfer.commission.account.sync.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Consultar comisiones por usuario">
+                <sheet>
+                    <group>
+                        <field name="cvu_cbu" placeholder="Opcional. Si se completa, consulta un CVU/CBU específico."/>
+                        <field name="limit"/>
+                        <field name="offset"/>
+                    </group>
+                </sheet>
+                <footer>
+                    <button name="action_sync" type="object" string="Consultar/Sincronizar" class="btn-primary"/>
+                    <button string="Cancelar" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_pf_gateway_incoming_transfer_commission_account_sync_wizard" model="ir.actions.act_window">
+        <field name="name">Consultar comisiones por usuario</field>
+        <field name="res_model">pf.gateway.incoming.transfer.commission.account.sync.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+
+    <menuitem id="menu_pagoflex_wallet_gateway_incoming_transfer_commission_account_sync_wizard"
+              name="Comisiones por usuario"
+              parent="menu_pagoflex_wallet_gateway_config"
+              action="pagoflex_wallet_gateway.action_pf_gateway_incoming_transfer_commission_account"
+              sequence="30"
+              groups="pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_admin"/>
+
+</odoo>

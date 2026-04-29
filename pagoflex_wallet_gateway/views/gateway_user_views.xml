@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_pf_gateway_user_tree" model="ir.ui.view">
+        <field name="name">pf.gateway.user.tree</field>
+        <field name="model">pf.gateway.user</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="name"/>
+                <field name="email"/>
+                <field name="partner_id"/>
+                <field name="partner_company_type"/>
+                <field name="partner_is_company"/>
+                <field name="parent_company_gateway_user_id"/>
+                <field name="dni"/>
+                <field name="cuit_cuil"/>
+                <field name="cuit_owner"/>
+                <field name="active"/>
+                <field name="is_email_verified"/>
+                <field name="is_kyc_verified"/>
+                <field name="source_updated_at"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_pf_gateway_user_form" model="ir.ui.view">
+        <field name="name">pf.gateway.user.form</field>
+        <field name="model">pf.gateway.user</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_sync_users" type="object" string="Sincronizar usuarios" class="btn-primary" groups="pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_admin,pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_operator"/>
+                    <button name="action_create_or_link_partner" type="object" string="Crear/vincular contacto" invisible="partner_id" groups="pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_admin,pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_operator"/>
+                    <button name="action_add_costoapp_commission_agent" type="object" string="Agregar CostoAPP" invisible="not partner_is_company" groups="pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_admin"/>
+                </header>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="name"/>
+                            <field name="external_id" readonly="1"/>
+                            <field name="partner_id"/>
+                            <field name="partner_company_type" readonly="1"/>
+                            <field name="partner_is_company" readonly="1"/>
+                            <field name="parent_company_gateway_user_id"/>
+                            <field name="email"/>
+                            <field name="phone"/>
+                            <field name="dni"/>
+                            <field name="cuit_cuil"/>
+                            <field name="cuit_owner"/>
+                        </group>
+                        <group>
+                            <field name="is_email_verified"/>
+                            <field name="is_kyc_verified"/>
+                            <field name="source_created_at"/>
+                            <field name="source_updated_at"/>
+                            <field name="last_sync_at"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Detalles">
+                            <group>
+                                <field name="full_name"/>
+                                <field name="first_name"/>
+                                <field name="last_name"/>
+                                <field name="birth_date"/>
+                                <field name="gender"/>
+                                <field name="nationality"/>
+                                <field name="occupation"/>
+                                <field name="marital_status"/>
+                                <field name="location"/>
+                            </group>
+                        </page>
+                        <page string="Membresias">
+                            <field name="company_membership_ids" readonly="1">
+                                <list>
+                                    <field name="company_id"/>
+                                    <field name="company_cuit"/>
+                                    <field name="bank_account_id"/>
+                                    <field name="role"/>
+                                    <field name="active"/>
+                                    <field name="source_updated_at"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Comisionistas" invisible="not partner_is_company">
+                            <group>
+                                <field name="commission_agent_total_percentage" readonly="1"/>
+                            </group>
+                            <field name="commission_agent_line_ids">
+                                <list editable="bottom">
+                                    <field name="sequence" widget="handle"/>
+                                    <field name="agent_partner_id"/>
+                                    <field name="agent_code"/>
+                                    <field name="percentage"/>
+                                    <field name="max_percentage" readonly="1"/>
+                                    <field name="active"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Payload crudo" groups="pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_admin,pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_operator">
+                            <field name="raw_payload" widget="text"/>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_pf_gateway_user_search" model="ir.ui.view">
+        <field name="name">pf.gateway.user.search</field>
+        <field name="model">pf.gateway.user</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="email"/>
+                <field name="partner_id"/>
+                <field name="parent_company_gateway_user_id"/>
+                <field name="dni"/>
+                <field name="cuit_cuil"/>
+                <field name="cuit_owner"/>
+                <filter name="filter_active" string="Activo" domain="[('active', '=', True)]"/>
+                <filter name="filter_company" string="Empresas" domain="[('partner_is_company', '=', True)]"/>
+                <filter name="filter_person" string="Personas" domain="[('partner_is_company', '=', False)]"/>
+                <filter name="filter_kyc" string="KYC verificado" domain="[('is_kyc_verified', '=', True)]"/>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_pf_gateway_user" model="ir.actions.act_window">
+        <field name="name">Usuarios</field>
+        <field name="res_model">pf.gateway.user</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <menuitem id="menu_pf_gateway_user" name="Usuarios" parent="menu_pagoflex_wallet_gateway_operations" action="action_pf_gateway_user" sequence="10"/>
+</odoo>

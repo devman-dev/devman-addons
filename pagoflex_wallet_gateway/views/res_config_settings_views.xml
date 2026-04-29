@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_res_config_settings_pagoflex_wallet_gateway" model="ir.ui.view">
+        <field name="name">res.config.settings.view.form.pagoflex.wallet.gateway</field>
+        <field name="model">res.config.settings</field>
+        <field name="inherit_id" ref="base_setup.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//form" position="inside">
+                <app string="PagoFlex Wallet Gateway" name="pagoflex_wallet_gateway" groups="pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_admin">
+                    <block title="Conexión del gateway">
+                        <setting string="URL base del gateway">
+                            <field name="pagoflex_gateway_base_url" placeholder="https://gateway.example.com"/>
+                        </setting>
+                        <setting string="API key administrativa">
+                            <field name="pagoflex_gateway_api_key" password="True"/>
+                        </setting>
+                        <setting string="Timeout (segundos)">
+                            <field name="pagoflex_gateway_timeout_seconds"/>
+                        </setting>
+                        <setting string="Tamaño de pagina">
+                            <field name="pagoflex_gateway_page_size"/>
+                        </setting>
+                        <setting string="Verificar SSL">
+                            <field name="pagoflex_gateway_verify_ssl"/>
+                        </setting>
+                        <setting string="CUIT owner para membresias">
+                            <field name="pagoflex_gateway_membership_owner_cuit" placeholder="Opcional"/>
+                        </setting>
+                        <setting string="Filtro activo membresias">
+                            <field name="pagoflex_gateway_membership_is_active"/>
+                        </setting>
+                    </block>
+                </app>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="action_pagoflex_wallet_gateway_settings" model="ir.actions.act_window">
+        <field name="name">Ajustes del gateway</field>
+        <field name="res_model">res.config.settings</field>
+        <field name="view_mode">form</field>
+        <field name="target">current</field>
+        <field name="context">{'module': 'pagoflex_wallet_gateway'}</field>
+    </record>
+
+    <menuitem id="menu_pagoflex_wallet_gateway_settings" name="Ajustes" parent="menu_pagoflex_wallet_gateway_config" action="action_pagoflex_wallet_gateway_settings" sequence="10" groups="pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_admin"/>
+</odoo>

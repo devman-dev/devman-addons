@@ -1,0 +1,214 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_pf_gateway_account_summary_wizard_form" model="ir.ui.view">
+        <field name="name">pf.gateway.account.summary.wizard.form</field>
+        <field name="model">pf.gateway.account.summary.wizard</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <field name="bank_account_id"/>
+                        <field name="date_from"/>
+                        <field name="date_to"/>
+                        <field name="status" placeholder="Opcional"/>
+                        <field name="include_commissions"/>
+                    </group>
+                </sheet>
+                <footer>
+                    <button name="action_print_report" type="object" string="Imprimir" class="btn-primary"/>
+                    <button string="Cancelar" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_pf_gateway_account_summary_wizard" model="ir.actions.act_window">
+        <field name="name">Resumen de Cuenta</field>
+        <field name="res_model">pf.gateway.account.summary.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+
+    <menuitem id="menu_pf_gateway_account_summary"
+              name="Resumen de Cuenta"
+              parent="menu_pagoflex_wallet_gateway_reports"
+              action="action_pf_gateway_account_summary_wizard"
+              sequence="40"
+              groups="pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_admin,pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_operator,pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_auditor"/>
+
+    <record id="action_report_pf_gateway_account_summary" model="ir.actions.report">
+        <field name="name">Resumen de Cuenta</field>
+        <field name="model">pf.gateway.account.summary.wizard</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">pagoflex_wallet_gateway.report_account_summary</field>
+        <field name="report_file">pagoflex_wallet_gateway.report_account_summary</field>
+        <field name="print_report_name">'Resumen de Cuenta - %s' % (object.bank_account_id.name)</field>
+    </record>
+
+    <template id="report_account_summary">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="doc">
+                <t t-set="summary" t-value="summaries[doc.id]"/>
+                <t t-set="o" t-value="doc"/>
+                <t t-call="web.external_layout">
+                    <div class="page">
+                        <h2>Resumen de Cuenta</h2>
+                        <div class="row mt16 mb16">
+                            <div class="col-6">
+                                <strong>Cuenta:</strong>
+                                <span t-esc="summary['bank_account'].name"/>
+                                <br/>
+                                <strong>CVU/CBU:</strong>
+                                <span t-esc="summary['bank_account'].cvu_cbu or ''"/>
+                                <br/>
+                                <strong>Alias:</strong>
+                                <span t-esc="summary['bank_account'].alias or ''"/>
+                            </div>
+                            <div class="col-6">
+                                <strong>Desde:</strong>
+                                <span t-field="doc.date_from"/>
+                                <br/>
+                                <strong>Hasta:</strong>
+                                <span t-field="doc.date_to"/>
+                                <br/>
+                                <strong>Estado:</strong>
+                                <span t-esc="doc.status or 'Todos'"/>
+                            </div>
+                        </div>
+
+                        <table class="table table-sm o_main_table">
+                            <thead>
+                                <tr>
+                                    <th>Movimientos</th>
+                                    <th class="text-end">Entradas</th>
+                                    <th class="text-end">Salidas</th>
+                                    <th class="text-end">Neto</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>
+                                        <span t-esc="summary['line_count']"/>
+                                    </td>
+                                    <td class="text-end">
+                                        <span t-esc="'%.2f' % summary['incoming_total']"/>
+                                    </td>
+                                    <td class="text-end">
+                                        <span t-esc="'%.2f' % summary['outgoing_total']"/>
+                                    </td>
+                                    <td class="text-end">
+                                        <span t-esc="'%.2f' % summary['net_total']"/>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <p class="text-muted">
+                            Este resumen se calcula con transferencias sincronizadas en Odoo. No reemplaza el saldo real informado por el gateway o el banco.
+                        </p>
+
+                        <h3>Comisiones por comisionista</h3>
+                        <table class="table table-sm o_main_table">
+                            <thead>
+                                <tr>
+                                    <th>Empresa</th>
+                                    <th>Comisionista</th>
+                                    <th>Código</th>
+                                    <th class="text-end">%</th>
+                                    <th class="text-end">Transacciones</th>
+                                    <th class="text-end">Base comisionable</th>
+                                    <th class="text-end">Comisión</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr t-foreach="summary['commission_summary']['rows']" t-as="commission">
+                                    <td>
+                                        <span t-esc="commission['company']"/>
+                                    </td>
+                                    <td>
+                                        <span t-esc="commission['agent']"/>
+                                    </td>
+                                    <td>
+                                        <span t-esc="commission['agent_code']"/>
+                                    </td>
+                                    <td class="text-end">
+                                        <span t-esc="'%.4f' % commission['percentage']"/>
+                                    </td>
+                                    <td class="text-end">
+                                        <span t-esc="commission['transaction_count']"/>
+                                    </td>
+                                    <td class="text-end">
+                                        <span t-esc="'%.2f' % commission['commission_base']"/>
+                                    </td>
+                                    <td class="text-end">
+                                        <span t-esc="'%.2f' % commission['commission_amount']"/>
+                                    </td>
+                                </tr>
+                                <tr t-if="not summary['commission_summary']['rows']">
+                                    <td colspan="7" class="text-center">No hay comisiones de comisionistas para los filtros seleccionados.</td>
+                                </tr>
+                                <tr t-if="summary['commission_summary']['rows']">
+                                    <td colspan="4">
+                                        <strong>Total</strong>
+                                    </td>
+                                    <td class="text-end">
+                                        <strong t-esc="summary['commission_summary']['totals']['transaction_count']"/>
+                                    </td>
+                                    <td class="text-end">
+                                        <strong t-esc="'%.2f' % summary['commission_summary']['totals']['commission_base']"/>
+                                    </td>
+                                    <td class="text-end">
+                                        <strong t-esc="'%.2f' % summary['commission_summary']['totals']['commission_total']"/>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <table class="table table-sm o_main_table">
+                            <thead>
+                                <tr>
+                                    <th>Fecha</th>
+                                    <th>Referencia</th>
+                                    <th>Tipo</th>
+                                    <th>Estado</th>
+                                    <th>Sentido</th>
+                                    <th>Contraparte</th>
+                                    <th class="text-end">Importe</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr t-foreach="summary['lines']" t-as="line">
+                                    <td>
+                                        <span t-esc="line['date']"/>
+                                    </td>
+                                    <td>
+                                        <span t-esc="line['origin_id'] or line['payment_id'] or line['name']"/>
+                                    </td>
+                                    <td>
+                                        <span t-esc="line['movement_nature'] or ''"/>
+                                    </td>
+                                    <td>
+                                        <span t-esc="line['status'] or ''"/>
+                                    </td>
+                                    <td>
+                                        <span t-esc="line['direction']"/>
+                                    </td>
+                                    <td>
+                                        <span t-esc="line['counterparty'] or ''"/>
+                                    </td>
+                                    <td class="text-end">
+                                        <span t-esc="'%.2f' % line['signed_amount']"/>
+                                        <span t-esc="line['currency'] or ''"/>
+                                    </td>
+                                </tr>
+                                <tr t-if="not summary['lines']">
+                                    <td colspan="7" class="text-center">No hay movimientos para los filtros seleccionados.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+</odoo>

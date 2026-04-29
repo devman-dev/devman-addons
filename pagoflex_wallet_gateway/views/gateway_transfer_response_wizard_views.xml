@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_pf_gateway_transfer_response_wizard_form" model="ir.ui.view">
+        <field name="name">pf.gateway.transfer.response.wizard.form</field>
+        <field name="model">pf.gateway.transfer.response.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Respuesta del gateway">
+                <sheet>
+                    <group>
+                        <field name="title" invisible="1"/>
+                        <field name="response_text" widget="text" nolabel="1"
+                               style="font-family: monospace; white-space: pre; min-height: 400px;"/>
+                    </group>
+                </sheet>
+                <footer>
+                    <button string="Cerrar" class="btn-primary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+</odoo>

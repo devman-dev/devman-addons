@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_pf_gateway_dashboard_form" model="ir.ui.view">
+        <field name="name">pf.gateway.dashboard.form</field>
+        <field name="model">pf.gateway.dashboard</field>
+        <field name="arch" type="xml">
+            <form create="true" edit="true" delete="false">
+                <header>
+                    <button name="action_refresh_dashboard" type="object" string="Actualizar" class="btn-primary"/>
+                    <button name="action_open_period_transfers" type="object" string="Ver transferencias del periodo" class="btn-secondary"/>
+                    <button name="action_open_sync_logs" type="object" string="Ver logs" class="btn-secondary"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1>Centro de Control PagoFlex</h1>
+                        <div class="text-muted">Monitoreo operativo, calidad de datos y comisiones del gateway.</div>
+                    </div>
+
+                    <group>
+                        <group>
+                            <field name="date_from"/>
+                            <field name="date_to"/>
+                        </group>
+                        <group>
+                            <div class="o_form_label">Utilice el rango para recalcular indicadores, control operativo y vision financiera.</div>
+                        </group>
+                    </group>
+
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_open_today_transfers" type="object" class="oe_stat_button" icon="fa-exchange">
+                            <field name="kpi_transfers_today" string="Transferencias hoy" widget="statinfo"/>
+                        </button>
+                        <button name="action_open_period_transfers" type="object" class="oe_stat_button" icon="fa-line-chart">
+                            <field name="kpi_amount_today" string="Importe hoy" widget="statinfo"/>
+                        </button>
+                        <button name="action_open_failed_sync_jobs" type="object" class="oe_stat_button" icon="fa-warning">
+                            <field name="kpi_failed_jobs" string="Jobs fallidos" widget="statinfo"/>
+                        </button>
+                        <button name="action_open_companies_without_partner" type="object" class="oe_stat_button" icon="fa-building-o">
+                            <field name="kpi_active_companies" string="Empresas activas" widget="statinfo"/>
+                        </button>
+                        <button name="action_open_users_without_partner" type="object" class="oe_stat_button" icon="fa-users">
+                            <field name="kpi_synced_users" string="Usuarios sincronizados" widget="statinfo"/>
+                        </button>
+                        <button name="action_open_sync_logs" type="object" class="oe_stat_button" icon="fa-refresh">
+                            <field name="kpi_success_rate" string="Exito sync %" widget="statinfo"/>
+                        </button>
+                        <button name="action_open_commission_report" type="object" class="oe_stat_button" icon="fa-money">
+                            <field name="kpi_estimated_commission" string="Comision estimada" widget="statinfo"/>
+                        </button>
+                        <button name="action_open_incomplete_transfers" type="object" class="oe_stat_button" icon="fa-shield">
+                            <field name="kpi_open_exceptions" string="Excepciones" widget="statinfo"/>
+                        </button>
+                    </div>
+
+                    <notebook>
+                        <page string="Resumen Ejecutivo">
+                            <field name="executive_summary_html" widget="html" nolabel="1" readonly="1"/>
+                        </page>
+                        <page string="Control Operativo">
+                            <field name="sync_summary_html" widget="html" nolabel="1" readonly="1"/>
+                        </page>
+                        <page string="Excepciones">
+                            <group>
+                                <group>
+                                    <button name="action_open_users_without_partner" type="object" string="Usuarios sin partner" class="btn-secondary"/>
+                                    <button name="action_open_companies_without_partner" type="object" string="Empresas sin partner" class="btn-secondary"/>
+                                    <button name="action_open_memberships_without_company" type="object" string="Membresias sin empresa" class="btn-secondary"/>
+                                </group>
+                                <group>
+                                    <button name="action_open_incomplete_transfers" type="object" string="Transferencias incompletas" class="btn-secondary"/>
+                                    <button name="action_open_unverified_users" type="object" string="Usuarios sin KYC" class="btn-secondary"/>
+                                </group>
+                            </group>
+                            <field name="exceptions_summary_html" widget="html" nolabel="1" readonly="1"/>
+                        </page>
+                        <page string="Finanzas">
+                            <field name="financial_summary_html" widget="html" nolabel="1" readonly="1"/>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_pf_gateway_dashboard" model="ir.actions.act_window">
+        <field name="name">Centro de Control</field>
+        <field name="res_model">pf.gateway.dashboard</field>
+        <field name="view_mode">form</field>
+        <field name="target">current</field>
+        <field name="context">{}</field>
+    </record>
+
+    <menuitem id="menu_pf_gateway_dashboard"
+              name="Centro de Control"
+              parent="menu_pagoflex_wallet_gateway_operations"
+              action="action_pf_gateway_dashboard"
+              sequence="5"
+              groups="pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_admin,pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_operator,pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_auditor"/>
+</odoo>

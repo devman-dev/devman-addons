@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+    <record id="cron_pf_gateway_sync_users" model="ir.cron">
+        <field name="name">PagoFlex Sincronizar Usuarios</field>
+        <field name="model_id" ref="model_pf_gateway_sync_job"/>
+        <field name="state">code</field>
+        <field name="code">model.cron_sync_users()</field>
+        <field name="interval_number">15</field>
+        <field name="interval_type">minutes</field>
+        <field name="active">False</field>
+    </record>
+
+    <record id="cron_pf_gateway_sync_companies" model="ir.cron">
+        <field name="name">PagoFlex Sincronizar Cuentas Empresas</field>
+        <field name="model_id" ref="model_pf_gateway_sync_job"/>
+        <field name="state">code</field>
+        <field name="code">model.cron_sync_companies()</field>
+        <field name="interval_number">15</field>
+        <field name="interval_type">minutes</field>
+        <field name="active">False</field>
+    </record>
+
+    <record id="cron_pf_gateway_sync_bank_accounts" model="ir.cron">
+        <field name="name">PagoFlex Sincronizar Cuentas Bancarias</field>
+        <field name="model_id" ref="model_pf_gateway_sync_job"/>
+        <field name="state">code</field>
+        <field name="code">model.cron_sync_bank_accounts()</field>
+        <field name="interval_number">15</field>
+        <field name="interval_type">minutes</field>
+        <field name="active">False</field>
+    </record>
+
+    <record id="cron_pf_gateway_sync_company_memberships" model="ir.cron">
+        <field name="name">PagoFlex Sincronizar Membresias de Empresas</field>
+        <field name="model_id" ref="model_pf_gateway_sync_job"/>
+        <field name="state">code</field>
+        <field name="code">model.cron_sync_company_memberships()</field>
+        <field name="interval_number">15</field>
+        <field name="interval_type">minutes</field>
+        <field name="active">False</field>
+    </record>
+
+    <record id="cron_pf_gateway_sync_negative_balance_limits" model="ir.cron">
+        <field name="name">PagoFlex Sincronizar Limites de Saldo Negativo</field>
+        <field name="model_id" ref="model_pf_gateway_sync_job"/>
+        <field name="state">code</field>
+        <field name="code">model.cron_sync_negative_balance_limits()</field>
+        <field name="interval_number">15</field>
+        <field name="interval_type">minutes</field>
+        <field name="active">False</field>
+    </record>
+
+    <record id="cron_pf_gateway_sync_transfers" model="ir.cron">
+        <field name="name">PagoFlex Sincronizar Transferencias</field>
+        <field name="model_id" ref="model_pf_gateway_sync_job"/>
+        <field name="state">code</field>
+        <field name="code">model.cron_sync_transfers()</field>
+        <field name="interval_number">10</field>
+        <field name="interval_type">minutes</field>
+        <field name="active">False</field>
+    </record>
+</odoo>

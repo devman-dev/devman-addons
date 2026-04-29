@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_pf_gateway_commission_payable_report_tree" model="ir.ui.view">
+        <field name="name">pf.gateway.commission.payable.report.tree</field>
+        <field name="model">pf.gateway.commission.payable.report</field>
+        <field name="arch" type="xml">
+            <list create="false" edit="false" delete="false">
+                <field name="month"/>
+                <field name="company_id"/>
+                <field name="agent_partner_id"/>
+                <field name="agent_code"/>
+                <field name="percentage"/>
+                <field name="transaction_count"/>
+                <field name="total_amount"/>
+                <field name="retained_commission"/>
+                <field name="commission_amount"/>
+                <field name="currency"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_pf_gateway_commission_payable_report_search" model="ir.ui.view">
+        <field name="name">pf.gateway.commission.payable.report.search</field>
+        <field name="model">pf.gateway.commission.payable.report</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="month"/>
+                <field name="company_id"/>
+                <field name="agent_partner_id"/>
+                <field name="agent_code"/>
+                <field name="currency"/>
+                <filter name="group_month" string="Mes" context="{'group_by': 'month'}"/>
+                <filter name="group_company" string="Empresa" context="{'group_by': 'company_id'}"/>
+                <filter name="group_agent" string="Comisionista" context="{'group_by': 'agent_partner_id'}"/>
+            </search>
+        </field>
+    </record>
+
+    <record id="view_pf_gateway_commission_payable_report_pivot" model="ir.ui.view">
+        <field name="name">pf.gateway.commission.payable.report.pivot</field>
+        <field name="model">pf.gateway.commission.payable.report</field>
+        <field name="arch" type="xml">
+            <pivot>
+                <field name="month" type="row"/>
+                <field name="agent_partner_id" type="row"/>
+                <field name="company_id" type="col"/>
+                <field name="commission_amount" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+
+    <record id="action_pf_gateway_commission_payable_report" model="ir.actions.act_window">
+        <field name="name">Comisiones a pagar</field>
+        <field name="res_model">pf.gateway.commission.payable.report</field>
+        <field name="view_mode">list,pivot</field>
+        <field name="context">{'search_default_group_month': 1}</field>
+    </record>
+
+    <menuitem id="menu_pf_gateway_commission_payable_report"
+              name="Comisiones a pagar"
+              parent="menu_pagoflex_wallet_gateway_reports"
+              action="action_pf_gateway_commission_payable_report"
+              sequence="45"
+              groups="pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_admin,pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_operator,pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_auditor"/>
+</odoo>

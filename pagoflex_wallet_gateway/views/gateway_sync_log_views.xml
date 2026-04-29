@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_pf_gateway_sync_log_tree" model="ir.ui.view">
+        <field name="name">pf.gateway.sync.log.tree</field>
+        <field name="model">pf.gateway.sync.log</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="create_date"/>
+                <field name="name"/>
+                <field name="resource"/>
+                <field name="mode"/>
+                <field name="status"/>
+                <field name="records_processed"/>
+                <field name="started_at"/>
+                <field name="finished_at"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_pf_gateway_sync_log_form" model="ir.ui.view">
+        <field name="name">pf.gateway.sync.log.form</field>
+        <field name="model">pf.gateway.sync.log</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="name"/>
+                            <field name="resource"/>
+                            <field name="mode"/>
+                            <field name="status"/>
+                        </group>
+                        <group>
+                            <field name="started_at"/>
+                            <field name="finished_at"/>
+                            <field name="records_processed"/>
+                            <field name="job_id"/>
+                        </group>
+                    </group>
+                    <group>
+                        <field name="message"/>
+                        <field name="error_detail"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_pf_gateway_sync_log_search" model="ir.ui.view">
+        <field name="name">pf.gateway.sync.log.search</field>
+        <field name="model">pf.gateway.sync.log</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="resource"/>
+                <field name="status"/>
+                <field name="mode"/>
+                <filter name="filter_failed" string="Fallido" domain="[('status', '=', 'failed')]"/>
+                <filter name="filter_success" string="Exitoso" domain="[('status', '=', 'success')]"/>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_pf_gateway_sync_log" model="ir.actions.act_window">
+        <field name="name">Logs de sincronización</field>
+        <field name="res_model">pf.gateway.sync.log</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <menuitem id="menu_pf_gateway_sync_log" name="Logs de sincronización" parent="menu_pagoflex_wallet_gateway_operations" action="action_pf_gateway_sync_log" sequence="99"/>
+</odoo>

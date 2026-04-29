@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <menuitem id="menu_pagoflex_wallet_gateway_root" name="PagoFlex Wallet Gateway" sequence="10" groups="pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_auditor,pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_operator,pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_admin"/>
+
+    <menuitem id="menu_pagoflex_wallet_gateway_operations" name="Operaciones" parent="menu_pagoflex_wallet_gateway_root" sequence="10"/>
+    <menuitem id="menu_pagoflex_wallet_gateway_reports" name="Reportes" parent="menu_pagoflex_wallet_gateway_root" sequence="80"/>
+    <menuitem id="menu_pagoflex_wallet_gateway_config" name="Configuración" parent="menu_pagoflex_wallet_gateway_root" sequence="90" groups="pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_admin"/>
+</odoo>

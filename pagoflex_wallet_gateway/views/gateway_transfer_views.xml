@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_pf_gateway_transfer_tree" model="ir.ui.view">
+        <field name="name">pf.gateway.transfer.tree</field>
+        <field name="model">pf.gateway.transfer</field>
+        <field name="arch" type="xml">
+            <list create="false" edit="false" delete="false">
+                <field name="name"/>
+                <field name="origin_id"/>
+                <field name="movement_nature"/>
+                <field name="status"/>
+                <field name="source_bank_account_id"/>
+                <field name="destination_bank_account_id"/>
+                <field name="currency"/>
+                <field name="amount"/>
+                <field name="transaction_at"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_pf_gateway_transfer_form" model="ir.ui.view">
+        <field name="name">pf.gateway.transfer.form</field>
+        <field name="model">pf.gateway.transfer</field>
+        <field name="arch" type="xml">
+            <form create="false" edit="false" delete="false">
+                <header>
+                    <button name="action_sync_transfers" type="object" string="Sincronizar transferencias" class="btn-primary" groups="pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_admin,pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_operator"/>
+                    <button name="action_sync_transfers_full" type="object" string="Sincronización completa" groups="pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_admin"/>
+                    <button name="action_query_by_origin_id" type="object" string="Consultar por Origin ID" invisible="not origin_id" groups="pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_admin,pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_operator"/>
+                    <button name="action_query_by_connector_id" type="object" string="Consultar por ID Coelsa" invisible="not connector_id" groups="pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_admin,pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_operator"/>
+                </header>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="name"/>
+                            <field name="external_id" readonly="1"/>
+                            <field name="payment_id"/>
+                            <field name="origin_id"/>
+                            <field name="movement_nature"/>
+                            <field name="status"/>
+                            <field name="connector_id"/>
+                        </group>
+                        <group>
+                            <field name="source_bank_account_id"/>
+                            <field name="destination_bank_account_id"/>
+                            <field name="source_user_id"/>
+                            <field name="destination_user_id"/>
+                            <field name="currency"/>
+                            <field name="amount"/>
+                            <field name="transaction_at"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Datos de las partes">
+                            <group>
+                                <group string="Origen">
+                                    <field name="source_address"/>
+                                    <field name="source_address_type"/>
+                                    <field name="source_owner_id_type"/>
+                                    <field name="source_owner_id"/>
+                                    <field name="source_owner_name"/>
+                                </group>
+                                <group string="Destino">
+                                    <field name="destination_address"/>
+                                    <field name="destination_address_type"/>
+                                    <field name="destination_owner_id_type"/>
+                                    <field name="destination_owner_id"/>
+                                    <field name="destination_owner_name"/>
+                                </group>
+                            </group>
+                        </page>
+                        <page string="Metadatos" groups="pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_admin,pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_operator">
+                            <field name="extra_metadata" widget="text"/>
+                            <field name="connector_response" widget="text"/>
+                        </page>
+                        <page string="Payload crudo" groups="pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_admin,pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_operator">
+                            <field name="raw_payload" widget="text"/>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_pf_gateway_transfer_search" model="ir.ui.view">
+        <field name="name">pf.gateway.transfer.search</field>
+        <field name="model">pf.gateway.transfer</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="origin_id"/>
+                <field name="payment_id"/>
+                <field name="connector_id"/>
+                <field name="source_bank_account_id"/>
+                <field name="destination_bank_account_id"/>
+                <field name="source_user_id"/>
+                <field name="destination_user_id"/>
+                <filter name="filter_transfer" string="Transferencias" domain="[('movement_nature', '=', 'TRANSFER')]"/>
+                <filter name="filter_commission" string="Comisiones" domain="[('movement_nature', '=', 'COMMISSION')]"/>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_pf_gateway_transfer" model="ir.actions.act_window">
+        <field name="name">Transferencias</field>
+        <field name="res_model">pf.gateway.transfer</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <menuitem id="menu_pf_gateway_transfer" name="Transferencias" parent="menu_pagoflex_wallet_gateway_operations" action="action_pf_gateway_transfer" sequence="30"/>
+</odoo>
