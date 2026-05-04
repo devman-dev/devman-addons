@@ -29,6 +29,11 @@ class PfGatewayBankAccount(models.Model):
     raw_payload = fields.Text()
     outgoing_transfer_ids = fields.One2many("pf.gateway.transfer", "source_bank_account_id", string="Transferencias salientes")
     incoming_transfer_ids = fields.One2many("pf.gateway.transfer", "destination_bank_account_id", string="Transferencias entrantes")
+    user_display_name = fields.Char(
+        string="Usuario",
+        compute="_compute_user_display_name",
+        store=False,
+    )
 
     _sql_constraints = [
         ("pf_gateway_bank_account_external_id_uniq", "unique(external_id)", "El external_id de la cuenta bancaria del gateway debe ser único."),
@@ -97,7 +102,7 @@ class PfGatewayBankAccount(models.Model):
                     "status": "success",
                     "finished_at": fields.Datetime.now(),
                     "records_processed": len(items),
-                    "message": f"Cuentas bancarias sincronizadas: {len(items)}",
+                    "message": f"Cuentas Bancarias sincronizadas: {len(items)}",
                 }
             )
             return len(items)
@@ -119,4 +124,18 @@ class PfGatewayBankAccount(models.Model):
                     }
                 )
             raise
+
+    def _compute_user_display_name(self):
+        for record in self:
+            user = record.gateway_user_id
+            record.user_display_name = user.full_name or user.name or user.email or user.external_id or "-"
+
+    def name_get(self):
+        result = []
+        for record in self:
+            user = record.gateway_user_id
+            user_name = user.full_name or user.name or user.email or user.external_id or "-"
+            label = f"{user_name} - {record.cvu_cbu}" if record.cvu_cbu else user_name
+            result.append((record.id, label))
+        return result
 

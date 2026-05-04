@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_pf_gateway_user_statement_summary_list" model="ir.ui.view">
+        <field name="name">pf.gateway.user.statement.summary.list</field>
+        <field name="model">pf.gateway.user.statement.summary</field>
+        <field name="arch" type="xml">
+            <list create="false" edit="false" delete="false">
+                <field name="user_id"/>
+                <field name="app"/>
+                <field name="cvu_cbu"/>
+                <field name="bank_account_id"/>
+                <field name="movement_count" sum="Movimientos"/>
+                <field name="incoming_total" sum="Entradas"/>
+                <field name="outgoing_total" sum="Salidas"/>
+                <field name="net_total" sum="Neto"/>
+                <field name="current_balance" sum="Saldo cuenta"/>
+                <field name="currency"/>
+                <field name="last_movement_at"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_pf_gateway_user_statement_summary_pivot" model="ir.ui.view">
+        <field name="name">pf.gateway.user.statement.summary.pivot</field>
+        <field name="model">pf.gateway.user.statement.summary</field>
+        <field name="arch" type="xml">
+            <pivot>
+                <field name="user_id" type="row"/>
+                <field name="app" type="row"/>
+                <field name="cvu_cbu" type="row"/>
+                <field name="incoming_total" type="measure"/>
+                <field name="outgoing_total" type="measure"/>
+                <field name="net_total" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+
+    <record id="action_pf_gateway_user_statement_summary" model="ir.actions.act_window">
+        <field name="name">Resumen por CVU/App</field>
+        <field name="res_model">pf.gateway.user.statement.summary</field>
+        <field name="view_mode">list,pivot</field>
+        <field name="context">{'create': False, 'edit': False, 'delete': False}</field>
+    </record>
+</odoo>

@@ -1,5 +1,5 @@
 {
-    "name": "PagoFlex Wallet",
+    "name": "Wallet Gateway",
     "summary": "Backoffice administrativo para sincronizar usuarios, cuentas y transferencias del gateway PagoFlex.",
     "version": "19.0.1.1.0",
     "category": "Tools",
@@ -15,6 +15,8 @@
         "views/res_config_settings_views.xml",
         "views/res_partner_views.xml",
         "views/incoming_transfer_commission_settings_views.xml",
+        "views/incoming_transfer_commission_distribution_rule_views.xml",
+        "views/incoming_transfer_commission_push_wizard_views.xml",
         "views/incoming_transfer_commission_account_views.xml",
         "views/incoming_transfer_commission_account_sync_wizard_views.xml",
         "views/negative_balance_limit_views.xml",
@@ -22,6 +24,8 @@
         "views/gateway_sync_log_views.xml",
         "views/gateway_company_views.xml",
         "views/company_membership_views.xml",
+        "views/gateway_user_statement_line_views.xml",
+        "views/gateway_user_statement_summary_views.xml",
         "views/gateway_user_views.xml",
         "views/company_commission_agent_views.xml",
         "views/gateway_bank_account_views.xml",
@@ -32,6 +36,11 @@
         "data/sync_job_data.xml",
         "data/cron.xml",
     ],
+    "assets": {
+        "web.assets_backend": [
+            "pagoflex_wallet_gateway/static/src/scss/gateway_dashboard.scss",
+        ],
+    },
     "images": ["static/description/icon.png"],
     "installable": True,
     "application": True,

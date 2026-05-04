@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_pf_gateway_incoming_transfer_commission_push_wizard_form" model="ir.ui.view">
+        <field name="name">pf.gateway.incoming.transfer.commission.push.wizard.form</field>
+        <field name="model">pf.gateway.incoming.transfer.commission.push.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Actualizar comisión en gateway" create="false" edit="true" delete="false">
+                <group>
+                    <field name="app_name" readonly="1"/>
+                    <field name="default_percentage" readonly="1"/>
+                    <field name="new_default_percentage"/>
+                    <field name="propagate_to_accounts"/>
+                    <label for="propagate_to_accounts" class="o_form_label" string="¿Desea propagar la comisión por defecto a las cuentas asociadas a esta APP?"/>
+                </group>
+                <footer>
+                    <button name="action_confirm" type="object" string="Confirmar" class="btn-primary"/>
+                    <button name="action_cancel" type="object" string="Cancelar" class="btn-secondary"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+</odoo>

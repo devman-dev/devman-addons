@@ -14,13 +14,15 @@ class PfGatewayDashboard(models.TransientModel):
     date_to = fields.Date(string="Hasta", default=lambda self: fields.Date.context_today(self), required=True)
 
     kpi_transfers_today = fields.Integer(string="Transferencias hoy", compute="_compute_dashboard")
-    kpi_amount_today = fields.Float(string="Importe hoy", compute="_compute_dashboard", digits=(16, 2))
-    kpi_failed_jobs = fields.Integer(string="Jobs fallidos", compute="_compute_dashboard")
+    kpi_amount_today = fields.Float(string="Volumen hoy", compute="_compute_dashboard", digits=(16, 2))
+    kpi_period_volume = fields.Float(string="Volumen del periodo", compute="_compute_dashboard", digits=(16, 2))
+    kpi_average_ticket = fields.Float(string="Ticket promedio", compute="_compute_dashboard", digits=(16, 2))
+    kpi_failed_jobs = fields.Integer(string="Alertas de sync", compute="_compute_dashboard")
     kpi_active_companies = fields.Integer(string="Empresas activas", compute="_compute_dashboard")
-    kpi_synced_users = fields.Integer(string="Usuarios sincronizados", compute="_compute_dashboard")
-    kpi_success_rate = fields.Float(string="Exito sync", compute="_compute_dashboard", digits=(16, 2))
-    kpi_estimated_commission = fields.Float(string="Comision estimada", compute="_compute_dashboard", digits=(16, 2))
-    kpi_open_exceptions = fields.Integer(string="Excepciones", compute="_compute_dashboard")
+    kpi_synced_users = fields.Integer(string="Usuarios activos", compute="_compute_dashboard")
+    kpi_success_rate = fields.Float(string="Disponibilidad sync", compute="_compute_dashboard", digits=(16, 2))
+    kpi_estimated_commission = fields.Float(string="Ingresos por comisión", compute="_compute_dashboard", digits=(16, 2))
+    kpi_open_exceptions = fields.Integer(string="Excepciones abiertas", compute="_compute_dashboard")
 
     executive_summary_html = fields.Html(string="Resumen ejecutivo", compute="_compute_dashboard", sanitize=False)
     sync_summary_html = fields.Html(string="Control operativo", compute="_compute_dashboard", sanitize=False)
@@ -77,6 +79,8 @@ class PfGatewayDashboard(models.TransientModel):
 
         period_transfers = transfer_model.search(self._period_transfer_domain())
         analytics = self._commission_analytics(period_transfers, membership_model)
+        self.kpi_period_volume = analytics["total_amount"]
+        self.kpi_average_ticket = analytics["average_ticket"]
         self.kpi_estimated_commission = analytics["commission_total"]
 
         self.executive_summary_html = self._build_executive_summary_html(period_transfers, analytics)
@@ -350,6 +354,20 @@ class PfGatewayDashboard(models.TransientModel):
         return self._open_action(
             "pagoflex_wallet_gateway.action_pf_gateway_sync_job",
             domain=[("active", "=", True), ("last_status", "=", "failed")],
+        )
+
+    def action_open_active_companies(self):
+        self.ensure_one()
+        return self._open_action(
+            "pagoflex_wallet_gateway.action_pf_gateway_company",
+            domain=[("active", "=", True)],
+        )
+
+    def action_open_active_users(self):
+        self.ensure_one()
+        return self._open_action(
+            "pagoflex_wallet_gateway.action_pf_gateway_user",
+            domain=[("active", "=", True)],
         )
 
     def action_open_sync_logs(self):

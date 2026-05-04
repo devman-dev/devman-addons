@@ -34,7 +34,7 @@
                             <field name="name"/>
                             <field name="external_id" readonly="1"/>
                             <field name="cvu_cbu" readonly="1"/>
-                            <field name="commission_percentage" readonly="1"/>
+                            <field name="commission_percentage"/>
                             <field name="is_active" readonly="1"/>
                         </group>
                         <group>

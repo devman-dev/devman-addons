@@ -1,11 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo noupdate="1">
-    <record id="incoming_transfer_commission_settings_default" model="pf.gateway.incoming.transfer.commission.settings">
-        <field name="name">Comisión por defecto</field>
-        <field name="default_percentage">0.0</field>
-        <field name="is_active">False</field>
-    </record>
-
     <record id="partner_costoapp_commission_agent" model="res.partner">
         <field name="name">CostoAPP</field>
         <field name="company_type">company</field>

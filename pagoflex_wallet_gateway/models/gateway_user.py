@@ -58,6 +58,22 @@ class PfGatewayUser(models.Model):
     bank_account_ids = fields.One2many("pf.gateway.bank.account", "gateway_user_id", string="Cuentas bancarias")
     transfer_source_ids = fields.One2many("pf.gateway.transfer", "source_user_id", string="Transferencias salientes")
     transfer_destination_ids = fields.One2many("pf.gateway.transfer", "destination_user_id", string="Transferencias entrantes")
+    statement_line_ids = fields.One2many(
+        "pf.gateway.user.statement.line",
+        "user_id",
+        string="Resumen de cuenta",
+        readonly=True,
+    )
+    statement_summary_ids = fields.One2many(
+        "pf.gateway.user.statement.summary",
+        "user_id",
+        string="Resumen por CVU/App",
+        readonly=True,
+    )
+    statement_line_count = fields.Integer(string="Movimientos", compute="_compute_statement_summary")
+    statement_incoming_total = fields.Float(string="Total entradas", compute="_compute_statement_summary", digits=(16, 2))
+    statement_outgoing_total = fields.Float(string="Total salidas", compute="_compute_statement_summary", digits=(16, 2))
+    statement_net_total = fields.Float(string="Neto", compute="_compute_statement_summary", digits=(16, 2))
 
     _sql_constraints = [
         ("pf_gateway_user_external_id_uniq", "unique(external_id)", "El external_id del usuario del gateway debe ser único."),
@@ -74,6 +90,32 @@ class PfGatewayUser(models.Model):
             record.commission_agent_total_percentage = sum(
                 record.commission_agent_line_ids.filtered("active").mapped("percentage")
             )
+
+    def _compute_statement_summary(self):
+        line_model = self.env["pf.gateway.user.statement.line"]
+        for record in self:
+            lines = line_model.search([("user_id", "=", record.id)])
+            incoming_total = sum(lines.filtered(lambda line: line.signed_amount > 0).mapped("signed_amount"))
+            outgoing_total = -sum(lines.filtered(lambda line: line.signed_amount < 0).mapped("signed_amount"))
+            record.statement_line_count = len(lines)
+            record.statement_incoming_total = incoming_total
+            record.statement_outgoing_total = outgoing_total
+            record.statement_net_total = incoming_total - outgoing_total
+
+    def action_open_account_statement(self):
+        self.ensure_one()
+        return {
+            "type": "ir.actions.act_window",
+            "name": _("Resumen de cuenta - %s") % self.display_name,
+            "res_model": "pf.gateway.user.statement.line",
+            "view_mode": "list,form,pivot,graph",
+            "domain": [("user_id", "=", self.id)],
+            "context": {
+                "create": False,
+                "edit": False,
+                "delete": False,
+            },
+        }
 
     @api.constrains("parent_company_gateway_user_id")
     def _check_parent_company_gateway_user(self):

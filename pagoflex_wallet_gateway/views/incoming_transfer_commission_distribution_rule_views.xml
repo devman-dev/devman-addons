@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_pf_gateway_incoming_transfer_commission_distribution_rule_tree" model="ir.ui.view">
+        <field name="name">pf.gateway.incoming.transfer.commission.distribution.rule.tree</field>
+        <field name="model">pf.gateway.incoming.transfer.commission.distribution.rule</field>
+        <field name="arch" type="xml">
+            <list>
+                <header>
+                    <button name="action_sync_all_from_gateway" type="object" string="Sincronizar" class="btn-primary" display="always"/>
+                </header>
+                <field name="name"/>
+                <field name="app_name"/>
+                <field name="destination_cvu_cbu"/>
+                <field name="commission_percentage"/>
+                <field name="is_active"/>
+                <field name="setting_id"/>
+                <field name="updated_at"/>
+                <field name="last_sync_at"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_pf_gateway_incoming_transfer_commission_distribution_rule_form" model="ir.ui.view">
+        <field name="name">pf.gateway.incoming.transfer.commission.distribution.rule.form</field>
+        <field name="model">pf.gateway.incoming.transfer.commission.distribution.rule</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_push_to_gateway" type="object" string="Actualizar en gateway" class="btn-primary"/>
+                    <button name="action_sync_this_rule" type="object" string="Sincronizar esta regla" invisible="not destination_cvu_cbu"/>
+                    <button name="action_sync_all_from_gateway" type="object" string="Sincronizar todas"/>
+                </header>
+                <sheet>
+                    <group>
+                        <group string="Regla">
+                            <field name="name"/>
+                            <field name="setting_id"/>
+                            <field name="app_name"/>
+                            <field name="destination_bank_account_id"/>
+                            <field name="destination_cvu_cbu"/>
+                            <field name="commission_percentage"/>
+                            <field name="is_active"/>
+                        </group>
+                        <group string="Datos informativos del gateway">
+                            <field name="gateway_rule_id" readonly="1"/>
+                            <field name="gateway_setting_id" readonly="1"/>
+                            <field name="destination_bank_account_external_id" readonly="1"/>
+                            <field name="created_at" readonly="1"/>
+                            <field name="updated_at" readonly="1"/>
+                            <field name="last_sync_at" readonly="1"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Payload crudo">
+                            <field name="raw_payload" widget="text" readonly="1"/>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_pf_gateway_incoming_transfer_commission_distribution_rule_search" model="ir.ui.view">
+        <field name="name">pf.gateway.incoming.transfer.commission.distribution.rule.search</field>
+        <field name="model">pf.gateway.incoming.transfer.commission.distribution.rule</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="app_name"/>
+                <field name="destination_cvu_cbu"/>
+                <field name="setting_id"/>
+                <filter name="filter_active" string="Activas" domain="[('is_active', '=', True)]"/>
+                <filter name="filter_inactive" string="Inactivas" domain="[('is_active', '=', False)]"/>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_pf_gateway_incoming_transfer_commission_distribution_rule" model="ir.actions.act_window">
+        <field name="name">Reglas de distribución de comisiones</field>
+        <field name="res_model">pf.gateway.incoming.transfer.commission.distribution.rule</field>
+        <field name="view_mode">list,form</field>
+        <field name="context">{'search_default_filter_active': 1}</field>
+    </record>
+
+    <menuitem id="menu_pagoflex_wallet_gateway_incoming_transfer_commission_distribution_rule"
+              name="Distribución de comisiones"
+              parent="menu_pagoflex_wallet_gateway_config"
+              action="action_pf_gateway_incoming_transfer_commission_distribution_rule"
+              sequence="21"
+              groups="pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_admin"/>
+</odoo>

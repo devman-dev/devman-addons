@@ -68,15 +68,19 @@
                 <field name="origin_id"/>
                 <field name="bdc_account_id"/>
                 <field name="gateway_user_id"/>
+                <field name="app"/>
                 <filter name="filter_primary" string="Principal" domain="[('is_primary', '=', True)]"/>
+                <separator/>
+                <filter name="group_by_app" string="Agrupar por App" context="{'group_by': 'app'}"/>
             </search>
         </field>
     </record>
 
     <record id="action_pf_gateway_bank_account" model="ir.actions.act_window">
-        <field name="name">Cuentas bancarias</field>
+        <field name="name">Cuentas Bancarias</field>
         <field name="res_model">pf.gateway.bank.account</field>
         <field name="view_mode">list,form</field>
+        <field name="context">{'search_default_group_by_app': 1}</field>
     </record>
 
     <menuitem id="menu_pf_gateway_bank_account" name="Cuentas bancarias" parent="menu_pagoflex_wallet_gateway_operations" action="action_pf_gateway_bank_account" sequence="20"/>

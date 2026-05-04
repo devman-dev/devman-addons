@@ -11,9 +11,11 @@
 "access_pf_gateway_bank_account_admin","pf.gateway.bank.account admin","model_pf_gateway_bank_account","pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_admin",1,1,1,1
 "access_pf_gateway_bank_account_operator","pf.gateway.bank.account operator","model_pf_gateway_bank_account","pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_operator",1,1,1,0
 "access_pf_gateway_bank_account_auditor","pf.gateway.bank.account auditor","model_pf_gateway_bank_account","pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_auditor",1,0,0,0
-"access_pf_gateway_incoming_transfer_commission_settings_admin","pf.gateway.incoming.transfer.commission.settings admin","model_pf_gateway_incoming_transfer_commission_settings","pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_admin",1,1,0,0
+"access_pf_gateway_incoming_transfer_commission_settings_admin","pf.gateway.incoming.transfer.commission.settings admin","model_pf_gateway_incoming_transfer_commission_settings","pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_admin",1,1,1,0
+"access_pf_gateway_incoming_transfer_commission_distribution_rule_admin","pf.gateway.incoming.transfer.commission.distribution.rule admin","model_pf_gateway_incoming_transfer_commission_distribution_rule","pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_admin",1,1,1,1
 "access_pf_gateway_incoming_transfer_commission_account_admin","pf.gateway.incoming.transfer.commission.account admin","model_pf_gateway_incoming_transfer_commission_account","pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_admin",1,1,1,0
 "access_pf_gateway_incoming_transfer_commission_account_sync_wizard_admin","pf.gateway.incoming.transfer.commission.account.sync.wizard admin","model_pf_gateway_incoming_transfer_commission_account_sync_wizard","pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_admin",1,1,1,1
+"access_pf_gateway_incoming_transfer_commission_push_wizard_admin","pf.gateway.incoming.transfer.commission.push.wizard admin","model_pf_gateway_incoming_transfer_commission_push_wizard","pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_admin",1,1,1,1
 "access_pf_gateway_negative_balance_limit_admin","pf.gateway.negative.balance.limit admin","model_pf_gateway_negative_balance_limit","pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_admin",1,1,1,1
 "access_pf_gateway_negative_balance_limit_operator","pf.gateway.negative.balance.limit operator","model_pf_gateway_negative_balance_limit","pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_operator",1,1,1,0
 "access_pf_gateway_negative_balance_limit_auditor","pf.gateway.negative.balance.limit auditor","model_pf_gateway_negative_balance_limit","pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_auditor",1,0,0,0
@@ -23,6 +25,12 @@
 "access_pf_gateway_transfer_admin","pf.gateway.transfer admin","model_pf_gateway_transfer","pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_admin",1,0,0,0
 "access_pf_gateway_transfer_operator","pf.gateway.transfer operator","model_pf_gateway_transfer","pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_operator",1,0,0,0
 "access_pf_gateway_transfer_auditor","pf.gateway.transfer auditor","model_pf_gateway_transfer","pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_auditor",1,0,0,0
+"access_pf_gateway_user_statement_line_admin","pf.gateway.user.statement.line admin","model_pf_gateway_user_statement_line","pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_admin",1,0,0,0
+"access_pf_gateway_user_statement_line_operator","pf.gateway.user.statement.line operator","model_pf_gateway_user_statement_line","pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_operator",1,0,0,0
+"access_pf_gateway_user_statement_line_auditor","pf.gateway.user.statement.line auditor","model_pf_gateway_user_statement_line","pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_auditor",1,0,0,0
+"access_pf_gateway_user_statement_summary_admin","pf.gateway.user.statement.summary admin","model_pf_gateway_user_statement_summary","pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_admin",1,0,0,0
+"access_pf_gateway_user_statement_summary_operator","pf.gateway.user.statement.summary operator","model_pf_gateway_user_statement_summary","pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_operator",1,0,0,0
+"access_pf_gateway_user_statement_summary_auditor","pf.gateway.user.statement.summary auditor","model_pf_gateway_user_statement_summary","pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_auditor",1,0,0,0
 "access_pf_gateway_sync_log_admin","pf.gateway.sync.log admin","model_pf_gateway_sync_log","pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_admin",1,1,1,1
 "access_pf_gateway_sync_log_operator","pf.gateway.sync.log operator","model_pf_gateway_sync_log","pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_operator",1,0,1,0
 "access_pf_gateway_sync_log_auditor","pf.gateway.sync.log auditor","model_pf_gateway_sync_log","pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_auditor",1,0,0,0

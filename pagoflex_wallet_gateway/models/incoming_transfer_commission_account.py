@@ -1,5 +1,9 @@
+import logging
+
 from odoo import _, api, fields, models
 from odoo.exceptions import UserError
+
+_logger = logging.getLogger(__name__)
 
 
 class PfGatewayIncomingTransferCommissionAccount(models.Model):
@@ -7,13 +11,14 @@ class PfGatewayIncomingTransferCommissionAccount(models.Model):
     _description = "Comisión de transferencias entrantes por cuenta"
     _inherit = "pf.gateway.client.mixin"
     _order = "updated_at desc, id desc"
+    _gateway_push_fields = {"commission_percentage", "is_active"}
 
     name = fields.Char(compute="_compute_name", store=True)
     active = fields.Boolean(default=True)
     external_id = fields.Char(required=True, index=True)
     bank_account_external_id = fields.Char(string="ID cuenta bancaria", index=True)
     cvu_cbu = fields.Char(string="CVU/CBU", index=True)
-    commission_percentage = fields.Float(string="Porcentaje de comisión", digits=(16, 4))
+    commission_percentage = fields.Float(string="Porcentaje de comisión", digits=(16, 2))
     is_active = fields.Boolean(string="Activo", default=True, index=True)
     created_at = fields.Datetime(readonly=True)
     updated_at = fields.Datetime(index=True, readonly=True)
@@ -32,6 +37,50 @@ class PfGatewayIncomingTransferCommissionAccount(models.Model):
     def _compute_name(self):
         for record in self:
             record.name = record.cvu_cbu or str(record.external_id)
+
+    def write(self, vals):
+        should_push = (
+            bool(self._gateway_push_fields.intersection(vals.keys()))
+            and not self.env.context.get("skip_gateway_push")
+            and not self.env.context.get("install_mode")
+        )
+        result = super().write(vals)
+        if should_push:
+            for record in self.filtered(lambda r: r._is_gateway_payload_ready()):
+                record._push_to_gateway()
+        return result
+
+    def _is_gateway_payload_ready(self):
+        self.ensure_one()
+        return bool(self.cvu_cbu)
+
+    def _push_to_gateway(self):
+        self.ensure_one()
+        app_name = self._get_app_name()
+        payload = {
+            "cvu_cbu": self.cvu_cbu,
+            "commission_percentage": round(self.commission_percentage or 0.0, 2),
+            "is_active": self.is_active,
+        }
+        response = self._gateway_request_json(
+            "POST",
+            "/admin/gateway/incoming-transfer-commission/accounts",
+            params={"app_name": app_name} if app_name else {},
+            payload=payload,
+        )
+        self.with_context(skip_gateway_push=True)._upsert_items([response])
+
+    def _get_app_name(self):
+        self.ensure_one()
+        bank_account = self.env["pf.gateway.bank.account"].search(
+            [
+                "|",
+                ("external_id", "=", self.bank_account_external_id),
+                ("cvu_cbu", "=", self.cvu_cbu),
+            ],
+            limit=1,
+        )
+        return (bank_account.app or "").strip() if bank_account else ""
 
     def _prepare_values(self, item):
         if not isinstance(item, dict):

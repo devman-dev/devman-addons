@@ -73,10 +73,15 @@ class PfGatewayCompanyCommissionAgent(models.Model):
             record.company_total_percentage = totals.get(record.company_partner_id.id, 0.0)
 
     def _commission_settings(self):
-        return self.env.ref(
-            "pagoflex_wallet_gateway.incoming_transfer_commission_settings_default",
-            raise_if_not_found=False,
-        ) or self.env["pf.gateway.incoming.transfer.commission.settings"].search([], limit=1)
+        return self.env["pf.gateway.incoming.transfer.commission.settings"].search(
+            [
+                "|",
+                ("app_name", "!=", False),
+                ("gateway_setting_id", "!=", False),
+            ],
+            order="is_active desc, id",
+            limit=1,
+        )
 
     @api.depends("company_partner_id")
     def _compute_max_percentage(self):

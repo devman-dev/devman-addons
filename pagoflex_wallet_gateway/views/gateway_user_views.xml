@@ -31,6 +31,7 @@
                     <button name="action_sync_users" type="object" string="Sincronizar usuarios" class="btn-primary" groups="pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_admin,pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_operator"/>
                     <button name="action_create_or_link_partner" type="object" string="Crear/vincular contacto" invisible="partner_id" groups="pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_admin,pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_operator"/>
                     <button name="action_add_costoapp_commission_agent" type="object" string="Agregar CostoAPP" invisible="not partner_is_company" groups="pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_admin"/>
+                    <button name="action_open_account_statement" type="object" string="Ver resumen de cuenta" groups="pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_admin,pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_operator,pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_auditor"/>
                 </header>
                 <sheet>
                     <group>
@@ -78,6 +79,53 @@
                                     <field name="role"/>
                                     <field name="active"/>
                                     <field name="source_updated_at"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Resumen de cuenta">
+                            <group>
+                                <group>
+                                    <field name="statement_line_count" readonly="1"/>
+                                    <field name="statement_net_total" readonly="1"/>
+                                </group>
+                                <group>
+                                    <field name="statement_incoming_total" readonly="1"/>
+                                    <field name="statement_outgoing_total" readonly="1"/>
+                                </group>
+                            </group>
+                            <separator string="Resumen por CVU/App"/>
+                            <field name="statement_summary_ids" readonly="1">
+                                <list create="false" edit="false" delete="false">
+                                    <field name="app"/>
+                                    <field name="cvu_cbu"/>
+                                    <field name="bank_account_id"/>
+                                    <field name="movement_count" sum="Movimientos"/>
+                                    <field name="incoming_total" sum="Entradas"/>
+                                    <field name="outgoing_total" sum="Salidas"/>
+                                    <field name="net_total" sum="Neto"/>
+                                    <field name="current_balance" sum="Saldo cuenta"/>
+                                    <field name="currency"/>
+                                    <field name="last_movement_at"/>
+                                </list>
+                            </field>
+                            <separator string="Detalle de movimientos"/>
+                            <field name="statement_line_ids" readonly="1">
+                                <list create="false" edit="false" delete="false">
+                                    <field name="transaction_at"/>
+                                    <field name="transfer_id"/>
+                                    <field name="app"/>
+                                    <field name="cvu_cbu"/>
+                                    <field name="bank_account_id"/>
+                                    <field name="name"/>
+                                    <field name="origin_id"/>
+                                    <field name="movement_nature"/>
+                                    <field name="status"/>
+                                    <field name="direction"/>
+                                    <field name="counterparty_user_id"/>
+                                    <field name="amount" sum="Total nominal"/>
+                                    <field name="signed_amount" sum="Neto"/>
+                                    <field name="running_balance"/>
+                                    <field name="currency"/>
                                 </list>
                             </field>
                         </page>
