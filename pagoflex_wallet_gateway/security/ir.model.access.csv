@@ -22,8 +22,8 @@
 "access_pf_gateway_company_commission_agent_admin","pf.gateway.company.commission.agent admin","model_pf_gateway_company_commission_agent","pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_admin",1,1,1,1
 "access_pf_gateway_company_commission_agent_operator","pf.gateway.company.commission.agent operator","model_pf_gateway_company_commission_agent","pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_operator",1,0,0,0
 "access_pf_gateway_company_commission_agent_auditor","pf.gateway.company.commission.agent auditor","model_pf_gateway_company_commission_agent","pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_auditor",1,0,0,0
-"access_pf_gateway_transfer_admin","pf.gateway.transfer admin","model_pf_gateway_transfer","pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_admin",1,0,0,0
-"access_pf_gateway_transfer_operator","pf.gateway.transfer operator","model_pf_gateway_transfer","pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_operator",1,0,0,0
+"access_pf_gateway_transfer_admin","pf.gateway.transfer admin","model_pf_gateway_transfer","pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_admin",1,1,0,0
+"access_pf_gateway_transfer_operator","pf.gateway.transfer operator","model_pf_gateway_transfer","pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_operator",1,1,0,0
 "access_pf_gateway_transfer_auditor","pf.gateway.transfer auditor","model_pf_gateway_transfer","pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_auditor",1,0,0,0
 "access_pf_gateway_user_statement_line_admin","pf.gateway.user.statement.line admin","model_pf_gateway_user_statement_line","pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_admin",1,0,0,0
 "access_pf_gateway_user_statement_line_operator","pf.gateway.user.statement.line operator","model_pf_gateway_user_statement_line","pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_operator",1,0,0,0

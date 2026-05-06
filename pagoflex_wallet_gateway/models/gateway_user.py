@@ -1,5 +1,10 @@
+import logging
+
 from odoo import _, api, fields, models
-from odoo.exceptions import ValidationError
+from odoo.exceptions import UserError, ValidationError
+
+
+_logger = logging.getLogger(__name__)
 
 
 class PfGatewayUser(models.Model):
@@ -10,7 +15,7 @@ class PfGatewayUser(models.Model):
 
     name = fields.Char(compute="_compute_name", store=True)
     active = fields.Boolean(default=True)
-    external_id = fields.Char(required=True, index=True)
+    external_id = fields.Char(index=True)
     email = fields.Char(index=True)
     full_name = fields.Char()
     first_name = fields.Char()
@@ -204,6 +209,134 @@ class PfGatewayUser(models.Model):
             )
         return True
 
+    def _gateway_user_payload_from_vals(self, vals):
+        return {
+            "id": vals.get("external_id") or vals.get("id") or None,
+            "email": vals.get("email") or None,
+            "full_name": vals.get("full_name") or vals.get("name") or None,
+            "first_name": vals.get("first_name") or None,
+            "last_name": vals.get("last_name") or None,
+            "birth_date": vals.get("birth_date") or None,
+            "dni": vals.get("dni") or None,
+            "gender": vals.get("gender") or None,
+            "cuit_cuil": vals.get("cuit_cuil") or None,
+            "cuit_owner": vals.get("cuit_owner") or None,
+            "phone": vals.get("phone") or None,
+            "nationality": vals.get("nationality") or None,
+            "occupation": vals.get("occupation") or None,
+            "marital_status": vals.get("marital_status") or None,
+            "location": vals.get("location") or None,
+            "is_active": bool(vals.get("active", True)),
+            "is_email_verified": vals.get("is_email_verified") if "is_email_verified" in vals else None,
+            "is_kyc_verified": vals.get("is_kyc_verified") if "is_kyc_verified" in vals else None,
+        }
+
+    def _values_from_gateway_item(self, item):
+        partner = self._find_partner_from_gateway_item(item)
+        values = {
+            "external_id": str(item.get("id")) if item.get("id") is not None else False,
+            "active": item.get("is_active", True),
+            "email": item.get("email"),
+            "full_name": item.get("full_name"),
+            "first_name": item.get("first_name"),
+            "last_name": item.get("last_name"),
+            "birth_date": self._coerce_date(item.get("birth_date"), field_name="birth_date"),
+            "dni": item.get("dni"),
+            "gender": item.get("gender"),
+            "cuit_cuil": item.get("cuit_cuil"),
+            "cuit_owner": item.get("cuit_owner"),
+            "phone": item.get("phone"),
+            "nationality": item.get("nationality"),
+            "occupation": item.get("occupation"),
+            "marital_status": item.get("marital_status"),
+            "location": item.get("location"),
+            "is_email_verified": item.get("is_email_verified", False),
+            "is_kyc_verified": item.get("is_kyc_verified", False),
+            "source_created_at": self._coerce_datetime(item.get("created_at"), field_name="created_at"),
+            "source_updated_at": self._coerce_datetime(item.get("updated_at"), field_name="updated_at"),
+            "last_sync_at": fields.Datetime.now(),
+            "raw_payload": self._payload_to_text(item),
+        }
+        if partner:
+            values["partner_id"] = partner.id
+        return values
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        if self.env.context.get("skip_gateway_user_push"):
+            return super().create(vals_list)
+
+        prepared_vals_list = []
+        for vals in vals_list:
+            prepared_vals = dict(vals)
+
+            # If the ID is not set, create the user first in gateway and map response values.
+            if not prepared_vals.get("external_id"):
+                payload = self._gateway_user_payload_from_vals(prepared_vals)
+                response = self._gateway_request_json("POST", "/admin/gateway/users", payload=payload)
+                if not isinstance(response, dict):
+                    raise UserError(_("El gateway devolvió una respuesta inválida al crear el usuario."))
+
+                user_data = response.get("user") or response
+                if not isinstance(user_data, dict):
+                    raise UserError(_("El gateway devolvió una respuesta inválida al crear el usuario."))
+
+                mapped_vals = self._values_from_gateway_item(user_data)
+                if not mapped_vals.get("external_id"):
+                    raise UserError(_("El gateway no devolvió un ID de usuario al crear el registro."))
+
+                for key, value in mapped_vals.items():
+                    if key == "external_id":
+                        prepared_vals[key] = value
+                    elif key not in prepared_vals or prepared_vals.get(key) in (False, None, ""):
+                        prepared_vals[key] = value
+
+            prepared_vals_list.append(prepared_vals)
+
+        return super().create(prepared_vals_list)
+
+    def write(self, vals):
+        if self.env.context.get("skip_gateway_user_push"):
+            return super().write(vals)
+
+        result = super().write(vals)
+
+        # Campos que se sincronizan con el gateway
+        gateway_fields = {
+            "email", "full_name", "first_name", "last_name", "birth_date",
+            "dni", "gender", "cuit_cuil", "cuit_owner", "phone",
+            "nationality", "occupation", "marital_status", "location", "active",
+            "is_email_verified", "is_kyc_verified",
+        }
+        if not gateway_fields.intersection(vals):
+            return result
+
+        for record in self:
+            if not record.external_id:
+                continue
+            payload = self._gateway_user_payload_from_vals({
+                **{f: getattr(record, f) for f in gateway_fields},
+                "external_id": record.external_id,
+                **vals,
+            })
+            _logger.debug(
+                "Gateway user write POST /admin/gateway/users external_id=%s email=%s payload=%s",
+                record.external_id,
+                record.email,
+                payload,
+            )
+            response = self._gateway_request_json(
+                "POST", "/admin/gateway/users", payload=payload
+            )
+            if isinstance(response, dict):
+                user_data = response.get("user") or response
+                if isinstance(user_data, dict):
+                    mapped_vals = self._values_from_gateway_item(user_data)
+                    mapped_vals.pop("external_id", None)
+                    super(PfGatewayUser, record).write(mapped_vals)
+
+        return result
+
     def sync_from_gateway(self, mode="manual", sync_mode="incremental", job=None):
         updated_since = None
         if sync_mode == "incremental":
@@ -220,42 +353,15 @@ class PfGatewayUser(models.Model):
         try:
             items = self._gateway_paginated_get("/admin/gateway/users", updated_since=updated_since)
             for item in items:
-                external_id = str(item.get("id"))
+                values = self._values_from_gateway_item(item)
+                external_id = values.get("external_id")
+                if not external_id:
+                    continue
                 record = self.search([("external_id", "=", external_id)], limit=1)
-                partner = record.partner_id if record else self.env["res.partner"]
-                if not partner:
-                    partner = self._find_partner_from_gateway_item(item)
-
-                values = {
-                    "external_id": external_id,
-                    "active": item.get("is_active", True),
-                    "email": item.get("email"),
-                    "full_name": item.get("full_name"),
-                    "first_name": item.get("first_name"),
-                    "last_name": item.get("last_name"),
-                    "birth_date": self._coerce_date(item.get("birth_date"), field_name="birth_date"),
-                    "dni": item.get("dni"),
-                    "gender": item.get("gender"),
-                    "cuit_cuil": item.get("cuit_cuil"),
-                    "cuit_owner": item.get("cuit_owner"),
-                    "phone": item.get("phone"),
-                    "nationality": item.get("nationality"),
-                    "occupation": item.get("occupation"),
-                    "marital_status": item.get("marital_status"),
-                    "location": item.get("location"),
-                    "is_email_verified": item.get("is_email_verified", False),
-                    "is_kyc_verified": item.get("is_kyc_verified", False),
-                    "source_created_at": self._coerce_datetime(item.get("created_at"), field_name="created_at"),
-                    "source_updated_at": self._coerce_datetime(item.get("updated_at"), field_name="updated_at"),
-                    "last_sync_at": fields.Datetime.now(),
-                    "raw_payload": self._payload_to_text(item),
-                }
-                if partner:
-                    values["partner_id"] = partner.id
                 if record:
-                    record.write(values)
+                    record.with_context(skip_gateway_user_push=True).write(values)
                 else:
-                    self.create(values)
+                    self.with_context(skip_gateway_user_push=True).create(values)
 
             log.write(
                 {

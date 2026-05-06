@@ -37,30 +37,26 @@
                     <group>
                         <group>
                             <field name="name"/>
-                            <field name="external_id" readonly="1"/>
                             <field name="partner_id"/>
                             <field name="partner_company_type" readonly="1"/>
                             <field name="partner_is_company" readonly="1"/>
                             <field name="parent_company_gateway_user_id"/>
-                            <field name="email"/>
+                            <field name="email" required="1"/>
                             <field name="phone"/>
                             <field name="dni"/>
-                            <field name="cuit_cuil"/>
+                            <field name="cuit_cuil" required="1"/>
                             <field name="cuit_owner"/>
                         </group>
                         <group>
                             <field name="is_email_verified"/>
                             <field name="is_kyc_verified"/>
-                            <field name="source_created_at"/>
-                            <field name="source_updated_at"/>
-                            <field name="last_sync_at"/>
                         </group>
                     </group>
                     <notebook>
                         <page string="Detalles">
                             <group>
-                                <field name="full_name"/>
-                                <field name="first_name"/>
+                                <field name="full_name" string="Nombre para Mostrar"/>
+                                <field name="first_name" required="1"/>
                                 <field name="last_name"/>
                                 <field name="birth_date"/>
                                 <field name="gender"/>

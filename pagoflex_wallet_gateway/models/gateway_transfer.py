@@ -103,6 +103,47 @@ class PfGatewayTransfer(models.Model):
             "name": title,
         }
 
+    def _push_status_to_gateway(self, status):
+        self.ensure_one()
+        if not self.external_id:
+            raise UserError(_("No se puede actualizar estado en gateway sin external_id."))
+
+        response = self._gateway_request_json(
+            "PATCH",
+            f"/admin/gateway/transfers/{self.external_id}/status",
+            payload={"status": status},
+        )
+        if not isinstance(response, dict):
+            raise UserError(_("El gateway devolvió una respuesta inválida al actualizar el estado."))
+
+        transfer_data = response.get("transfer") if isinstance(response.get("transfer"), dict) else response
+        confirmed_status = transfer_data.get("status") if isinstance(transfer_data, dict) else None
+        if confirmed_status and str(confirmed_status).upper() != str(status).upper():
+            raise UserError(
+                _("El gateway confirmó un estado distinto. Enviado: %(sent)s. Recibido: %(received)s.")
+                % {"sent": status, "received": confirmed_status}
+            )
+        return response
+
+    def write(self, vals):
+        if self.env.context.get("skip_gateway_status_push"):
+            return super().write(vals)
+
+        if "status" not in vals:
+            return super().write(vals)
+
+        new_status = vals.get("status")
+        if not new_status:
+            raise UserError(_("El estado no puede estar vacío."))
+
+        for record in self:
+            record._push_status_to_gateway(new_status)
+
+        result = super().write(vals)
+        if hasattr(self.env.user, "notify_success"):
+            self.env.user.notify_success(message=_("Estado actualizado correctamente en gateway."))
+        return result
+
     def sync_from_gateway(self, mode="manual", sync_mode="incremental", job=None):
         transfer_model = self.sudo()
         updated_since = None
@@ -162,7 +203,7 @@ class PfGatewayTransfer(models.Model):
                 }
                 record = transfer_model.search([("external_id", "=", values["external_id"])], limit=1)
                 if record:
-                    record.write(values)
+                    record.with_context(skip_gateway_status_push=True).write(values)
                 else:
                     transfer_model.create(values)
 
