@@ -75,7 +75,7 @@ class PfGatewayUserStatementLine(models.Model):
                         transfer.destination_owner_name AS counterparty_name,
                         transfer.amount AS amount,
                         CASE
-                            WHEN transfer.status = 'FAILED' THEN 0.0
+                            WHEN transfer.status NOT IN ('CREATED', 'AUTHORIZED', 'CAPTURED', 'COMPLETED') THEN 0.0
                             WHEN transfer.source_user_id = transfer.destination_user_id THEN 0.0
                             ELSE -transfer.amount
                         END AS signed_amount,
@@ -107,7 +107,7 @@ class PfGatewayUserStatementLine(models.Model):
                         transfer.source_owner_name AS counterparty_name,
                         transfer.amount AS amount,
                         CASE
-                            WHEN transfer.status = 'FAILED' THEN 0.0
+                            WHEN transfer.status NOT IN ('CAPTURED', 'COMPLETED') THEN 0.0
                             ELSE transfer.amount
                         END AS signed_amount,
                         transfer.currency AS currency
@@ -123,7 +123,7 @@ class PfGatewayUserStatementLine(models.Model):
                 SELECT
                     movement_lines.*,
                     SUM(movement_lines.signed_amount) OVER (
-                        PARTITION BY movement_lines.user_id
+                        PARTITION BY movement_lines.user_id, movement_lines.bank_account_id
                         ORDER BY movement_lines.transaction_at, movement_lines.id
                         ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW
                     ) AS running_balance

@@ -14,6 +14,7 @@
                 <field name="outgoing_total" sum="Salidas"/>
                 <field name="net_total" sum="Neto"/>
                 <field name="current_balance" sum="Saldo cuenta"/>
+                <field name="control_difference" sum="Diferencia control"/>
                 <field name="currency"/>
                 <field name="last_movement_at"/>
             </list>

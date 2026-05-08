@@ -78,6 +78,19 @@
                                 </list>
                             </field>
                         </page>
+                        <page string="CVUs">
+                            <field name="bank_account_ids" readonly="1">
+                                <list create="false" edit="false" delete="false">
+                                    <field name="cvu_cbu"/>
+                                    <field name="app"/>
+                                    <field name="balance" sum="Saldo"/>
+                                    <field name="currency_id"/>
+                                    <field name="status"/>
+                                    <field name="balance_sync_status"/>
+                                    <field name="balance_last_check_at"/>
+                                </list>
+                            </field>
+                        </page>
                         <page string="Resumen de cuenta">
                             <group>
                                 <group>
@@ -100,6 +113,7 @@
                                     <field name="outgoing_total" sum="Salidas"/>
                                     <field name="net_total" sum="Neto"/>
                                     <field name="current_balance" sum="Saldo cuenta"/>
+                                    <field name="control_difference" sum="Diferencia control"/>
                                     <field name="currency"/>
                                     <field name="last_movement_at"/>
                                 </list>

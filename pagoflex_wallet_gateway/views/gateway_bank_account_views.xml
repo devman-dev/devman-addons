@@ -5,6 +5,9 @@
         <field name="model">pf.gateway.bank.account</field>
         <field name="arch" type="xml">
             <list>
+                <header>
+                    <button name="action_refresh_balance_async" type="object" string="Actualizar saldo" class="btn-secondary" display="always" groups="pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_admin,pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_operator"/>
+                </header>
                 <field name="name"/>
                 <field name="gateway_user_id"/>
                 <field name="cvu_cbu"/>
@@ -31,18 +34,18 @@
                         <group>
                             <field name="name"/>
                             <field name="external_id" readonly="1"/>
-                            <field name="origin_id"/>
-                            <field name="gateway_user_id"/>
-                            <field name="cvu_cbu"/>
-                            <field name="alias"/>
+                            <field name="origin_id" readonly="1"/>
+                            <field name="gateway_user_id" readonly="1"/>
+                            <field name="cvu_cbu" readonly="1"/>
+                            <field name="alias" readonly="1"/>
                         </group>
                         <group>
                             <field name="status"/>
-                            <field name="is_primary"/>
-                            <field name="bdc_account_id"/>
-                            <field name="app"/>
-                            <field name="currency"/>
-                            <field name="balance"/>
+                            <field name="is_primary" readonly="1"/>
+                            <field name="bdc_account_id" readonly="1"/>
+                            <field name="app" readonly="1"/>
+                            <field name="currency" readonly="1"/>
+                            <field name="balance" readonly="1"/>
                         </group>
                     </group>
                     <notebook>

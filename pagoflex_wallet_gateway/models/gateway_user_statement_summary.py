@@ -17,6 +17,7 @@ class PfGatewayUserStatementSummary(models.Model):
     outgoing_total = fields.Float(string="Salidas", digits=(16, 2), readonly=True)
     net_total = fields.Float(string="Neto", digits=(16, 2), readonly=True)
     current_balance = fields.Float(string="Saldo cuenta", digits=(16, 2), readonly=True)
+    control_difference = fields.Float(string="Diferencia control", digits=(16, 2), readonly=True)
     last_movement_at = fields.Datetime(string="Ultimo movimiento", readonly=True)
 
     def init(self):
@@ -36,6 +37,7 @@ class PfGatewayUserStatementSummary(models.Model):
                     SUM(CASE WHEN line.signed_amount < 0 THEN -line.signed_amount ELSE 0.0 END) AS outgoing_total,
                     SUM(line.signed_amount) AS net_total,
                     COALESCE(account.balance, 0.0) AS current_balance,
+                    SUM(line.signed_amount) - COALESCE(account.balance, 0.0) AS control_difference,
                     MAX(line.transaction_at) AS last_movement_at
                 FROM pf_gateway_user_statement_line line
                 LEFT JOIN pf_gateway_bank_account account
