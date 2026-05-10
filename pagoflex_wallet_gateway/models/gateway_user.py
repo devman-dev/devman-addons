@@ -45,6 +45,23 @@ class PfGatewayUser(models.Model):
         ondelete="set null",
         index=True,
     )
+    has_linked_company = fields.Boolean(
+        string="Tiene empresa",
+        compute="_compute_has_linked_company",
+        store=True,
+    )
+    register_as_company = fields.Boolean(
+        string="Registrar como empresa",
+        help="Solo se usa al crear en gateway y no se persiste en el usuario.",
+    )
+    app_name = fields.Selection(
+        [
+            ("pagoflex", "Pagoflex"),
+            ("sivep", "SIVEP"),
+        ],
+        string="App",
+        help="Solo se usa al crear como empresa en gateway y no se persiste en el usuario.",
+    )
     company_membership_ids = fields.One2many(
         "pf.gateway.company.membership",
         "user_id",
@@ -67,6 +84,24 @@ class PfGatewayUser(models.Model):
         "pf.gateway.user.statement.line",
         "user_id",
         string="Resumen de cuenta",
+        readonly=True,
+    )
+    statement_status_filter = fields.Selection(
+        [
+            ("CREATED", "CREATED"),
+            ("AUTHORIZED", "AUTHORIZED"),
+            ("CAPTURED", "CAPTURED"),
+            ("COMPLETED", "COMPLETED"),
+            ("FAILED", "FAILED"),
+            ("CANCELLED", "CANCELLED"),
+        ],
+        string="Estado transacción",
+        help="Filtra el detalle de movimientos por estado.",
+    )
+    statement_line_filtered_ids = fields.One2many(
+        "pf.gateway.user.statement.line",
+        compute="_compute_statement_line_filtered_ids",
+        string="Detalle de movimientos filtrado",
         readonly=True,
     )
     statement_summary_ids = fields.One2many(
@@ -96,6 +131,11 @@ class PfGatewayUser(models.Model):
                 record.commission_agent_line_ids.filtered("active").mapped("percentage")
             )
 
+    @api.depends("parent_company_gateway_user_id")
+    def _compute_has_linked_company(self):
+        for record in self:
+            record.has_linked_company = bool(record.parent_company_gateway_user_id)
+
     def _compute_statement_summary(self):
         line_model = self.env["pf.gateway.user.statement.line"]
         for record in self:
@@ -106,6 +146,15 @@ class PfGatewayUser(models.Model):
             record.statement_incoming_total = incoming_total
             record.statement_outgoing_total = outgoing_total
             record.statement_net_total = incoming_total - outgoing_total
+
+    @api.depends("statement_status_filter")
+    def _compute_statement_line_filtered_ids(self):
+        line_model = self.env["pf.gateway.user.statement.line"]
+        for record in self:
+            domain = [("user_id", "=", record.id)]
+            if record.statement_status_filter:
+                domain.append(("status", "=", record.statement_status_filter))
+            record.statement_line_filtered_ids = line_model.search(domain, order="transaction_at desc, id desc")
 
     def action_open_account_statement(self):
         self.ensure_one()
@@ -130,6 +179,14 @@ class PfGatewayUser(models.Model):
             owner_cuit = "".join(char for char in str(record.cuit_owner or "") if char.isdigit())
             if company and owner_cuit and company_cuit != owner_cuit:
                 raise ValidationError(_("La empresa vinculada debe coincidir con el CUIT owner del usuario gateway."))
+
+    @api.constrains("register_as_company", "app_name")
+    def _check_register_as_company_requires_app(self):
+        for record in self:
+            if record.register_as_company and not record.app_name:
+                raise ValidationError(
+                    _("Debes seleccionar una app cuando activas 'Registrar como empresa'.")
+                )
 
     def _partner_search_domain_from_gateway_item(self, item):
         vat = item.get("cuit_cuil") or item.get("cuit") or item.get("cuil") or item.get("dni")
@@ -210,7 +267,7 @@ class PfGatewayUser(models.Model):
         return True
 
     def _gateway_user_payload_from_vals(self, vals):
-        return {
+        payload = {
             "id": vals.get("external_id") or vals.get("id") or None,
             "email": vals.get("email") or None,
             "full_name": vals.get("full_name") or vals.get("name") or None,
@@ -230,6 +287,15 @@ class PfGatewayUser(models.Model):
             "is_email_verified": vals.get("is_email_verified") if "is_email_verified" in vals else None,
             "is_kyc_verified": vals.get("is_kyc_verified") if "is_kyc_verified" in vals else None,
         }
+        # Solo incluir register_as_company si tiene un valor booleano válido (evitar enviar None al gateway)
+        register_as_company_val = vals.get("register_as_company") if "register_as_company" in vals else None
+        if register_as_company_val is not None:
+            payload["register_as_company"] = bool(register_as_company_val)
+        # Solo incluir app_name si tiene un valor válido (evitar enviar None al gateway)
+        app_name_val = vals.get("app_name") if "app_name" in vals else None
+        if app_name_val is not None:
+            payload["app_name"] = str(app_name_val)
+        return payload
 
     def _values_from_gateway_item(self, item):
         partner = self._find_partner_from_gateway_item(item)
@@ -269,10 +335,17 @@ class PfGatewayUser(models.Model):
         prepared_vals_list = []
         for vals in vals_list:
             prepared_vals = dict(vals)
+            register_as_company = bool(prepared_vals.pop("register_as_company", False))
+            app_name = prepared_vals.pop("app_name", None)
 
             # If the ID is not set, create the user first in gateway and map response values.
             if not prepared_vals.get("external_id"):
-                payload = self._gateway_user_payload_from_vals(prepared_vals)
+                payload_values = dict(prepared_vals)
+                if register_as_company:
+                    payload_values["register_as_company"] = True
+                    if app_name:
+                        payload_values["app_name"] = app_name
+                payload = self._gateway_user_payload_from_vals(payload_values)
                 response = self._gateway_request_json("POST", "/admin/gateway/users", payload=payload)
                 if not isinstance(response, dict):
                     raise UserError(_("El gateway devolvió una respuesta inválida al crear el usuario."))

@@ -6,7 +6,6 @@
         <field name="arch" type="xml">
             <list>
                 <field name="name"/>
-                <field name="partner_id"/>
                 <field name="cuit"/>
                 <field name="contact_name"/>
                 <field name="contact_email"/>
@@ -32,7 +31,6 @@
                         <group>
                             <field name="name"/>
                             <field name="external_id" readonly="1"/>
-                            <field name="partner_id"/>
                             <field name="cuit"/>
                             <field name="active"/>
                         </group>
@@ -65,11 +63,30 @@
                                 </list>
                             </field>
                         </page>
+                        <page string="Comisionistas">
+                            <button
+                                name="action_sync_company_commission_agents"
+                                type="object"
+                                string="Sincronizar comisionistas"
+                                class="btn-secondary"
+                                groups="pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_admin,pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_operator"
+                            />
+                            <field name="company_commission_gateway_agent_ids">
+                                <list editable="bottom">
+                                    <field name="external_id" readonly="1"/>
+                                    <field name="user_id"/>
+                                    <field name="company_app_name" column_invisible="1"/>
+                                    <field name="bank_account_id" domain="[('gateway_user_id', '=', user_id)] + ([('app', '=', company_app_name)] if company_app_name else [])"/>
+                                    <field name="commission_percentage"/>
+                                    <field name="is_active"/>
+                                    <field name="source_updated_at" readonly="1"/>
+                                </list>
+                            </field>
+                        </page>
                         <page string="Usuarios vinculados">
                             <field name="child_gateway_user_ids" readonly="1">
                                 <list>
                                     <field name="name"/>
-                                    <field name="partner_id"/>
                                     <field name="email"/>
                                     <field name="cuit_cuil"/>
                                     <field name="cuit_owner"/>
@@ -92,7 +109,6 @@
         <field name="arch" type="xml">
             <search>
                 <field name="name"/>
-                <field name="partner_id"/>
                 <field name="cuit"/>
                 <field name="contact_name"/>
                 <field name="contact_email"/>

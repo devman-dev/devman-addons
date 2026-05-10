@@ -86,6 +86,20 @@ class PfGatewayBankAccount(models.Model):
         self.sync_from_gateway(mode="manual", sync_mode="incremental")
         return True
 
+    @api.model
+    def _name_search(self, name="", domain=None, operator="ilike", limit=100, order=None):
+        _logger.debug(
+            "[BankAccount._name_search] name=%r domain=%s operator=%r limit=%s",
+            name,
+            domain,
+            operator,
+            limit,
+        )
+        result = super()._name_search(name=name, domain=domain, operator=operator, limit=limit, order=order)
+        _logger.debug("[BankAccount._name_search] → %s resultados", len(result) if result is not None else "None")
+        return result
+
+
     def _balance_request_payload(self):
         self.ensure_one()
         return {

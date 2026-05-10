@@ -92,16 +92,12 @@ class PfGatewayAccountSummaryWizard(models.TransientModel):
         }
 
         for company in companies:
-            if not company.partner_id:
-                continue
-
-            agent_lines = self.env["pf.gateway.company.commission.agent"].search(
+            agent_lines = self.env["pf.gateway.company.commission.gateway.agent"].search(
                 [
-                    ("active", "=", True),
-                    ("company_partner_id", "=", company.partner_id.id),
-                    ("agent_partner_id", "!=", False),
+                    ("is_active", "=", True),
+                    ("company_id", "=", company.id),
                 ],
-                order="sequence, id",
+                order="id",
             )
             if not agent_lines:
                 continue
@@ -128,13 +124,19 @@ class PfGatewayAccountSummaryWizard(models.TransientModel):
                 continue
 
             for line in agent_lines:
-                commission_amount = commission_base * line.percentage / 100.0
+                percentage = line.commission_percentage or 0.0
+                agent_partner = line.user_id.partner_id if line.user_id else self.env["res.partner"]
+                commission_amount = commission_base * percentage / 100.0
                 rows.append(
                     {
                         "company": company.name,
-                        "agent": line.agent_partner_id.display_name,
-                        "agent_code": line.agent_code or "",
-                        "percentage": line.percentage,
+                        "agent": (
+                            agent_partner.display_name
+                            if agent_partner
+                            else line.user_id.display_name if line.user_id else _("Sin comisionista")
+                        ),
+                        "agent_code": agent_partner.gateway_commission_agent_code if agent_partner else "",
+                        "percentage": percentage,
                         "transaction_count": transaction_count,
                         "commission_base": commission_base,
                         "commission_amount": commission_amount,

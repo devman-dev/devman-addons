@@ -23,7 +23,7 @@
         <field name="name">pf.gateway.incoming.transfer.commission.account.form</field>
         <field name="model">pf.gateway.incoming.transfer.commission.account</field>
         <field name="arch" type="xml">
-            <form create="false" edit="false" delete="false">
+            <form create="false" delete="false">
                 <header>
                     <button name="action_open_sync_wizard" type="object" string="Consultar/Sincronizar" class="btn-primary"/>
                     <button name="action_sync_this_cvu" type="object" string="Sincronizar este CVU" invisible="not cvu_cbu"/>

@@ -26,20 +26,20 @@ class PfGatewayCommissionPayableReport(models.Model):
             CREATE OR REPLACE VIEW %s AS (
                 WITH company_rates AS (
                     SELECT
-                        company_partner_id,
-                        SUM(percentage) AS retained_percentage
-                    FROM pf_gateway_company_commission_agent
-                    WHERE active
-                    GROUP BY company_partner_id
+                        company_id,
+                        SUM(commission_percentage) AS retained_percentage
+                    FROM pf_gateway_company_commission_gateway_agent
+                    WHERE is_active
+                    GROUP BY company_id
                 ),
                 commission_lines AS (
                     SELECT
                         c.id AS company_id,
-                        c.partner_id AS company_partner_id,
+                        company_user.partner_id AS company_partner_id,
                         date_trunc('month', t.transaction_at)::date AS month,
-                        cla.agent_partner_id AS agent_partner_id,
+                        agent_user.partner_id AS agent_partner_id,
                         agent.gateway_commission_agent_code AS agent_code,
-                        cla.percentage AS percentage,
+                        cga.commission_percentage AS percentage,
                         t.id AS transfer_id,
                         t.amount AS amount,
                         t.currency AS currency,
@@ -51,15 +51,17 @@ class PfGatewayCommissionPayableReport(models.Model):
                        AND membership.company_id IS NOT NULL
                     JOIN pf_gateway_company c
                         ON c.id = membership.company_id
-                       AND c.partner_id IS NOT NULL
-                    JOIN pf_gateway_company_commission_agent cla
-                        ON cla.active
-                       AND cla.company_partner_id = c.partner_id
-                       AND cla.agent_partner_id IS NOT NULL
+                    LEFT JOIN pf_gateway_user company_user
+                        ON company_user.id = c.created_by_user_id
+                    JOIN pf_gateway_company_commission_gateway_agent cga
+                        ON cga.is_active
+                       AND cga.company_id = c.id
+                    LEFT JOIN pf_gateway_user agent_user
+                        ON agent_user.id = cga.user_id
                     JOIN res_partner agent
-                        ON agent.id = cla.agent_partner_id
+                        ON agent.id = agent_user.partner_id
                     LEFT JOIN company_rates
-                        ON company_rates.company_partner_id = c.partner_id
+                        ON company_rates.company_id = c.id
                     LEFT JOIN pf_gateway_bank_account source_account
                         ON source_account.id = t.source_bank_account_id
                     LEFT JOIN LATERAL (

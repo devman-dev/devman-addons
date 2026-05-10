@@ -12,7 +12,6 @@ class ResPartner(models.Model):
         default=0.0,
     )
     gateway_user_ids = fields.One2many("pf.gateway.user", "partner_id", string="Usuarios gateway")
-    gateway_company_ids = fields.One2many("pf.gateway.company", "partner_id", string="Cuentas empresas gateway")
     gateway_company_commission_line_ids = fields.One2many(
         "pf.gateway.company.commission.agent",
         "agent_partner_id",

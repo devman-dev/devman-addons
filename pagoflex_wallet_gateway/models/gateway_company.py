@@ -1,5 +1,10 @@
+import logging
+
 from odoo import _, api, fields, models
 from odoo.exceptions import UserError
+
+
+_logger = logging.getLogger(__name__)
 
 
 class PfGatewayCompany(models.Model):
@@ -11,7 +16,6 @@ class PfGatewayCompany(models.Model):
     name = fields.Char(string="Razón social", required=True)
     active = fields.Boolean(string="Activo", default=True)
     external_id = fields.Char(string="ID gateway", index=True, readonly=True)
-    partner_id = fields.Many2one("res.partner", string="Contacto Odoo", ondelete="restrict", index=True)
     cuit = fields.Char(required=True, index=True)
     contact_name = fields.Char(string="Contacto")
     contact_email = fields.Char(string="Email contacto")
@@ -32,6 +36,11 @@ class PfGatewayCompany(models.Model):
         "pf.gateway.company.membership",
         "company_id",
         string="Membresias",
+    )
+    company_commission_gateway_agent_ids = fields.One2many(
+        "pf.gateway.company.commission.gateway.agent",
+        "company_id",
+        string="Comisionistas gateway",
     )
     source_created_at = fields.Datetime(string="Creado en gateway", readonly=True)
     source_updated_at = fields.Datetime(string="Actualizado en gateway", readonly=True, index=True)
@@ -56,55 +65,6 @@ class PfGatewayCompany(models.Model):
             "is_active": bool(self.active),
         }
 
-    def _partner_search_domain_from_company_values(self, values):
-        cuit = values.get("cuit")
-        email = values.get("contact_email")
-        if cuit:
-            return [("vat", "=", cuit)]
-        if email:
-            return [("email", "=", email)]
-        return []
-
-    def _partner_values_from_company_values(self, values):
-        return {
-            "name": values.get("name") or values.get("contact_name") or values.get("contact_email") or values.get("cuit"),
-            "company_type": "company",
-            "is_company": True,
-            "vat": values.get("cuit") or False,
-            "email": values.get("contact_email") or False,
-            "phone": values.get("contact_phone") or False,
-        }
-
-    def _find_or_create_partner_from_company_values(self, values):
-        domain = self._partner_search_domain_from_company_values(values)
-        partner = self.env["res.partner"].search(domain, limit=1) if domain else self.env["res.partner"]
-        partner_values = self._partner_values_from_company_values(values)
-        if partner:
-            update_values = {
-                key: value
-                for key, value in partner_values.items()
-                if value and (key in {"company_type", "is_company"} or not partner[key])
-            }
-            if update_values:
-                partner.write(update_values)
-            return partner
-        return self.env["res.partner"].create(partner_values)
-
-    def _ensure_partner_link(self):
-        for record in self:
-            if record.partner_id:
-                continue
-            partner = record._find_or_create_partner_from_company_values(
-                {
-                    "name": record.name,
-                    "cuit": record.cuit,
-                    "contact_name": record.contact_name,
-                    "contact_email": record.contact_email,
-                    "contact_phone": record.contact_phone,
-                }
-            )
-            record.with_context(skip_gateway_company_push=True).partner_id = partner.id
-
     def _update_from_gateway_payload(self, payload):
         self.ensure_one()
         if not isinstance(payload, dict):
@@ -128,7 +88,6 @@ class PfGatewayCompany(models.Model):
             "contact_email": item.get("contact_email"),
             "contact_phone": item.get("contact_phone"),
         }
-        partner = self._find_or_create_partner_from_company_values(company_values)
 
         created_by = self.env["pf.gateway.user"]
         created_by_external_id = item.get("created_by_user_id")
@@ -145,7 +104,6 @@ class PfGatewayCompany(models.Model):
 
         return {
             "external_id": str(item.get("id")) if item.get("id") is not None else False,
-            "partner_id": partner.id,
             "name": company_values["name"],
             "cuit": company_values["cuit"],
             "contact_name": company_values["contact_name"],
@@ -162,11 +120,6 @@ class PfGatewayCompany(models.Model):
 
     @api.model_create_multi
     def create(self, vals_list):
-        if not self.env.context.get("skip_gateway_company_push"):
-            for vals in vals_list:
-                if not vals.get("partner_id"):
-                    partner = self._find_or_create_partner_from_company_values(vals)
-                    vals["partner_id"] = partner.id
         records = super().create(vals_list)
         if self.env.context.get("skip_gateway_company_push"):
             return records
@@ -184,9 +137,6 @@ class PfGatewayCompany(models.Model):
         result = super().write(vals)
         if self.env.context.get("skip_gateway_company_push"):
             return result
-
-        if {"name", "cuit", "contact_name", "contact_email", "contact_phone"}.intersection(vals):
-            self._ensure_partner_link()
 
         push_fields = {
             "name",
@@ -214,6 +164,20 @@ class PfGatewayCompany(models.Model):
 
     def action_sync_companies(self):
         self.sync_from_gateway(mode="manual", sync_mode="incremental")
+        return True
+
+    def action_sync_company_commission_agents(self):
+        self.ensure_one()
+        _logger.info(
+            "[Company] action_sync_company_commission_agents company_id=%s company_external_id=%s",
+            self.id,
+            self.external_id,
+        )
+        self.env["pf.gateway.company.commission.gateway.agent"].sync_from_gateway(
+            mode="manual",
+            sync_mode="incremental",
+            company=self,
+        )
         return True
 
     def sync_from_gateway(self, mode="manual", sync_mode="incremental", job=None):

@@ -44,7 +44,7 @@
                                 </list>
                             </field>
                         </page>
-                        <page string="Cuentas empresas">
+                        <!-- <page string="Cuentas empresas">
                             <field name="gateway_company_ids" readonly="1">
                                 <list>
                                     <field name="name"/>
@@ -54,7 +54,7 @@
                                     <field name="active"/>
                                 </list>
                             </field>
-                        </page>
+                        </page> -->
                         <page string="Reglas como comisionista" invisible="not is_gateway_commission_agent">
                             <field name="gateway_company_commission_line_ids" readonly="1">
                                 <list>

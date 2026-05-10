@@ -21,3 +21,4 @@ from . import gateway_transfer_response_wizard
 from . import account_summary_report
 from . import commission_payable_report
 from . import res_config_settings
+from . import gateway_company_commission_agent

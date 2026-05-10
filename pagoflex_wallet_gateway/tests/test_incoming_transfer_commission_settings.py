@@ -103,3 +103,40 @@ class TestIncomingTransferCommissionSettings(TransactionCase):
 
         self.assertEqual(updated_a.commission_percentage, 4.0)
         self.assertEqual(updated_b.commission_percentage, 2.0)
+
+    def test_write_account_commission_pushes_new_value_to_gateway(self):
+        account_calls = []
+
+        def fake_gateway_request(recordset, method, path, params=None, payload=None):
+            account_calls.append(
+                {
+                    "method": method,
+                    "path": path,
+                    "params": params or {},
+                    "payload": payload or {},
+                }
+            )
+            return {
+                "id": "comm-a",
+                "bank_account_id": "bank-a",
+                "cvu_cbu": "0000538801000000064016",
+                "commission_percentage": payload.get("commission_percentage"),
+                "is_active": payload.get("is_active", True),
+            }
+
+        account = self.CommissionAccount.search([("external_id", "=", "comm-a")], limit=1)
+        with patch.object(type(self.CommissionAccount), "_gateway_request_json", fake_gateway_request):
+            account.write({"commission_percentage": 5.25})
+
+        self.assertEqual(len(account_calls), 1)
+        self.assertEqual(account_calls[0]["method"], "POST")
+        self.assertEqual(account_calls[0]["path"], "/admin/gateway/incoming-transfer-commission/accounts")
+        self.assertEqual(account_calls[0]["params"].get("app_name"), "test-propagation-only")
+        self.assertEqual(
+            account_calls[0]["payload"],
+            {
+                "cvu_cbu": "0000538801000000064016",
+                "commission_percentage": 5.25,
+                "is_active": True,
+            },
+        )

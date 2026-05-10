@@ -119,8 +119,11 @@ class PfGatewayDashboard(models.TransientModel):
                 "count": self.env["pf.gateway.user"].search_count([("partner_id", "=", False), ("active", "=", True)]),
             },
             {
-                "label": _("Empresas sin partner asociado"),
-                "count": self.env["pf.gateway.company"].search_count([("partner_id", "=", False), ("active", "=", True)]),
+                "label": _("Empresas sin usuario creador asociado"),
+                "count": self.env["pf.gateway.company"].search_count([
+                    ("created_by_user_id", "=", False),
+                    ("active", "=", True),
+                ]),
             },
             {
                 "label": _("Membresias activas sin empresa resuelta"),
@@ -154,10 +157,16 @@ class PfGatewayDashboard(models.TransientModel):
         for membership in memberships:
             company_by_user_id.setdefault(membership.user_id.id, membership.company_id)
 
-        commission_lines_by_partner = {}
-        for company in company_by_user_id.values():
-            if company.partner_id and company.partner_id.id not in commission_lines_by_partner:
-                commission_lines_by_partner[company.partner_id.id] = company.partner_id.gateway_commission_agent_line_ids.filtered("active")
+        commission_gateway_model = self.env["pf.gateway.company.commission.gateway.agent"]
+        company_ids = list({company.id for company in company_by_user_id.values() if company})
+        commission_lines_by_company = defaultdict(lambda: commission_gateway_model.browse())
+        if company_ids:
+            commission_lines = commission_gateway_model.search([
+                ("is_active", "=", True),
+                ("company_id", "in", company_ids),
+            ])
+            for line in commission_lines:
+                commission_lines_by_company[line.company_id.id] |= line
 
         company_totals = defaultdict(lambda: {"name": "", "amount": 0.0, "count": 0, "commission": 0.0})
         agent_totals = defaultdict(lambda: {"name": "", "code": "", "amount": 0.0, "count": 0})
@@ -176,14 +185,20 @@ class PfGatewayDashboard(models.TransientModel):
             company_bucket["amount"] += transfer.amount
             company_bucket["count"] += 1
 
-            commission_lines = commission_lines_by_partner.get(company.partner_id.id if company.partner_id else False, self.env["pf.gateway.company.commission.agent"])
+            commission_lines = commission_lines_by_company.get(company.id, commission_gateway_model.browse())
             for line in commission_lines:
-                commission_amount = transfer.amount * line.percentage / 100.0
+                commission_amount = transfer.amount * line.commission_percentage / 100.0
                 commission_total += commission_amount
                 company_bucket["commission"] += commission_amount
-                agent_bucket = agent_totals[line.agent_partner_id.id]
-                agent_bucket["name"] = line.agent_partner_id.display_name
-                agent_bucket["code"] = line.agent_code or ""
+                agent_partner = line.user_id.partner_id if line.user_id else self.env["res.partner"]
+                agent_key = line.user_id.id or line.id
+                agent_bucket = agent_totals[agent_key]
+                agent_bucket["name"] = (
+                    agent_partner.display_name
+                    if agent_partner
+                    else line.user_id.display_name if line.user_id else _("Sin comisionista")
+                )
+                agent_bucket["code"] = agent_partner.gateway_commission_agent_code if agent_partner else ""
                 agent_bucket["amount"] += commission_amount
                 agent_bucket["count"] += 1
 
@@ -391,7 +406,7 @@ class PfGatewayDashboard(models.TransientModel):
         self.ensure_one()
         return self._open_action(
             "pagoflex_wallet_gateway.action_pf_gateway_company",
-            domain=[("active", "=", True), ("partner_id", "=", False)],
+            domain=[("active", "=", True), ("created_by_user_id", "=", False)],
         )
 
     def action_open_memberships_without_company(self):

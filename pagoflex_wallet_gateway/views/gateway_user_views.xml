@@ -7,6 +7,7 @@
             <list>
                 <field name="name"/>
                 <field name="email"/>
+                <field name="has_linked_company"/>
                 <field name="partner_id"/>
                 <field name="partner_company_type"/>
                 <field name="partner_is_company"/>
@@ -40,6 +41,9 @@
                             <field name="partner_id"/>
                             <field name="partner_company_type" readonly="1"/>
                             <field name="partner_is_company" readonly="1"/>
+                            <field name="has_linked_company" readonly="1"/>
+                            <field name="register_as_company" readonly="id"/>
+                            <field name="app_name" readonly="id"/>
                             <field name="parent_company_gateway_user_id"/>
                             <field name="email" required="1"/>
                             <field name="phone"/>
@@ -119,14 +123,17 @@
                                 </list>
                             </field>
                             <separator string="Detalle de movimientos"/>
-                            <field name="statement_line_ids" readonly="1">
+                            <group>
+                                <field name="statement_status_filter" placeholder="Todos"/>
+                            </group>
+                            <field name="statement_line_filtered_ids" readonly="1">
                                 <list create="false" edit="false" delete="false">
                                     <field name="transaction_at"/>
                                     <field name="transfer_id"/>
                                     <field name="app"/>
                                     <field name="cvu_cbu"/>
-                                    <field name="bank_account_id"/>
-                                    <field name="name"/>
+                                    <!-- <field name="bank_account_id"/> -->
+                                    <!-- <field name="name"/> -->
                                     <field name="origin_id"/>
                                     <field name="movement_nature"/>
                                     <field name="status"/>
@@ -170,12 +177,14 @@
             <search>
                 <field name="name"/>
                 <field name="email"/>
+                <field name="has_linked_company"/>
                 <field name="partner_id"/>
                 <field name="parent_company_gateway_user_id"/>
                 <field name="dni"/>
                 <field name="cuit_cuil"/>
                 <field name="cuit_owner"/>
                 <filter name="filter_active" string="Activo" domain="[('active', '=', True)]"/>
+                <filter name="filter_has_linked_company" string="Con empresa vinculada" domain="[('has_linked_company', '=', True)]"/>
                 <filter name="filter_company" string="Empresas" domain="[('partner_is_company', '=', True)]"/>
                 <filter name="filter_person" string="Personas" domain="[('partner_is_company', '=', False)]"/>
                 <filter name="filter_kyc" string="KYC verificado" domain="[('is_kyc_verified', '=', True)]"/>
