@@ -21,6 +21,50 @@ class PfGatewayCommissionPayableReport(models.Model):
 
     def init(self):
         tools.drop_view_if_exists(self.env.cr, self._table)
+
+        # Verificar que las tablas dependientes existen antes de crear la vista compleja.
+        # En una instalación nueva el modulo puede inicializar los modelos en orden
+        # alfabético y la tabla pf_gateway_company_commission_gateway_agent puede no
+        # existir todavía en ese momento. En ese caso creamos una vista vacía; Odoo
+        # la recreará correctamente en el siguiente -u o reinicio.
+        self.env.cr.execute(
+            """
+            SELECT COUNT(*) FROM information_schema.tables
+            WHERE table_schema = 'public'
+              AND table_name IN (
+                  'pf_gateway_company_commission_gateway_agent',
+                  'pf_gateway_transfer',
+                  'pf_gateway_company_membership',
+                  'pf_gateway_company'
+              )
+            """
+        )
+        found_tables = self.env.cr.fetchone()[0]
+        if found_tables < 4:
+            # Crear vista vacía stub para no bloquear la instalación
+            self.env.cr.execute(
+                """
+                CREATE OR REPLACE VIEW %s AS (
+                    SELECT
+                        0::integer AS id,
+                        NULL::date AS month,
+                        NULL::integer AS company_id,
+                        NULL::integer AS company_partner_id,
+                        NULL::integer AS agent_partner_id,
+                        NULL::varchar AS agent_code,
+                        0.0::double precision AS percentage,
+                        0::integer AS transaction_count,
+                        0.0::double precision AS total_amount,
+                        0.0::double precision AS retained_commission,
+                        0.0::double precision AS commission_amount,
+                        NULL::varchar AS currency
+                    WHERE false
+                )
+                """
+                % self._table
+            )
+            return
+
         self.env.cr.execute(
             """
             CREATE OR REPLACE VIEW %s AS (
