@@ -73,6 +73,8 @@
                 <field name="gateway_user_id"/>
                 <field name="app"/>
                 <filter name="filter_primary" string="Principal" domain="[('is_primary', '=', True)]"/>
+                <filter name="filter_balance_non_negative" string="Balance >= 0" domain="[('balance', '>=', 0)]"/>
+                <filter name="filter_balance_negative" string="Balance &lt; 0" domain="[('balance', '&lt;', 0)]"/>
                 <separator/>
                 <filter name="group_by_app" string="Agrupar por App" context="{'group_by': 'app'}"/>
             </search>

@@ -13,9 +13,11 @@
                 <field name="movement_nature"/>
                 <field name="status"/>
                 <field name="source_address"/>
+                <field name="source_user_id"/>
                 <field name="destination_address"/>
+                <field name="destination_user_id"/>
                 <field name="currency"/>
-                <field name="amount"/>
+                <field name="amount" sum="Total"/>
                 <field name="transaction_at"/>
             </list>
         </field>
@@ -98,6 +100,9 @@
                 <field name="destination_user_id"/>
                 <filter name="filter_transfer" string="Transferencias" domain="[('movement_nature', '=', 'TRANSFER')]"/>
                 <filter name="filter_commission" string="Comisiones" domain="[('movement_nature', '=', 'COMMISSION')]"/>
+                <separator/>
+                <filter name="filter_completed" string="Completadas" domain="[('status', '=', 'COMPLETED')]"/>
+                <filter name="filter_other_status" string="Otras" domain="['|', ('status', '=', False), ('status', '!=', 'COMPLETED')]"/>
             </search>
         </field>
     </record>
@@ -106,6 +111,7 @@
         <field name="name">Transferencias</field>
         <field name="res_model">pf.gateway.transfer</field>
         <field name="view_mode">list,form</field>
+        <field name="context">{"search_default_filter_completed": 1}</field>
     </record>
 
     <menuitem id="menu_pf_gateway_transfer" name="Transferencias" parent="menu_pagoflex_wallet_gateway_operations" action="action_pf_gateway_transfer" sequence="30"/>

@@ -33,6 +33,7 @@
         "views/gateway_transfer_views.xml",
         "views/account_summary_report_views.xml",
         "views/commission_payable_report_views.xml",
+        "views/daily_reference_report_views.xml",
         "data/sync_job_data.xml",
         "data/cron.xml",
     ],

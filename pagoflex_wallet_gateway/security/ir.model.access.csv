@@ -51,3 +51,9 @@
 "access_pf_gateway_commission_payable_report_admin","pf.gateway.commission.payable.report admin","model_pf_gateway_commission_payable_report","pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_admin",1,0,0,0
 "access_pf_gateway_commission_payable_report_operator","pf.gateway.commission.payable.report operator","model_pf_gateway_commission_payable_report","pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_operator",1,0,0,0
 "access_pf_gateway_commission_payable_report_auditor","pf.gateway.commission.payable.report auditor","model_pf_gateway_commission_payable_report","pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_auditor",1,0,0,0
+"access_pf_gateway_daily_reference_import_admin","pf.gateway.daily.reference.import admin","model_pf_gateway_daily_reference_import","pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_admin",1,1,1,1
+"access_pf_gateway_daily_reference_import_operator","pf.gateway.daily.reference.import operator","model_pf_gateway_daily_reference_import","pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_operator",1,1,1,1
+"access_pf_gateway_daily_reference_import_line_admin","pf.gateway.daily.reference.import.line admin","model_pf_gateway_daily_reference_import_line","pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_admin",1,1,1,1
+"access_pf_gateway_daily_reference_import_line_operator","pf.gateway.daily.reference.import.line operator","model_pf_gateway_daily_reference_import_line","pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_operator",1,1,1,1
+"access_pf_gateway_daily_reference_import_wizard_admin","pf.gateway.daily.reference.import.wizard admin","model_pf_gateway_daily_reference_import_wizard","pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_admin",1,1,1,1
+"access_pf_gateway_daily_reference_import_wizard_operator","pf.gateway.daily.reference.import.wizard operator","model_pf_gateway_daily_reference_import_wizard","pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_operator",1,1,1,1

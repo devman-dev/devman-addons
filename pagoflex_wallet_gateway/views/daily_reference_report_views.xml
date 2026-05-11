@@ -1,0 +1,194 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_pf_gateway_daily_reference_import_tree" model="ir.ui.view">
+        <field name="name">pf.gateway.daily.reference.import.tree</field>
+        <field name="model">pf.gateway.daily.reference.import</field>
+        <field name="arch" type="xml">
+            <list create="false" edit="false" delete="true">
+                <field name="name"/>
+                <field name="import_date"/>
+                <field name="source_file_name"/>
+                <field name="line_count"/>
+                <field name="imported_at"/>
+                <field name="imported_by_id"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_pf_gateway_daily_reference_import_form" model="ir.ui.view">
+        <field name="name">pf.gateway.daily.reference.import.form</field>
+        <field name="model">pf.gateway.daily.reference.import</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_open_import_wizard"
+                            type="object"
+                            string="Importar archivo"
+                            class="btn-primary"
+                            groups="pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_admin,pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_operator"/>
+                </header>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="name" readonly="1"/>
+                            <field name="import_date" readonly="1"/>
+                            <field name="source_file_name" readonly="1"/>
+                        </group>
+                        <group>
+                            <field name="line_count" readonly="1"/>
+                            <field name="imported_at" readonly="1"/>
+                            <field name="imported_by_id" readonly="1"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Lineas importadas">
+                            <field name="line_ids" readonly="1">
+                                <list create="false" edit="false" delete="true">
+                                    <field name="operation_date"/>
+                                    <field name="nro_registro"/>
+                                    <field name="id_movimiento"/>
+                                    <field name="id_debin"/>
+                                    <field name="tipo_mov"/>
+                                    <field name="estado"/>
+                                    <field name="cbu"/>
+                                    <field name="cuit"/>
+                                    <field name="denominacion"/>
+                                    <field name="amount" sum="Importe COELSA"/>
+                                    <field name="importe_2" sum="Importe 2"/>
+                                    <field name="moneda"/>
+                                    <field name="concepto"/>
+                                    <field name="detalle"/>
+                                    <field name="cvu"/>
+                                    <field name="cvu_credito"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Cabeceras origen">
+                            <field name="source_headers_json" widget="text" readonly="1"/>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_pf_gateway_daily_reference_import_line_tree" model="ir.ui.view">
+        <field name="name">pf.gateway.daily.reference.import.line.tree</field>
+        <field name="model">pf.gateway.daily.reference.import.line</field>
+        <field name="arch" type="xml">
+            <list create="false" edit="false" delete="true">
+                <field name="import_id"/>
+                <field name="operation_date"/>
+                <field name="nro_registro"/>
+                <field name="id_movimiento"/>
+                <field name="id_debin"/>
+                <field name="tipo_mov"/>
+                <field name="estado"/>
+                <field name="cbu"/>
+                <field name="cuit"/>
+                <field name="denominacion"/>
+                <field name="amount" sum="Importe COELSA"/>
+                <field name="importe_2" sum="Importe 2"/>
+                <field name="moneda"/>
+                <field name="concepto"/>
+                <field name="detalle"/>
+                <field name="cvu"/>
+                <field name="cvu_credito"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_pf_gateway_daily_reference_import_line_search" model="ir.ui.view">
+        <field name="name">pf.gateway.daily.reference.import.line.search</field>
+        <field name="model">pf.gateway.daily.reference.import.line</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="import_id"/>
+                <field name="nro_registro"/>
+                <field name="id_movimiento"/>
+                <field name="id_debin"/>
+                <field name="cbu"/>
+                <field name="cuit"/>
+                <field name="denominacion"/>
+                <field name="detalle"/>
+                <field name="concepto"/>
+                <field name="estado"/>
+                <field name="tipo_mov"/>
+                <field name="operation_date"/>
+                <field name="moneda"/>
+                <filter name="group_by_date" string="Fecha" context="{'group_by': 'operation_date'}"/>
+                <filter name="group_by_estado" string="Estado" context="{'group_by': 'estado'}"/>
+                <filter name="group_by_tipo_mov" string="Tipo movimiento" context="{'group_by': 'tipo_mov'}"/>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_pf_gateway_daily_reference_import" model="ir.actions.act_window">
+        <field name="name">Listado de Referencia Diario</field>
+        <field name="res_model">pf.gateway.daily.reference.import</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <record id="action_pf_gateway_daily_reference_import_line" model="ir.actions.act_window">
+        <field name="name">Seguimiento Listado Referencia</field>
+        <field name="res_model">pf.gateway.daily.reference.import.line</field>
+        <field name="view_mode">list</field>
+        <field name="search_view_id" ref="view_pf_gateway_daily_reference_import_line_search"/>
+    </record>
+
+    <record id="view_pf_gateway_daily_reference_import_wizard_form" model="ir.ui.view">
+        <field name="name">pf.gateway.daily.reference.import.wizard.form</field>
+        <field name="model">pf.gateway.daily.reference.import.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Importar Listado de Referencia Diario">
+                <sheet>
+                    <group>
+                        <field name="file_data" filename="file_name"/>
+                        <field name="file_name" readonly="1"/>
+                        <field name="import_date"/>
+                        <field name="sheet_name" placeholder="Opcional"/>
+                        <field name="has_header"/>
+                    </group>
+                </sheet>
+                <footer>
+                    <button name="action_import_file" type="object" string="Importar" class="btn-primary"/>
+                    <button string="Cancelar" special="cancel" class="btn-secondary"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_pf_gateway_daily_reference_import_wizard" model="ir.actions.act_window">
+        <field name="name">Importar Listado de Referencia Diario</field>
+        <field name="res_model">pf.gateway.daily.reference.import.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+
+    <menuitem id="menu_pagoflex_wallet_gateway_report_imports"
+              name="Carga de reportes"
+              parent="menu_pagoflex_wallet_gateway_reports"
+              sequence="20"
+              groups="pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_admin,pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_operator"/>
+
+    <menuitem id="menu_pf_gateway_daily_reference_import_wizard"
+              name="Listado de Referencia Diario"
+              parent="menu_pagoflex_wallet_gateway_report_imports"
+              action="action_pf_gateway_daily_reference_import_wizard"
+              sequence="10"
+              groups="pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_admin,pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_operator"/>
+
+    <menuitem id="menu_pf_gateway_daily_reference_import_history"
+              name="Historial Listado Referencia"
+              parent="menu_pagoflex_wallet_gateway_report_imports"
+              action="action_pf_gateway_daily_reference_import"
+              sequence="20"
+              groups="pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_admin,pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_operator"/>
+
+    <menuitem id="menu_pf_gateway_daily_reference_import_line_tracking"
+              name="Seguimiento de movimientos"
+              parent="menu_pagoflex_wallet_gateway_report_imports"
+              action="action_pf_gateway_daily_reference_import_line"
+              sequence="30"
+              groups="pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_admin,pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_operator"/>
+</odoo>
