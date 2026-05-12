@@ -8,7 +8,7 @@
                 <field name="name"/>
                 <field name="email"/>
                 <field name="has_linked_company"/>
-                <field name="partner_id"/>
+                <!-- <field name="partner_id"/> -->
                 <field name="partner_company_type"/>
                 <field name="partner_is_company"/>
                 <field name="parent_company_gateway_user_id"/>
@@ -30,7 +30,7 @@
             <form>
                 <header>
                     <button name="action_sync_users" type="object" string="Sincronizar usuarios" class="btn-primary" groups="pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_admin,pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_operator"/>
-                    <button name="action_create_or_link_partner" type="object" string="Crear/vincular contacto" invisible="partner_id" groups="pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_admin,pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_operator"/>
+                    <!-- <button name="action_create_or_link_partner" type="object" string="Crear/vincular contacto" invisible="partner_id" groups="pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_admin,pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_operator"/> -->
                     <button name="action_add_costoapp_commission_agent" type="object" string="Agregar CostoAPP" invisible="not partner_is_company" groups="pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_admin"/>
                     <button name="action_open_account_statement" type="object" string="Ver resumen de cuenta" groups="pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_admin,pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_operator,pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_auditor"/>
                 </header>
@@ -38,7 +38,7 @@
                     <group>
                         <group>
                             <field name="name"/>
-                            <field name="partner_id"/>
+                            <!-- <field name="partner_id"/> -->
                             <field name="partner_company_type" readonly="1"/>
                             <field name="partner_is_company" readonly="1"/>
                             <field name="has_linked_company" readonly="1"/>
@@ -178,7 +178,7 @@
                 <field name="name"/>
                 <field name="email"/>
                 <field name="has_linked_company"/>
-                <field name="partner_id"/>
+                <!-- <field name="partner_id"/> -->
                 <field name="parent_company_gateway_user_id"/>
                 <field name="dni"/>
                 <field name="cuit_cuil"/>

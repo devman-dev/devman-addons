@@ -19,7 +19,7 @@ class PfGatewayCompany(models.Model):
     cuit = fields.Char(required=True, index=True)
     contact_name = fields.Char(string="Contacto")
     contact_email = fields.Char(string="Email contacto")
-    contact_phone = fields.Char(string="Teléfono contacto")
+    contact_phone = fields.Char(string="Teléfono contacto", required=True)
     created_by_user_id = fields.Many2one("pf.gateway.user", string="Creado por", ondelete="set null", index=True)
     primary_bank_account_id = fields.Many2one(
         "pf.gateway.bank.account",

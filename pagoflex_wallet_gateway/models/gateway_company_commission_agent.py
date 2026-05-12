@@ -97,6 +97,66 @@ class PfGatewayCompanyCommissionAgent(models.Model):
             payload["id"] = self.external_id
         return payload
 
+    def _is_company_not_found_gateway_error(self, exc):
+        message = str(exc or "").lower()
+        return "company_id no existe" in message
+
+    def _ensure_company_exists_in_gateway(self):
+        self.ensure_one()
+        company = self.company_id
+
+        method = "PATCH" if company.external_id else "POST"
+        path = company._gateway_company_patch_path() if company.external_id else "/admin/gateway/companies"
+        payload = company._gateway_company_payload()
+
+        try:
+            response = company._gateway_request_json(method, path, payload=payload)
+        except UserError:
+            if method != "PATCH":
+                raise
+            # Si el external_id local ya no existe en gateway, recrear por POST.
+            response = company._gateway_request_json("POST", "/admin/gateway/companies", payload=payload)
+
+        company._update_from_gateway_payload(response)
+        return company
+
+    def _post_company_commission_agent_with_company_retry(self, payload, *, log_context="write"):
+        self.ensure_one()
+        endpoint = "/admin/gateway/company-commission-agents"
+        try:
+            return self._gateway_request_json("POST", endpoint, payload=payload)
+        except UserError as exc:
+            if not self._is_company_not_found_gateway_error(exc):
+                raise
+            if not self.company_id.external_id:
+                raise
+
+            _logger.warning(
+                "[CommissionAgent] company_id no existe en gateway. "
+                "Se hace upsert de empresa y se reintenta una vez. "
+                "context=%s company_external_id=%s",
+                log_context,
+                self.company_id.external_id,
+            )
+            refreshed_company = self._ensure_company_exists_in_gateway()
+            if not refreshed_company.exists() or not refreshed_company.external_id:
+                raise exc
+
+            # Rearmar payload usando explicitamente el external_id actualizado.
+            retry_payload = dict(payload)
+            retry_payload["company_id"] = refreshed_company.external_id
+            if self.external_id:
+                retry_payload["id"] = self.external_id
+
+            _logger.info(
+                "[CommissionAgent] Reintento POST company-commission-agents context=%s "
+                "company_external_id=%s payload=%s",
+                log_context,
+                refreshed_company.external_id,
+                retry_payload,
+            )
+            return self._gateway_request_json("POST", endpoint, payload=retry_payload)
+
     def _resolve_required_company(self, external_id):
         company = self.env["pf.gateway.company"].search([("external_id", "=", str(external_id))], limit=1)
         if not company:
@@ -161,11 +221,7 @@ class PfGatewayCompanyCommissionAgent(models.Model):
                 "[CommissionAgent] PUSH create -> POST /admin/gateway/company-commission-agents payload=%s",
                 payload,
             )
-            response = record._gateway_request_json(
-                "POST",
-                "/admin/gateway/company-commission-agents",
-                payload=payload,
-            )
+            response = record._post_company_commission_agent_with_company_retry(payload, log_context="create")
             record._update_from_gateway_payload(response)
         return records
 
@@ -186,11 +242,7 @@ class PfGatewayCompanyCommissionAgent(models.Model):
                 record.external_id,
                 payload,
             )
-            response = record._gateway_request_json(
-                "POST",
-                "/admin/gateway/company-commission-agents",
-                payload=payload,
-            )
+            response = record._post_company_commission_agent_with_company_retry(payload, log_context="write")
             record._update_from_gateway_payload(response)
         return result
 
