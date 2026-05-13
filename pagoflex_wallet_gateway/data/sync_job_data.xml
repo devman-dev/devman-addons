@@ -24,6 +24,14 @@
         <field name="active">True</field>
     </record>
 
+    <record id="pf_gateway_sync_job_bank_account_assignments" model="pf.gateway.sync.job">
+        <field name="sequence">22</field>
+        <field name="name">Sincronizar Asignaciones de Cuentas del Gateway</field>
+        <field name="resource">bank_account_assignments</field>
+        <field name="sync_mode">incremental</field>
+        <field name="active">True</field>
+    </record>
+
     <record id="pf_gateway_sync_job_company_memberships" model="pf.gateway.sync.job">
         <field name="sequence">25</field>
         <field name="name">Sincronizar Membresias de Empresas del Gateway</field>

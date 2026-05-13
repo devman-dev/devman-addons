@@ -11,8 +11,11 @@ class PfGatewaySyncLog(models.Model):
         [
             ("users", "Usuarios"),
             ("companies", "Empresas"),
+            ("company-locations", "Locales"),
+            ("company-location-commission-agents", "Comisionistas por local"),
             ("company_memberships", "Membresias"),
             ("bank_accounts", "Cuentas Bancarias"),
+            ("bank_account_assignments", "Asignaciones de cuentas"),
             ("negative_balance_limits", "Limites de Saldo Negativo"),
             ("transfers", "Transferencias"),
             ("all", "Todo"),

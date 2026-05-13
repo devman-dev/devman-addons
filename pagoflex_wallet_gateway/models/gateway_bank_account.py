@@ -1,4 +1,5 @@
 import logging
+import json
 
 from odoo import _, api, fields, models
 from odoo.exceptions import UserError
@@ -65,6 +66,9 @@ class PfGatewayBankAccount(models.Model):
     _sql_constraints = [
         ("pf_gateway_bank_account_external_id_uniq", "unique(external_id)", "El external_id de la cuenta bancaria del gateway debe ser único."),
     ]
+    _BALANCE_REFRESH_QUEUE_PARAM = "pagoflex_wallet_gateway.balance_refresh_account_ids"
+    _BALANCE_REFRESH_CRON_CODE = "model._cron_refresh_balances_reusable()"
+    _BALANCE_REFRESH_CRON_NAME = "PagoFlex Refrescar saldos bancarios"
 
     @api.depends("cvu_cbu", "alias", "origin_id")
     def _compute_name(self):
@@ -306,15 +310,13 @@ class PfGatewayBankAccount(models.Model):
         if not account_ids:
             return False
 
-        cron = self.env["ir.cron"].sudo().create(
+        queue_ids = set(self._get_balance_refresh_queue_ids())
+        queue_ids.update(account_ids)
+        self._set_balance_refresh_queue_ids(list(queue_ids))
+
+        cron = self._get_or_create_balance_refresh_cron()
+        cron.write(
             {
-                "name": _("PagoFlex Refrescar saldos bancarios"),
-                "model_id": self.env.ref("pagoflex_wallet_gateway.model_pf_gateway_bank_account").id,
-                "state": "code",
-                "code": f"model._cron_refresh_balances({account_ids})",
-                # Cron efimero: evita re-ejecuciones frecuentes sin borrar el registro en caliente.
-                "interval_number": 1200,
-                "interval_type": "months",
                 "nextcall": fields.Datetime.now(),
                 "active": True,
             }
@@ -322,9 +324,118 @@ class PfGatewayBankAccount(models.Model):
         return cron
 
     @api.model
+    def _get_balance_refresh_queue_ids(self):
+        raw = self.env["ir.config_parameter"].sudo().get_param(self._BALANCE_REFRESH_QUEUE_PARAM)
+        if not raw:
+            return []
+        try:
+            values = json.loads(raw)
+        except Exception:
+            _logger.warning("Cola de refresco de saldos inválida en config parameter: %s", raw)
+            return []
+
+        if not isinstance(values, list):
+            return []
+
+        sanitized = []
+        for value in values:
+            try:
+                account_id = int(value)
+            except (TypeError, ValueError):
+                continue
+            if account_id > 0:
+                sanitized.append(account_id)
+        return list(dict.fromkeys(sanitized))
+
+    @api.model
+    def _set_balance_refresh_queue_ids(self, account_ids):
+        sanitized = []
+        for value in account_ids or []:
+            try:
+                account_id = int(value)
+            except (TypeError, ValueError):
+                continue
+            if account_id > 0:
+                sanitized.append(account_id)
+        payload = json.dumps(sorted(set(sanitized)))
+        self.env["ir.config_parameter"].sudo().set_param(self._BALANCE_REFRESH_QUEUE_PARAM, payload)
+
+    @api.model
+    def _get_or_create_balance_refresh_cron(self):
+        cron_model = self.env["ir.cron"].sudo()
+        model_id = self.env.ref("pagoflex_wallet_gateway.model_pf_gateway_bank_account").id
+
+        reusable = cron_model.search(
+            [
+                ("model_id", "=", model_id),
+                ("state", "=", "code"),
+                ("code", "=", self._BALANCE_REFRESH_CRON_CODE),
+            ],
+            order="id asc",
+            limit=1,
+        )
+
+        legacy = cron_model.search(
+            [
+                ("model_id", "=", model_id),
+                ("state", "=", "code"),
+                ("code", "like", "model._cron_refresh_balances(%"),
+            ],
+            order="id asc",
+        )
+
+        if reusable:
+            if legacy:
+                legacy.unlink()
+            return reusable
+
+        if legacy:
+            cron = legacy[0]
+            if len(legacy) > 1:
+                (legacy - cron).unlink()
+            cron.write(
+                {
+                    "name": self._BALANCE_REFRESH_CRON_NAME,
+                    "code": self._BALANCE_REFRESH_CRON_CODE,
+                    "interval_number": 1,
+                    "interval_type": "minutes",
+                    "active": False,
+                }
+            )
+            return cron
+
+        return cron_model.create(
+            {
+                "name": self._BALANCE_REFRESH_CRON_NAME,
+                "model_id": model_id,
+                "state": "code",
+                "code": self._BALANCE_REFRESH_CRON_CODE,
+                "interval_number": 1,
+                "interval_type": "minutes",
+                "active": False,
+            }
+        )
+
+    @api.model
     def _cron_refresh_balances(self, account_ids=None):
         records = self.sudo().browse(account_ids or []).exists()
         records._refresh_balance_from_gateway()
+
+    @api.model
+    def _cron_refresh_balances_reusable(self):
+        cron = self._get_or_create_balance_refresh_cron()
+        account_ids = self._get_balance_refresh_queue_ids()
+        if not account_ids:
+            cron.write({"active": False})
+            return 0
+
+        records = self.sudo().browse(account_ids).exists()
+        try:
+            records._refresh_balance_from_gateway()
+        finally:
+            self._set_balance_refresh_queue_ids([])
+            cron.write({"active": False})
+        return len(records)
 
     def action_refresh_balance_async(self):
         records = self

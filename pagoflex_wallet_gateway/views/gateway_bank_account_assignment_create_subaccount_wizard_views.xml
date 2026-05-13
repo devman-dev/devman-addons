@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_pf_gateway_bank_account_assignment_create_subaccount_wizard_form" model="ir.ui.view">
+        <field name="name">pf.gateway.bank.account.assignment.create.subaccount.wizard.form</field>
+        <field name="model">pf.gateway.bank.account.assignment.subaccount.wizard</field>
+        <field name="arch" type="xml">
+            <form>
+                <group>
+                    <field name="assignment_id" readonly="1"/>
+                    <field name="user_id" readonly="1" context="{'default_active': True}"/>
+                    <field name="app"/>
+                </group>
+                <group>
+                    <field name="created_bank_account_id" readonly="1"/>
+                </group>
+                <footer>
+                    <button name="action_create_subaccount" type="object" string="Crear cuenta" class="btn-primary"/>
+                    <button string="Cerrar" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+</odoo>

@@ -22,4 +22,9 @@ from . import account_summary_report
 from . import commission_payable_report
 from . import res_config_settings
 from . import gateway_company_commission_agent
+from . import gateway_company_location
+from . import gateway_company_location_commission_agent
+from . import gateway_company_location_create_subaccount_wizard
+from . import gateway_bank_account_assignment
+from . import gateway_bank_account_assignment_create_subaccount_wizard
 from . import daily_reference_report

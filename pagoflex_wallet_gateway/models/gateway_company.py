@@ -19,7 +19,7 @@ class PfGatewayCompany(models.Model):
     cuit = fields.Char(required=True, index=True)
     contact_name = fields.Char(string="Contacto")
     contact_email = fields.Char(string="Email contacto")
-    contact_phone = fields.Char(string="Teléfono contacto", required=True)
+    contact_phone = fields.Char(string="Teléfono contacto")
     created_by_user_id = fields.Many2one("pf.gateway.user", string="Creado por", ondelete="set null", index=True)
     primary_bank_account_id = fields.Many2one(
         "pf.gateway.bank.account",
@@ -41,6 +41,16 @@ class PfGatewayCompany(models.Model):
         "pf.gateway.company.commission.gateway.agent",
         "company_id",
         string="Comisionistas gateway",
+    )
+    company_bank_account_assignment_ids = fields.One2many(
+        "pf.gateway.bank.account.assignment",
+        "company_id",
+        string="Asignaciones de cuentas",
+    )
+    company_location_ids = fields.One2many(
+        "pf.gateway.company.location",
+        "company_id",
+        string="Locales",
     )
     source_created_at = fields.Datetime(string="Creado en gateway", readonly=True)
     source_updated_at = fields.Datetime(string="Actualizado en gateway", readonly=True, index=True)
@@ -180,6 +190,35 @@ class PfGatewayCompany(models.Model):
         )
         return True
 
+    def action_sync_company_bank_account_assignments(self):
+        self.ensure_one()
+        _logger.info(
+            "[Company] action_sync_company_bank_account_assignments company_id=%s company_external_id=%s",
+            self.id,
+            self.external_id,
+        )
+        self.env["pf.gateway.bank.account.assignment"].sync_from_gateway(
+            mode="manual",
+            sync_mode="incremental",
+            company=self,
+            assignment_type="commission_agent",
+        )
+        return True
+
+    def action_sync_company_locations(self):
+        self.ensure_one()
+        _logger.info(
+            "[Company] action_sync_company_locations company_id=%s company_external_id=%s",
+            self.id,
+            self.external_id,
+        )
+        self.env["pf.gateway.company.location"].sync_from_gateway(
+            mode="manual",
+            sync_mode="incremental",
+            company=self,
+        )
+        return True
+
     def sync_from_gateway(self, mode="manual", sync_mode="incremental", job=None):
         updated_since = None
         if sync_mode == "incremental":
@@ -200,6 +239,8 @@ class PfGatewayCompany(models.Model):
                 record = self.search([("external_id", "=", values["external_id"])], limit=1)
                 if not record and values.get("cuit"):
                     record = self.search([("cuit", "=", values["cuit"])], limit=1)
+                if record and values.get("contact_phone") in (None, False):
+                    values["contact_phone"] = record.contact_phone
                 if record:
                     record.with_context(skip_gateway_company_push=True).write(values)
                     company_record = record

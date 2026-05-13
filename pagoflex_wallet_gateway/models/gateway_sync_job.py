@@ -16,6 +16,7 @@ class PfGatewaySyncJob(models.Model):
             ("companies", "Empresas"),
             ("company_memberships", "Membresias"),
             ("bank_accounts", "Cuentas Bancarias"),
+            ("bank_account_assignments", "Asignaciones de cuentas"),
             ("incoming_transfer_commission_settings", "Comisiones por defecto"),
             ("incoming_transfer_commission_distribution_rules", "Reglas de distribución de comisiones"),
             ("negative_balance_limits", "Limites de Saldo Negativo"),
@@ -52,6 +53,7 @@ class PfGatewaySyncJob(models.Model):
             "companies": self.env["pf.gateway.company"],
             "company_memberships": self.env["pf.gateway.company.membership"],
             "bank_accounts": self.env["pf.gateway.bank.account"],
+            "bank_account_assignments": self.env["pf.gateway.bank.account.assignment"],
             "incoming_transfer_commission_settings": self.env["pf.gateway.incoming.transfer.commission.settings"],
             "incoming_transfer_commission_distribution_rules": self.env["pf.gateway.incoming.transfer.commission.distribution.rule"],
             "negative_balance_limits": self.env["pf.gateway.negative.balance.limit"],
@@ -118,6 +120,10 @@ class PfGatewaySyncJob(models.Model):
     @api.model
     def cron_sync_bank_accounts(self):
         return self._run_named_job("bank_accounts", cron_mode=True)
+
+    @api.model
+    def cron_sync_bank_account_assignments(self):
+        return self._run_named_job("bank_account_assignments", cron_mode=True)
 
     @api.model
     def cron_sync_negative_balance_limits(self):
