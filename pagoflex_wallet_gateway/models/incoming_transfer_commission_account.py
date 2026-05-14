@@ -14,6 +14,11 @@ class PfGatewayIncomingTransferCommissionAccount(models.Model):
     _gateway_push_fields = {"commission_percentage", "is_active"}
 
     name = fields.Char(compute="_compute_name", store=True)
+    user_display_name = fields.Char(
+        string="Usuario",
+        compute="_compute_user_display_name",
+        store=False,
+    )
     active = fields.Boolean(default=True)
     external_id = fields.Char(required=True, index=True)
     bank_account_external_id = fields.Char(string="ID cuenta bancaria", index=True)
@@ -37,6 +42,29 @@ class PfGatewayIncomingTransferCommissionAccount(models.Model):
     def _compute_name(self):
         for record in self:
             record.name = record.cvu_cbu or str(record.external_id)
+
+    @api.depends("bank_account_external_id", "cvu_cbu")
+    def _compute_user_display_name(self):
+        account_model = self.env["pf.gateway.bank.account"]
+        external_ids = list({r.bank_account_external_id for r in self if r.bank_account_external_id})
+        cvu_values = list({r.cvu_cbu for r in self if r.cvu_cbu})
+
+        accounts_by_external = {}
+        accounts_by_cvu = {}
+
+        if external_ids:
+            for account in account_model.search([("external_id", "in", external_ids)]):
+                if account.external_id and account.external_id not in accounts_by_external:
+                    accounts_by_external[account.external_id] = account
+
+        if cvu_values:
+            for account in account_model.search([("cvu_cbu", "in", cvu_values)]):
+                if account.cvu_cbu and account.cvu_cbu not in accounts_by_cvu:
+                    accounts_by_cvu[account.cvu_cbu] = account
+
+        for record in self:
+            account = accounts_by_external.get(record.bank_account_external_id) or accounts_by_cvu.get(record.cvu_cbu)
+            record.user_display_name = account.gateway_user_id.display_name if account and account.gateway_user_id else False
 
     def write(self, vals):
         should_push = (

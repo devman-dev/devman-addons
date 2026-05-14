@@ -423,10 +423,9 @@ class PfGatewayBankAccount(models.Model):
 
     @api.model
     def _cron_refresh_balances_reusable(self):
-        cron = self._get_or_create_balance_refresh_cron()
         account_ids = self._get_balance_refresh_queue_ids()
         if not account_ids:
-            cron.write({"active": False})
+            self._deactivate_balance_refresh_cron_sql()
             return 0
 
         records = self.sudo().browse(account_ids).exists()
@@ -434,8 +433,19 @@ class PfGatewayBankAccount(models.Model):
             records._refresh_balance_from_gateway()
         finally:
             self._set_balance_refresh_queue_ids([])
-            cron.write({"active": False})
+            self._deactivate_balance_refresh_cron_sql()
         return len(records)
+
+    @api.model
+    def _deactivate_balance_refresh_cron_sql(self):
+        """Desactiva el cron de refresco de saldos via SQL directo para evitar
+        el bloqueo ORM que Odoo aplica al registro del cron mientras está en ejecución."""
+        model_id = self.env.ref("pagoflex_wallet_gateway.model_pf_gateway_bank_account").id
+        self.env.cr.execute(
+            "UPDATE ir_cron SET active = false WHERE model_id = %s AND code = %s AND active = true",
+            [model_id, self._BALANCE_REFRESH_CRON_CODE],
+        )
+        _logger.debug("Cron de refresco de saldos desactivado (cola vacía).")
 
     def action_refresh_balance_async(self):
         records = self

@@ -8,7 +8,7 @@
                 <header>
                     <button name="action_open_sync_wizard" type="object" string="Sincronizar" class="btn-primary" display="always"/>
                 </header>
-                <field name="name"/>
+                <field name="user_display_name" string="Usuario"/>
                 <field name="cvu_cbu"/>
                 <field name="commission_percentage"/>
                 <field name="is_active"/>

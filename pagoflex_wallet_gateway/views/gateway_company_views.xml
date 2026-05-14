@@ -101,17 +101,6 @@
                                 class="btn-secondary"
                                 groups="pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_admin,pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_operator"
                             />
-                            <field name="company_commission_gateway_agent_ids">
-                                <list editable="bottom">
-                                    <field name="external_id" readonly="1"/>
-                                    <field name="user_id"/>
-                                    <field name="company_app_name" column_invisible="1"/>
-                                    <field name="bank_account_id" domain="[('gateway_user_id', '=', user_id)] + ([('app', '=', company_app_name)] if company_app_name else [])"/>
-                                    <field name="commission_percentage"/>
-                                    <field name="is_active"/>
-                                    <field name="source_updated_at" readonly="1"/>
-                                </list>
-                            </field>
                             <separator string="Asignación de CVUs a comisionistas"/>
                             <field name="company_bank_account_assignment_ids" context="{'default_assignment_type': 'commission_agent'}">
                                 <list editable="bottom">
@@ -122,6 +111,18 @@
                                     <field name="assignment_type" optional="hide"/>
                                     <field name="is_active"/>
                                     <field name="updated_at" readonly="1"/>
+                                </list>
+                            </field>
+                            <separator string=""/>
+                            <field name="company_commission_gateway_agent_ids">
+                                <list editable="bottom">
+                                    <field name="external_id" readonly="1"/>
+                                    <field name="user_id"/>
+                                    <field name="company_app_name" column_invisible="1"/>
+                                    <field name="bank_account_id" domain="[('gateway_user_id', '=', user_id)] + ([('app', '=', company_app_name)] if company_app_name else [])"/>
+                                    <field name="commission_percentage"/>
+                                    <field name="is_active"/>
+                                    <field name="source_updated_at" readonly="1"/>
                                 </list>
                             </field>
                         </page>
