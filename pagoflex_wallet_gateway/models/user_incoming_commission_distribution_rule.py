@@ -344,7 +344,8 @@ class PfGatewayUserIncomingCommissionDistributionRule(models.Model):
         return record
 
     @api.model
-    def sync_from_gateway(self, user_id=None, app_name=None, limit=200, offset=0):
+    def sync_from_gateway(self, mode="manual", sync_mode="incremental", job=None, user_id=None, app_name=None, limit=200, offset=0):
+        del mode, sync_mode, job
         path = "/admin/gateway/user-incoming-transfer-commission/distribution-rules"
         page_limit = max(1, int(limit or 200))
         current_offset = max(0, int(offset or 0))
