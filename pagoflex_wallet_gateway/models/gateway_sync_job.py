@@ -19,6 +19,8 @@ class PfGatewaySyncJob(models.Model):
             ("bank_account_assignments", "Asignaciones de cuentas"),
             ("incoming_transfer_commission_settings", "Comisiones por defecto"),
             ("incoming_transfer_commission_distribution_rules", "Reglas de distribución de comisiones"),
+            ("user_incoming_commission_settings", "Comisiones por usuario"),
+            ("user_incoming_commission_distribution_rules", "Reglas de distribución por usuario"),
             ("negative_balance_limits", "Limites de Saldo Negativo"),
             ("transfers", "Transferencias"),
         ],
@@ -56,6 +58,8 @@ class PfGatewaySyncJob(models.Model):
             "bank_account_assignments": self.env["pf.gateway.bank.account.assignment"],
             "incoming_transfer_commission_settings": self.env["pf.gateway.incoming.transfer.commission.settings"],
             "incoming_transfer_commission_distribution_rules": self.env["pf.gateway.incoming.transfer.commission.distribution.rule"],
+            "user_incoming_commission_settings": self.env["pf.gateway.user.incoming.commission.settings"],
+            "user_incoming_commission_distribution_rules": self.env["pf.gateway.user.incoming.commission.distribution.rule"],
             "negative_balance_limits": self.env["pf.gateway.negative.balance.limit"],
             "transfers": self.env["pf.gateway.transfer"],
         }
@@ -132,6 +136,14 @@ class PfGatewaySyncJob(models.Model):
     @api.model
     def cron_sync_incoming_transfer_commission_distribution_rules(self):
         return self._run_named_job("incoming_transfer_commission_distribution_rules", cron_mode=True)
+
+    @api.model
+    def cron_sync_user_incoming_commission_settings(self):
+        return self._run_named_job("user_incoming_commission_settings", cron_mode=True)
+
+    @api.model
+    def cron_sync_user_incoming_commission_distribution_rules(self):
+        return self._run_named_job("user_incoming_commission_distribution_rules", cron_mode=True)
 
     @api.model
     def cron_sync_transfers(self):

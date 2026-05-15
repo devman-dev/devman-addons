@@ -92,6 +92,24 @@ class PfGatewayBankAccount(models.Model):
 
     @api.model
     def _name_search(self, name="", domain=None, operator="ilike", limit=100, order=None):
+        domain = list(domain or [])
+        ctx = self.env.context
+        app_name_from_ctx = ctx.get("default_app_name")
+        if app_name_from_ctx:
+            # Reemplaza filtros de 'app' vacíos/falsos (dot notation no resuelta en OWL)
+            domain = [
+                d for d in domain
+                if not (isinstance(d, (list, tuple)) and len(d) >= 3 and d[0] == "app" and not d[2])
+            ]
+            has_app_filter = any(
+                isinstance(d, (list, tuple)) and len(d) >= 3 and d[0] == "app" and d[2]
+                for d in domain
+            )
+            if not has_app_filter:
+                domain.append(("app", "=", app_name_from_ctx))
+            # Inyectar filtro de estado activo si no está presente
+            if not any(isinstance(d, (list, tuple)) and len(d) >= 3 and d[0] == "status" for d in domain):
+                domain.append(("status", "=", "active"))
         _logger.debug(
             "[BankAccount._name_search] name=%r domain=%s operator=%r limit=%s",
             name,

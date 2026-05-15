@@ -77,6 +77,62 @@ class PfGatewayUser(models.Model):
         compute="_compute_commission_agent_total_percentage",
         digits=(16, 4),
     )
+    incoming_commission_setting_ids = fields.One2many(
+        "pf.gateway.user.incoming.commission.settings",
+        "gateway_user_id",
+        string="Configuraciones de comisión entrante",
+    )
+    incoming_commission_setting_selected_id = fields.Many2one(
+        "pf.gateway.user.incoming.commission.settings",
+        string="Configuración de comisión entrante seleccionada",
+        ondelete="set null",
+        copy=False,
+    )
+    incoming_commission_setting_id = fields.Many2one(
+        "pf.gateway.user.incoming.commission.settings",
+        string="Configuración de comisión entrante",
+        compute="_compute_incoming_commission_setting_id",
+        inverse="_inverse_incoming_commission_setting_id",
+        store=False,
+    )
+    incoming_commission_app_name = fields.Selection(
+        related="incoming_commission_setting_selected_id.app_name",
+        string="Nombre de la app",
+        readonly=True,
+    )
+    incoming_commission_total_percentage = fields.Float(
+        related="incoming_commission_setting_selected_id.total_percentage",
+        string="Porcentaje total",
+        readonly=True,
+        digits=(16, 4),
+    )
+    incoming_commission_rules_total_percentage = fields.Float(
+        related="incoming_commission_setting_selected_id.distribution_rules_total_percentage",
+        string="Total reglas",
+        readonly=True,
+        digits=(16, 4),
+    )
+    incoming_commission_settlement_bank_account_id = fields.Many2one(
+        related="incoming_commission_setting_selected_id.settlement_bank_account_id",
+        string="Cuenta bancaria liquidación",
+        readonly=True,
+    )
+    incoming_commission_is_active = fields.Boolean(
+        related="incoming_commission_setting_selected_id.is_active",
+        string="Activo",
+        readonly=True,
+    )
+    incoming_commission_updated_at = fields.Datetime(
+        related="incoming_commission_setting_selected_id.updated_at",
+        string="Updated At",
+        readonly=True,
+    )
+    incoming_commission_distribution_rule_ids = fields.One2many(
+        "pf.gateway.user.incoming.commission.distribution.rule",
+        related="incoming_commission_setting_selected_id.distribution_rule_ids",
+        string="Reglas de distribución",
+        readonly=False,
+    )
     bank_account_ids = fields.One2many("pf.gateway.bank.account", "gateway_user_id", string="Cuentas bancarias")
     transfer_source_ids = fields.One2many("pf.gateway.transfer", "source_user_id", string="Transferencias salientes")
     transfer_destination_ids = fields.One2many("pf.gateway.transfer", "destination_user_id", string="Transferencias entrantes")
@@ -136,6 +192,21 @@ class PfGatewayUser(models.Model):
         for record in self:
             record.has_linked_company = bool(record.parent_company_gateway_user_id)
 
+    @api.depends("incoming_commission_setting_selected_id", "incoming_commission_setting_ids")
+    def _compute_incoming_commission_setting_id(self):
+        for record in self:
+            selected = record.incoming_commission_setting_selected_id
+            if selected and selected in record.incoming_commission_setting_ids:
+                effective = selected
+            else:
+                effective = record.incoming_commission_setting_ids[:1]
+
+            record.incoming_commission_setting_id = effective
+
+    def _inverse_incoming_commission_setting_id(self):
+        for record in self:
+            record.incoming_commission_setting_selected_id = record.incoming_commission_setting_id
+
     def _compute_statement_summary(self):
         line_model = self.env["pf.gateway.user.statement.line"]
         for record in self:
@@ -188,6 +259,17 @@ class PfGatewayUser(models.Model):
                     _("Debes seleccionar una app cuando activas 'Registrar como empresa'.")
                 )
 
+    @api.constrains("incoming_commission_setting_selected_id")
+    def _check_incoming_commission_setting_belongs_to_user(self):
+        for record in self:
+            if (
+                record.incoming_commission_setting_selected_id
+                and record.incoming_commission_setting_selected_id.gateway_user_id != record
+            ):
+                raise ValidationError(
+                    _("La configuración de comisión seleccionada debe pertenecer al usuario actual.")
+                )
+
     def _partner_search_domain_from_gateway_item(self, item):
         vat = item.get("cuit_cuil") or item.get("cuit") or item.get("cuil") or item.get("dni")
         email = item.get("email")
@@ -222,6 +304,37 @@ class PfGatewayUser(models.Model):
     def action_sync_users(self):
         self.sync_from_gateway(mode="manual", sync_mode="incremental")
         return True
+
+    def action_sync_user_commissions(self):
+        settings_model = self.env["pf.gateway.user.incoming.commission.settings"]
+        rules_model = self.env["pf.gateway.user.incoming.commission.distribution.rule"]
+        processed_settings = 0
+        processed_rules = 0
+
+        for record in self:
+            if not record.external_id:
+                raise UserError(_("El usuario debe tener external_id para sincronizar comisiones desde el gateway."))
+            processed_settings += settings_model.sync_from_gateway(user_id=record.external_id)
+            processed_rules += rules_model.sync_from_gateway(user_id=record.external_id)
+
+        return {
+            "type": "ir.actions.client",
+            "tag": "display_notification",
+            "params": {
+                "title": _("Sincronización de comisiones completada"),
+                "message": _(
+                    "Se procesaron %(settings)s configuraciones y %(rules)s reglas para %(users)s usuario(s)."
+                )
+                % {
+                    "settings": processed_settings,
+                    "rules": processed_rules,
+                    "users": len(self),
+                },
+                "type": "success",
+                "sticky": False,
+                "next": {"type": "ir.actions.client", "tag": "reload"},
+            },
+        }
 
     def action_create_or_link_partner(self):
         for record in self:
@@ -372,7 +485,11 @@ class PfGatewayUser(models.Model):
         if self.env.context.get("skip_gateway_user_push"):
             return super().write(vals)
 
-        result = super().write(vals)
+        write_target = self
+        if "incoming_commission_setting_ids" in vals and not self.env.context.get("skip_gateway_push"):
+            write_target = self.with_context(skip_gateway_push=True)
+
+        result = super(PfGatewayUser, write_target).write(vals)
 
         # Campos que se sincronizan con el gateway
         gateway_fields = {

@@ -7,10 +7,10 @@
             <list>
                 <field name="name"/>
                 <field name="email"/>
-                <field name="has_linked_company"/>
+                <!-- <field name="has_linked_company"/> -->
                 <!-- <field name="partner_id"/> -->
-                <field name="partner_company_type"/>
-                <field name="partner_is_company"/>
+                <!-- <field name="partner_company_type"/> -->
+                <!-- <field name="partner_is_company"/> -->
                 <field name="parent_company_gateway_user_id"/>
                 <field name="dni"/>
                 <field name="cuit_cuil"/>
@@ -30,6 +30,7 @@
             <form>
                 <header>
                     <button name="action_sync_users" type="object" string="Sincronizar usuarios" class="btn-primary" groups="pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_admin,pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_operator"/>
+                    <button name="action_sync_user_commissions" type="object" string="Sincronizar comisiones" class="btn-secondary" groups="pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_admin,pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_operator"/>
                     <!-- <button name="action_create_or_link_partner" type="object" string="Crear/vincular contacto" invisible="partner_id" groups="pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_admin,pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_operator"/> -->
                     <button name="action_add_costoapp_commission_agent" type="object" string="Agregar CostoAPP" invisible="not partner_is_company" groups="pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_admin"/>
                     <button name="action_open_account_statement" type="object" string="Ver resumen de cuenta" groups="pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_admin,pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_operator,pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_auditor"/>
@@ -39,10 +40,10 @@
                         <group>
                             <field name="name"/>
                             <!-- <field name="partner_id"/> -->
-                            <field name="partner_company_type" readonly="1"/>
-                            <field name="partner_is_company" readonly="1"/>
-                            <field name="has_linked_company" readonly="1"/>
-                            <field name="register_as_company" readonly="id"/>
+                            <!-- <field name="partner_company_type" readonly="1"/> -->
+                            <!-- <field name="partner_is_company" readonly="1"/> -->
+                            <!-- <field name="has_linked_company" readonly="1"/> -->
+                            <!-- <field name="register_as_company" readonly="id"/> -->
                             <field name="app_name" readonly="id"/>
                             <field name="parent_company_gateway_user_id"/>
                             <field name="email" required="1"/>
@@ -70,7 +71,7 @@
                                 <field name="location"/>
                             </group>
                         </page>
-                        <page string="Membresias">
+                        <!-- <page string="Membresias">
                             <field name="company_membership_ids" readonly="1">
                                 <list>
                                     <field name="company_id"/>
@@ -81,7 +82,7 @@
                                     <field name="source_updated_at"/>
                                 </list>
                             </field>
-                        </page>
+                        </page> -->
                         <page string="CVUs">
                             <field name="bank_account_ids" readonly="1">
                                 <list create="false" edit="false" delete="false">
@@ -93,6 +94,58 @@
                                     <field name="balance_sync_status"/>
                                     <field name="balance_last_check_at"/>
                                 </list>
+                            </field>
+                        </page>
+                        <page string="Comisiones entrantes" groups="pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_admin">
+                            <separator string="Comisiones entrantes"/>
+                            <field name="incoming_commission_setting_ids" context="{'default_gateway_user_id': id, 'skip_gateway_push': True}">
+                                <list editable="bottom">
+                                    <field name="app_name"/>
+                                    <field name="total_percentage"/>
+                                    <field name="settlement_bank_account_id"/>
+                                    <field name="is_active"/>
+                                    <field name="updated_at" readonly="1"/>
+                                </list>
+                            </field>
+                            <field name="incoming_commission_setting_selected_id" invisible="1"/>
+                            <field name="incoming_commission_app_name" invisible="1"/>
+                            <group>
+                                <field name="incoming_commission_setting_id" domain="[('id', 'in', incoming_commission_setting_ids)]" options="{'no_create': True}"/>
+                            </group>
+                            <!-- <separator string="Configuración de comisión entrante"/>
+                            <group invisible="not incoming_commission_setting_id">
+                                <group>
+                                    <field name="incoming_commission_app_name" readonly="1"/>
+                                    <field name="incoming_commission_total_percentage" readonly="1"/>
+                                    <field name="incoming_commission_rules_total_percentage" readonly="1"/>
+                                </group>
+                                <group>
+                                    <field name="incoming_commission_settlement_bank_account_id" readonly="1"/>
+                                    <field name="incoming_commission_is_active" readonly="1"/>
+                                    <field name="incoming_commission_updated_at" readonly="1"/>
+                                </group>
+                            </group> -->
+                            <separator string="Reglas de distribución"/>
+                            <field name="incoming_commission_distribution_rule_ids" invisible="not incoming_commission_setting_id" context="{'default_settings_id': incoming_commission_setting_id, 'default_gateway_user_id': id, 'default_app_name': incoming_commission_app_name, 'skip_gateway_push': True}">
+                                <list>
+                                    <field name="app_name"/>
+                                    <field name="name"/>
+                                    <field name="destination_bank_account_id" domain="[('app', '=', parent.incoming_commission_app_name), ('status', '=', 'active')]"/>
+                                    <field name="commission_percentage" sum="Total %"/>
+                                    <field name="is_active"/>
+                                    <field name="updated_at" readonly="1"/>
+                                </list>
+                                <form string="Regla de distribución">
+                                    <group>
+                                        <field name="settings_id" invisible="1"/>
+                                        <field name="app_name" readonly="1"/>
+                                        <field name="name"/>
+                                        <field name="destination_bank_account_id"/>
+                                        <field name="commission_percentage"/>
+                                        <field name="is_active"/>
+                                        <field name="updated_at" readonly="1"/>
+                                    </group>
+                                </form>
                             </field>
                         </page>
                         <page string="Resumen de cuenta">
@@ -161,9 +214,9 @@
                                 </list>
                             </field>
                         </page>
-                        <page string="Payload crudo" groups="pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_admin,pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_operator">
+                        <!-- <page string="Payload crudo" groups="pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_admin,pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_operator">
                             <field name="raw_payload" widget="text"/>
-                        </page>
+                        </page> -->
                     </notebook>
                 </sheet>
             </form>

@@ -60,6 +60,26 @@
         <field name="active">False</field>
     </record>
 
+    <record id="cron_pf_gateway_sync_user_incoming_commission_settings" model="ir.cron">
+        <field name="name">PagoFlex Sincronizar Comisiones por Usuario</field>
+        <field name="model_id" ref="model_pf_gateway_sync_job"/>
+        <field name="state">code</field>
+        <field name="code">model.cron_sync_user_incoming_commission_settings()</field>
+        <field name="interval_number">15</field>
+        <field name="interval_type">minutes</field>
+        <field name="active">False</field>
+    </record>
+
+    <record id="cron_pf_gateway_sync_user_incoming_commission_distribution_rules" model="ir.cron">
+        <field name="name">PagoFlex Sincronizar Reglas de Distribución por Usuario</field>
+        <field name="model_id" ref="model_pf_gateway_sync_job"/>
+        <field name="state">code</field>
+        <field name="code">model.cron_sync_user_incoming_commission_distribution_rules()</field>
+        <field name="interval_number">15</field>
+        <field name="interval_type">minutes</field>
+        <field name="active">False</field>
+    </record>
+
     <record id="cron_pf_gateway_sync_transfers" model="ir.cron">
         <field name="name">PagoFlex Sincronizar Transferencias</field>
         <field name="model_id" ref="model_pf_gateway_sync_job"/>

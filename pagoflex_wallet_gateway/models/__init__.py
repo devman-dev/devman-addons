@@ -9,6 +9,8 @@ from . import gateway_bank_account
 from . import company_membership
 from . import incoming_transfer_commission_settings
 from . import incoming_transfer_commission_distribution_rule
+from . import user_incoming_commission_settings
+from . import user_incoming_commission_distribution_rule
 from . import company_commission_agent
 from . import incoming_transfer_commission_account
 from . import incoming_transfer_commission_account_sync_wizard
