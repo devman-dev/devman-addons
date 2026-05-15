@@ -50,6 +50,12 @@ class PfGatewayUserIncomingCommissionDistributionRule(models.Model):
         store=True,
         index=True,
     )
+    destination_user_display_name = fields.Char(
+        related="destination_bank_account_id.user_display_name",
+        string="Usuario del Gateway",
+        readonly=True,
+        store=False,
+    )
     app_name = fields.Selection(
         related="settings_id.app_name",
         readonly=True,
@@ -73,6 +79,30 @@ class PfGatewayUserIncomingCommissionDistributionRule(models.Model):
         for record in self:
             if float_compare(record.commission_percentage, 0.0, precision_digits=4) < 0:
                 raise ValidationError(_("El porcentaje de comisión no puede ser negativo."))
+
+    @api.constrains("settings_id", "destination_bank_account_id")
+    def _check_unique_destination_cvu_per_settings(self):
+        for record in self:
+            if not record.settings_id or not record.destination_bank_account_id:
+                continue
+
+            destination_cvu = (record.destination_bank_account_id.cvu_cbu or "").strip()
+            if not destination_cvu:
+                continue
+
+            duplicate = self.search(
+                [
+                    ("id", "!=", record.id),
+                    ("settings_id", "=", record.settings_id.id),
+                    ("destination_bank_account_id.cvu_cbu", "=", destination_cvu),
+                ],
+                limit=1,
+            )
+            if duplicate:
+                raise ValidationError(
+                    _("Ya existe una regla de distribución con el CVU/CBU %(cvu)s para esta configuración.")
+                    % {"cvu": destination_cvu}
+                )
 
     @api.model_create_multi
     def create(self, vals_list):
@@ -103,9 +133,13 @@ class PfGatewayUserIncomingCommissionDistributionRule(models.Model):
         if self.env.context.get("skip_gateway_push") or self.env.context.get("install_mode"):
             return records
 
+        records_to_push = self.env[self._name]
         for record, values in zip(records, prepared_vals_list):
-            if self._gateway_push_fields.intersection(values.keys()) and record._is_gateway_payload_ready():
-                record._push_to_gateway()
+            if self._gateway_push_fields.intersection(values.keys()):
+                records_to_push |= record
+
+        if records_to_push:
+            records_to_push._push_batch_to_gateway()
         return records
 
     def write(self, vals):
@@ -116,8 +150,7 @@ class PfGatewayUserIncomingCommissionDistributionRule(models.Model):
         )
         result = super().write(vals)
         if should_push:
-            for record in self.filtered(lambda record: record._is_gateway_payload_ready()):
-                record._push_to_gateway()
+            self._push_batch_to_gateway()
         return result
 
     def _get_destination_bank_account(self):
@@ -172,10 +205,11 @@ class PfGatewayUserIncomingCommissionDistributionRule(models.Model):
         seen_destinations = set()
         for rule in rules.sorted(key=lambda item: item.id or 0):
             rule._validate_push_preconditions()
-            destination_id = rule.destination_bank_account_id.id
-            if destination_id in seen_destinations:
+            destination_cvu = (rule.destination_bank_account_id.cvu_cbu or "").strip()
+            destination_key = destination_cvu or f"account_id:{rule.destination_bank_account_id.id}"
+            if destination_key in seen_destinations:
                 continue
-            seen_destinations.add(destination_id)
+            seen_destinations.add(destination_key)
             unique_rules.append(rule)
 
         return {

@@ -234,13 +234,17 @@ class PfGatewayUserIncomingCommissionSettings(models.Model):
             settlement_cvu=payload.get("settlement_cvu"),
         )
         values = {
-            "gateway_user_id": gateway_user.id or False,
-            "app_name": payload.get("app_name") or False,
-            "total_percentage": float(payload.get("total_percentage") or 0.0),
+            "gateway_user_id": gateway_user.id or self.gateway_user_id.id or False,
+            "app_name": payload.get("app_name") or self.app_name or False,
+            "total_percentage": float(payload.get("total_percentage") or self.total_percentage or 0.0),
             "settlement_bank_account_id": settlement_account.id or self.settlement_bank_account_id.id or False,
-            "is_active": bool(payload.get("is_active")),
-            "created_at": self._coerce_datetime(payload.get("created_at"), field_name="created_at"),
-            "updated_at": self._coerce_datetime(payload.get("updated_at"), field_name="updated_at"),
+            "is_active": bool(payload.get("is_active")) if "is_active" in payload else self.is_active,
+            "created_at": self._coerce_datetime(payload.get("created_at"), field_name="created_at")
+            if "created_at" in payload
+            else self.created_at,
+            "updated_at": self._coerce_datetime(payload.get("updated_at"), field_name="updated_at")
+            if "updated_at" in payload
+            else self.updated_at,
         }
         self.with_context(skip_gateway_push=True).write(values)
 

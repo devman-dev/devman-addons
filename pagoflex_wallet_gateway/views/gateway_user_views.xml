@@ -60,7 +60,8 @@
                     <notebook>
                         <page string="Detalles">
                             <group>
-                                <field name="full_name" string="Nombre para Mostrar"/>
+                                <field name="full_name" string="Nombre Completo"/>
+                                <field name="gateway_display_name"/>
                                 <field name="first_name" required="1"/>
                                 <field name="last_name"/>
                                 <field name="birth_date"/>
@@ -98,7 +99,7 @@
                         </page>
                         <page string="Comisiones entrantes" groups="pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_admin">
                             <separator string="Comisiones entrantes"/>
-                            <field name="incoming_commission_setting_ids" context="{'default_gateway_user_id': id, 'skip_gateway_push': True}">
+                            <field name="incoming_commission_setting_ids" context="{'default_gateway_user_id': id}">
                                 <list editable="bottom">
                                     <field name="app_name"/>
                                     <field name="total_percentage"/>
@@ -126,9 +127,10 @@
                                 </group>
                             </group> -->
                             <separator string="Reglas de distribución"/>
-                            <field name="incoming_commission_distribution_rule_ids" invisible="not incoming_commission_setting_id" context="{'default_settings_id': incoming_commission_setting_id, 'default_gateway_user_id': id, 'default_app_name': incoming_commission_app_name, 'skip_gateway_push': True}">
+                            <field name="incoming_commission_distribution_rule_ids" invisible="not incoming_commission_setting_id" context="{'default_settings_id': incoming_commission_setting_id, 'default_gateway_user_id': id, 'default_app_name': incoming_commission_app_name}">
                                 <list>
                                     <field name="app_name"/>
+                                    <field name="destination_user_display_name" string="Usuario del Gateway"/>
                                     <field name="name"/>
                                     <field name="destination_bank_account_id" domain="[('app', '=', parent.incoming_commission_app_name), ('status', '=', 'active')]"/>
                                     <field name="commission_percentage" sum="Total %"/>

@@ -17,6 +17,7 @@ class PfGatewayUser(models.Model):
     active = fields.Boolean(default=True)
     external_id = fields.Char(index=True)
     email = fields.Char(index=True)
+    gateway_display_name = fields.Char(string="Nombre para mostrar", oldname="display_name")
     full_name = fields.Char()
     first_name = fields.Char()
     last_name = fields.Char()
@@ -42,6 +43,12 @@ class PfGatewayUser(models.Model):
     parent_company_gateway_user_id = fields.Many2one(
         "pf.gateway.company",
         string="Empresa vinculada",
+        ondelete="set null",
+        index=True,
+    )
+    parent_user_id = fields.Many2one(
+        "pf.gateway.user",
+        string="Cuenta padre",
         ondelete="set null",
         index=True,
     )
@@ -175,10 +182,10 @@ class PfGatewayUser(models.Model):
         ("pf_gateway_user_external_id_uniq", "unique(external_id)", "El external_id del usuario del gateway debe ser único."),
     ]
 
-    @api.depends("full_name", "email", "external_id")
+    @api.depends("gateway_display_name", "full_name", "email", "external_id")
     def _compute_name(self):
         for record in self:
-            record.name = record.full_name or record.email or record.external_id
+            record.name = record.gateway_display_name or record.full_name or record.email or record.external_id
 
     @api.depends("commission_agent_line_ids.percentage", "commission_agent_line_ids.active")
     def _compute_commission_agent_total_percentage(self):
@@ -231,7 +238,7 @@ class PfGatewayUser(models.Model):
         self.ensure_one()
         return {
             "type": "ir.actions.act_window",
-            "name": _("Resumen de cuenta - %s") % self.display_name,
+            "name": _("Resumen de cuenta - %s") % (self.gateway_display_name or self.name),
             "res_model": "pf.gateway.user.statement.line",
             "view_mode": "list,form,pivot,graph",
             "domain": [("user_id", "=", self.id)],
@@ -262,10 +269,9 @@ class PfGatewayUser(models.Model):
     @api.constrains("incoming_commission_setting_selected_id")
     def _check_incoming_commission_setting_belongs_to_user(self):
         for record in self:
-            if (
-                record.incoming_commission_setting_selected_id
-                and record.incoming_commission_setting_selected_id.gateway_user_id != record
-            ):
+            selected = record.incoming_commission_setting_selected_id
+            selected_owner = selected.gateway_user_id
+            if selected and selected_owner and selected_owner.id != record.id:
                 raise ValidationError(
                     _("La configuración de comisión seleccionada debe pertenecer al usuario actual.")
                 )
@@ -380,9 +386,17 @@ class PfGatewayUser(models.Model):
         return True
 
     def _gateway_user_payload_from_vals(self, vals):
+        parent_user = None
+        parent_user_val = vals.get("parent_user_id")
+        if isinstance(parent_user_val, models.BaseModel):
+            parent_user = parent_user_val
+        elif isinstance(parent_user_val, int):
+            parent_user = self.browse(parent_user_val)
+
         payload = {
             "id": vals.get("external_id") or vals.get("id") or None,
             "email": vals.get("email") or None,
+            "display_name": vals.get("gateway_display_name") or vals.get("display_name") or None,
             "full_name": vals.get("full_name") or vals.get("name") or None,
             "first_name": vals.get("first_name") or None,
             "last_name": vals.get("last_name") or None,
@@ -396,6 +410,12 @@ class PfGatewayUser(models.Model):
             "occupation": vals.get("occupation") or None,
             "marital_status": vals.get("marital_status") or None,
             "location": vals.get("location") or None,
+            "parent_user_id": (
+                parent_user.external_id
+                if parent_user and parent_user.exists() and parent_user.external_id
+                else vals.get("parent_user_external_id")
+            )
+            or None,
             "is_active": bool(vals.get("active", True)),
             "is_email_verified": vals.get("is_email_verified") if "is_email_verified" in vals else None,
             "is_kyc_verified": vals.get("is_kyc_verified") if "is_kyc_verified" in vals else None,
@@ -412,10 +432,13 @@ class PfGatewayUser(models.Model):
 
     def _values_from_gateway_item(self, item):
         partner = self._find_partner_from_gateway_item(item)
+        parent_external_id = item.get("parent_user_id")
+        parent_user = self.search([("external_id", "=", str(parent_external_id))], limit=1) if parent_external_id else self.env["pf.gateway.user"]
         values = {
             "external_id": str(item.get("id")) if item.get("id") is not None else False,
             "active": item.get("is_active", True),
             "email": item.get("email"),
+            "gateway_display_name": item.get("display_name"),
             "full_name": item.get("full_name"),
             "first_name": item.get("first_name"),
             "last_name": item.get("last_name"),
@@ -434,6 +457,7 @@ class PfGatewayUser(models.Model):
             "source_created_at": self._coerce_datetime(item.get("created_at"), field_name="created_at"),
             "source_updated_at": self._coerce_datetime(item.get("updated_at"), field_name="updated_at"),
             "last_sync_at": fields.Datetime.now(),
+            "parent_user_id": parent_user.id if parent_user else False,
             "raw_payload": self._payload_to_text(item),
         }
         if partner:
@@ -485,18 +509,14 @@ class PfGatewayUser(models.Model):
         if self.env.context.get("skip_gateway_user_push"):
             return super().write(vals)
 
-        write_target = self
-        if "incoming_commission_setting_ids" in vals and not self.env.context.get("skip_gateway_push"):
-            write_target = self.with_context(skip_gateway_push=True)
-
-        result = super(PfGatewayUser, write_target).write(vals)
+        result = super().write(vals)
 
         # Campos que se sincronizan con el gateway
         gateway_fields = {
-            "email", "full_name", "first_name", "last_name", "birth_date",
+            "email", "gateway_display_name", "full_name", "first_name", "last_name", "birth_date",
             "dni", "gender", "cuit_cuil", "cuit_owner", "phone",
             "nationality", "occupation", "marital_status", "location", "active",
-            "is_email_verified", "is_kyc_verified",
+            "is_email_verified", "is_kyc_verified", "parent_user_id",
         }
         if not gateway_fields.intersection(vals):
             return result
