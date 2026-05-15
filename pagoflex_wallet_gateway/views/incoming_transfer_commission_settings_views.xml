@@ -30,7 +30,7 @@
                             <field name="distribution_rule_ids" context="{'default_setting_id': id, 'default_app_name': app_name}">
                                 <list editable="bottom">
                                     <field name="name"/>
-                                    <field name="destination_bank_account_id" domain="[('app', '=', parent.app_name)]"/>
+                                    <field name="destination_bank_account_id" domain="[('status', '=', 'active')]"/>
                                     <field name="user_display_name" string="Usuario"/>
                                     <!-- <field name="destination_cvu_cbu"/> -->
                                     <field name="commission_percentage"/>

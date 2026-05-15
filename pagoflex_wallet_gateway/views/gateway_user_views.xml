@@ -44,7 +44,7 @@
                             <!-- <field name="partner_is_company" readonly="1"/> -->
                             <!-- <field name="has_linked_company" readonly="1"/> -->
                             <!-- <field name="register_as_company" readonly="id"/> -->
-                            <field name="app_name" readonly="id"/>
+                            <field name="app_name" readonly="external_id"/>
                             <field name="parent_company_gateway_user_id"/>
                             <field name="email" required="1"/>
                             <field name="phone"/>
@@ -85,6 +85,7 @@
                             </field>
                         </page> -->
                         <page string="CVUs">
+                            <button name="action_sync_user_bank_accounts" type="object" string="Sincronizar cuentas bancarias" class="btn-secondary" groups="pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_admin,pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_operator"/>
                             <field name="bank_account_ids" readonly="1">
                                 <list create="false" edit="false" delete="false">
                                     <field name="cvu_cbu"/>
@@ -132,7 +133,7 @@
                                     <field name="app_name"/>
                                     <field name="destination_user_display_name" string="Usuario del Gateway"/>
                                     <field name="name"/>
-                                    <field name="destination_bank_account_id" domain="[('app', '=', parent.incoming_commission_app_name), ('status', '=', 'active')]"/>
+                                    <field name="destination_bank_account_id" domain="[('status', '=', 'active')]"/>
                                     <field name="commission_percentage" sum="Total %"/>
                                     <field name="is_active"/>
                                     <field name="updated_at" readonly="1"/>

@@ -36,7 +36,7 @@ class PfGatewayUserIncomingCommissionSettings(models.Model):
         required=True,
         ondelete="restrict",
         index=True,
-        domain="[('app', '=', app_name), ('status', '=', 'active')]",
+        domain="[('status', '=', 'active')]",
     )
     settlement_cvu = fields.Char(string="CVU de liquidación", related="settlement_bank_account_id.cvu_cbu", store=False)
     is_active = fields.Boolean(string="Activo", default=True, index=True)

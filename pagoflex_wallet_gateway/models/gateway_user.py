@@ -214,6 +214,16 @@ class PfGatewayUser(models.Model):
         for record in self:
             record.incoming_commission_setting_selected_id = record.incoming_commission_setting_id
 
+    def _ensure_incoming_commission_setting_selected(self):
+        for record in self:
+            if record.incoming_commission_setting_selected_id:
+                continue
+            fallback = record.incoming_commission_setting_ids[:1]
+            if fallback:
+                super(PfGatewayUser, record.with_context(skip_gateway_user_push=True)).write(
+                    {"incoming_commission_setting_selected_id": fallback.id}
+                )
+
     def _compute_statement_summary(self):
         line_model = self.env["pf.gateway.user.statement.line"]
         for record in self:
@@ -310,6 +320,36 @@ class PfGatewayUser(models.Model):
     def action_sync_users(self):
         self.sync_from_gateway(mode="manual", sync_mode="incremental")
         return True
+
+    def copy(self, default=None):
+        default = dict(default or {})
+        # Duplicar usuario como borrador para alta manual en gateway.
+        default.setdefault("email", False)
+        default.setdefault("external_id", False)
+        default.setdefault("app_name", False)
+        return super().copy(default)
+
+    def action_sync_user_bank_accounts(self):
+        bank_account_model = self.env["pf.gateway.bank.account"]
+        processed_accounts = bank_account_model.sync_from_gateway(mode="manual", sync_mode="incremental")
+
+        return {
+            "type": "ir.actions.client",
+            "tag": "display_notification",
+            "params": {
+                "title": _("Sincronización de cuentas bancarias completada"),
+                "message": _(
+                    "Se procesaron %(accounts)s cuentas para %(users)s usuario(s)."
+                )
+                % {
+                    "accounts": processed_accounts,
+                    "users": len(self),
+                },
+                "type": "success",
+                "sticky": False,
+                "next": {"type": "ir.actions.client", "tag": "reload"},
+            },
+        }
 
     def action_sync_user_commissions(self):
         settings_model = self.env["pf.gateway.user.incoming.commission.settings"]
@@ -509,7 +549,19 @@ class PfGatewayUser(models.Model):
         if self.env.context.get("skip_gateway_user_push"):
             return super().write(vals)
 
+        vals = dict(vals)
+        if (
+            "incoming_commission_distribution_rule_ids" in vals
+            and "incoming_commission_setting_selected_id" not in vals
+            and len(self) == 1
+            and not self.incoming_commission_setting_selected_id
+        ):
+            fallback = self.incoming_commission_setting_ids[:1]
+            if fallback:
+                vals["incoming_commission_setting_selected_id"] = fallback.id
+
         result = super().write(vals)
+        self._ensure_incoming_commission_setting_selected()
 
         # Campos que se sincronizan con el gateway
         gateway_fields = {

@@ -36,7 +36,7 @@ class PfGatewayUserIncomingCommissionDistributionRule(models.Model):
         required=True,
         ondelete="restrict",
         index=True,
-        domain="[('app', '=', app_name), ('status', '=', 'active')]",
+        domain="[('status', '=', 'active')]",
     )
     destination_cvu_cbu = fields.Char(string="CVU/CBU destino", related="destination_bank_account_id.cvu_cbu", store=False)
     commission_percentage = fields.Float(string="Porcentaje", digits=(16, 4), default=0.0)
