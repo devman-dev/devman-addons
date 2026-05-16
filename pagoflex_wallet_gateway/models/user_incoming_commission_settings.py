@@ -111,6 +111,7 @@ class PfGatewayUserIncomingCommissionSettings(models.Model):
     @api.model_create_multi
     def create(self, vals_list):
         records = super().create(vals_list)
+        records.mapped("gateway_user_id")._ensure_incoming_commission_setting_selected()
         if self.env.context.get("skip_gateway_push") or self.env.context.get("install_mode"):
             return records
 
@@ -136,6 +137,8 @@ class PfGatewayUserIncomingCommissionSettings(models.Model):
             result = super(PfGatewayUserIncomingCommissionSettings, self.with_context(skip_gateway_push=True)).write(vals)
         else:
             result = super().write(vals)
+
+        self.mapped("gateway_user_id")._ensure_incoming_commission_setting_selected()
 
         if should_push:
             for record in self:
