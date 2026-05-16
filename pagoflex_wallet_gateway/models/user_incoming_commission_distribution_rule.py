@@ -63,11 +63,6 @@ class PfGatewayUserIncomingCommissionDistributionRule(models.Model):
 
     _sql_constraints = [
         (
-            "uq_pf_gateway_user_itc_distribution_rule_destination",
-            "unique(settings_id, destination_bank_account_id)",
-            "La regla de distribución debe ser única por configuración y cuenta destino.",
-        ),
-        (
             "ck_pf_gateway_user_itc_dist_rules_pct_nonneg",
             "check(commission_percentage >= 0)",
             "El porcentaje de comisión no puede ser negativo.",
@@ -79,30 +74,6 @@ class PfGatewayUserIncomingCommissionDistributionRule(models.Model):
         for record in self:
             if float_compare(record.commission_percentage, 0.0, precision_digits=4) < 0:
                 raise ValidationError(_("El porcentaje de comisión no puede ser negativo."))
-
-    @api.constrains("settings_id", "destination_bank_account_id")
-    def _check_unique_destination_cvu_per_settings(self):
-        for record in self:
-            if not record.settings_id or not record.destination_bank_account_id:
-                continue
-
-            destination_cvu = (record.destination_bank_account_id.cvu_cbu or "").strip()
-            if not destination_cvu:
-                continue
-
-            duplicate = self.search(
-                [
-                    ("id", "!=", record.id),
-                    ("settings_id", "=", record.settings_id.id),
-                    ("destination_bank_account_id.cvu_cbu", "=", destination_cvu),
-                ],
-                limit=1,
-            )
-            if duplicate:
-                raise ValidationError(
-                    _("Ya existe una regla de distribución con el CVU/CBU %(cvu)s para esta configuración.")
-                    % {"cvu": destination_cvu}
-                )
 
     @api.model_create_multi
     def create(self, vals_list):
