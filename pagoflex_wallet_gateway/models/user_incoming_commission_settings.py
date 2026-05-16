@@ -74,8 +74,14 @@ class PfGatewayUserIncomingCommissionSettings(models.Model):
 
     @api.depends("distribution_rule_ids.commission_percentage")
     def _compute_distribution_rules_total_percentage(self):
+        rule_model = self.env["pf.gateway.user.incoming.commission.distribution.rule"]
         for record in self:
-            record.distribution_rules_total_percentage = sum(record.distribution_rule_ids.mapped("commission_percentage"))
+            domain = [("settings_id", "=", record.id)]
+            if record.gateway_user_id:
+                domain.append(("gateway_user_id", "=", record.gateway_user_id.id))
+            record.distribution_rules_total_percentage = sum(
+                rule_model.search(domain).mapped("commission_percentage")
+            )
 
     @api.constrains("total_percentage")
     def _check_total_percentage(self):
@@ -85,12 +91,16 @@ class PfGatewayUserIncomingCommissionSettings(models.Model):
 
     @api.constrains("total_percentage", "distribution_rule_ids", "distribution_rule_ids.commission_percentage")
     def _check_distribution_rules_total_not_exceed_total_percentage(self):
+        rule_model = self.env["pf.gateway.user.incoming.commission.distribution.rule"]
         for record in self:
-            rules_total = sum(record.distribution_rule_ids.mapped("commission_percentage"))
+            domain = [("settings_id", "=", record.id)]
+            if record.gateway_user_id:
+                domain.append(("gateway_user_id", "=", record.gateway_user_id.id))
+            rules_total = sum(rule_model.search(domain).mapped("commission_percentage"))
             if float_compare(rules_total, record.total_percentage or 0.0, precision_digits=4) > 0:
                 raise ValidationError(
                     _(
-                        "La suma de reglas (%(rules)s) no puede superar la comisión madre (%(total)s)."
+                        "La suma de reglas del usuario/configuración (%(rules)s) no puede superar la comisión madre (%(total)s)."
                     )
                     % {
                         "rules": f"{rules_total:.4f}",
