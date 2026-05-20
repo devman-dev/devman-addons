@@ -11,10 +11,10 @@
                 <!-- <field name="partner_id"/> -->
                 <!-- <field name="partner_company_type"/> -->
                 <!-- <field name="partner_is_company"/> -->
-                <field name="parent_company_gateway_user_id"/>
+                <!-- <field name="parent_company_gateway_user_id"/> -->
                 <field name="dni"/>
                 <field name="cuit_cuil"/>
-                <field name="cuit_owner"/>
+                <!-- <field name="cuit_owner"/> -->
                 <field name="active"/>
                 <field name="is_email_verified"/>
                 <field name="is_kyc_verified"/>
@@ -45,25 +45,25 @@
                             <!-- <field name="has_linked_company" readonly="1"/> -->
                             <!-- <field name="register_as_company" readonly="id"/> -->
                             <field name="app_name" readonly="external_id"/>
-                            <field name="parent_company_gateway_user_id"/>
+                            <!-- <field name="parent_company_gateway_user_id"/> -->
                             <field name="email" required="1"/>
                             <field name="phone"/>
                             <field name="dni"/>
                             <field name="cuit_cuil" required="1"/>
-                            <field name="cuit_owner"/>
+                            <!-- <field name="cuit_owner"/> -->
                         </group>
                         <group>
-                            <field name="is_email_verified"/>
-                            <field name="is_kyc_verified"/>
+                            <field name="is_email_verified" required="1"/>
+                            <field name="is_kyc_verified" required="1"/>
                         </group>
                     </group>
                     <notebook>
                         <page string="Detalles">
                             <group>
-                                <field name="full_name" string="Nombre Completo"/>
                                 <field name="gateway_display_name"/>
                                 <field name="first_name" required="1"/>
                                 <field name="last_name"/>
+                                <field name="full_name" string="Nombre Completo"/>
                                 <field name="birth_date"/>
                                 <field name="gender"/>
                                 <field name="nationality"/>
@@ -235,10 +235,10 @@
                 <field name="email"/>
                 <field name="has_linked_company"/>
                 <!-- <field name="partner_id"/> -->
-                <field name="parent_company_gateway_user_id"/>
+                <!-- <field name="parent_company_gateway_user_id"/> -->
                 <field name="dni"/>
                 <field name="cuit_cuil"/>
-                <field name="cuit_owner"/>
+                <!-- <field name="cuit_owner"/> -->
                 <filter name="filter_active" string="Activo" domain="[('active', '=', True)]"/>
                 <filter name="filter_has_linked_company" string="Con empresa vinculada" domain="[('has_linked_company', '=', True)]"/>
                 <filter name="filter_company" string="Empresas" domain="[('partner_is_company', '=', True)]"/>

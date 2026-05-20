@@ -31,8 +31,8 @@ class PfGatewayUser(models.Model):
     occupation = fields.Char()
     marital_status = fields.Char()
     location = fields.Char()
-    is_email_verified = fields.Boolean()
-    is_kyc_verified = fields.Boolean()
+    is_email_verified = fields.Boolean(default=True)
+    is_kyc_verified = fields.Boolean(default=True)
     source_created_at = fields.Datetime()
     source_updated_at = fields.Datetime(index=True)
     last_sync_at = fields.Datetime(index=True)
@@ -474,32 +474,52 @@ class PfGatewayUser(models.Model):
         partner = self._find_partner_from_gateway_item(item)
         parent_external_id = item.get("parent_user_id")
         parent_user = self.search([("external_id", "=", str(parent_external_id))], limit=1) if parent_external_id else self.env["pf.gateway.user"]
-        values = {
-            "external_id": str(item.get("id")) if item.get("id") is not None else False,
-            "active": item.get("is_active", True),
-            "email": item.get("email"),
-            "gateway_display_name": item.get("display_name"),
-            "full_name": item.get("full_name"),
-            "first_name": item.get("first_name"),
-            "last_name": item.get("last_name"),
-            "birth_date": self._coerce_date(item.get("birth_date"), field_name="birth_date"),
-            "dni": item.get("dni"),
-            "gender": item.get("gender"),
-            "cuit_cuil": item.get("cuit_cuil"),
-            "cuit_owner": item.get("cuit_owner"),
-            "phone": item.get("phone"),
-            "nationality": item.get("nationality"),
-            "occupation": item.get("occupation"),
-            "marital_status": item.get("marital_status"),
-            "location": item.get("location"),
-            "is_email_verified": item.get("is_email_verified", False),
-            "is_kyc_verified": item.get("is_kyc_verified", False),
-            "source_created_at": self._coerce_datetime(item.get("created_at"), field_name="created_at"),
-            "source_updated_at": self._coerce_datetime(item.get("updated_at"), field_name="updated_at"),
-            "last_sync_at": fields.Datetime.now(),
-            "parent_user_id": parent_user.id if parent_user else False,
-            "raw_payload": self._payload_to_text(item),
-        }
+        values = {}
+        if "id" in item:
+            values["external_id"] = str(item.get("id")) if item.get("id") is not None else False
+        if "is_active" in item:
+            values["active"] = item.get("is_active", True)
+        if "email" in item:
+            values["email"] = item.get("email")
+        if "display_name" in item:
+            values["gateway_display_name"] = item.get("display_name")
+        if "full_name" in item:
+            values["full_name"] = item.get("full_name")
+        if "first_name" in item:
+            values["first_name"] = item.get("first_name")
+        if "last_name" in item:
+            values["last_name"] = item.get("last_name")
+        if "birth_date" in item:
+            values["birth_date"] = self._coerce_date(item.get("birth_date"), field_name="birth_date")
+        if "dni" in item:
+            values["dni"] = item.get("dni")
+        if "gender" in item:
+            values["gender"] = item.get("gender")
+        if "cuit_cuil" in item:
+            values["cuit_cuil"] = item.get("cuit_cuil")
+        if "cuit_owner" in item:
+            values["cuit_owner"] = item.get("cuit_owner")
+        if "phone" in item:
+            values["phone"] = item.get("phone")
+        if "nationality" in item:
+            values["nationality"] = item.get("nationality")
+        if "occupation" in item:
+            values["occupation"] = item.get("occupation")
+        if "marital_status" in item:
+            values["marital_status"] = item.get("marital_status")
+        if "location" in item:
+            values["location"] = item.get("location")
+        if "is_email_verified" in item:
+            values["is_email_verified"] = item.get("is_email_verified")
+        if "is_kyc_verified" in item:
+            values["is_kyc_verified"] = item.get("is_kyc_verified")
+        if "created_at" in item:
+            values["source_created_at"] = self._coerce_datetime(item.get("created_at"), field_name="created_at")
+        if "updated_at" in item:
+            values["source_updated_at"] = self._coerce_datetime(item.get("updated_at"), field_name="updated_at")
+        values["last_sync_at"] = fields.Datetime.now()
+        values["parent_user_id"] = parent_user.id if parent_user else False
+        values["raw_payload"] = self._payload_to_text(item)
         if partner:
             values["partner_id"] = partner.id
         return values
@@ -565,7 +585,7 @@ class PfGatewayUser(models.Model):
 
         # Campos que se sincronizan con el gateway
         gateway_fields = {
-            "email", "gateway_display_name", "full_name", "first_name", "last_name", "birth_date",
+            "email", "gateway_display_name", "display_name", "full_name", "first_name", "last_name", "birth_date",
             "dni", "gender", "cuit_cuil", "cuit_owner", "phone",
             "nationality", "occupation", "marital_status", "location", "active",
             "is_email_verified", "is_kyc_verified", "parent_user_id",
@@ -594,6 +614,8 @@ class PfGatewayUser(models.Model):
                 user_data = response.get("user") or response
                 if isinstance(user_data, dict):
                     mapped_vals = self._values_from_gateway_item(user_data)
+                    if "display_name" not in user_data:
+                        mapped_vals.pop("gateway_display_name", None)
                     mapped_vals.pop("external_id", None)
                     super(PfGatewayUser, record).write(mapped_vals)
 
