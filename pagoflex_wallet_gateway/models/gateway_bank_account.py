@@ -325,14 +325,15 @@ class PfGatewayBankAccount(models.Model):
         queue_ids.update(account_ids)
         self._set_balance_refresh_queue_ids(list(queue_ids))
 
-        cron = self._get_or_create_balance_refresh_cron()
-        cron.write(
-            {
-                "nextcall": fields.Datetime.now(),
-                "active": True,
-            }
-        )
-        return cron
+        try:
+            cron = self._get_or_create_balance_refresh_cron()
+            self._activate_balance_refresh_cron_sql(cron=cron)
+            return cron
+        except Exception:
+            # Nunca bloquear la sincronizacion principal por problemas de
+            # programacion del refresco de saldos en segundo plano.
+            _logger.exception("No se pudo programar el refresco de saldos en segundo plano.")
+            return False
 
     @api.model
     def _get_balance_refresh_queue_ids(self):
@@ -439,13 +440,42 @@ class PfGatewayBankAccount(models.Model):
             self._deactivate_balance_refresh_cron_sql()
             return 0
 
+        # Consumir el lote actual al inicio para no perder ids que se agreguen
+        # mientras este cron esta en ejecucion.
+        self._set_balance_refresh_queue_ids([])
         records = self.sudo().browse(account_ids).exists()
         try:
             records._refresh_balance_from_gateway()
         finally:
-            self._set_balance_refresh_queue_ids([])
-            self._deactivate_balance_refresh_cron_sql()
+            pending_ids = self._get_balance_refresh_queue_ids()
+            if pending_ids:
+                self._activate_balance_refresh_cron_sql()
+            else:
+                self._deactivate_balance_refresh_cron_sql()
         return len(records)
+
+    @api.model
+    def _activate_balance_refresh_cron_sql(self, cron=None):
+        """Activa el cron de refresco de saldos via SQL directo para evitar
+        el bloqueo ORM cuando el cron esta en ejecucion."""
+        cron = cron or self.env["ir.cron"].sudo().search(
+            [
+                ("state", "=", "code"),
+                ("code", "=", self._BALANCE_REFRESH_CRON_CODE),
+                ("name", "=", self._BALANCE_REFRESH_CRON_NAME),
+            ],
+            order="id asc",
+            limit=1,
+        )
+        if not cron:
+            _logger.debug("Cron de refresco de saldos no encontrado para activar.")
+            return
+
+        self.env.cr.execute(
+            "UPDATE ir_cron SET active = true, nextcall = %s WHERE id = %s",
+            [fields.Datetime.now(), cron.id],
+        )
+        _logger.debug("Cron de refresco de saldos activado (id=%s).", cron.id)
 
     @api.model
     def _deactivate_balance_refresh_cron_sql(self):

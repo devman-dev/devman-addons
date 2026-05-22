@@ -585,7 +585,7 @@ class PfGatewayUser(models.Model):
 
         # Campos que se sincronizan con el gateway
         gateway_fields = {
-            "email", "gateway_display_name", "display_name", "full_name", "first_name", "last_name", "birth_date",
+            "email", "gateway_display_name", "full_name", "first_name", "last_name", "birth_date",
             "dni", "gender", "cuit_cuil", "cuit_owner", "phone",
             "nationality", "occupation", "marital_status", "location", "active",
             "is_email_verified", "is_kyc_verified", "parent_user_id",
