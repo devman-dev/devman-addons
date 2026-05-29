@@ -49,6 +49,10 @@
     }
 }
 
+.pf_gateway_dashboard_scope {
+    min-width: 360px;
+}
+
 .pf_dashboard_panel {
     background: #ffffff;
     border: 1px solid #dfe5ee;
@@ -423,4 +427,45 @@
     .pf_dashboard_compact_metric {
         border-right: 0;
     }
+}
+
+.pf_transfer_address_badge {
+    border-radius: 4px;
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 700;
+    line-height: 16px;
+    margin-right: 6px;
+    min-width: 26px;
+    padding: 0 4px;
+    text-align: center;
+    vertical-align: baseline;
+}
+
+.pf_transfer_address_value {
+    color: #0f172a;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+    font-size: 12px;
+    white-space: nowrap;
+}
+
+.pf_transfer_wallet_pagoflex {
+    background: #dbeafe;
+    color: #1d4ed8;
+}
+
+.pf_transfer_wallet_sivep,
+.pf_transfer_wallet_sivet {
+    background: #d1fae5;
+    color: #047857;
+}
+
+.pf_transfer_wallet_external {
+    background: #e2e8f0;
+    color: #475569;
+}
+
+.pf_transfer_wallet_unknown {
+    background: #fef3c7;
+    color: #92400e;
 }

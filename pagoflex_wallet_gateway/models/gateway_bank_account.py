@@ -399,6 +399,8 @@ class PfGatewayBankAccount(models.Model):
         if reusable:
             if legacy:
                 legacy.unlink()
+            if reusable.active and not self._get_balance_refresh_queue_ids():
+                reusable.active = False
             return reusable
 
         if legacy:
@@ -619,4 +621,3 @@ class PfGatewayBankAccount(models.Model):
             label = f"{user_name} - {record.cvu_cbu}" if record.cvu_cbu else user_name
             result.append((record.id, label))
         return result
-

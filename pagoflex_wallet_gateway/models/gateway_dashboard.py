@@ -11,6 +11,12 @@ class PfGatewayDashboard(models.TransientModel):
 
     date_from = fields.Date(string="Desde", default=lambda self: self._default_date_from(), required=True)
     date_to = fields.Date(string="Hasta", default=lambda self: fields.Date.context_today(self), required=True)
+    filter_app = fields.Selection(
+        selection="_selection_filter_app",
+        string="App",
+    )
+    filter_external_incoming = fields.Boolean(string="Entrantes externas")
+    filter_commission_accounts = fields.Boolean(string="Cuentas de comisión")
 
     kpi_bank_balance = fields.Float(string="Saldo en banco", compute="_compute_dashboard", digits=(16, 2))
     kpi_incoming_volume = fields.Float(string="Volumen entrante", compute="_compute_dashboard", digits=(16, 2))
@@ -42,7 +48,23 @@ class PfGatewayDashboard(models.TransientModel):
         today = fields.Date.context_today(self)
         return today.replace(day=1)
 
-    @api.depends("date_from", "date_to")
+    @api.model
+    def _selection_filter_app(self):
+        app_values = set(
+            self.env["pf.gateway.bank.account"].search([("app", "!=", False)]).mapped("app")
+        )
+        app_values.update(
+            self.env["pf.gateway.dashboard.app.config"].search([("app_name", "!=", False)]).mapped("app_name")
+        )
+        options_by_key = {}
+        app_config_model = self.env["pf.gateway.dashboard.app.config"]
+        for app_name in app_values:
+            app_key = self._app_key(app_name)
+            if app_key and app_key not in options_by_key:
+                options_by_key[app_key] = app_config_model._display_app_name(app_name)
+        return sorted(options_by_key.items(), key=lambda item: item[0])
+
+    @api.depends("date_from", "date_to", "filter_app", "filter_external_incoming", "filter_commission_accounts")
     def _compute_dashboard(self):
         for record in self:
             record._compute_dashboard_values()
@@ -60,7 +82,9 @@ class PfGatewayDashboard(models.TransientModel):
         period_transfers = transfer_model.search(self._period_transfer_domain())
         app_configs = self.env["pf.gateway.dashboard.app.config"].search([("active", "=", True)])
         wallet_rows = self._wallet_rows(active_accounts, period_transfers, app_configs)
-        totals = self._global_totals(wallet_rows, period_transfers, active_accounts, user_model)
+        filtered_transfers = self._filtered_transfer_records(period_transfers, active_accounts, app_configs)
+        visible_accounts = self._visible_active_accounts(active_accounts)
+        totals = self._global_totals(wallet_rows, filtered_transfers, visible_accounts, user_model)
 
         self.kpi_bank_balance = totals["bank_balance"]
         self.kpi_incoming_volume = totals["incoming_volume"]
@@ -133,6 +157,8 @@ class PfGatewayDashboard(models.TransientModel):
         app_keys = {self._app_key(app_name) for app_name in active_accounts.mapped("app")}
         app_keys.update(self._app_key(app_name) for app_name in app_configs.mapped("app_name"))
         app_keys = sorted(app_key for app_key in app_keys if app_key)
+        if self.filter_app:
+            app_keys = [app_key for app_key in app_keys if app_key == self.filter_app]
         rows = []
         config_by_app = {self._app_key(config.app_name): config for config in app_configs}
         all_account_ids = set(active_accounts.ids)
@@ -149,20 +175,19 @@ class PfGatewayDashboard(models.TransientModel):
                     all_account_ids,
                 )
             )
-            app_transfers = period_transfers.filtered(
-                lambda transfer, account_ids=app_account_ids: (
-                    transfer.movement_nature == "TRANSFER"
-                    and (
-                        transfer.source_bank_account_id.id in account_ids
-                        or transfer.destination_bank_account_id.id in account_ids
-                    )
-                )
-            )
             commission_account = config.commission_bank_account_id if config else self.env["pf.gateway.bank.account"]
             commission_transfers = period_transfers.filtered(
                 lambda transfer, account=commission_account: self._is_commission_transfer_for_account(transfer, account)
             )
-            balance = sum(app_accounts.mapped("balance"))
+            visible_app_transfers = period_transfers.filtered(
+                lambda transfer, account_ids=app_account_ids, account=commission_account: self._matches_transfer_filters(
+                    transfer,
+                    account_ids,
+                    all_account_ids,
+                    account,
+                )
+            )
+            balance = 0.0
             incoming_volume = sum(incoming_transfers.mapped("amount"))
             generated_commissions = sum(commission_transfers.mapped("amount"))
             user_count = len(set(app_accounts.mapped("gateway_user_id").ids))
@@ -180,7 +205,7 @@ class PfGatewayDashboard(models.TransientModel):
                     "bank_balance": balance,
                     "incoming_volume": incoming_volume,
                     "generated_commissions": generated_commissions,
-                    "transfer_count": len(app_transfers),
+                    "transfer_count": len(visible_app_transfers),
                     "active_accounts": len(app_accounts),
                     "active_users": user_count,
                     "sync_label": _("Sincronizado") if app_accounts else _("Sin cuentas"),
@@ -191,14 +216,85 @@ class PfGatewayDashboard(models.TransientModel):
         return rows
 
     def _global_totals(self, wallet_rows, period_transfers, active_accounts, user_model):
+        active_user_domain = [("active", "=", True)]
+        if self.filter_app:
+            user_ids = active_accounts.mapped("gateway_user_id").ids
+            active_user_domain.append(("id", "in", user_ids or [0]))
         return {
-            "bank_balance": sum(row["bank_balance"] for row in wallet_rows),
+            "bank_balance": 0.0,
             "incoming_volume": sum(row["incoming_volume"] for row in wallet_rows),
             "generated_commissions": sum(row["generated_commissions"] for row in wallet_rows),
-            "transfer_count": len(period_transfers.filtered(lambda transfer: transfer.movement_nature == "TRANSFER")),
+            "transfer_count": len(period_transfers),
             "active_accounts": len(active_accounts),
-            "active_users": user_model.search_count([("active", "=", True)]),
+            "active_users": user_model.search_count(active_user_domain),
         }
+
+    def _visible_active_accounts(self, active_accounts):
+        if not self.filter_app:
+            return active_accounts
+        return active_accounts.filtered(lambda account: self._app_key(account.app) == self.filter_app)
+
+    def _filtered_transfer_records(self, period_transfers, active_accounts, app_configs):
+        visible_accounts = self._visible_active_accounts(active_accounts)
+        visible_account_ids = set(visible_accounts.ids)
+        all_account_ids = set(active_accounts.ids)
+        commission_accounts = app_configs.filtered(
+            lambda config: (
+                config.commission_bank_account_id
+                and (not self.filter_app or self._app_key(config.app_name) == self.filter_app)
+            )
+        ).mapped("commission_bank_account_id")
+
+        return period_transfers.filtered(
+            lambda transfer: self._matches_global_transfer_filters(
+                transfer,
+                visible_account_ids,
+                all_account_ids,
+                commission_accounts,
+            )
+        )
+
+    def _matches_global_transfer_filters(self, transfer, visible_account_ids, all_account_ids, commission_accounts):
+        if self.filter_app and not (
+            transfer.source_bank_account_id.id in visible_account_ids
+            or transfer.destination_bank_account_id.id in visible_account_ids
+        ):
+            return False
+
+        use_scope_filters = self.filter_external_incoming or self.filter_commission_accounts
+        if not use_scope_filters:
+            return transfer.movement_nature == "TRANSFER"
+
+        matches_external = (
+            self.filter_external_incoming
+            and self._is_external_incoming_transfer(transfer, visible_account_ids, all_account_ids)
+        )
+        matches_commission = (
+            self.filter_commission_accounts
+            and self._is_any_commission_account_transfer(transfer, commission_accounts)
+        )
+        return bool(matches_external or matches_commission)
+
+    def _matches_transfer_filters(self, transfer, app_account_ids, all_account_ids, commission_account):
+        use_scope_filters = self.filter_external_incoming or self.filter_commission_accounts
+        if not use_scope_filters:
+            return (
+                transfer.movement_nature == "TRANSFER"
+                and (
+                    transfer.source_bank_account_id.id in app_account_ids
+                    or transfer.destination_bank_account_id.id in app_account_ids
+                )
+            )
+
+        matches_external = (
+            self.filter_external_incoming
+            and self._is_external_incoming_transfer(transfer, app_account_ids, all_account_ids)
+        )
+        matches_commission = (
+            self.filter_commission_accounts
+            and self._is_commission_account_transfer(transfer, commission_account)
+        )
+        return bool(matches_external or matches_commission)
 
     def _is_external_incoming_transfer(self, transfer, app_account_ids, all_account_ids):
         if transfer.movement_nature != "TRANSFER":
@@ -214,15 +310,31 @@ class PfGatewayDashboard(models.TransientModel):
             return False
         if transfer.movement_nature != "COMMISSION":
             return False
+        return self._is_commission_account_transfer(transfer, commission_account)
+
+    def _is_commission_account_transfer(self, transfer, commission_account):
+        if not commission_account:
+            return False
         return (
             transfer.source_bank_account_id == commission_account
             or transfer.destination_bank_account_id == commission_account
         )
 
+    def _is_any_commission_account_transfer(self, transfer, commission_accounts):
+        if not commission_accounts:
+            return False
+        return (
+            transfer.source_bank_account_id in commission_accounts
+            or transfer.destination_bank_account_id in commission_accounts
+        )
+
     def _exception_values(self, app_configs):
-        configured_apps = {config.app_name for config in app_configs if config.commission_bank_account_id}
+        configured_apps = {self._app_key(config.app_name) for config in app_configs if config.commission_bank_account_id}
         account_apps = set(
-            self.env["pf.gateway.bank.account"].search([("status", "=", "active"), ("app", "!=", False)]).mapped("app")
+            self._app_key(app_name)
+            for app_name in self.env["pf.gateway.bank.account"].search(
+                [("status", "=", "active"), ("app", "!=", False)]
+            ).mapped("app")
         )
         missing_commission_apps = account_apps - configured_apps
         return [
@@ -259,7 +371,7 @@ class PfGatewayDashboard(models.TransientModel):
 
     def _build_global_summary_html(self, totals):
         cards = [
-            ("bank", _("Saldo total en banco"), self._format_money(totals["bank_balance"]), _("Ver detalle"), "blue"),
+            ("bank", _("Saldo total en banco"), _("No disponible"), _("Pendiente de nueva fuente"), "blue"),
             ("arrow-circle-down", _("Volumen entrante del periodo"), self._format_money(totals["incoming_volume"]), _("Solo ingresos externos"), "green"),
             ("money", _("Comisiones generadas"), self._format_money(totals["generated_commissions"]), _("Acumulado del periodo"), "purple"),
             ("exchange", _("Transferencias totales"), self._format_int(totals["transfer_count"]), _("Todas las billeteras"), "blue"),
@@ -310,7 +422,7 @@ class PfGatewayDashboard(models.TransientModel):
         ) % (
             escape(row["color"]),
             escape(row["display_name"]),
-            self._compact_metric_html(_("Saldo en banco"), self._format_money(row["bank_balance"]), _("Ver detalle")),
+            self._compact_metric_html(_("Saldo en banco"), _("No disponible"), _("Pendiente de nueva fuente")),
             self._compact_metric_html(_("Volumen entrante"), self._format_money(row["incoming_volume"]), _("Solo ingresos externos")),
             self._compact_metric_html(_("Comisiones generadas"), self._format_money(row["generated_commissions"]), _("Acumulado del periodo")),
             self._compact_metric_html(_("Transferencias"), self._format_int(row["transfer_count"]), _("Total periodo")),

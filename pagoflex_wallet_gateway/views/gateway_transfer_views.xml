@@ -12,9 +12,9 @@
                 <field name="origin_id"/>
                 <field name="movement_nature"/>
                 <field name="status"/>
-                <field name="source_address"/>
+                <field name="source_address_display" widget="html"/>
                 <field name="source_user_id"/>
-                <field name="destination_address"/>
+                <field name="destination_address_display" widget="html"/>
                 <field name="destination_user_id"/>
                 <field name="currency"/>
                 <field name="amount" sum="Total"/>
@@ -58,6 +58,7 @@
                         <page string="Datos de las partes">
                             <group>
                                 <group string="Origen">
+                                    <field name="source_address_display" widget="html" readonly="1" nolabel="1"/>
                                     <field name="source_address" readonly="1"/>
                                     <field name="source_address_type" readonly="1"/>
                                     <field name="source_owner_id_type" readonly="1"/>
@@ -65,6 +66,7 @@
                                     <field name="source_owner_name" readonly="1"/>
                                 </group>
                                 <group string="Destino">
+                                    <field name="destination_address_display" widget="html" readonly="1" nolabel="1"/>
                                     <field name="destination_address" readonly="1"/>
                                     <field name="destination_address_type" readonly="1"/>
                                     <field name="destination_owner_id_type" readonly="1"/>
@@ -100,6 +102,12 @@
                 <field name="destination_user_id"/>
                 <filter name="filter_transfer" string="Transferencias" domain="[('movement_nature', '=', 'TRANSFER')]"/>
                 <filter name="filter_commission" string="Comisiones" domain="[('movement_nature', '=', 'COMMISSION')]"/>
+                <separator/>
+                <filter name="filter_app_pagoflex" string="PagoFlex" domain="['|', ('source_bank_account_id.app', '=ilike', 'pagoflex'), ('destination_bank_account_id.app', '=ilike', 'pagoflex')]"/>
+                <filter name="filter_app_sivep" string="SIVEP" domain="['|', ('source_bank_account_id.app', '=ilike', 'sivep'), ('destination_bank_account_id.app', '=ilike', 'sivep')]"/>
+                <separator/>
+                <filter name="filter_external_incoming" string="Entrantes externas" domain="[('is_external_incoming_transfer', '=', True)]"/>
+                <filter name="filter_commission_accounts" string="Cuentas de comisión" domain="[('is_dashboard_commission_account_transfer', '=', True)]"/>
                 <separator/>
                 <filter name="filter_completed" string="Completadas" domain="[('status', '=', 'COMPLETED')]"/>
                 <filter name="filter_other_status" string="Otras" domain="['|', ('status', '=', False), ('status', '!=', 'COMPLETED')]"/>

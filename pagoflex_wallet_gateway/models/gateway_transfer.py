@@ -1,5 +1,7 @@
 import logging
 
+from markupsafe import escape
+
 from odoo import _, api, fields, models
 from odoo.exceptions import UserError
 
@@ -47,6 +49,26 @@ class PfGatewayTransfer(models.Model):
     destination_owner_name = fields.Char()
     extra_metadata = fields.Text()
     connector_response = fields.Text()
+    source_address_display = fields.Html(
+        string="Origen",
+        compute="_compute_address_displays",
+        sanitize=False,
+    )
+    destination_address_display = fields.Html(
+        string="Destino",
+        compute="_compute_address_displays",
+        sanitize=False,
+    )
+    is_external_incoming_transfer = fields.Boolean(
+        string="Entrante externa",
+        compute="_compute_dashboard_filter_flags",
+        search="_search_is_external_incoming_transfer",
+    )
+    is_dashboard_commission_account_transfer = fields.Boolean(
+        string="Cuenta de comisión",
+        compute="_compute_dashboard_filter_flags",
+        search="_search_is_dashboard_commission_account_transfer",
+    )
     source_created_at = fields.Datetime()
     source_updated_at = fields.Datetime(index=True)
     transaction_at = fields.Datetime(index=True)
@@ -65,6 +87,136 @@ class PfGatewayTransfer(models.Model):
                 record.name = f"[{record.movement_nature}] {label}"
             else:
                 record.name = label
+
+    @api.depends(
+        "source_address",
+        "destination_address",
+        "source_bank_account_id",
+        "source_bank_account_id.app",
+        "destination_bank_account_id",
+        "destination_bank_account_id.app",
+    )
+    def _compute_address_displays(self):
+        account_model = self.env["pf.gateway.bank.account"].sudo()
+        unresolved_addresses = {
+            address
+            for record in self
+            for address in (record.source_address, record.destination_address)
+            if address
+        }
+        accounts_by_cvu = {}
+        if unresolved_addresses:
+            accounts = account_model.search([("cvu_cbu", "in", list(unresolved_addresses))])
+            accounts_by_cvu = {account.cvu_cbu: account for account in accounts}
+
+        for record in self:
+            record.source_address_display = record._address_badge_html(
+                record.source_address,
+                record.source_bank_account_id,
+                accounts_by_cvu.get(record.source_address),
+            )
+            record.destination_address_display = record._address_badge_html(
+                record.destination_address,
+                record.destination_bank_account_id,
+                accounts_by_cvu.get(record.destination_address),
+            )
+
+    def _address_badge_html(self, address, linked_account, fallback_account):
+        account = linked_account or fallback_account
+        app = (account.app or "").strip().lower() if account else ""
+        if app:
+            code = self._wallet_code(app)
+            css_class = "pf_transfer_wallet_%s" % app.replace(" ", "_").replace("-", "_")
+        elif address:
+            code = "EXT"
+            css_class = "pf_transfer_wallet_external"
+        else:
+            code = "?"
+            css_class = "pf_transfer_wallet_unknown"
+
+        label = escape(address or "-")
+        return (
+            "<span class='pf_transfer_address_badge %s'>%s</span>"
+            "<span class='pf_transfer_address_value'>%s</span>"
+        ) % (escape(css_class), escape(code), label)
+
+    def _wallet_code(self, app):
+        codes = {
+            "pagoflex": "PF",
+            "sivep": "SV",
+            "sivet": "SV",
+        }
+        return codes.get(app, app[:3].upper() if app else "?")
+
+    def _compute_dashboard_filter_flags(self):
+        commission_accounts = self.env["pf.gateway.dashboard.app.config"].sudo().search(
+            [("active", "=", True), ("commission_bank_account_id", "!=", False)]
+        ).mapped("commission_bank_account_id")
+        commission_account_ids = set(commission_accounts.ids)
+        for record in self:
+            record.is_external_incoming_transfer = record._is_external_incoming_transfer_record()
+            record.is_dashboard_commission_account_transfer = bool(
+                record.source_bank_account_id.id in commission_account_ids
+                or record.destination_bank_account_id.id in commission_account_ids
+            )
+
+    def _is_external_incoming_transfer_record(self):
+        self.ensure_one()
+        if self.movement_nature != "TRANSFER":
+            return False
+        if (self.status or "").upper() != "COMPLETED":
+            return False
+        if not self.destination_bank_account_id:
+            return False
+        if self.source_bank_account_id:
+            return False
+        if not self.source_address:
+            return False
+        return not bool(
+            self.env["pf.gateway.bank.account"].sudo().search(
+                [("cvu_cbu", "=", self.source_address)],
+                limit=1,
+            )
+        )
+
+    def _search_is_external_incoming_transfer(self, operator, value):
+        positive = (operator in ("=", "==") and bool(value)) or (operator in ("!=", "<>") and not bool(value))
+        account_cvus = set(
+            self.env["pf.gateway.bank.account"]
+            .sudo()
+            .search([("cvu_cbu", "!=", False)])
+            .mapped("cvu_cbu")
+        )
+        candidates = self.sudo().search([
+            ("movement_nature", "=", "TRANSFER"),
+            ("status", "=", "COMPLETED"),
+            ("destination_bank_account_id", "!=", False),
+            ("source_bank_account_id", "=", False),
+            ("source_address", "!=", False),
+        ])
+        external_incoming_ids = candidates.filtered(
+            lambda transfer: transfer.source_address not in account_cvus
+        ).ids
+        return [("id", "in", external_incoming_ids)] if positive else [("id", "not in", external_incoming_ids)]
+
+    def _search_is_dashboard_commission_account_transfer(self, operator, value):
+        positive = (operator in ("=", "==") and bool(value)) or (operator in ("!=", "<>") and not bool(value))
+        account_ids = self.env["pf.gateway.dashboard.app.config"].sudo().search(
+            [("active", "=", True), ("commission_bank_account_id", "!=", False)]
+        ).mapped("commission_bank_account_id").ids
+        if not account_ids:
+            return [("id", "=", 0)] if positive else []
+        positive_domain = [
+            "|",
+            ("source_bank_account_id", "in", account_ids),
+            ("destination_bank_account_id", "in", account_ids),
+        ]
+        if positive:
+            return positive_domain
+        return [
+            ("source_bank_account_id", "not in", account_ids),
+            ("destination_bank_account_id", "not in", account_ids),
+        ]
 
     def action_sync_transfers(self):
         self.sync_from_gateway(mode="manual", sync_mode="incremental")
