@@ -12,6 +12,7 @@
         "data/incoming_transfer_commission_settings_data.xml",
         "views/menu_views.xml",
         "views/gateway_dashboard_views.xml",
+        "views/gateway_dashboard_app_config_views.xml",
         "views/res_config_settings_views.xml",
         "views/res_partner_views.xml",
         "views/incoming_transfer_commission_settings_views.xml",

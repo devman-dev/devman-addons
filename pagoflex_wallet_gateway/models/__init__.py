@@ -1,4 +1,5 @@
 from . import gateway_client
+from . import gateway_dashboard_app_config
 from . import gateway_dashboard
 from . import res_partner
 from . import gateway_sync_log

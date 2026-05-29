@@ -8,127 +8,32 @@
                 <sheet>
                     <div class="pf_gateway_dashboard_header">
                         <div class="oe_title">
-                            <h1>Centro de Control PagoFlex</h1>
+                            <h1>Centro de Control</h1>
                             <div class="text-muted">Monitoreo operativo, calidad de datos y comisiones del gateway.</div>
                         </div>
                         <div class="pf_gateway_dashboard_actions">
+                            <group class="pf_gateway_dashboard_dates">
+                                <field name="date_from"/>
+                                <field name="date_to"/>
+                            </group>
                             <button name="action_refresh_dashboard" type="object" string="Actualizar" class="btn btn-primary" icon="fa-refresh"/>
-                            <button name="action_open_period_transfers" type="object" string="Transferencias del periodo" class="btn btn-secondary" icon="fa-exchange"/>
+                            <button name="action_open_period_transfers" type="object" string="Transferencias del período" class="btn btn-secondary" icon="fa-exchange"/>
                             <button name="action_open_sync_logs" type="object" string="Logs" class="btn btn-secondary" icon="fa-list"/>
+                            <button name="action_open_dashboard_app_config" type="object" string="Configurar apps" class="btn btn-secondary" icon="fa-cog" groups="pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_admin"/>
                         </div>
                     </div>
 
-                    <div class="pf_gateway_dashboard_filters">
-                        <group>
-                            <field name="date_from"/>
-                            <field name="date_to"/>
-                        </group>
-                        <div class="text-muted">Utilice el rango para recalcular indicadores, control operativo y vision financiera.</div>
+                    <field name="global_summary_html" widget="html" nolabel="1" readonly="1"/>
+                    <field name="wallet_summary_html" widget="html" nolabel="1" readonly="1"/>
+                    <field name="charts_summary_html" widget="html" nolabel="1" readonly="1"/>
+                    <div class="pf_dashboard_bottom_grid">
+                        <field name="sync_summary_html" widget="html" nolabel="1" readonly="1"/>
+                        <field name="exceptions_summary_html" widget="html" nolabel="1" readonly="1"/>
                     </div>
 
-                    <div name="kpi_grid">
-                        <section class="pf_gateway_dashboard_section">
-                            <div class="pf_gateway_section_title">
-                                <h2>Operación</h2>
-                                <span>Actividad transaccional y comportamiento del período.</span>
-                            </div>
-                            <div class="pf_gateway_kpi_grid">
-                                <button name="action_open_today_transfers" type="object" class="pf_gateway_kpi_card pf_gateway_kpi_card_blue">
-                                    <i class="fa fa-exchange pf_gateway_kpi_icon" role="img" aria-label="Transferencias"/>
-                                    <field name="kpi_transfers_today" string="Transferencias hoy" widget="statinfo"/>
-                                </button>
-                                <button name="action_open_today_transfers" type="object" class="pf_gateway_kpi_card pf_gateway_kpi_card_green">
-                                    <i class="fa fa-line-chart pf_gateway_kpi_icon" role="img" aria-label="Volumen hoy"/>
-                                    <field name="kpi_amount_today" string="Volumen hoy" widget="statinfo"/>
-                                </button>
-                                <button name="action_open_period_transfers" type="object" class="pf_gateway_kpi_card pf_gateway_kpi_card_teal">
-                                    <i class="fa fa-area-chart pf_gateway_kpi_icon" role="img" aria-label="Ticket promedio"/>
-                                    <field name="kpi_average_ticket" string="Ticket promedio" widget="statinfo"/>
-                                </button>
-                            </div>
-                        </section>
-
-                        <section class="pf_gateway_dashboard_section">
-                            <div class="pf_gateway_section_title">
-                                <h2>Ingresos</h2>
-                                <span>Volumen monetario e ingresos estimados por comisión.</span>
-                            </div>
-                            <div class="pf_gateway_kpi_grid">
-                                <button name="action_open_period_transfers" type="object" class="pf_gateway_kpi_card pf_gateway_kpi_card_purple">
-                                    <i class="fa fa-bank pf_gateway_kpi_icon" role="img" aria-label="Volumen del periodo"/>
-                                    <field name="kpi_period_volume" string="Volumen del periodo" widget="statinfo"/>
-                                </button>
-                                <button name="action_open_commission_report" type="object" class="pf_gateway_kpi_card pf_gateway_kpi_card_orange">
-                                    <i class="fa fa-money pf_gateway_kpi_icon" role="img" aria-label="Ingresos por comision"/>
-                                    <field name="kpi_estimated_commission" string="Ingresos por comisión" widget="statinfo"/>
-                                </button>
-                            </div>
-                        </section>
-
-                        <section class="pf_gateway_dashboard_section">
-                            <div class="pf_gateway_section_title">
-                                <h2>Control</h2>
-                                <span>Estado de sincronización y entidades operativas.</span>
-                            </div>
-                            <div class="pf_gateway_kpi_grid">
-                                <button name="action_open_sync_logs" type="object" class="pf_gateway_kpi_card pf_gateway_kpi_card_indigo">
-                                    <i class="fa fa-refresh pf_gateway_kpi_icon" role="img" aria-label="Disponibilidad sync"/>
-                                    <field name="kpi_success_rate" string="Disponibilidad sync %" widget="statinfo"/>
-                                </button>
-                                <button name="action_open_failed_sync_jobs" type="object" class="pf_gateway_kpi_card pf_gateway_kpi_card_red">
-                                    <i class="fa fa-warning pf_gateway_kpi_icon" role="img" aria-label="Alertas de sync"/>
-                                    <field name="kpi_failed_jobs" string="Alertas de sync" widget="statinfo"/>
-                                </button>
-                                <button name="action_open_active_companies" type="object" class="pf_gateway_kpi_card pf_gateway_kpi_card_green">
-                                    <i class="fa fa-building-o pf_gateway_kpi_icon" role="img" aria-label="Empresas"/>
-                                    <field name="kpi_active_companies" string="Empresas activas" widget="statinfo"/>
-                                </button>
-                                <button name="action_open_active_users" type="object" class="pf_gateway_kpi_card pf_gateway_kpi_card_blue">
-                                    <i class="fa fa-users pf_gateway_kpi_icon" role="img" aria-label="Usuarios"/>
-                                    <field name="kpi_synced_users" string="Usuarios activos" widget="statinfo"/>
-                                </button>
-                            </div>
-                        </section>
-
-                        <section class="pf_gateway_dashboard_section">
-                            <div class="pf_gateway_section_title">
-                                <h2>Riesgo</h2>
-                                <span>Excepciones que requieren revisión operativa.</span>
-                            </div>
-                            <div class="pf_gateway_kpi_grid">
-                                <button name="action_open_incomplete_transfers" type="object" class="pf_gateway_kpi_card pf_gateway_kpi_card_slate">
-                                    <i class="fa fa-shield pf_gateway_kpi_icon" role="img" aria-label="Excepciones"/>
-                                    <field name="kpi_open_exceptions" string="Excepciones abiertas" widget="statinfo"/>
-                                </button>
-                            </div>
-                        </section>
+                    <div class="pf_gateway_dashboard_note">
+                        Los valores mostrados corresponden al período seleccionado. Volumen entrante incluye únicamente ingresos externos completados.
                     </div>
-
-                    <notebook>
-                        <page string="Resumen Ejecutivo">
-                            <field name="executive_summary_html" widget="html" nolabel="1" readonly="1"/>
-                        </page>
-                        <page string="Control Operativo">
-                            <field name="sync_summary_html" widget="html" nolabel="1" readonly="1"/>
-                        </page>
-                        <page string="Excepciones">
-                            <group>
-                                <group>
-                                    <button name="action_open_users_without_partner" type="object" string="Usuarios sin partner" class="btn-secondary"/>
-                                    <button name="action_open_companies_without_partner" type="object" string="Empresas sin partner" class="btn-secondary"/>
-                                    <button name="action_open_memberships_without_company" type="object" string="Membresias sin empresa" class="btn-secondary"/>
-                                </group>
-                                <group>
-                                    <button name="action_open_incomplete_transfers" type="object" string="Transferencias incompletas" class="btn-secondary"/>
-                                    <button name="action_open_unverified_users" type="object" string="Usuarios sin KYC" class="btn-secondary"/>
-                                </group>
-                            </group>
-                            <field name="exceptions_summary_html" widget="html" nolabel="1" readonly="1"/>
-                        </page>
-                        <page string="Finanzas">
-                            <field name="financial_summary_html" widget="html" nolabel="1" readonly="1"/>
-                        </page>
-                    </notebook>
                 </sheet>
             </form>
         </field>
