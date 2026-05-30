@@ -1,0 +1,283 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_pf_gateway_bank_movement_tree" model="ir.ui.view">
+        <field name="name">pf.gateway.bank.movement.tree</field>
+        <field name="model">pf.gateway.bank.movement</field>
+        <field name="arch" type="xml">
+            <list decoration-success="reconciliation_state in ('auto', 'manual')" decoration-warning="reconciliation_state == 'conflict'" decoration-muted="reconciliation_state == 'ignored'">
+                <header>
+                    <button name="action_auto_reconcile" type="object" string="Conciliar automático" class="btn-primary" display="always" groups="pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_admin,pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_operator"/>
+                    <button name="action_reset_reconciliation" type="object" string="Reabrir" display="always" groups="pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_admin,pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_operator"/>
+                </header>
+                <field name="movement_date"/>
+                <field name="movement_time"/>
+                <field name="reconciliation_state"/>
+                <field name="bank_account_id"/>
+                <field name="cbu_cvu_alias"/>
+                <field name="movement_direction"/>
+                <field name="debit_credit"/>
+                <field name="amount" sum="Importe"/>
+                <field name="currency"/>
+                <field name="origin_id"/>
+                <field name="reference"/>
+                <field name="coelsa_id"/>
+                <field name="counterparty_name"/>
+                <field name="counterparty_cbu_cvu"/>
+                <field name="matched_transfer_id"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_pf_gateway_bank_movement_form" model="ir.ui.view">
+        <field name="name">pf.gateway.bank.movement.form</field>
+        <field name="model">pf.gateway.bank.movement</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_auto_reconcile" type="object" string="Conciliar automático" class="btn-primary" groups="pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_admin,pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_operator"/>
+                    <button name="action_mark_manual_reconciled" type="object" string="Confirmar conciliación manual" class="btn-secondary" groups="pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_admin,pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_operator"/>
+                    <button name="action_reset_reconciliation" type="object" string="Reabrir" groups="pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_admin,pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_operator"/>
+                    <button name="action_ignore_reconciliation" type="object" string="Ignorar" groups="pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_admin,pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_operator"/>
+                    <field name="reconciliation_state" widget="statusbar" statusbar_visible="pending,auto,manual,conflict,ignored"/>
+                </header>
+                <sheet>
+                    <group>
+                        <group string="Movimiento">
+                            <field name="movement_id" readonly="1"/>
+                            <field name="origin_id" readonly="1"/>
+                            <field name="movement_date" readonly="1"/>
+                            <field name="movement_time" readonly="1"/>
+                            <field name="movement_datetime" readonly="1"/>
+                            <field name="concept" readonly="1"/>
+                            <field name="description" readonly="1"/>
+                        </group>
+                        <group string="Importe">
+                            <field name="movement_direction" readonly="1"/>
+                            <field name="debit_credit" readonly="1"/>
+                            <field name="currency" readonly="1"/>
+                            <field name="amount" readonly="1"/>
+                            <field name="reference" readonly="1"/>
+                            <field name="coelsa_id" readonly="1"/>
+                        </group>
+                    </group>
+                    <group>
+                        <group string="Cuenta consultada">
+                            <field name="bank_account_id" readonly="1"/>
+                            <field name="cbu_cvu_alias" readonly="1"/>
+                            <field name="product_uid" readonly="1"/>
+                            <field name="request_date_from" readonly="1"/>
+                            <field name="request_date_to" readonly="1"/>
+                            <field name="opening_balance" readonly="1"/>
+                            <field name="total_records" readonly="1"/>
+                        </group>
+                        <group string="Contraparte">
+                            <field name="counterparty_name" readonly="1"/>
+                            <field name="counterparty_vat" readonly="1"/>
+                            <field name="counterparty_cbu_cvu" readonly="1"/>
+                        </group>
+                    </group>
+                    <group string="Conciliación">
+                        <field name="matched_transfer_id"/>
+                        <field name="reconciliation_note" readonly="1"/>
+                        <field name="reconciled_at" readonly="1"/>
+                    </group>
+                    <notebook>
+                        <page string="Consultas históricas">
+                            <field name="sync_run_ids" readonly="1">
+                                <list>
+                                    <field name="started_at"/>
+                                    <field name="state"/>
+                                    <field name="start_date"/>
+                                    <field name="end_date"/>
+                                    <field name="first_page_offset"/>
+                                    <field name="last_page_offset"/>
+                                    <field name="pages_fetched"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Payload crudo" groups="pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_admin,pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_operator">
+                            <field name="raw_payload" widget="text" readonly="1"/>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_pf_gateway_bank_movement_search" model="ir.ui.view">
+        <field name="name">pf.gateway.bank.movement.search</field>
+        <field name="model">pf.gateway.bank.movement</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="movement_id"/>
+                <field name="origin_id"/>
+                <field name="reference"/>
+                <field name="coelsa_id"/>
+                <field name="cbu_cvu_alias"/>
+                <field name="counterparty_name"/>
+                <field name="counterparty_cbu_cvu"/>
+                <filter name="filter_pending" string="Pendientes" domain="[('reconciliation_state', '=', 'pending')]"/>
+                <filter name="filter_conflict" string="A revisar" domain="[('reconciliation_state', '=', 'conflict')]"/>
+                <filter name="filter_reconciled" string="Conciliadas" domain="[('reconciliation_state', 'in', ['auto', 'manual'])]"/>
+                <filter name="filter_incoming" string="Entrantes" domain="[('movement_direction', '=', 'INCOMING')]"/>
+                <filter name="filter_outgoing" string="Salientes" domain="[('movement_direction', '=', 'OUTGOING')]"/>
+                <filter name="filter_movement_date" string="Fecha" date="movement_date"/>
+                <separator/>
+                <filter name="group_by_account" string="Agrupar por cuenta" context="{'group_by': 'bank_account_id'}"/>
+                <filter name="group_by_state" string="Agrupar por conciliación" context="{'group_by': 'reconciliation_state'}"/>
+                <filter name="group_by_date" string="Agrupar por fecha" context="{'group_by': 'movement_date'}"/>
+            </search>
+        </field>
+    </record>
+
+    <record id="view_pf_gateway_bank_movement_sync_wizard_form" model="ir.ui.view">
+        <field name="name">pf.gateway.bank.movement.sync.wizard.form</field>
+        <field name="model">pf.gateway.bank.movement.sync.wizard</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <field name="bank_account_id"/>
+                        <field name="cbu_cvu_alias" placeholder="Opcional si seleccionás cuenta"/>
+                        <field name="start_date"/>
+                        <field name="end_date"/>
+                        <field name="page_size"/>
+                        <field name="page_offset"/>
+                        <field name="fetch_all_pages"/>
+                        <field name="auto_reconcile"/>
+                    </group>
+                </sheet>
+                <footer>
+                    <button name="action_sync" type="object" string="Consultar" class="btn-primary"/>
+                    <button string="Cancelar" special="cancel" class="btn-secondary"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_pf_gateway_bank_movement" model="ir.actions.act_window">
+        <field name="name">Movimientos bancarios</field>
+        <field name="res_model">pf.gateway.bank.movement</field>
+        <field name="view_mode">list,form</field>
+        <field name="context">{'search_default_filter_pending': 1}</field>
+    </record>
+
+    <record id="view_pf_gateway_bank_movement_sync_run_tree" model="ir.ui.view">
+        <field name="name">pf.gateway.bank.movement.sync.run.tree</field>
+        <field name="model">pf.gateway.bank.movement.sync.run</field>
+        <field name="arch" type="xml">
+            <list decoration-success="state == 'success'" decoration-danger="state == 'failed'">
+                <field name="started_at"/>
+                <field name="finished_at"/>
+                <field name="state"/>
+                <field name="bank_account_id"/>
+                <field name="cbu_cvu_alias"/>
+                <field name="start_date"/>
+                <field name="end_date"/>
+                <field name="page_size"/>
+                <field name="first_page_offset"/>
+                <field name="last_page_offset"/>
+                <field name="pages_fetched"/>
+                <field name="total_records"/>
+                <field name="movements_found"/>
+                <field name="movements_created"/>
+                <field name="movements_updated"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_pf_gateway_bank_movement_sync_run_form" model="ir.ui.view">
+        <field name="name">pf.gateway.bank.movement.sync.run.form</field>
+        <field name="model">pf.gateway.bank.movement.sync.run</field>
+        <field name="arch" type="xml">
+            <form create="false" edit="false">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="state"/>
+                            <field name="started_at"/>
+                            <field name="finished_at"/>
+                            <field name="bank_account_id"/>
+                            <field name="cbu_cvu_alias"/>
+                        </group>
+                        <group>
+                            <field name="start_date"/>
+                            <field name="end_date"/>
+                            <field name="page_size"/>
+                            <field name="first_page_offset"/>
+                            <field name="last_page_offset"/>
+                            <field name="fetch_all_pages"/>
+                        </group>
+                    </group>
+                    <group string="Resultado">
+                        <field name="pages_fetched"/>
+                        <field name="total_records"/>
+                        <field name="movements_found"/>
+                        <field name="movements_created"/>
+                        <field name="movements_updated"/>
+                    </group>
+                    <notebook>
+                        <page string="Movimientos">
+                            <field name="movement_ids"/>
+                        </page>
+                        <page string="Error">
+                            <field name="error_detail" widget="text"/>
+                        </page>
+                        <page string="Última respuesta">
+                            <field name="last_response_raw" widget="text"/>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_pf_gateway_bank_movement_sync_run_search" model="ir.ui.view">
+        <field name="name">pf.gateway.bank.movement.sync.run.search</field>
+        <field name="model">pf.gateway.bank.movement.sync.run</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="cbu_cvu_alias"/>
+                <field name="bank_account_id"/>
+                <filter name="filter_success" string="Correctas" domain="[('state', '=', 'success')]"/>
+                <filter name="filter_failed" string="Fallidas" domain="[('state', '=', 'failed')]"/>
+                <filter name="filter_started_at" string="Fecha consulta" date="started_at"/>
+                <separator/>
+                <filter name="group_by_account" string="Agrupar por cuenta" context="{'group_by': 'bank_account_id'}"/>
+                <filter name="group_by_state" string="Agrupar por estado" context="{'group_by': 'state'}"/>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_pf_gateway_bank_movement_sync_run" model="ir.actions.act_window">
+        <field name="name">Historial consultas bancarias</field>
+        <field name="res_model">pf.gateway.bank.movement.sync.run</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <record id="action_pf_gateway_bank_movement_sync_wizard" model="ir.actions.act_window">
+        <field name="name">Consultar movimientos bancarios</field>
+        <field name="res_model">pf.gateway.bank.movement.sync.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+
+    <menuitem id="menu_pf_gateway_bank_movement"
+              name="Movimientos bancarios"
+              parent="menu_pagoflex_wallet_gateway_operations"
+              action="action_pf_gateway_bank_movement"
+              sequence="35"/>
+
+    <menuitem id="menu_pf_gateway_bank_movement_sync"
+              name="Consultar movimientos bancarios"
+              parent="menu_pagoflex_wallet_gateway_operations"
+              action="action_pf_gateway_bank_movement_sync_wizard"
+              sequence="36"
+              groups="pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_admin,pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_operator"/>
+
+    <menuitem id="menu_pf_gateway_bank_movement_sync_run"
+              name="Historial consultas bancarias"
+              parent="menu_pagoflex_wallet_gateway_operations"
+              action="action_pf_gateway_bank_movement_sync_run"
+              sequence="37"/>
+</odoo>

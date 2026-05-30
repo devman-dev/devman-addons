@@ -18,6 +18,8 @@ from . import incoming_transfer_commission_account_sync_wizard
 from . import incoming_transfer_commission_push_wizard
 from . import negative_balance_limit
 from . import gateway_transfer
+from . import gateway_bank_movement
+from . import gateway_bank_movement_sync_wizard
 from . import gateway_user_statement_line
 from . import gateway_user_statement_summary
 from . import gateway_transfer_response_wizard

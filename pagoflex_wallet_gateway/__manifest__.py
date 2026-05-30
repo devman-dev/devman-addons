@@ -34,6 +34,7 @@
         "views/gateway_user_views.xml",
         "views/company_commission_agent_views.xml",
         "views/gateway_bank_account_views.xml",
+        "views/gateway_bank_movement_views.xml",
         "views/gateway_transfer_response_wizard_views.xml",
         "views/gateway_transfer_views.xml",
         "views/account_summary_report_views.xml",

@@ -153,6 +153,22 @@ class PfGatewayDashboard(models.TransientModel):
             domain.append(("transaction_at", "<=", end_dt))
         return domain
 
+    def _period_bank_movement_domain(self):
+        domain = [("active", "=", True)]
+        if self.date_from:
+            domain.append(("movement_date", ">=", self.date_from))
+        if self.date_to:
+            domain.append(("movement_date", "<=", self.date_to))
+        return domain
+
+    def _period_bank_movement_amount(self):
+        result = self.env["pf.gateway.bank.movement"].read_group(
+            self._period_bank_movement_domain(),
+            ["amount:sum"],
+            [],
+        )
+        return result[0]["amount"] if result else 0.0
+
     def _wallet_rows(self, active_accounts, period_transfers, app_configs):
         app_keys = {self._app_key(app_name) for app_name in active_accounts.mapped("app")}
         app_keys.update(self._app_key(app_name) for app_name in app_configs.mapped("app_name"))
@@ -221,7 +237,7 @@ class PfGatewayDashboard(models.TransientModel):
             user_ids = active_accounts.mapped("gateway_user_id").ids
             active_user_domain.append(("id", "in", user_ids or [0]))
         return {
-            "bank_balance": 0.0,
+            "bank_balance": self._period_bank_movement_amount(),
             "incoming_volume": sum(row["incoming_volume"] for row in wallet_rows),
             "generated_commissions": sum(row["generated_commissions"] for row in wallet_rows),
             "transfer_count": len(period_transfers),
@@ -371,7 +387,7 @@ class PfGatewayDashboard(models.TransientModel):
 
     def _build_global_summary_html(self, totals):
         cards = [
-            ("bank", _("Saldo total en banco"), _("No disponible"), _("Pendiente de nueva fuente"), "blue"),
+            ("bank", _("Saldo total en banco"), self._format_money(totals["bank_balance"]), _("Movimientos persistidos del periodo"), "blue"),
             ("arrow-circle-down", _("Volumen entrante del periodo"), self._format_money(totals["incoming_volume"]), _("Solo ingresos externos"), "green"),
             ("money", _("Comisiones generadas"), self._format_money(totals["generated_commissions"]), _("Acumulado del periodo"), "purple"),
             ("exchange", _("Transferencias totales"), self._format_int(totals["transfer_count"]), _("Todas las billeteras"), "blue"),

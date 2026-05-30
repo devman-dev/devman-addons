@@ -533,6 +533,26 @@ class PfGatewayBankAccount(models.Model):
             },
         }
 
+    def action_open_bank_movement_sync_wizard(self):
+        records = self
+        if not records:
+            active_ids = self.env.context.get("active_ids") or []
+            records = self.browse(active_ids)
+        if len(records) != 1:
+            raise UserError(_("Selecciona una única cuenta bancaria para consultar movimientos."))
+        record = records[0]
+        return {
+            "type": "ir.actions.act_window",
+            "name": _("Consultar movimientos bancarios"),
+            "res_model": "pf.gateway.bank.movement.sync.wizard",
+            "view_mode": "form",
+            "target": "new",
+            "context": {
+                "default_bank_account_id": record.id,
+                "default_cbu_cvu_alias": record.cvu_cbu or record.alias,
+            },
+        }
+
     def sync_from_gateway(self, mode="manual", sync_mode="incremental", job=None):
         updated_since = None
         if sync_mode == "incremental":

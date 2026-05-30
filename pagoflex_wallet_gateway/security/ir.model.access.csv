@@ -43,6 +43,14 @@
 "access_pf_gateway_transfer_admin","pf.gateway.transfer admin","model_pf_gateway_transfer","pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_admin",1,1,0,0
 "access_pf_gateway_transfer_operator","pf.gateway.transfer operator","model_pf_gateway_transfer","pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_operator",1,1,0,0
 "access_pf_gateway_transfer_auditor","pf.gateway.transfer auditor","model_pf_gateway_transfer","pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_auditor",1,0,0,0
+"access_pf_gateway_bank_movement_admin","pf.gateway.bank.movement admin","model_pf_gateway_bank_movement","pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_admin",1,1,1,1
+"access_pf_gateway_bank_movement_operator","pf.gateway.bank.movement operator","model_pf_gateway_bank_movement","pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_operator",1,1,1,0
+"access_pf_gateway_bank_movement_auditor","pf.gateway.bank.movement auditor","model_pf_gateway_bank_movement","pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_auditor",1,0,0,0
+"access_pf_gateway_bank_movement_sync_run_admin","pf.gateway.bank.movement.sync.run admin","model_pf_gateway_bank_movement_sync_run","pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_admin",1,1,1,1
+"access_pf_gateway_bank_movement_sync_run_operator","pf.gateway.bank.movement.sync.run operator","model_pf_gateway_bank_movement_sync_run","pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_operator",1,0,0,0
+"access_pf_gateway_bank_movement_sync_run_auditor","pf.gateway.bank.movement.sync.run auditor","model_pf_gateway_bank_movement_sync_run","pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_auditor",1,0,0,0
+"access_pf_gateway_bank_movement_sync_wizard_admin","pf.gateway.bank.movement.sync.wizard admin","model_pf_gateway_bank_movement_sync_wizard","pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_admin",1,1,1,1
+"access_pf_gateway_bank_movement_sync_wizard_operator","pf.gateway.bank.movement.sync.wizard operator","model_pf_gateway_bank_movement_sync_wizard","pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_operator",1,1,1,1
 "access_pf_gateway_user_statement_line_admin","pf.gateway.user.statement.line admin","model_pf_gateway_user_statement_line","pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_admin",1,0,0,0
 "access_pf_gateway_user_statement_line_operator","pf.gateway.user.statement.line operator","model_pf_gateway_user_statement_line","pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_operator",1,0,0,0
 "access_pf_gateway_user_statement_line_auditor","pf.gateway.user.statement.line auditor","model_pf_gateway_user_statement_line","pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_auditor",1,0,0,0

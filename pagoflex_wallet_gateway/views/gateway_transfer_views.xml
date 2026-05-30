@@ -8,7 +8,7 @@
                 <header>
                     <button name="action_sync_transfers_full" type="object" string="Sincronización completa" class="btn-primary" display="always" groups="pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_admin"/>
                 </header>
-                <field name="name"/>
+                <!-- <field name="name"/> -->
                 <field name="origin_id"/>
                 <field name="movement_nature"/>
                 <field name="status"/>
@@ -36,7 +36,7 @@
                 <sheet>
                     <group>
                         <group>
-                            <field name="name" readonly="1"/>
+                            <!-- <field name="name" readonly="1"/> -->
                             <field name="external_id" readonly="1"/>
                             <field name="payment_id" readonly="1"/>
                             <field name="origin_id" readonly="1"/>
@@ -100,13 +100,12 @@
                 <field name="destination_address"/>
                 <field name="source_user_id"/>
                 <field name="destination_user_id"/>
-                <filter name="filter_transfer" string="Transferencias" domain="[('movement_nature', '=', 'TRANSFER')]"/>
+                <filter name="filter_transfer" string="Entrantes externas" domain="[('is_external_incoming_transfer', 'in', [True])]"/>
                 <filter name="filter_commission" string="Comisiones" domain="[('movement_nature', '=', 'COMMISSION')]"/>
                 <separator/>
                 <filter name="filter_app_pagoflex" string="PagoFlex" domain="['|', ('source_bank_account_id.app', '=ilike', 'pagoflex'), ('destination_bank_account_id.app', '=ilike', 'pagoflex')]"/>
                 <filter name="filter_app_sivep" string="SIVEP" domain="['|', ('source_bank_account_id.app', '=ilike', 'sivep'), ('destination_bank_account_id.app', '=ilike', 'sivep')]"/>
                 <separator/>
-                <filter name="filter_external_incoming" string="Entrantes externas" domain="[('is_external_incoming_transfer', '=', True)]"/>
                 <filter name="filter_commission_accounts" string="Cuentas de comisión" domain="[('is_dashboard_commission_account_transfer', '=', True)]"/>
                 <separator/>
                 <filter name="filter_completed" string="Completadas" domain="[('status', '=', 'COMPLETED')]"/>

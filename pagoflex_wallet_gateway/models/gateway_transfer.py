@@ -164,23 +164,45 @@ class PfGatewayTransfer(models.Model):
         self.ensure_one()
         if self.movement_nature != "TRANSFER":
             return False
-        if (self.status or "").upper() != "COMPLETED":
-            return False
-        if not self.destination_bank_account_id:
-            return False
-        if self.source_bank_account_id:
+        if (self.status or "").upper() == "FAILED":
             return False
         if not self.source_address:
             return False
-        return not bool(
-            self.env["pf.gateway.bank.account"].sudo().search(
-                [("cvu_cbu", "=", self.source_address)],
-                limit=1,
-            )
+        account_cvus = set(
+            self.env["pf.gateway.bank.account"]
+            .sudo()
+            .search([("cvu_cbu", "!=", False)])
+            .mapped("cvu_cbu")
         )
+        source_is_wallet = bool(self.source_bank_account_id) or self.source_address in account_cvus
+        destination_is_wallet = bool(self.destination_bank_account_id) or self.destination_address in account_cvus
+        return destination_is_wallet and not source_is_wallet
+
+    def _is_positive_boolean_search(self, operator, value):
+        values = value if isinstance(value, (list, tuple, set)) else [value]
+        bool_values = {bool(item) for item in values}
+        if operator in ("=", "=="):
+            return bool(value)
+        if operator in ("!=", "<>"):
+            return not bool(value)
+        if operator == "in":
+            if bool_values == {True}:
+                return True
+            if bool_values == {False}:
+                return False
+            return None
+        if operator == "not in":
+            if bool_values == {False}:
+                return True
+            if bool_values == {True}:
+                return False
+            return None
+        return False
 
     def _search_is_external_incoming_transfer(self, operator, value):
-        positive = (operator in ("=", "==") and bool(value)) or (operator in ("!=", "<>") and not bool(value))
+        positive = self._is_positive_boolean_search(operator, value)
+        if positive is None:
+            return []
         account_cvus = set(
             self.env["pf.gateway.bank.account"]
             .sudo()
@@ -189,18 +211,20 @@ class PfGatewayTransfer(models.Model):
         )
         candidates = self.sudo().search([
             ("movement_nature", "=", "TRANSFER"),
-            ("status", "=", "COMPLETED"),
-            ("destination_bank_account_id", "!=", False),
-            ("source_bank_account_id", "=", False),
             ("source_address", "!=", False),
         ])
         external_incoming_ids = candidates.filtered(
-            lambda transfer: transfer.source_address not in account_cvus
+            lambda transfer: (transfer.status or "").upper() != "FAILED"
+            and not transfer.source_bank_account_id
+            and transfer.source_address not in account_cvus
+            and (transfer.destination_bank_account_id or transfer.destination_address in account_cvus)
         ).ids
         return [("id", "in", external_incoming_ids)] if positive else [("id", "not in", external_incoming_ids)]
 
     def _search_is_dashboard_commission_account_transfer(self, operator, value):
-        positive = (operator in ("=", "==") and bool(value)) or (operator in ("!=", "<>") and not bool(value))
+        positive = self._is_positive_boolean_search(operator, value)
+        if positive is None:
+            return []
         account_ids = self.env["pf.gateway.dashboard.app.config"].sudo().search(
             [("active", "=", True), ("commission_bank_account_id", "!=", False)]
         ).mapped("commission_bank_account_id").ids
