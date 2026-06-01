@@ -41,3 +41,12 @@ class ResConfigSettings(models.TransientModel):
         config_parameter="pagoflex_wallet_gateway.membership_is_active",
         default="",
     )
+    pagoflex_gateway_bank_movement_query_cbu = fields.Char(
+        string="CBU/CVU/Alias fijo para movimientos",
+        config_parameter="pagoflex_wallet_gateway.bank_movement_query_cbu",
+    )
+    pagoflex_gateway_completed_business_data_batch_size = fields.Integer(
+        string="Tamano lote datos bancarios",
+        config_parameter="pagoflex_wallet_gateway.completed_business_data_batch_size",
+        default=50,
+    )

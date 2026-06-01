@@ -18,7 +18,8 @@
                 <field name="destination_user_id"/>
                 <field name="currency"/>
                 <field name="amount" sum="Total"/>
-                <field name="transaction_at"/>
+                <field name="fecha_negocio"/>
+                <!-- <field name="transaction_at"/> -->
             </list>
         </field>
     </record>
@@ -51,6 +52,8 @@
                             <field name="destination_user_id" readonly="1"/> -->
                             <field name="currency" readonly="1"/>
                             <field name="amount" readonly="1"/>
+                            <field name="fecha_negocio" readonly="1"/>
+                            <field name="business_data_last_check_at" readonly="1"/>
                             <field name="transaction_at" readonly="1"/>
                         </group>
                     </group>
@@ -96,20 +99,24 @@
                 <field name="origin_id"/>
                 <field name="payment_id"/>
                 <field name="connector_id"/>
+                <field name="fecha_negocio"/>
                 <field name="source_address"/>
                 <field name="destination_address"/>
                 <field name="source_user_id"/>
                 <field name="destination_user_id"/>
                 <filter name="filter_transfer" string="Entrantes externas" domain="[('is_external_incoming_transfer', 'in', [True])]"/>
+                <filter name="filter_external_outgoing" string="Salientes externas" domain="[('is_external_outgoing_transfer', 'in', [True])]"/>
                 <filter name="filter_commission" string="Comisiones" domain="[('movement_nature', '=', 'COMMISSION')]"/>
                 <separator/>
-                <filter name="filter_app_pagoflex" string="PagoFlex" domain="['|', ('source_bank_account_id.app', '=ilike', 'pagoflex'), ('destination_bank_account_id.app', '=ilike', 'pagoflex')]"/>
-                <filter name="filter_app_sivep" string="SIVEP" domain="['|', ('source_bank_account_id.app', '=ilike', 'sivep'), ('destination_bank_account_id.app', '=ilike', 'sivep')]"/>
+                <filter name="filter_app_pagoflex" string="PagoFlex" domain="[('is_pagoflex_wallet_transfer', '=', True)]"/>
+                <filter name="filter_app_sivep" string="SIVEP" domain="[('is_sivep_wallet_transfer', '=', True)]"/>
                 <separator/>
                 <filter name="filter_commission_accounts" string="Cuentas de comisión" domain="[('is_dashboard_commission_account_transfer', '=', True)]"/>
                 <separator/>
                 <filter name="filter_completed" string="Completadas" domain="[('status', '=', 'COMPLETED')]"/>
                 <filter name="filter_other_status" string="Otras" domain="['|', ('status', '=', False), ('status', '!=', 'COMPLETED')]"/>
+                <separator/>
+                <filter name="group_by_fecha_negocio" string="Fecha negocio" context="{'group_by': 'fecha_negocio'}"/>
             </search>
         </field>
     </record>

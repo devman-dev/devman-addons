@@ -64,6 +64,5 @@ class PfGatewayDashboardAppConfig(models.Model):
         known = {
             "pagoflex": "PagoFlex",
             "sivep": "SIVEP",
-            "sivet": "SIVET",
         }
         return known.get(value.lower(), value or "-")

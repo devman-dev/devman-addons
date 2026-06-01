@@ -29,6 +29,14 @@
                         <setting string="Filtro activo membresias">
                             <field name="pagoflex_gateway_membership_is_active"/>
                         </setting>
+                        <setting string="CBU/CVU/Alias fijo para movimientos"
+                                 help="Si se informa, la consulta de movimientos bancarios usara siempre este identificador en lugar del CVU de cada cuenta de usuario. Util para bancos que solo aceptan el CBU del titular del comercio.">
+                            <field name="pagoflex_gateway_bank_movement_query_cbu" placeholder="Opcional"/>
+                        </setting>
+                        <setting string="Tamano lote datos bancarios"
+                                 help="Cantidad maxima de transferencias COMPLETED que se consultan por ejecucion manual del cron de fecha negocio e ID Coelsa.">
+                            <field name="pagoflex_gateway_completed_business_data_batch_size"/>
+                        </setting>
                     </block>
                 </app>
             </xpath>

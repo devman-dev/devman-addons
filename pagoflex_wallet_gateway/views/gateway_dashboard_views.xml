@@ -26,13 +26,23 @@
                     <field name="global_summary_html" widget="html" nolabel="1" readonly="1"/>
                     <field name="wallet_summary_html" widget="html" nolabel="1" readonly="1"/>
                     <field name="charts_summary_html" widget="html" nolabel="1" readonly="1"/>
+                    <field name="reconciliation_summary_html" widget="html" nolabel="1" readonly="1"/>
+                    <field name="transaction_count_summary_html" widget="html" nolabel="1" readonly="1"/>
                     <div class="pf_dashboard_bottom_grid">
                         <field name="sync_summary_html" widget="html" nolabel="1" readonly="1"/>
-                        <field name="exceptions_summary_html" widget="html" nolabel="1" readonly="1"/>
+                        <div>
+                            <field name="exceptions_summary_html" widget="html" nolabel="1" readonly="1"/>
+                            <div class="pf_dashboard_exception_actions">
+                                <button name="action_open_dashboard_app_config" type="object" string="Ver apps" class="btn btn-secondary" icon="fa-cog"/>
+                                <button name="action_open_incomplete_transfers" type="object" string="Ver transferencias incompletas" class="btn btn-secondary" icon="fa-exchange"/>
+                                <button name="action_open_balance_sync_exceptions" type="object" string="Ver cuentas sin saldo" class="btn btn-secondary" icon="fa-credit-card"/>
+                                <button name="action_open_unverified_users" type="object" string="Ver usuarios sin KYC" class="btn btn-secondary" icon="fa-user"/>
+                            </div>
+                        </div>
                     </div>
 
                     <div class="pf_gateway_dashboard_note">
-                        Los valores mostrados corresponden al período seleccionado. Volumen entrante incluye únicamente ingresos externos completados.
+                        Los valores mostrados corresponden al período seleccionado. Las transferencias se imputan por fecha negocio; si falta, se usa la fecha de transacción como respaldo. Volumen entrante incluye únicamente ingresos externos completados.
                     </div>
                 </sheet>
             </form>

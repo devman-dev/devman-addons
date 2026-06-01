@@ -99,4 +99,25 @@
         <field name="interval_type">minutes</field>
         <field name="active">False</field>
     </record>
+
+    <record id="cron_pf_gateway_update_completed_transfer_business_data" model="ir.cron">
+        <field name="name">PagoFlex Actualizar Fecha Negocio Transferencias Completadas</field>
+        <field name="model_id" ref="model_pf_gateway_transfer"/>
+        <field name="state">code</field>
+        <field name="code">model.cron_update_completed_transfer_business_data()</field>
+        <field name="interval_number">1</field>
+        <field name="interval_type">days</field>
+        <field name="active">False</field>
+    </record>
+
+    <record id="cron_pf_gateway_sync_recent_bank_movements" model="ir.cron">
+        <field name="name">PagoFlex Consultar y Conciliar Movimientos Bancarios</field>
+        <field name="model_id" ref="model_pf_gateway_bank_movement"/>
+        <field name="state">code</field>
+        <field name="code">model.cron_sync_recent_bank_movements()</field>
+        <field name="interval_number">1</field>
+        <field name="interval_type">days</field>
+        <field name="nextcall" eval="(datetime.now() + relativedelta(days=1)).replace(hour=6, minute=0, second=0, microsecond=0)"/>
+        <field name="active">True</field>
+    </record>
 </odoo>

@@ -69,6 +69,7 @@ class PfGatewayBankAccount(models.Model):
     _BALANCE_REFRESH_QUEUE_PARAM = "pagoflex_wallet_gateway.balance_refresh_account_ids"
     _BALANCE_REFRESH_CRON_CODE = "model._cron_refresh_balances_reusable()"
     _BALANCE_REFRESH_CRON_NAME = "PagoFlex Refrescar saldos bancarios"
+    _BANK_MOVEMENT_QUERY_CBU_PARAM = "pagoflex_wallet_gateway.bank_movement_query_cbu"
 
     @api.depends("cvu_cbu", "alias", "origin_id")
     def _compute_name(self):
@@ -541,16 +542,21 @@ class PfGatewayBankAccount(models.Model):
         if len(records) != 1:
             raise UserError(_("Selecciona una única cuenta bancaria para consultar movimientos."))
         record = records[0]
+        fixed_query_cbu = (
+            self.env["ir.config_parameter"].sudo().get_param(self._BANK_MOVEMENT_QUERY_CBU_PARAM) or ""
+        ).strip()
+        context = {
+            "default_cbu_cvu_alias": fixed_query_cbu or record.cvu_cbu or record.alias,
+        }
+        if not fixed_query_cbu:
+            context["default_bank_account_id"] = record.id
         return {
             "type": "ir.actions.act_window",
             "name": _("Consultar movimientos bancarios"),
             "res_model": "pf.gateway.bank.movement.sync.wizard",
             "view_mode": "form",
             "target": "new",
-            "context": {
-                "default_bank_account_id": record.id,
-                "default_cbu_cvu_alias": record.cvu_cbu or record.alias,
-            },
+            "context": context,
         }
 
     def sync_from_gateway(self, mode="manual", sync_mode="incremental", job=None):

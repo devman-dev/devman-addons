@@ -137,7 +137,7 @@
             <form>
                 <sheet>
                     <group>
-                        <field name="bank_account_id"/>
+                        <field name="bank_account_id" invisible="1"/>
                         <field name="cbu_cvu_alias" placeholder="Opcional si seleccionás cuenta"/>
                         <field name="start_date"/>
                         <field name="end_date"/>

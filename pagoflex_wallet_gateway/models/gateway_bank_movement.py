@@ -1,6 +1,6 @@
 import logging
 import hashlib
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from odoo import _, api, fields, models
 from odoo.exceptions import UserError, ValidationError
@@ -19,7 +19,7 @@ class PfGatewayBankMovementSyncRun(models.Model):
     cbu_cvu_alias = fields.Char(string="CBU/CVU/Alias consultado", required=True, index=True)
     start_date = fields.Date(string="Fecha desde", required=True)
     end_date = fields.Date(string="Fecha hasta", required=True)
-    page_size = fields.Integer(string="Tamaño página", default=10000)
+    page_size = fields.Integer(string="Tamaño página", default=100)
     first_page_offset = fields.Integer(string="Offset inicial", default=1)
     last_page_offset = fields.Integer(string="Offset final")
     fetch_all_pages = fields.Boolean(string="Todas las páginas")
@@ -130,6 +130,9 @@ class PfGatewayBankMovement(models.Model):
             "El movimiento bancario ya existe para la cuenta consultada.",
         ),
     ]
+    _BANK_MOVEMENT_CRON_LOOKBACK_PARAM = "pagoflex_wallet_gateway.bank_movement_cron_lookback_days"
+    _BANK_MOVEMENT_CRON_PAGE_SIZE_PARAM = "pagoflex_wallet_gateway.bank_movement_cron_page_size"
+    _BANK_MOVEMENT_QUERY_CBU_PARAM = "pagoflex_wallet_gateway.bank_movement_query_cbu"
 
     @api.depends("movement_id", "origin_id", "movement_date", "amount")
     def _compute_name(self):
@@ -194,18 +197,30 @@ class PfGatewayBankMovement(models.Model):
                 raise ValidationError(_("La fecha desde no puede ser posterior a la fecha hasta."))
 
     @api.model
+    def _get_fixed_bank_movement_query_cbu(self):
+        return (
+            self.env["ir.config_parameter"].sudo().get_param(self._BANK_MOVEMENT_QUERY_CBU_PARAM) or ""
+        ).strip()
+
+    @api.model
     def sync_from_gateway_account(
         self,
         bank_account=None,
         cbu_cvu_alias=None,
         start_date=None,
         end_date=None,
-        page_size=10000,
+        page_size=100,
         page_offset=1,
         fetch_all_pages=False,
     ):
         bank_account = bank_account or self.env["pf.gateway.bank.account"].browse()
-        cbu_cvu_alias = (cbu_cvu_alias or bank_account.cvu_cbu or bank_account.alias or "").strip()
+        cbu_cvu_alias = (
+            cbu_cvu_alias
+            or self._get_fixed_bank_movement_query_cbu()
+            or bank_account.cvu_cbu
+            or bank_account.alias
+            or ""
+        ).strip()
         if not cbu_cvu_alias:
             raise UserError(_("Debes indicar un CBU/CVU/Alias para consultar movimientos."))
         if not start_date or not end_date:
@@ -213,7 +228,7 @@ class PfGatewayBankMovement(models.Model):
         if start_date > end_date:
             raise UserError(_("La fecha desde no puede ser posterior a la fecha hasta."))
 
-        page_size = int(page_size or 10000)
+        page_size = int(page_size or 100)
         current_offset = int(page_offset or 1)
         run = self.env["pf.gateway.bank.movement.sync.run"].sudo().create(
             {
@@ -326,7 +341,7 @@ class PfGatewayBankMovement(models.Model):
         payload = {
             "startDate": fields.Date.to_string(start_date),
             "endDate": fields.Date.to_string(end_date),
-            "pageSize": int(page_size or 10000),
+            "pageSize": int(page_size or 100),
             "pageOffset": int(page_offset or 1),
         }
         response = self._gateway_request_json(
@@ -470,6 +485,94 @@ class PfGatewayBankMovement(models.Model):
                 "sticky": False,
             },
         }
+
+    @api.model
+    def cron_sync_recent_bank_movements(self):
+        params = self.env["ir.config_parameter"].sudo()
+        try:
+            lookback_days = int(params.get_param(self._BANK_MOVEMENT_CRON_LOOKBACK_PARAM, "2") or 2)
+        except ValueError:
+            lookback_days = 2
+        try:
+            page_size = int(params.get_param(self._BANK_MOVEMENT_CRON_PAGE_SIZE_PARAM, "100") or 100)
+        except ValueError:
+            page_size = 100
+        lookback_days = max(1, lookback_days)
+        page_size = max(1, page_size)
+
+        today = fields.Date.context_today(self)
+        start_date = today - timedelta(days=lookback_days)
+        end_date = today
+        fixed_query_cbu = self._get_fixed_bank_movement_query_cbu()
+        if fixed_query_cbu:
+            query_targets = [(self.env["pf.gateway.bank.account"].sudo().browse(), fixed_query_cbu)]
+        else:
+            accounts = self.env["pf.gateway.bank.account"].sudo().search(
+                [
+                    ("status", "=", "active"),
+                    "|",
+                    ("cvu_cbu", "!=", False),
+                    ("alias", "!=", False),
+                ]
+            )
+            query_targets = [(account, (account.cvu_cbu or account.alias or "").strip()) for account in accounts]
+        log = self.env["pf.gateway.sync.log"].sudo().create(
+            {
+                "name": _("Consultar y conciliar movimientos bancarios"),
+                "resource": "bank_movements",
+                "mode": "cron",
+            }
+        )
+
+        movement_model = self.sudo()
+        synced_records = movement_model.browse()
+        created_count = 0
+        updated_count = 0
+        failed = []
+        for account, cbu_cvu_alias in query_targets:
+            if not cbu_cvu_alias:
+                continue
+            try:
+                result = movement_model.sync_from_gateway_account(
+                    bank_account=account,
+                    cbu_cvu_alias=cbu_cvu_alias,
+                    start_date=start_date,
+                    end_date=end_date,
+                    page_size=page_size,
+                    page_offset=1,
+                    fetch_all_pages=True,
+                )
+                movements = movement_model.browse(result["record_ids"])
+                synced_records |= movements
+                created_count += result["created"]
+                updated_count += result["updated"]
+                if movements:
+                    movements.action_auto_reconcile()
+            except Exception as exc:
+                failed.append("%s: %s" % (cbu_cvu_alias, exc))
+                _logger.exception("Error sincronizando movimientos bancarios para %s", cbu_cvu_alias)
+
+        status = "failed" if failed else "success"
+        message = _(
+            "Consultas realizadas: %(queries)s. Movimientos sincronizados: %(movements)s. Creados: %(created)s. Actualizados: %(updated)s."
+        ) % {
+            "queries": len(query_targets),
+            "movements": len(synced_records),
+            "created": created_count,
+            "updated": updated_count,
+        }
+        if failed:
+            message = "%s %s" % (message, _("Consultas con error: %s.") % len(failed))
+        log.write(
+            {
+                "status": status,
+                "finished_at": fields.Datetime.now(),
+                "records_processed": len(synced_records),
+                "message": message,
+                "error_detail": "\n".join(failed) if failed else False,
+            }
+        )
+        return len(synced_records)
 
     def _find_transfer_candidates(self):
         self.ensure_one()
