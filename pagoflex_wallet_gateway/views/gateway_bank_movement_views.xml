@@ -119,8 +119,10 @@
                 <filter name="filter_pending" string="Pendientes" domain="[('reconciliation_state', '=', 'pending')]"/>
                 <filter name="filter_conflict" string="A revisar" domain="[('reconciliation_state', '=', 'conflict')]"/>
                 <filter name="filter_reconciled" string="Conciliadas" domain="[('reconciliation_state', 'in', ['auto', 'manual'])]"/>
+                <separator/>
                 <filter name="filter_incoming" string="Entrantes" domain="[('movement_direction', '=', 'INCOMING')]"/>
                 <filter name="filter_outgoing" string="Salientes" domain="[('movement_direction', '=', 'OUTGOING')]"/>
+                <separator/>
                 <filter name="filter_movement_date" string="Fecha" date="movement_date"/>
                 <separator/>
                 <filter name="group_by_account" string="Agrupar por cuenta" context="{'group_by': 'bank_account_id'}"/>

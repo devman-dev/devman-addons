@@ -91,7 +91,7 @@ class PfGatewayDashboard(models.TransientModel):
         visible_accounts = self._visible_active_accounts(active_accounts)
         totals = self._global_totals(wallet_rows, filtered_transfers, visible_accounts, user_model)
         period_bank_movements = self._period_bank_movements(bank_accounts)
-        reconciliation_rows = self._reconciliation_rows(totals, period_bank_movements)
+        reconciliation_rows = self._reconciliation_rows(totals, period_bank_movements, period_transfers, bank_accounts)
         transaction_count_rows = self._transaction_count_rows(period_transfers, bank_accounts, period_bank_movements)
 
         self.kpi_bank_balance = totals["bank_balance"]
@@ -215,36 +215,85 @@ class PfGatewayDashboard(models.TransientModel):
             lambda movement: not movement.bank_account_id or movement.bank_account_id.id in visible_account_ids
         )
 
-    def _reconciliation_rows(self, totals, bank_movements):
-        bank_commission_movements = bank_movements.filtered(lambda movement: self._is_bank_commission_movement(movement))
-        bank_commission_ids = set(bank_commission_movements.ids)
-        bank_incoming = sum(
-            abs(movement.amount or 0.0)
-            for movement in bank_movements
-            if self._is_bank_incoming_movement(movement) and movement.id not in bank_commission_ids
+    def _reconciliation_rows(self, totals, bank_movements, period_transfers=None, bank_accounts=None):
+        period_transfers = period_transfers or self.env["pf.gateway.transfer"]
+        bank_accounts = bank_accounts or self.env["pf.gateway.bank.account"]
+        visible_account_ids = set(self._visible_bank_accounts(bank_accounts).ids)
+        all_account_ids = set(bank_accounts.ids)
+        external_incoming_transfers = period_transfers.filtered(
+            lambda transfer: self._is_external_incoming_transfer(transfer, visible_account_ids, all_account_ids)
         )
-        bank_outgoing = sum(
-            abs(movement.amount or 0.0)
-            for movement in bank_movements
-            if self._is_bank_outgoing_movement(movement) and movement.id not in bank_commission_ids
+        external_outgoing_transfers = period_transfers.filtered(
+            lambda transfer: self._is_external_outgoing_transfer(transfer, visible_account_ids, all_account_ids)
         )
-        bank_commissions = sum(abs(movement.amount or 0.0) for movement in bank_commission_movements)
-        has_bank_commissions = bool(bank_commission_movements)
-        bank_net_flow = bank_incoming - bank_outgoing - (bank_commissions if has_bank_commissions else 0.0)
+        external_incoming_ids = set(external_incoming_transfers.ids)
+        external_outgoing_ids = set(external_outgoing_transfers.ids)
+        bank_incoming_movements = bank_movements.filtered(
+            lambda movement: self._is_bank_incoming_movement(movement)
+        )
+        bank_incoming_matched = bank_incoming_movements.filtered(
+            lambda movement: movement.matched_transfer_id.id in external_incoming_ids
+        )
+        bank_incoming_unmatched = bank_incoming_movements.filtered(lambda movement: not movement.matched_transfer_id)
+        bank_incoming_not_comparable = bank_incoming_movements - bank_incoming_matched - bank_incoming_unmatched
+        bank_incoming = sum(abs(movement.amount or 0.0) for movement in bank_incoming_movements)
+        bank_incoming_unmatched_amount = sum(abs(movement.amount or 0.0) for movement in bank_incoming_unmatched)
+        bank_incoming_not_comparable_amount = sum(
+            abs(movement.amount or 0.0) for movement in bank_incoming_not_comparable
+        )
+        bank_outgoing_movements = bank_movements.filtered(lambda movement: self._is_bank_outgoing_movement(movement))
+        bank_outgoing_matched = bank_outgoing_movements.filtered(
+            lambda movement: movement.matched_transfer_id.id in external_outgoing_ids
+        )
+        bank_outgoing_unmatched = bank_outgoing_movements.filtered(lambda movement: not movement.matched_transfer_id)
+        bank_outgoing_not_comparable = bank_outgoing_movements - bank_outgoing_matched - bank_outgoing_unmatched
+        bank_outgoing = sum(abs(movement.amount or 0.0) for movement in bank_outgoing_movements)
+        bank_outgoing_unmatched_amount = sum(abs(movement.amount or 0.0) for movement in bank_outgoing_unmatched)
+        bank_outgoing_not_comparable_amount = sum(
+            abs(movement.amount or 0.0) for movement in bank_outgoing_not_comparable
+        )
+        bank_net_flow = sum(movement.amount or 0.0 for movement in bank_movements)
         wallet_net_flow = totals["net_period_flow"]
         return [
-            self._reconciliation_row(_("Importes entrantes"), totals["incoming_volume"], bank_incoming),
-            self._reconciliation_row(_("Importes salientes"), totals["outgoing_volume"], bank_outgoing),
+            self._reconciliation_row(
+                _("Importes entrantes"),
+                totals["incoming_volume"],
+                bank_incoming,
+            ),
+            self._reconciliation_row(
+                _("Importes salientes"),
+                totals["outgoing_volume"],
+                bank_outgoing,
+            ),
             self._reconciliation_row(
                 _("Comisiones"),
                 totals["generated_commissions"],
-                bank_commissions if has_bank_commissions else None,
+                0.0,
             ),
             self._reconciliation_row(
                 _("Flujo neto del periodo"),
                 wallet_net_flow,
                 bank_net_flow,
-                partial=not has_bank_commissions and bool(totals["generated_commissions"]),
+            ),
+            self._reconciliation_row(
+                _("Banco creditos sin transferencia vinculada"),
+                0.0,
+                bank_incoming_unmatched_amount,
+            ),
+            self._reconciliation_row(
+                _("Banco debitos sin transferencia vinculada"),
+                0.0,
+                bank_outgoing_unmatched_amount,
+            ),
+            self._reconciliation_row(
+                _("Banco creditos no comparables"),
+                0.0,
+                bank_incoming_not_comparable_amount,
+            ),
+            self._reconciliation_row(
+                _("Banco debitos no comparables"),
+                0.0,
+                bank_outgoing_not_comparable_amount,
             ),
         ]
 
@@ -257,31 +306,69 @@ class PfGatewayDashboard(models.TransientModel):
         external_outgoing_transfers = period_transfers.filtered(
             lambda transfer: self._is_external_outgoing_transfer(transfer, visible_account_ids, all_account_ids)
         )
-        commission_transfers = period_transfers.filtered(lambda transfer: transfer.movement_nature == "COMMISSION")
-        bank_commission_movements = bank_movements.filtered(lambda movement: self._is_bank_commission_movement(movement))
-        bank_commission_ids = set(bank_commission_movements.ids)
+        commission_transfers = period_transfers.filtered(
+            lambda transfer: transfer.movement_nature == "COMMISSION" and (transfer.status or "").upper() != "FAILED"
+        )
         bank_incoming_movements = bank_movements.filtered(
-            lambda movement: self._is_bank_incoming_movement(movement) and movement.id not in bank_commission_ids
+            lambda movement: self._is_bank_incoming_movement(movement)
         )
+        external_incoming_ids = set(external_incoming_transfers.ids)
+        external_outgoing_ids = set(external_outgoing_transfers.ids)
+        bank_incoming_matched = bank_incoming_movements.filtered(
+            lambda movement: movement.matched_transfer_id.id in external_incoming_ids
+        )
+        bank_incoming_unmatched = bank_incoming_movements.filtered(lambda movement: not movement.matched_transfer_id)
+        bank_incoming_not_comparable = bank_incoming_movements - bank_incoming_matched - bank_incoming_unmatched
         bank_outgoing_movements = bank_movements.filtered(
-            lambda movement: self._is_bank_outgoing_movement(movement) and movement.id not in bank_commission_ids
+            lambda movement: self._is_bank_outgoing_movement(movement)
         )
-        has_bank_commissions = bool(bank_commission_movements)
+        bank_outgoing_matched = bank_outgoing_movements.filtered(
+            lambda movement: movement.matched_transfer_id.id in external_outgoing_ids
+        )
+        bank_outgoing_unmatched = bank_outgoing_movements.filtered(lambda movement: not movement.matched_transfer_id)
+        bank_outgoing_not_comparable = bank_outgoing_movements - bank_outgoing_matched - bank_outgoing_unmatched
         wallet_total = len(external_incoming_transfers) + len(external_outgoing_transfers) + len(commission_transfers)
-        bank_total = len(bank_incoming_movements) + len(bank_outgoing_movements) + len(bank_commission_movements)
+        bank_total = len(bank_incoming_movements) + len(bank_outgoing_movements)
         return [
-            self._transaction_count_row(_("Entrantes externas"), len(external_incoming_transfers), len(bank_incoming_movements)),
-            self._transaction_count_row(_("Salientes externas"), len(external_outgoing_transfers), len(bank_outgoing_movements)),
+            self._transaction_count_row(
+                _("Entrantes externas"),
+                len(external_incoming_transfers),
+                len(bank_incoming_movements),
+            ),
+            self._transaction_count_row(
+                _("Salientes externas"),
+                len(external_outgoing_transfers),
+                len(bank_outgoing_movements),
+            ),
             self._transaction_count_row(
                 _("Comisiones"),
                 len(commission_transfers),
-                len(bank_commission_movements) if has_bank_commissions else None,
+                0,
             ),
             self._transaction_count_row(
                 _("Total controlado"),
                 wallet_total,
                 bank_total,
-                partial=not has_bank_commissions and bool(commission_transfers),
+            ),
+            self._transaction_count_row(
+                _("Banco creditos sin transferencia vinculada"),
+                0,
+                len(bank_incoming_unmatched),
+            ),
+            self._transaction_count_row(
+                _("Banco debitos sin transferencia vinculada"),
+                0,
+                len(bank_outgoing_unmatched),
+            ),
+            self._transaction_count_row(
+                _("Banco creditos no comparables"),
+                0,
+                len(bank_incoming_not_comparable),
+            ),
+            self._transaction_count_row(
+                _("Banco debitos no comparables"),
+                0,
+                len(bank_outgoing_not_comparable),
             ),
         ]
 
@@ -555,6 +642,8 @@ class PfGatewayDashboard(models.TransientModel):
         if not commission_account:
             return False
         if transfer.movement_nature != "COMMISSION":
+            return False
+        if (transfer.status or "").upper() == "FAILED":
             return False
         return self._is_commission_account_transfer(transfer, commission_account)
 
