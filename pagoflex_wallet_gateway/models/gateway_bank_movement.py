@@ -278,10 +278,8 @@ class PfGatewayBankMovement(models.Model):
                         cbu_cvu_alias=cbu_cvu_alias,
                         response_data=data,
                     )
-                    domain = self._movement_lookup_domain(values)
-                    record = self.sudo().search(domain, limit=1) if domain else self.browse()
-                    write_values = dict(values)
-                    write_values.pop("movement_identity", None)
+                    record = self._find_existing_movement(values)
+                    write_values = self._movement_write_values(record, values) if record else dict(values)
                     if record:
                         record.write(write_values)
                         updated_count += 1
@@ -433,13 +431,116 @@ class PfGatewayBankMovement(models.Model):
 
     @api.model
     def _movement_lookup_domain(self, values):
-        account_id = values.get("bank_account_id")
         cbu_cvu_alias = values.get("cbu_cvu_alias")
         movement_identity = values.get("movement_identity")
-        movement_id = values.get("movement_id")
-        origin_id = values.get("origin_id")
         if cbu_cvu_alias and movement_identity:
             return [("cbu_cvu_alias", "=", cbu_cvu_alias), ("movement_identity", "=", movement_identity)]
+        return []
+
+    @api.model
+    def _stable_movement_lookup_domain(self, values):
+        cbu_cvu_alias = values.get("cbu_cvu_alias")
+        stable_id = values.get("movement_id") or values.get("origin_id")
+        movement_date = values.get("movement_date")
+        movement_time = values.get("movement_time")
+        amount = values.get("amount")
+        debit_credit = values.get("debit_credit")
+        concept = values.get("concept")
+        if not all([cbu_cvu_alias, stable_id, movement_date, movement_time, debit_credit, concept]):
+            return []
+        return [
+            ("active", "=", True),
+            ("cbu_cvu_alias", "=", cbu_cvu_alias),
+            "|",
+            ("movement_id", "=", stable_id),
+            ("origin_id", "=", stable_id),
+            ("movement_date", "=", movement_date),
+            ("movement_time", "=", movement_time),
+            ("amount", "=", amount or 0.0),
+            ("debit_credit", "=", debit_credit),
+            ("concept", "=", concept),
+        ]
+
+    @api.model
+    def _find_existing_movement(self, values):
+        exact_domain = self._movement_lookup_domain(values)
+        exact = self.sudo().search(exact_domain, limit=1) if exact_domain else self.browse()
+        stable_domain = self._stable_movement_lookup_domain(values)
+        stable = self.sudo().search(stable_domain) if stable_domain else self.browse()
+        candidates = exact | stable
+        if not candidates:
+            legacy_domain = self._legacy_movement_lookup_domain(values)
+            candidates = self.sudo().search(legacy_domain, limit=1) if legacy_domain else self.browse()
+        if not candidates:
+            return self.browse()
+        return self._select_best_existing_movement(candidates)
+
+    @api.model
+    def _select_best_existing_movement(self, records):
+        return records.sorted(
+            key=lambda record: (
+                -self._movement_enrichment_score(record),
+                -(record.last_sync_at.timestamp() if record.last_sync_at else 0),
+                record.id,
+            )
+        )[:1]
+
+    @api.model
+    def _movement_enrichment_score(self, source):
+        if isinstance(source, dict):
+            getter = source.get
+            matched_transfer = False
+            state = getter("reconciliation_state")
+        else:
+            getter = lambda field: source[field]
+            matched_transfer = bool(source.matched_transfer_id)
+            state = source.reconciliation_state
+        score = 0
+        if matched_transfer:
+            score += 32
+        if state in ("auto", "manual"):
+            score += 16
+        if getter("coelsa_id"):
+            score += 8
+        if getter("reference"):
+            score += 4
+        if getter("counterparty_cbu_cvu"):
+            score += 2
+        if getter("counterparty_vat"):
+            score += 1
+        return score
+
+    @api.model
+    def _movement_write_values(self, record, values):
+        write_values = dict(values)
+        write_values.pop("movement_identity", None)
+        if not record:
+            return write_values
+
+        preserve_fields = (
+            "coelsa_id",
+            "reference",
+            "counterparty_cbu_cvu",
+            "counterparty_vat",
+            "counterparty_name",
+        )
+        incoming_score = self._movement_enrichment_score(values)
+        existing_score = self._movement_enrichment_score(record)
+        for field in preserve_fields:
+            existing_value = record[field]
+            incoming_value = write_values.get(field)
+            if existing_value and (not incoming_value or incoming_score < existing_score):
+                write_values.pop(field, None)
+        if incoming_score < existing_score:
+            write_values.pop("raw_payload", None)
+        return write_values
+
+    @api.model
+    def _legacy_movement_lookup_domain(self, values):
+        account_id = values.get("bank_account_id")
+        cbu_cvu_alias = values.get("cbu_cvu_alias")
+        movement_id = values.get("movement_id")
+        origin_id = values.get("origin_id")
         if account_id and movement_id:
             return [("bank_account_id", "=", account_id), ("movement_id", "=", movement_id)]
         if cbu_cvu_alias and movement_id:

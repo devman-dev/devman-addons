@@ -42,6 +42,7 @@ class PfGatewayDashboard(models.TransientModel):
     wallet_summary_html = fields.Html(string="Billeteras", compute="_compute_dashboard", sanitize=False)
     charts_summary_html = fields.Html(string="Analisis del periodo", compute="_compute_dashboard", sanitize=False)
     reconciliation_summary_html = fields.Html(string="Conciliacion operativa", compute="_compute_dashboard", sanitize=False)
+    temporal_reconciliation_html = fields.Html(string="Evolucion temporal", compute="_compute_dashboard", sanitize=False)
     transaction_count_summary_html = fields.Html(string="Conteo operativo", compute="_compute_dashboard", sanitize=False)
     sync_summary_html = fields.Html(string="Control operativo", compute="_compute_dashboard", sanitize=False)
     exceptions_summary_html = fields.Html(string="Riesgos y excepciones", compute="_compute_dashboard", sanitize=False)
@@ -93,6 +94,7 @@ class PfGatewayDashboard(models.TransientModel):
         period_bank_movements = self._period_bank_movements(bank_accounts)
         reconciliation_rows = self._reconciliation_rows(totals, period_bank_movements, period_transfers, bank_accounts)
         transaction_count_rows = self._transaction_count_rows(period_transfers, bank_accounts, period_bank_movements)
+        temporal_rows = self._temporal_reconciliation_rows(period_transfers, bank_accounts, period_bank_movements)
 
         self.kpi_bank_balance = totals["bank_balance"]
         self.kpi_incoming_volume = totals["incoming_volume"]
@@ -138,6 +140,7 @@ class PfGatewayDashboard(models.TransientModel):
         self.wallet_summary_html = self._build_wallet_summary_html(wallet_rows)
         self.charts_summary_html = self._build_charts_summary_html(wallet_rows)
         self.reconciliation_summary_html = self._build_reconciliation_summary_html(reconciliation_rows)
+        self.temporal_reconciliation_html = self._build_temporal_reconciliation_html(temporal_rows)
         self.transaction_count_summary_html = self._build_transaction_count_summary_html(transaction_count_rows)
         self.sync_summary_html = self._build_sync_summary_html(job_model.search([], order="sequence, id"), period_logs)
         self.exceptions_summary_html = self._build_exceptions_html(exception_values)
@@ -146,11 +149,13 @@ class PfGatewayDashboard(models.TransientModel):
             + self.wallet_summary_html
             + self.charts_summary_html
             + self.reconciliation_summary_html
+            + self.temporal_reconciliation_html
             + self.transaction_count_summary_html
         )
         self.financial_summary_html = (
             self.charts_summary_html
             + self.reconciliation_summary_html
+            + self.temporal_reconciliation_html
             + self.transaction_count_summary_html
         )
 
@@ -371,6 +376,68 @@ class PfGatewayDashboard(models.TransientModel):
                 len(bank_outgoing_not_comparable),
             ),
         ]
+
+    def _temporal_reconciliation_rows(self, period_transfers, bank_accounts, bank_movements):
+        visible_account_ids = set(self._visible_bank_accounts(bank_accounts).ids)
+        all_account_ids = set(bank_accounts.ids)
+        rows_by_key = {}
+
+        def ensure_row(concept_key, concept_label, day):
+            key = (concept_key, day)
+            if key not in rows_by_key:
+                rows_by_key[key] = {
+                    "concept_key": concept_key,
+                    "concept": concept_label,
+                    "date": day,
+                    "wallet_count": 0,
+                    "wallet_amount": 0.0,
+                    "bank_count": 0,
+                    "bank_amount": 0.0,
+                }
+            return rows_by_key[key]
+
+        for transfer in period_transfers:
+            day = self._transfer_period_day(transfer)
+            if not day:
+                continue
+            if self._is_external_incoming_transfer(transfer, visible_account_ids, all_account_ids):
+                row = ensure_row("incoming", _("Importes entrantes"), day)
+            elif self._is_external_outgoing_transfer(transfer, visible_account_ids, all_account_ids):
+                row = ensure_row("outgoing", _("Importes salientes"), day)
+            else:
+                continue
+            row["wallet_count"] += 1
+            row["wallet_amount"] += transfer.amount or 0.0
+
+        for movement in bank_movements:
+            day = movement.movement_date
+            if not day:
+                continue
+            if self._is_bank_incoming_movement(movement):
+                row = ensure_row("incoming", _("Importes entrantes"), day)
+            elif self._is_bank_outgoing_movement(movement):
+                row = ensure_row("outgoing", _("Importes salientes"), day)
+            else:
+                continue
+            row["bank_count"] += 1
+            row["bank_amount"] += abs(movement.amount or 0.0)
+
+        concept_order = {"incoming": 0, "outgoing": 1}
+        cumulative = {"incoming": 0.0, "outgoing": 0.0}
+        rows = []
+        for row in sorted(rows_by_key.values(), key=lambda item: (item["date"], concept_order.get(item["concept_key"], 99))):
+            row["difference"] = (row["wallet_amount"] or 0.0) - (row["bank_amount"] or 0.0)
+            cumulative[row["concept_key"]] += row["difference"]
+            row["cumulative_difference"] = cumulative[row["concept_key"]]
+            rows.append(row)
+        return rows
+
+    def _transfer_period_day(self, transfer):
+        if transfer.fecha_negocio:
+            return transfer.fecha_negocio
+        if transfer.transaction_at:
+            return transfer.transaction_at.date()
+        return False
 
     def _transaction_count_row(self, concept, wallet_count, bank_count, partial=False):
         difference = None if bank_count is None else (wallet_count or 0) - (bank_count or 0)
@@ -851,6 +918,53 @@ class PfGatewayDashboard(models.TransientModel):
             escape(bank_value),
             escape(difference),
             escape(row["status_label"]),
+        )
+
+    def _build_temporal_reconciliation_html(self, rows):
+        body = "".join(self._temporal_reconciliation_row_html(row) for row in rows)
+        if not body:
+            body = (
+                "<div class='pf_dashboard_temporal_empty'>%s</div>"
+                % escape(_("Sin movimientos para el periodo seleccionado."))
+            )
+        return (
+            "<section class='pf_dashboard_panel pf_dashboard_temporal'>"
+            "<div class='pf_dashboard_panel_header'><h2>%s</h2><span>%s</span></div>"
+            "<div class='pf_dashboard_temporal_table'>"
+            "<div class='pf_dashboard_temporal_head'>"
+            "<span>%s</span><span>%s</span><span>%s</span><span>%s</span>"
+            "<span>%s</span><span>%s</span><span>%s</span><span>%s</span>"
+            "</div>%s</div></section>"
+        ) % (
+            escape(_("Evolucion temporal de importes")),
+            escape(_("Entrantes y salientes por fecha")),
+            escape(_("Fecha")),
+            escape(_("Concepto")),
+            escape(_("Cant. billetera")),
+            escape(_("Importe billetera")),
+            escape(_("Cant. banco")),
+            escape(_("Importe banco")),
+            escape(_("Dif. dia")),
+            escape(_("Dif. acumulada")),
+            body,
+        )
+
+    def _temporal_reconciliation_row_html(self, row):
+        day = fields.Date.to_string(row["date"]) if row["date"] else "-"
+        return (
+            "<div class='pf_dashboard_temporal_row'>"
+            "<span>%s</span><span>%s</span><strong>%s</strong><strong>%s</strong>"
+            "<strong>%s</strong><strong>%s</strong><strong>%s</strong><strong>%s</strong>"
+            "</div>"
+        ) % (
+            escape(day),
+            escape(row["concept"]),
+            escape(self._format_int(row["wallet_count"])),
+            escape(self._format_money(row["wallet_amount"])),
+            escape(self._format_int(row["bank_count"])),
+            escape(self._format_money(row["bank_amount"])),
+            escape(self._format_money(row["difference"])),
+            escape(self._format_money(row["cumulative_difference"])),
         )
 
     def _build_transaction_count_summary_html(self, rows):

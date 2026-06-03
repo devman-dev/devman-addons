@@ -423,6 +423,67 @@
     color: #92400e;
 }
 
+.pf_dashboard_temporal {
+    overflow: hidden;
+
+    .pf_dashboard_panel_header span {
+        color: #64748b;
+        font-size: 12px;
+    }
+}
+
+.pf_dashboard_temporal_table {
+    display: grid;
+    grid-template-columns: 1fr;
+    overflow-x: auto;
+}
+
+.pf_dashboard_temporal_head,
+.pf_dashboard_temporal_row {
+    align-items: center;
+    display: grid;
+    gap: 10px;
+    grid-template-columns:
+        minmax(92px, 0.7fr)
+        minmax(150px, 1.2fr)
+        repeat(2, minmax(110px, 0.8fr))
+        repeat(2, minmax(110px, 0.8fr))
+        repeat(2, minmax(120px, 0.9fr));
+    min-width: 980px;
+    padding: 11px 16px;
+}
+
+.pf_dashboard_temporal_head {
+    background: #f8fafc;
+    border-bottom: 1px solid #edf1f6;
+    color: #64748b;
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.pf_dashboard_temporal_row {
+    border-bottom: 1px solid #edf1f6;
+    color: #334155;
+    font-size: 13px;
+
+    &:last-child {
+        border-bottom: 0;
+    }
+
+    strong {
+        color: #0f172a;
+        font-size: 13px;
+        overflow-wrap: anywhere;
+    }
+}
+
+.pf_dashboard_temporal_empty {
+    color: #64748b;
+    font-size: 13px;
+    padding: 14px 16px;
+}
+
 .pf_dashboard_ops_grid {
     display: grid;
     gap: 10px;
