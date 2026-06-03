@@ -469,9 +469,6 @@ class PfGatewayBankMovement(models.Model):
         stable = self.sudo().search(stable_domain) if stable_domain else self.browse()
         candidates = exact | stable
         if not candidates:
-            legacy_domain = self._legacy_movement_lookup_domain(values)
-            candidates = self.sudo().search(legacy_domain, limit=1) if legacy_domain else self.browse()
-        if not candidates:
             return self.browse()
         return self._select_best_existing_movement(candidates)
 
