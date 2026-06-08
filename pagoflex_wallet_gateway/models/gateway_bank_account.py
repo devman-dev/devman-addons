@@ -327,9 +327,12 @@ class PfGatewayBankAccount(models.Model):
         self._set_balance_refresh_queue_ids(list(queue_ids))
 
         try:
-            cron = self._get_or_create_balance_refresh_cron()
-            self._activate_balance_refresh_cron_sql(cron=cron)
-            return cron
+            # Aislar este bloque en un savepoint evita dejar la transacción
+            # principal en estado abortado cuando falla SQL interno del cron.
+            with self.env.cr.savepoint():
+                cron = self._get_or_create_balance_refresh_cron()
+                self._activate_balance_refresh_cron_sql(cron=cron)
+                return cron
         except Exception:
             # Nunca bloquear la sincronizacion principal por problemas de
             # programacion del refresco de saldos en segundo plano.
@@ -637,13 +640,13 @@ class PfGatewayBankAccount(models.Model):
     def _compute_user_display_name(self):
         for record in self:
             user = record.gateway_user_id
-            record.user_display_name = user.full_name or user.name or user.email or user.external_id or "-"
+            record.user_display_name = user.gateway_display_name or user.full_name or user.name or user.email or user.external_id or "-"
 
     def name_get(self):
         result = []
         for record in self:
             user = record.gateway_user_id
-            user_name = user.full_name or user.name or user.email or user.external_id or "-"
+            user_name = user.gateway_display_name or user.full_name or user.name or user.email or user.external_id or "-"
             label = f"{user_name} - {record.cvu_cbu}" if record.cvu_cbu else user_name
             result.append((record.id, label))
         return result

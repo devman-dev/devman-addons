@@ -69,6 +69,28 @@ class PfGatewayUserIncomingCommissionDistributionRule(models.Model):
         ),
     ]
 
+    @api.model
+    def _get_fallback_name_from_account(self, destination_bank_account_id):
+        if not destination_bank_account_id:
+            return False
+        account = self.env["pf.gateway.bank.account"].browse(destination_bank_account_id)
+        if not account:
+            return False
+        user = account.gateway_user_id
+        fallback = user.gateway_display_name or user.full_name or user.name or user.email or user.external_id
+        return (fallback or "").strip() or False
+
+    def _get_effective_name(self):
+        self.ensure_one()
+        return (self.name or "").strip() or self._get_fallback_name_from_account(self.destination_bank_account_id.id) or ""
+
+    @api.onchange("destination_bank_account_id")
+    def _onchange_destination_bank_account_id_set_name_fallback(self):
+        for record in self:
+            if (record.name or "").strip():
+                continue
+            record.name = record._get_fallback_name_from_account(record.destination_bank_account_id.id) or False
+
     @api.constrains("commission_percentage")
     def _check_commission_percentage(self):
         for record in self:
@@ -98,6 +120,11 @@ class PfGatewayUserIncomingCommissionDistributionRule(models.Model):
                 if settings_id:
                     prepared_vals["settings_id"] = settings_id
 
+            if not (prepared_vals.get("name") or "").strip():
+                fallback_name = self._get_fallback_name_from_account(prepared_vals.get("destination_bank_account_id"))
+                if fallback_name:
+                    prepared_vals["name"] = fallback_name
+
             prepared_vals_list.append(prepared_vals)
 
         records = super().create(prepared_vals_list)
@@ -114,6 +141,14 @@ class PfGatewayUserIncomingCommissionDistributionRule(models.Model):
         return records
 
     def write(self, vals):
+        vals = dict(vals)
+        if not (vals.get("name") or "").strip():
+            destination_id = vals.get("destination_bank_account_id")
+            if destination_id and len(self) == 1:
+                fallback_name = self._get_fallback_name_from_account(destination_id)
+                if fallback_name:
+                    vals["name"] = fallback_name
+
         should_push = (
             bool(self._gateway_push_fields.intersection(vals.keys()))
             and not self.env.context.get("skip_gateway_push")
@@ -133,7 +168,7 @@ class PfGatewayUserIncomingCommissionDistributionRule(models.Model):
         destination_account = self._get_destination_bank_account()
         return {
             "destination_cvu_cbu": destination_account.cvu_cbu or "",
-            "name": self.name or "",
+            "name": self._get_effective_name(),
             "commission_percentage": round(self.commission_percentage or 0.0, 4),
             "is_active": self.is_active,
         }
@@ -196,7 +231,7 @@ class PfGatewayUserIncomingCommissionDistributionRule(models.Model):
             "user_id": self.settings_id.gateway_user_id.external_id or "",
             "app_name": self.settings_id.app_name,
             "destination_cvu_cbu": self._get_destination_bank_account().cvu_cbu or "",
-            "name": self.name or "",
+            "name": self._get_effective_name(),
             "commission_percentage": round(self.commission_percentage or 0.0, 4),
             "is_active": self.is_active,
         }
