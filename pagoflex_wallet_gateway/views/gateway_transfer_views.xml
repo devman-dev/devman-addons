@@ -54,6 +54,9 @@
                             <field name="amount" readonly="1"/>
                             <field name="fecha_negocio" readonly="1"/>
                             <field name="business_data_last_check_at" readonly="1"/>
+                            <field name="status_validation_attempts" readonly="1"/>
+                            <field name="status_validation_last_at" readonly="1"/>
+                            <field name="status_validation_exhausted" readonly="1"/>
                             <field name="transaction_at" readonly="1"/>
                         </group>
                     </group>
@@ -81,6 +84,7 @@
                         <page string="Metadatos" groups="pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_admin,pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_operator">
                             <field name="extra_metadata" widget="text" readonly="1"/>
                             <field name="connector_response" widget="text" readonly="1"/>
+                            <field name="status_validation_error" widget="text" readonly="1"/>
                         </page>
                         <page string="Payload crudo" groups="pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_admin,pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_operator">
                             <field name="raw_payload" widget="text" readonly="1"/>
@@ -115,6 +119,7 @@
                 <separator/>
                 <filter name="filter_completed" string="Completadas" domain="[('status', '=', 'COMPLETED')]"/>
                 <filter name="filter_other_status" string="Otras" domain="['|', ('status', '=', False), ('status', '!=', 'COMPLETED')]"/>
+                <filter name="filter_status_validation_exhausted" string="Validacion agotada" domain="[('status_validation_exhausted', '=', True)]"/>
                 <separator/>
                 <filter name="group_by_fecha_negocio_day" string="Fecha negocio: Día" context="{'group_by': 'fecha_negocio:day'}"/>
                 <filter name="group_by_fecha_negocio_month" string="Fecha negocio: Mes" context="{'group_by': 'fecha_negocio:month'}"/>

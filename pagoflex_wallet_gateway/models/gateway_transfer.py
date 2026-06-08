@@ -89,6 +89,27 @@ class PfGatewayTransfer(models.Model):
     transaction_at = fields.Datetime(index=True)
     fecha_negocio = fields.Date(string="Fecha negocio", index=True)
     business_data_last_check_at = fields.Datetime(string="Ultima consulta datos bancarios", index=True)
+    status_validation_attempts = fields.Integer(
+        string="Intentos validacion estado",
+        default=0,
+        index=True,
+        readonly=True,
+    )
+    status_validation_last_at = fields.Datetime(
+        string="Ultima validacion estado",
+        index=True,
+        readonly=True,
+    )
+    status_validation_exhausted = fields.Boolean(
+        string="Validacion estado agotada",
+        default=False,
+        index=True,
+        readonly=True,
+    )
+    status_validation_error = fields.Text(
+        string="Ultimo error validacion estado",
+        readonly=True,
+    )
     last_sync_at = fields.Datetime(index=True)
     raw_payload = fields.Text()
 
@@ -536,13 +557,31 @@ class PfGatewayTransfer(models.Model):
     @api.model
     def cron_validate_pending_transfer_statuses(self, limit=10):
         transfer_model = self.sudo()
+        params = self.env["ir.config_parameter"].sudo()
+        try:
+            max_attempts = int(params.get_param("pagoflex_wallet_gateway.pending_status_max_attempts", "5") or 5)
+        except ValueError:
+            max_attempts = 5
+        try:
+            cooldown_minutes = int(params.get_param("pagoflex_wallet_gateway.pending_status_cooldown_minutes", "30") or 30)
+        except ValueError:
+            cooldown_minutes = 30
+        max_attempts = max(1, max_attempts)
+        cooldown_minutes = max(0, cooldown_minutes)
+        now = fields.Datetime.now()
+        cooldown_limit = fields.Datetime.subtract(now, minutes=cooldown_minutes) if cooldown_minutes else now
         transfers = transfer_model.search(
             [
                 ("active", "=", True),
                 ("origin_id", "!=", False),
+                ("status_validation_exhausted", "=", False),
+                ("status_validation_attempts", "<", max_attempts),
+                "|",
+                ("status_validation_last_at", "=", False),
+                ("status_validation_last_at", "<=", cooldown_limit),
                 "|",
                 ("status", "=", False),
-                ("status", "!=", "COMPLETED"),
+                ("status", "not in", ["COMPLETED", "FAILED"]),
             ],
             order="transaction_at desc, id desc",
             limit=limit,
@@ -558,6 +597,8 @@ class PfGatewayTransfer(models.Model):
         updated = 0
         errors = []
         for transfer in transfers:
+            attempt_now = fields.Datetime.now()
+            attempts = (transfer.status_validation_attempts or 0) + 1
             try:
                 response = transfer._query_bank_by_origin_id()
                 response_text = transfer._payload_to_text(response)
@@ -569,23 +610,43 @@ class PfGatewayTransfer(models.Model):
                     response_text,
                 )
                 target_status = transfer._target_status_from_bank_response(response)
-                transfer.write(
-                    {
-                        "connector_response": response_text,
-                        "last_sync_at": fields.Datetime.now(),
-                    }
-                )
+                target_status = (target_status or "").strip().upper()
+                current_status = (transfer.status or "").strip().upper()
+                exhausted = target_status in ("COMPLETED", "FAILED") or attempts >= max_attempts
+                values = {
+                    "connector_response": response_text,
+                    "last_sync_at": attempt_now,
+                    "status_validation_attempts": attempts,
+                    "status_validation_last_at": attempt_now,
+                    "status_validation_exhausted": exhausted,
+                    "status_validation_error": False,
+                }
                 if target_status and target_status != (transfer.status or "").strip().upper():
-                    transfer.write({"status": target_status})
+                    values["status"] = target_status
                     updated += 1
+                elif current_status in ("COMPLETED", "FAILED"):
+                    values["status_validation_exhausted"] = True
+                transfer.write(values)
                 processed += 1
             except Exception as exc:
+                exhausted = attempts >= max_attempts
+                transfer.write(
+                    {
+                        "last_sync_at": attempt_now,
+                        "status_validation_attempts": attempts,
+                        "status_validation_last_at": attempt_now,
+                        "status_validation_exhausted": exhausted,
+                        "status_validation_error": str(exc),
+                    }
+                )
                 errors.append("%s: %s" % (transfer.origin_id or transfer.id, exc))
 
         status = "failed" if errors and not processed else "success"
-        message = _("Transferencias validadas: %(processed)s. Estados actualizados: %(updated)s.") % {
+        message = _("Transferencias validadas: %(processed)s. Estados actualizados: %(updated)s. Intentos maximos: %(max_attempts)s. Enfriamiento: %(cooldown)s min.") % {
             "processed": processed,
             "updated": updated,
+            "max_attempts": max_attempts,
+            "cooldown": cooldown_minutes,
         }
         if errors:
             message = "%s %s" % (message, _("Errores: %s") % "; ".join(errors[:5]))
