@@ -46,6 +46,8 @@
     "assets": {
         "web.assets_backend": [
             "pagoflex_wallet_gateway/static/src/scss/gateway_dashboard.scss",
+            "pagoflex_wallet_gateway/static/src/js/pf_realtime_charts_widget.js",
+            "pagoflex_wallet_gateway/static/src/xml/pf_realtime_charts_widget.xml",
         ],
     },
     "images": ["static/description/icon.png"],

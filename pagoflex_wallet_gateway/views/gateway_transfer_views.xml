@@ -19,7 +19,7 @@
                 <field name="currency"/>
                 <field name="amount" sum="Total"/>
                 <field name="fecha_negocio"/>
-                <!-- <field name="transaction_at"/> -->
+                <field name="transaction_at" string="Fecha" optional="hide"/>
             </list>
         </field>
     </record>

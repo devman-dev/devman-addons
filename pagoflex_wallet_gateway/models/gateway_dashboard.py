@@ -4,6 +4,12 @@ from markupsafe import escape
 
 from odoo import _, api, fields, models
 from odoo.osv import expression
+from odoo.tools import format_date
+
+import time as std_time
+
+_DASHBOARD_CACHE = {}
+_DASHBOARD_CACHE_TTL = 30  # segundos de caché para evitar sobrecarga
 
 
 class PfGatewayDashboard(models.TransientModel):
@@ -158,6 +164,181 @@ class PfGatewayDashboard(models.TransientModel):
             + self.temporal_reconciliation_html
             + self.transaction_count_summary_html
         )
+
+    @api.model
+    def get_realtime_charts_data(self, date_from_str, date_to_str, periodicity='daily', filter_app=False):
+        """
+        Endpoint optimizado para Chart.js.
+        Retorna datos agrupados por app y fecha.
+        Incluye caché temporal para evitar consultas pesadas continuas.
+        """
+        cache_key = f"{date_from_str}_{date_to_str}_{periodicity}_{filter_app}"
+        now = std_time.time()
+        
+        # Retornar de caché si es válido
+        if cache_key in _DASHBOARD_CACHE:
+            cached_data, timestamp = _DASHBOARD_CACHE[cache_key]
+            if now - timestamp < _DASHBOARD_CACHE_TTL:
+                return cached_data
+
+        date_from = fields.Date.from_string(date_from_str) if date_from_str else False
+        date_to = fields.Date.from_string(date_to_str) if date_to_str else False
+        
+        domain_base = [('active', '=', True)]
+        period_domain = self._transfer_business_period_domain(date_from, date_to)
+        if period_domain:
+            domain_base = expression.AND([domain_base, period_domain])
+            
+        transfer_model = self.env["pf.gateway.transfer"]
+        
+        # Buscar todas las transferencias del periodo para procesar en memoria
+        # Es más eficiente que múltiples queries SQL complejas
+        period_transfers = transfer_model.search(domain_base)
+        
+        app_configs = self.env["pf.gateway.dashboard.app.config"].search([("active", "=", True)])
+        bank_accounts = self.env["pf.gateway.bank.account"].search([])
+        active_accounts = bank_accounts.filtered(lambda a: a.status == "active")
+        
+        app_keys = {self._app_key(app_name) for app_name in bank_accounts.mapped("app")}
+        app_keys.update(self._app_key(app_name) for app_name in app_configs.mapped("app_name"))
+        app_keys = sorted(app_key for app_key in app_keys if app_key)
+        
+        if filter_app:
+            app_keys = [app_key for app_key in app_keys if app_key == filter_app]
+            
+        config_by_app = {self._app_key(config.app_name): config for config in app_configs}
+        all_account_ids = set(bank_accounts.ids)
+        
+        # Generar etiquetas de tiempo
+        labels_dict = self._generate_time_labels(date_from, date_to, periodicity)
+        labels = list(labels_dict.keys())
+        
+        result = {
+            'last_update': fields.Datetime.now().isoformat() + 'Z',
+            'volumen_entrante': {
+                'labels': list(labels_dict.values()),
+                'datasets': []
+            },
+            'comisiones': {
+                'labels': list(labels_dict.values()),
+                'datasets': []
+            },
+            'transferencias': {
+                'labels': [],
+                'datasets': [{'data': [], 'backgroundColor': []}],
+                'total': 0
+            }
+        }
+        
+        colors = ['#4e73df', '#1cc88a', '#36b9cc', '#f6c23e', '#e74a3b', '#6f42c1', '#fd7e14']
+        
+        transfer_total = 0
+        
+        for index, app_key in enumerate(app_keys):
+            config = config_by_app.get(app_key)
+            display_app_name = config.app_name if config else app_key
+            display_app_name = self._display_app_name(display_app_name)
+            color = colors[index % len(colors)]
+            
+            app_all_accounts = bank_accounts.filtered(lambda account, key=app_key: self._app_key(account.app) == key)
+            app_account_ids = set(app_all_accounts.ids)
+            
+            # Filtros por app
+            incoming_transfers = period_transfers.filtered(
+                lambda t, account_ids=app_account_ids: self._is_external_incoming_transfer(t, account_ids, all_account_ids)
+            )
+            
+            commission_account = config.commission_bank_account_id if config else self.env["pf.gateway.bank.account"]
+            commission_transfers = period_transfers.filtered(
+                lambda t, account=commission_account: self._is_commission_transfer_for_account(t, account)
+            )
+            
+            visible_app_transfers = period_transfers.filtered(
+                lambda t, account_ids=app_account_ids, account=commission_account: self._matches_transfer_filters(
+                    t, account_ids, all_account_ids, account
+                )
+            )
+            
+            # Agrupar volumen entrante
+            vol_data = {label: 0.0 for label in labels}
+            for t in incoming_transfers:
+                key = self._get_time_key(self._transfer_period_day(t), periodicity)
+                if key in vol_data:
+                    vol_data[key] += t.amount or 0.0
+                    
+            volumen_total = sum(vol_data.values())
+            result['volumen_entrante']['datasets'].append({
+                'label': display_app_name,
+                'data': list(vol_data.values()),
+                'total': volumen_total,
+                'borderColor': color,
+                'backgroundColor': color,
+                'fill': False,
+                'tension': 0.4
+            })
+            
+            # Agrupar comisiones
+            com_data = {label: 0.0 for label in labels}
+            for t in commission_transfers:
+                key = self._get_time_key(self._transfer_period_day(t), periodicity)
+                if key in com_data:
+                    com_data[key] += t.amount or 0.0
+                    
+            comisiones_total = sum(com_data.values())
+            result['comisiones']['datasets'].append({
+                'label': display_app_name,
+                'data': list(com_data.values()),
+                'total': comisiones_total,
+                'borderColor': color,
+                'backgroundColor': color,
+                'fill': False,
+                'tension': 0.4
+            })
+            
+            # Transferencias (Dona)
+            app_transfer_count = len(visible_app_transfers)
+            if app_transfer_count > 0:
+                result['transferencias']['labels'].append(display_app_name)
+                result['transferencias']['datasets'][0]['data'].append(app_transfer_count)
+                result['transferencias']['datasets'][0]['backgroundColor'].append(color)
+                transfer_total += app_transfer_count
+                
+        result['transferencias']['total'] = transfer_total
+        
+        # Guardar en caché
+        _DASHBOARD_CACHE[cache_key] = (result, now)
+        
+        return result
+
+    def _generate_time_labels(self, date_from, date_to, periodicity):
+        from datetime import timedelta
+        labels_dict = {}
+        if not date_from or not date_to:
+            return labels_dict
+            
+        current = date_from
+        while current <= date_to:
+            key = self._get_time_key(current, periodicity)
+            if key not in labels_dict:
+                if periodicity == 'daily':
+                    labels_dict[key] = current.strftime('%d/%m')
+                elif periodicity == 'weekly':
+                    labels_dict[key] = f"Semana {current.isocalendar()[1]}"
+                elif periodicity == 'monthly':
+                    labels_dict[key] = current.strftime('%m/%Y')
+            current += timedelta(days=1)
+        return labels_dict
+
+    def _get_time_key(self, date_obj, periodicity):
+        if not date_obj:
+            return 'unknown'
+        if periodicity == 'daily':
+            return date_obj.strftime('%Y-%m-%d')
+        elif periodicity == 'weekly':
+            return f"{date_obj.isocalendar()[0]}-W{date_obj.isocalendar()[1]}"
+        elif periodicity == 'monthly':
+            return date_obj.strftime('%Y-%m')
+        return date_obj.strftime('%Y-%m-%d')
 
     def _period_bounds(self):
         start_dt = False

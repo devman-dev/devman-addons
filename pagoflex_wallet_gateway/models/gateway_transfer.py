@@ -390,6 +390,7 @@ class PfGatewayTransfer(models.Model):
     def action_query_by_origin_id(self):
         self.ensure_one()
         response = self._query_bank_by_origin_id()
+        self._update_bank_business_data_from_response(response)
         return self._open_response_wizard(_("Consulta por Origin ID"), response)
 
     def action_query_by_connector_id(self):
@@ -397,6 +398,7 @@ class PfGatewayTransfer(models.Model):
         if not self.connector_id:
             raise UserError(_("Esta transferencia no tiene Connector ID asignado."))
         response = self._query_bank_by_connector_id()
+        self._update_bank_business_data_from_response(response)
         return self._open_response_wizard(_("Consulta por Connector ID (Coelsa)"), response)
 
     def _open_response_wizard(self, title, response):
@@ -550,8 +552,6 @@ class PfGatewayTransfer(models.Model):
                 date_value = self._coerce_date(extra_metadata.get(field_name), field_name=field_name)
                 if date_value:
                     return date_value
-        if transaction_at:
-            return transaction_at.date()
         return False
 
     @api.model
@@ -842,6 +842,7 @@ class PfGatewayTransfer(models.Model):
                 source_user = source_account.gateway_user_id if source_account else user_model.browse()
                 destination_user = destination_account.gateway_user_id if destination_account else user_model.browse()
                 transaction_at = self._coerce_datetime(item.get("transaction_at"), field_name="transaction_at")
+                business_date = self._business_date_from_item(item)
                 values = {
                     "external_id": str(item.get("id")),
                     "active": True,
@@ -873,11 +874,12 @@ class PfGatewayTransfer(models.Model):
                     "source_created_at": self._coerce_datetime(item.get("created_at"), field_name="created_at"),
                     "source_updated_at": self._coerce_datetime(item.get("updated_at"), field_name="updated_at"),
                     "transaction_at": transaction_at,
-                    "fecha_negocio": self._business_date_from_item(item, transaction_at=transaction_at),
                     "last_sync_at": fields.Datetime.now(),
                     "raw_payload": self._payload_to_text(item),
                 }
                 record = transfer_model.search([("external_id", "=", values["external_id"])], limit=1)
+                if business_date:
+                    values["fecha_negocio"] = business_date
                 if record:
                     record.with_context(skip_gateway_status_push=True).write(values)
                 else:

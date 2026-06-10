@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="pagoflex_wallet_gateway.PfRealtimeChartsWidget" owl="1">
+        <div class="pf-realtime-charts-container mt-4 mb-4">
+            <div t-if="state.loading" class="text-center p-4">
+                <i class="fa fa-circle-o-notch fa-spin fa-2x text-primary"></i>
+                <p class="mt-2 text-muted">Cargando gráficos en tiempo real...</p>
+            </div>
+            
+            <div t-if="state.error" class="alert alert-warning">
+                <i class="fa fa-exclamation-triangle"></i> <t t-esc="state.error"/>
+            </div>
+
+            <div t-if="!state.loading and !state.error" class="row">
+                <div class="col-12 d-flex justify-content-between align-items-center text-muted small mb-3">
+                    <div class="btn-group" role="group">
+                        <button type="button" t-on-click="() => this.setPeriodicity('daily')" t-attf-class="btn btn-sm btn-outline-secondary {{ state.periodicity === 'daily' ? 'active' : '' }}">Diario</button>
+                        <button type="button" t-on-click="() => this.setPeriodicity('weekly')" t-attf-class="btn btn-sm btn-outline-secondary {{ state.periodicity === 'weekly' ? 'active' : '' }}">Semanal</button>
+                        <button type="button" t-on-click="() => this.setPeriodicity('monthly')" t-attf-class="btn btn-sm btn-outline-secondary {{ state.periodicity === 'monthly' ? 'active' : '' }}">Mensual</button>
+                    </div>
+                    <div>
+                        <i class="fa fa-circle text-success pulse-animation"></i> En vivo - Última actualización: <t t-esc="state.lastUpdate"/>
+                    </div>
+                </div>
+                
+                <div class="col-md-4">
+                    <div class="card shadow-sm h-100 border-0">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <h5 class="card-title fw-bold">Volumen Entrante <small class="d-block text-muted fw-normal mt-1" style="font-size: 0.75rem;">(solo ingresos externos)</small></h5>
+                                <div class="text-end text-primary fw-bold fs-5"><t t-esc="formatCurrency(state.volumenTotal)"/></div>
+                            </div>
+                            <div style="height: 250px; position: relative;" class="mt-3">
+                                <canvas t-ref="volumenCanvas"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="card shadow-sm h-100 border-0">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <h5 class="card-title fw-bold">Comisiones Generadas <small class="d-block text-muted fw-normal mt-1" style="font-size: 0.75rem;">(acumulado)</small></h5>
+                                <div class="text-end text-purple fw-bold fs-5" style="color: #6f42c1;"><t t-esc="formatCurrency(state.comisionesTotal)"/></div>
+                            </div>
+                            <div style="height: 250px; position: relative;" class="mt-3">
+                                <canvas t-ref="comisionesCanvas"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="card shadow-sm h-100 border-0">
+                        <div class="card-body">
+                            <h5 class="card-title fw-bold mb-3">Transferencias del Período</h5>
+                            <div style="height: 250px; position: relative;">
+                                <canvas t-ref="transferenciasCanvas"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <style>
+                .pulse-animation {
+                    animation: pulse 2s infinite;
+                }
+                @keyframes pulse {
+                    0% { opacity: 1; }
+                    50% { opacity: 0.4; }
+                    100% { opacity: 1; }
+                }
+                .pf-realtime-charts-container .card {
+                    border-radius: 8px;
+                    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+                }
+            </style>
+        </div>
+    </t>
+</templates>
