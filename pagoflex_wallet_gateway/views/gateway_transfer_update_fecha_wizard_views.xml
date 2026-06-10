@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_pf_gateway_transfer_update_fecha_wizard_form" model="ir.ui.view">
+        <field name="name">pf.gateway.transfer.update.fecha.wizard.form</field>
+        <field name="model">pf.gateway.transfer.update.fecha.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Actualizar Fecha de Negocio">
+                <group>
+                    <field name="fecha_negocio"/>
+                </group>
+                <footer>
+                    <button name="action_update_fecha" type="object" string="Actualizar Fecha" class="btn-primary" data-hotkey="q"/>
+                    <button string="Cancelar" class="btn-secondary" special="cancel" data-hotkey="z"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_pf_gateway_transfer_update_fecha_wizard" model="ir.actions.act_window">
+        <field name="name">Actualizar Fecha de Negocio</field>
+        <field name="res_model">pf.gateway.transfer.update.fecha.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+        <field name="binding_model_id" ref="pagoflex_wallet_gateway.model_pf_gateway_transfer"/>
+        <field name="binding_view_types">list,form</field>
+    </record>
+</odoo>

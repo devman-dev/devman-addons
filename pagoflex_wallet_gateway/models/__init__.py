@@ -23,6 +23,7 @@ from . import gateway_bank_movement_sync_wizard
 from . import gateway_user_statement_line
 from . import gateway_user_statement_summary
 from . import gateway_transfer_response_wizard
+from . import gateway_transfer_update_fecha_wizard
 from . import account_summary_report
 from . import commission_payable_report
 from . import res_config_settings

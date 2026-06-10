@@ -36,6 +36,7 @@
         "views/gateway_bank_account_views.xml",
         "views/gateway_bank_movement_views.xml",
         "views/gateway_transfer_response_wizard_views.xml",
+        "views/gateway_transfer_update_fecha_wizard_views.xml",
         "views/gateway_transfer_views.xml",
         "views/account_summary_report_views.xml",
         "views/commission_payable_report_views.xml",

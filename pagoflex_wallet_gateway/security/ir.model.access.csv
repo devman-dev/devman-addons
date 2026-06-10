@@ -83,3 +83,5 @@
 "access_pf_gateway_daily_reference_import_line_operator","pf.gateway.daily.reference.import.line operator","model_pf_gateway_daily_reference_import_line","pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_operator",1,1,1,1
 "access_pf_gateway_daily_reference_import_wizard_admin","pf.gateway.daily.reference.import.wizard admin","model_pf_gateway_daily_reference_import_wizard","pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_admin",1,1,1,1
 "access_pf_gateway_daily_reference_import_wizard_operator","pf.gateway.daily.reference.import.wizard operator","model_pf_gateway_daily_reference_import_wizard","pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_operator",1,1,1,1
+"access_pf_gateway_transfer_update_fecha_wizard_admin","pf.gateway.transfer.update.fecha.wizard admin","model_pf_gateway_transfer_update_fecha_wizard","pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_admin",1,1,1,1
+"access_pf_gateway_transfer_update_fecha_wizard_operator","pf.gateway.transfer.update.fecha.wizard operator","model_pf_gateway_transfer_update_fecha_wizard","pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_operator",1,1,1,1
