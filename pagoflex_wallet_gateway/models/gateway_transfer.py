@@ -1,3 +1,4 @@
+import json
 import logging
 
 from markupsafe import escape
@@ -818,6 +819,84 @@ class PfGatewayTransfer(models.Model):
             self.env.user.notify_success(message=_("Estado actualizado correctamente en gateway."))
         return result
 
+    def _resolve_transfer_account(self, account_external_id=None, address=None):
+        account_model = self.env["pf.gateway.bank.account"]
+        account = account_model.browse()
+        if account_external_id:
+            account = account_model.search([("external_id", "=", str(account_external_id))], limit=1)
+        if not account and address:
+            account = account_model.search([("cvu_cbu", "=", address)], limit=1)
+        return account
+
+    def _transfer_link_values(self, source_account, destination_account):
+        return {
+            "source_bank_account_id": source_account.id,
+            "destination_bank_account_id": destination_account.id,
+            "source_user_id": source_account.gateway_user_id.id,
+            "destination_user_id": destination_account.gateway_user_id.id,
+        }
+
+    def _transfer_link_values_from_item(self, item):
+        source_account = self._resolve_transfer_account(
+            account_external_id=item.get("source_account_id"),
+            address=item.get("source_address"),
+        )
+        destination_account = self._resolve_transfer_account(
+            account_external_id=item.get("destination_account_id"),
+            address=item.get("destination_address"),
+        )
+        return self._transfer_link_values(source_account, destination_account)
+
+    def _transfer_payload_dict(self, raw_payload):
+        if not raw_payload:
+            return {}
+        if isinstance(raw_payload, dict):
+            return raw_payload
+        try:
+            payload = json.loads(raw_payload)
+        except (TypeError, ValueError, json.JSONDecodeError):
+            return {}
+        return payload if isinstance(payload, dict) else {}
+
+    def _relink_orphan_transfers(self):
+        orphan_domain = [
+            "|",
+            "|",
+            ("source_bank_account_id", "=", False),
+            ("destination_bank_account_id", "=", False),
+            "|",
+            ("source_user_id", "=", False),
+            ("destination_user_id", "=", False),
+        ]
+        orphan_transfers = self.search(orphan_domain)
+        relinked = 0
+        for transfer in orphan_transfers:
+            payload = self._transfer_payload_dict(transfer.raw_payload)
+            source_account = transfer.source_bank_account_id or self._resolve_transfer_account(
+                account_external_id=payload.get("source_account_id"),
+                address=transfer.source_address,
+            )
+            destination_account = transfer.destination_bank_account_id or self._resolve_transfer_account(
+                account_external_id=payload.get("destination_account_id"),
+                address=transfer.destination_address,
+            )
+            values = self._transfer_link_values(source_account, destination_account)
+            changed_values = {
+                field_name: value
+                for field_name, value in values.items()
+                if transfer[field_name].id != value
+            }
+            if changed_values:
+                transfer.with_context(skip_gateway_status_push=True).write(changed_values)
+                relinked += 1
+        return relinked
+
+    @api.model
+    def cron_relink_orphan_transfers(self):
+        relinked = self.sudo()._relink_orphan_transfers()
+        _logger.info("[cron_relink_orphan_transfers] Transferencias reenlazadas: %s", relinked)
+        return relinked
+
     def sync_from_gateway(self, mode="manual", sync_mode="incremental", job=None):
         transfer_model = self.sudo()
         updated_since = None
@@ -834,13 +913,7 @@ class PfGatewayTransfer(models.Model):
         )
         try:
             items = self._gateway_paginated_get("/admin/gateway/transfers", updated_since=updated_since)
-            account_model = self.env["pf.gateway.bank.account"]
-            user_model = self.env["pf.gateway.user"]
             for item in items:
-                source_account = account_model.search([("external_id", "=", item.get("source_account_id"))], limit=1)
-                destination_account = account_model.search([("external_id", "=", item.get("destination_account_id"))], limit=1)
-                source_user = source_account.gateway_user_id if source_account else user_model.browse()
-                destination_user = destination_account.gateway_user_id if destination_account else user_model.browse()
                 transaction_at = self._coerce_datetime(item.get("transaction_at"), field_name="transaction_at")
                 business_date = self._business_date_from_item(item)
                 values = {
@@ -855,10 +928,6 @@ class PfGatewayTransfer(models.Model):
                     "concept": item.get("concept"),
                     "description": item.get("description"),
                     "connector_id": item.get("connector_id"),
-                    "source_bank_account_id": source_account.id,
-                    "destination_bank_account_id": destination_account.id,
-                    "source_user_id": source_user.id,
-                    "destination_user_id": destination_user.id,
                     "source_address": item.get("source_address"),
                     "source_address_type": item.get("source_address_type"),
                     "source_owner_id_type": item.get("source_owner_id_type"),
@@ -877,6 +946,7 @@ class PfGatewayTransfer(models.Model):
                     "last_sync_at": fields.Datetime.now(),
                     "raw_payload": self._payload_to_text(item),
                 }
+                values.update(self._transfer_link_values_from_item(item))
                 record = transfer_model.search([("external_id", "=", values["external_id"])], limit=1)
                 if business_date:
                     values["fecha_negocio"] = business_date
@@ -885,12 +955,13 @@ class PfGatewayTransfer(models.Model):
                 else:
                     transfer_model.create(values)
 
+            relinked = transfer_model._relink_orphan_transfers()
             log.write(
                 {
                     "status": "success",
                     "finished_at": fields.Datetime.now(),
                     "records_processed": len(items),
-                    "message": f"Transferencias sincronizadas: {len(items)}",
+                    "message": f"Transferencias sincronizadas: {len(items)}. Reenlazadas: {relinked}",
                 }
             )
             return len(items)

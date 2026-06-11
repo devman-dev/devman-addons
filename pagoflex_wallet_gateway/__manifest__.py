@@ -41,8 +41,10 @@
         "views/account_summary_report_views.xml",
         "views/commission_payable_report_views.xml",
         "views/daily_reference_report_views.xml",
+        "views/reconciliation_control_views.xml",
         "data/sync_job_data.xml",
         "data/cron.xml",
+        "data/cron_reconciliation.xml",
     ],
     "assets": {
         "web.assets_backend": [

@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Tree View -->
+    <record id="view_pf_reconciliation_control_tree" model="ir.ui.view">
+        <field name="name">pf.reconciliation.control.tree</field>
+        <field name="model">pf.reconciliation.control</field>
+        <field name="arch" type="xml">
+            <list decoration-danger="diff_in_count != 0 or diff_out_count != 0" create="0" edit="0" delete="0">
+                <field name="date"/>
+                <field name="time_window"/>
+                <field name="wallet_in_count" string="Billetera Entrantes"/>
+                <field name="bank_in_count" string="Banco Entrantes"/>
+                <field name="diff_in_count" string="Dif. Ent. Cant."/>
+                
+                <field name="wallet_in_amount" string="Billetera Ent. $"/>
+                <field name="bank_in_amount" string="Banco Ent. $"/>
+                <field name="diff_in_amount" string="Dif. Ent. $"/>
+
+                <field name="wallet_out_count" string="Billetera Salientes"/>
+                <field name="bank_out_count" string="Banco Salientes"/>
+                <field name="diff_out_count" string="Dif. Sal. Cant."/>
+                
+                <field name="wallet_out_amount" string="Billetera Sal. $"/>
+                <field name="bank_out_amount" string="Banco Sal. $"/>
+                <field name="diff_out_amount" string="Dif. Sal. $"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Pivot View -->
+    <record id="view_pf_reconciliation_control_pivot" model="ir.ui.view">
+        <field name="name">pf.reconciliation.control.pivot</field>
+        <field name="model">pf.reconciliation.control</field>
+        <field name="arch" type="xml">
+            <pivot string="Conciliación por Cortes" disable_linking="True">
+                <field name="date" type="row"/>
+                <field name="time_window" type="row"/>
+                <field name="wallet_in_count" type="measure"/>
+                <field name="bank_in_count" type="measure"/>
+                <field name="diff_in_count" type="measure"/>
+                <field name="wallet_out_count" type="measure"/>
+                <field name="bank_out_count" type="measure"/>
+                <field name="diff_out_count" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+
+    <!-- Search View -->
+    <record id="view_pf_reconciliation_control_search" model="ir.ui.view">
+        <field name="name">pf.reconciliation.control.search</field>
+        <field name="model">pf.reconciliation.control</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="date"/>
+                <filter string="Con Diferencias (Entrantes)" name="diff_in" domain="[('diff_in_count', '!=', 0)]"/>
+                <filter string="Con Diferencias (Salientes)" name="diff_out" domain="[('diff_out_count', '!=', 0)]"/>
+                <separator/>
+                <filter string="Fecha" name="group_by_date" context="{'group_by':'date'}"/>
+                <filter string="Franja" name="group_by_window" context="{'group_by':'time_window'}"/>
+            </search>
+        </field>
+    </record>
+
+    <!-- Action -->
+    <record id="action_pf_reconciliation_control" model="ir.actions.act_window">
+        <field name="name">Conciliación por Cortes Horarios</field>
+        <field name="res_model">pf.reconciliation.control</field>
+        <field name="view_mode">list,pivot</field>
+        <field name="search_view_id" ref="view_pf_reconciliation_control_search"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_empty_folder">
+                No hay registros de conciliación generados.
+            </p>
+            <p>
+                Los registros se generarán automáticamente mediante una tarea programada.
+            </p>
+        </field>
+    </record>
+
+    <!-- Menu Item -->
+    <menuitem id="menu_pf_reconciliation_control"
+              name="Conciliación por Cortes"
+              parent="pagoflex_wallet_gateway.menu_pagoflex_wallet_gateway_reports"
+              action="action_pf_reconciliation_control"
+              sequence="20"/>
+</odoo>

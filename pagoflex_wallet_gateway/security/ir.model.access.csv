@@ -85,3 +85,6 @@
 "access_pf_gateway_daily_reference_import_wizard_operator","pf.gateway.daily.reference.import.wizard operator","model_pf_gateway_daily_reference_import_wizard","pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_operator",1,1,1,1
 "access_pf_gateway_transfer_update_fecha_wizard_admin","pf.gateway.transfer.update.fecha.wizard admin","model_pf_gateway_transfer_update_fecha_wizard","pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_admin",1,1,1,1
 "access_pf_gateway_transfer_update_fecha_wizard_operator","pf.gateway.transfer.update.fecha.wizard operator","model_pf_gateway_transfer_update_fecha_wizard","pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_operator",1,1,1,1
+"access_pf_reconciliation_control_admin","pf.reconciliation.control admin","model_pf_reconciliation_control","pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_admin",1,1,1,1
+"access_pf_reconciliation_control_operator","pf.reconciliation.control operator","model_pf_reconciliation_control","pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_operator",1,1,1,1
+"access_pf_reconciliation_control_auditor","pf.reconciliation.control auditor","model_pf_reconciliation_control","pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_auditor",1,0,0,0
