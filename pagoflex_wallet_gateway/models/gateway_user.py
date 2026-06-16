@@ -382,6 +382,20 @@ class PfGatewayUser(models.Model):
             },
         }
 
+    def action_open_load_default_incoming_commission_wizard(self):
+        self.ensure_one()
+        return {
+            "type": "ir.actions.act_window",
+            "name": _("Cargar comision entrante por defecto"),
+            "res_model": "pf.gateway.user.incoming.commission.load.default.wizard",
+            "view_mode": "form",
+            "target": "new",
+            "context": {
+                "default_gateway_user_id": self.id,
+                "default_app_name": self.incoming_commission_app_name or "pagoflex",
+            },
+        }
+
     def action_create_or_link_partner(self):
         for record in self:
             if record.partner_id:

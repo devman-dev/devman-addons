@@ -226,8 +226,22 @@ class PfGatewayUserIncomingCommissionSettings(models.Model):
         if not app_name:
             return 0
 
-        rules = self.distribution_rule_ids.filtered(lambda rule: rule._is_gateway_payload_ready())
+        rules = self.env["pf.gateway.user.incoming.commission.distribution.rule"].search(
+            [("settings_id", "=", self.id)]
+        )
+        rules = rules.filtered(lambda rule: rule._is_gateway_payload_ready())
         if not rules:
+            if not self.gateway_user_id or not self.gateway_user_id.external_id:
+                return 0
+            self._gateway_request_json(
+                "PUT",
+                "/admin/gateway/user-incoming-transfer-commission/distribution-rules/batch",
+                payload={
+                    "user_id": self.gateway_user_id.external_id,
+                    "app_name": app_name,
+                    "rules": [],
+                },
+            )
             return 0
         return rules._push_batch_to_gateway()
 

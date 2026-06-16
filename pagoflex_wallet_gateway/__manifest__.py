@@ -18,6 +18,7 @@
         "views/incoming_transfer_commission_settings_views.xml",
         "views/incoming_transfer_commission_distribution_rule_views.xml",
         "views/incoming_transfer_commission_push_wizard_views.xml",
+        "views/user_incoming_commission_load_default_wizard_views.xml",
         "views/incoming_transfer_commission_account_views.xml",
         "views/incoming_transfer_commission_account_sync_wizard_views.xml",
         "views/negative_balance_limit_views.xml",

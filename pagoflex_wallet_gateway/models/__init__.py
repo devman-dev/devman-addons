@@ -12,6 +12,7 @@ from . import incoming_transfer_commission_settings
 from . import incoming_transfer_commission_distribution_rule
 from . import user_incoming_commission_settings
 from . import user_incoming_commission_distribution_rule
+from . import user_incoming_commission_load_default_wizard
 from . import company_commission_agent
 from . import incoming_transfer_commission_account
 from . import incoming_transfer_commission_account_sync_wizard

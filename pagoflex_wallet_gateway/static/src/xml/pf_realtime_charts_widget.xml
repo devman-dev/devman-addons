@@ -13,10 +13,16 @@
 
             <div t-if="!state.loading and !state.error" class="row">
                 <div class="col-12 d-flex justify-content-between align-items-center text-muted small mb-3">
-                    <div class="btn-group" role="group">
-                        <button type="button" t-on-click="() => this.setPeriodicity('daily')" t-attf-class="btn btn-sm btn-outline-secondary {{ state.periodicity === 'daily' ? 'active' : '' }}">Diario</button>
-                        <button type="button" t-on-click="() => this.setPeriodicity('weekly')" t-attf-class="btn btn-sm btn-outline-secondary {{ state.periodicity === 'weekly' ? 'active' : '' }}">Semanal</button>
-                        <button type="button" t-on-click="() => this.setPeriodicity('monthly')" t-attf-class="btn btn-sm btn-outline-secondary {{ state.periodicity === 'monthly' ? 'active' : '' }}">Mensual</button>
+                    <div class="d-flex gap-2 align-items-center">
+                        <div class="btn-group" role="group">
+                            <button type="button" t-on-click="() => this.setPeriodicity('daily')" t-attf-class="btn btn-sm btn-outline-secondary {{ state.periodicity === 'daily' ? 'active' : '' }}">Diario</button>
+                            <button type="button" t-on-click="() => this.setPeriodicity('weekly')" t-attf-class="btn btn-sm btn-outline-secondary {{ state.periodicity === 'weekly' ? 'active' : '' }}">Semanal</button>
+                            <button type="button" t-on-click="() => this.setPeriodicity('monthly')" t-attf-class="btn btn-sm btn-outline-secondary {{ state.periodicity === 'monthly' ? 'active' : '' }}">Mensual</button>
+                        </div>
+                        <div class="btn-group" role="group">
+                            <button type="button" t-on-click="() => this.setDateBasis('transaction')" t-attf-class="btn btn-sm btn-outline-secondary {{ state.dateBasis === 'transaction' ? 'active' : '' }}">Operación</button>
+                            <button type="button" t-on-click="() => this.setDateBasis('business')" t-attf-class="btn btn-sm btn-outline-secondary {{ state.dateBasis === 'business' ? 'active' : '' }}">Negocio</button>
+                        </div>
                     </div>
                     <div>
                         <i class="fa fa-circle text-success pulse-animation"></i> En vivo - Última actualización: <t t-esc="state.lastUpdate"/>

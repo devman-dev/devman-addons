@@ -100,6 +100,7 @@
                         </page>
                         <page string="Comisiones entrantes" groups="pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_admin">
                             <separator string="Comisiones entrantes"/>
+                            <button name="action_open_load_default_incoming_commission_wizard" type="object" string="Cargar por defecto" class="btn-secondary"/>
                             <field name="incoming_commission_setting_ids" context="{'default_gateway_user_id': id}">
                                 <list editable="bottom">
                                     <field name="app_name"/>

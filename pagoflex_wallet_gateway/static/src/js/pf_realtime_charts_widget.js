@@ -19,6 +19,7 @@ export class PfRealtimeChartsWidget extends Component {
             error: null,
             loading: true,
             periodicity: 'daily',
+            dateBasis: 'business',
             volumenTotal: 0,
             comisionesTotal: 0,
         });
@@ -74,6 +75,19 @@ export class PfRealtimeChartsWidget extends Component {
         }
     }
 
+    async setDateBasis(dateBasis) {
+        if (this.state.dateBasis === dateBasis) return;
+        this.state.dateBasis = dateBasis;
+        await this.fetchData();
+        if (this.hasRenderedCharts()) {
+            this.updateCharts();
+        } else {
+            this.destroyCharts();
+            await this.waitForRender();
+            this.renderCharts();
+        }
+    }
+
     formatCurrency(value) {
         return new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS' }).format(value);
     }
@@ -106,7 +120,8 @@ export class PfRealtimeChartsWidget extends Component {
                     dateFromStr,
                     dateToStr,
                     this.state.periodicity,
-                    filterApp
+                    filterApp,
+                    this.state.dateBasis
                 ]
             );
             this.chartData = result;

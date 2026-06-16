@@ -159,6 +159,15 @@ class PfGatewayUserIncomingCommissionDistributionRule(models.Model):
             self._push_batch_to_gateway()
         return result
 
+    def unlink(self):
+        settings = self.mapped("settings_id")
+        should_push = not self.env.context.get("skip_gateway_push") and not self.env.context.get("install_mode")
+        result = super().unlink()
+        if should_push:
+            for setting in settings:
+                setting._push_distribution_rules_to_gateway()
+        return result
+
     def _get_destination_bank_account(self):
         self.ensure_one()
         return self.destination_bank_account_id or self.env["pf.gateway.bank.account"].browse()

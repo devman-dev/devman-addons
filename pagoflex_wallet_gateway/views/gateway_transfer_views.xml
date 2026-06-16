@@ -4,7 +4,7 @@
         <field name="name">pf.gateway.transfer.tree</field>
         <field name="model">pf.gateway.transfer</field>
         <field name="arch" type="xml">
-            <list create="false" edit="false" delete="false" default_order="fecha_negocio desc, id desc">
+            <list create="false" edit="false" delete="false" default_order="transaction_at desc, id desc">
                 <header>
                     <button name="action_sync_transfers_full" type="object" string="Sincronización completa" class="btn-primary" display="always" groups="pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_admin"/>
                 </header>
@@ -132,7 +132,7 @@
         <field name="name">Transferencias</field>
         <field name="res_model">pf.gateway.transfer</field>
         <field name="view_mode">list,form</field>
-        <field name="context">{"search_default_filter_completed": 1, "search_default_group_by_fecha_negocio_day": 1}</field>
+        <field name="context">{}</field>
     </record>
 
     <menuitem id="menu_pf_gateway_transfer" name="Transferencias" parent="menu_pagoflex_wallet_gateway_operations" action="action_pf_gateway_transfer" sequence="30"/>

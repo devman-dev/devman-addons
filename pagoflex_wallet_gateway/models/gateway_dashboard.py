@@ -166,13 +166,14 @@ class PfGatewayDashboard(models.TransientModel):
         )
 
     @api.model
-    def get_realtime_charts_data(self, date_from_str, date_to_str, periodicity='daily', filter_app=False):
+    def get_realtime_charts_data(self, date_from_str, date_to_str, periodicity='daily', filter_app=False, date_basis='business'):
         """
         Endpoint optimizado para Chart.js.
         Retorna datos agrupados por app y fecha.
         Incluye caché temporal para evitar consultas pesadas continuas.
         """
-        cache_key = f"{date_from_str}_{date_to_str}_{periodicity}_{filter_app}"
+        date_basis = date_basis if date_basis in ("business", "transaction") else "business"
+        cache_key = f"{date_from_str}_{date_to_str}_{periodicity}_{filter_app}_{date_basis}"
         now = std_time.time()
         
         # Retornar de caché si es válido
@@ -185,7 +186,7 @@ class PfGatewayDashboard(models.TransientModel):
         date_to = fields.Date.from_string(date_to_str) if date_to_str else False
         
         domain_base = [('active', '=', True)]
-        period_domain = self._transfer_business_period_domain(date_from, date_to)
+        period_domain = self._transfer_chart_period_domain(date_from, date_to, date_basis)
         if period_domain:
             domain_base = expression.AND([domain_base, period_domain])
             
@@ -262,7 +263,7 @@ class PfGatewayDashboard(models.TransientModel):
             # Agrupar volumen entrante
             vol_data = {label: 0.0 for label in labels}
             for t in incoming_transfers:
-                key = self._get_time_key(self._transfer_period_day(t), periodicity)
+                key = self._get_time_key(self._transfer_chart_day(t, date_basis), periodicity)
                 if key in vol_data:
                     vol_data[key] += t.amount or 0.0
                     
@@ -280,7 +281,7 @@ class PfGatewayDashboard(models.TransientModel):
             # Agrupar comisiones
             com_data = {label: 0.0 for label in labels}
             for t in commission_transfers:
-                key = self._get_time_key(self._transfer_period_day(t), periodicity)
+                key = self._get_time_key(self._transfer_chart_day(t, date_basis), periodicity)
                 if key in com_data:
                     com_data[key] += t.amount or 0.0
                     
@@ -339,6 +340,21 @@ class PfGatewayDashboard(models.TransientModel):
         elif periodicity == 'monthly':
             return date_obj.strftime('%Y-%m')
         return date_obj.strftime('%Y-%m-%d')
+
+    def _transfer_chart_period_domain(self, date_from=False, date_to=False, date_basis="business"):
+        if date_basis == "transaction":
+            domain = []
+            if date_from:
+                domain.append(("transaction_at", ">=", datetime.combine(date_from, time.min)))
+            if date_to:
+                domain.append(("transaction_at", "<=", datetime.combine(date_to, time.max)))
+            return domain
+        return self._transfer_business_period_domain(date_from, date_to)
+
+    def _transfer_chart_day(self, transfer, date_basis="business"):
+        if date_basis == "transaction":
+            return transfer.transaction_at.date() if transfer.transaction_at else False
+        return self._transfer_period_day(transfer)
 
     def _period_bounds(self):
         start_dt = False
