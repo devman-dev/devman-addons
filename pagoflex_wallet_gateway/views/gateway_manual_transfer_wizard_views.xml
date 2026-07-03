@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <!-- Vista Formulario del Wizard -->
+        <record id="view_gateway_manual_transfer_wizard_form" model="ir.ui.view">
+            <field name="name">gateway.manual.transfer.wizard.form</field>
+            <field name="model">gateway.manual.transfer.wizard</field>
+            <field name="arch" type="xml">
+                <form string="Transferencia Manual">
+                    <sheet>
+                        <div class="alert alert-warning" role="alert" invisible="not is_reversal">
+                            Está realizando una <strong>Reversión</strong>. Se generará una clave de idempotencia especial.
+                        </div>
+                        <group>
+                            <group string="Datos de Origen y Destino">
+                                <field name="is_reversal" widget="boolean_toggle"/>
+                                <field name="origin_cbu_cvu"/>
+                                <field name="destination_cbu_cvu"/>
+                            </group>
+                            <group string="Detalles de Transferencia">
+                                <field name="amount" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                                <field name="currency_id" invisible="1"/>
+                                <field name="concept"/>
+                                <field name="description"/>
+                            </group>
+                        </group>
+                        <group string="Información Adicional">
+                            <field name="reason" placeholder="Motivo administrativo o justificación"/>
+                            <field name="reference_origin_id" placeholder="Ej: 554320"/>
+                        </group>
+                    </sheet>
+                    <footer>
+                        <button name="action_confirm_transfer" type="object" string="Confirmar Transferencia" class="btn-primary" data-hotkey="q"/>
+                        <button special="cancel" string="Cancelar" class="btn-secondary" data-hotkey="x"/>
+                    </footer>
+                </form>
+            </field>
+        </record>
+
+        <!-- Acción de Ventana -->
+        <record id="action_gateway_manual_transfer_wizard" model="ir.actions.act_window">
+            <field name="name">Transferencia Manual</field>
+            <field name="res_model">gateway.manual.transfer.wizard</field>
+            <field name="view_mode">form</field>
+            <field name="target">new</field>
+        </record>
+
+        <!-- Menú -->
+        <menuitem id="menu_gateway_manual_transfer_wizard" 
+                  name="Nueva Transferencia Manual" 
+                  parent="menu_pagoflex_wallet_gateway_operations" 
+                  action="action_gateway_manual_transfer_wizard" 
+                  sequence="35"/>
+    </data>
+</odoo>

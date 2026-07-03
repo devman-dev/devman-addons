@@ -326,10 +326,18 @@ class PfGatewayBankAccount(models.Model):
         queue_ids.update(account_ids)
         self._set_balance_refresh_queue_ids(list(queue_ids))
 
+        # Forzamos un flush_all aquí ANTES del bloque try..except. 
+        # Esto asegura que si hubo algún error de base de datos en las escrituras 
+        # anteriores (ej. constraint violations al sincronizar cuentas), la excepción 
+        # salte y se propague correctamente, en lugar de ser devorada por el 
+        # except Exception genérico de abajo.
+        self.env.flush_all()
+
         try:
             # Aislar este bloque en un savepoint evita dejar la transacción
             # principal en estado abortado cuando falla SQL interno del cron.
-            with self.env.cr.savepoint():
+            # Pasamos flush=False porque ya hicimos el flush arriba.
+            with self.env.cr.savepoint(flush=False):
                 cron = self._get_or_create_balance_refresh_cron()
                 self._activate_balance_refresh_cron_sql(cron=cron)
                 return cron
@@ -446,10 +454,22 @@ class PfGatewayBankAccount(models.Model):
             self._deactivate_balance_refresh_cron_sql()
             return 0
 
-        # Consumir el lote actual al inicio para no perder ids que se agreguen
-        # mientras este cron esta en ejecucion.
-        self._set_balance_refresh_queue_ids([])
-        records = self.sudo().browse(account_ids).exists()
+        # Límite por ejecución para evitar el timeout del worker (default 30 cuentas)
+        try:
+            params = self.env["ir.config_parameter"].sudo()
+            batch_size = int(params.get_param("pagoflex_wallet_gateway.balance_refresh_batch_size", "30") or 30)
+        except ValueError:
+            batch_size = 30
+        
+        batch_size = max(1, batch_size)
+        batch_ids = account_ids[:batch_size]
+        remaining_ids = account_ids[batch_size:]
+
+        # Consumir el lote actual al inicio dejando los restantes en la cola.
+        # Así no perdemos los ids que se agreguen mientras este cron está en ejecución.
+        self._set_balance_refresh_queue_ids(remaining_ids)
+        
+        records = self.sudo().browse(batch_ids).exists()
         try:
             records._refresh_balance_from_gateway()
         finally:

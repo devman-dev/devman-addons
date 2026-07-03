@@ -582,7 +582,7 @@ class PfGatewayTransfer(models.Model):
                 ("status_validation_last_at", "<=", cooldown_limit),
                 "|",
                 ("status", "=", False),
-                ("status", "not in", ["COMPLETED", "FAILE_1"]),
+                ("status", "not in", ["COMPLETED", "FAILED_1"]),
             ],
             order="transaction_at desc, id desc",
             limit=limit,

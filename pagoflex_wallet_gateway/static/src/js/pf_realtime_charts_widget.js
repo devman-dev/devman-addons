@@ -34,12 +34,20 @@ export class PfRealtimeChartsWidget extends Component {
 
         onWillStart(async () => {
             await this.loadChartJs();
-            await this.fetchData();
         });
 
         onMounted(() => {
-            this.renderCharts();
-            this.startPolling();
+            this.fetchData().then(() => {
+                const checkAndRender = () => {
+                    if (this.volumenCanvasRef.el) {
+                        this.renderCharts();
+                        this.startPolling();
+                    } else if (!this.state.error) {
+                        setTimeout(checkAndRender, 50);
+                    }
+                };
+                checkAndRender();
+            });
         });
 
         onWillUnmount(() => {

@@ -26,6 +26,7 @@
                     <field name="global_summary_html" widget="html" nolabel="1" readonly="1"/>
                     <field name="wallet_summary_html" widget="html" nolabel="1" readonly="1"/>
                     <field name="charts_summary_html" widget="pf_realtime_charts" nolabel="1" readonly="1"/>
+                    <field name="top_users_summary_html" widget="html" nolabel="1" readonly="1"/>
                     <field name="reconciliation_summary_html" widget="html" nolabel="1" readonly="1"/>
                     <!-- <field name="temporal_reconciliation_html" widget="html" nolabel="1" readonly="1"/> -->
                     <field name="transaction_count_summary_html" widget="html" nolabel="1" readonly="1"/>

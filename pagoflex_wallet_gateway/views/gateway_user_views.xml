@@ -86,8 +86,8 @@
                         </page> -->
                         <page string="CVUs">
                             <button name="action_sync_user_bank_accounts" type="object" string="Sincronizar cuentas bancarias" class="btn-secondary" groups="pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_admin,pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_operator"/>
-                            <field name="bank_account_ids" readonly="1">
-                                <list create="false" edit="false" delete="false">
+                            <field name="bank_account_ids">
+                                <list create="false" delete="false">
                                     <field name="cvu_cbu"/>
                                     <field name="app"/>
                                     <field name="balance" sum="Saldo"/>

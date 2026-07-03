@@ -52,6 +52,7 @@ class PfGatewayDashboard(models.TransientModel):
     transaction_count_summary_html = fields.Html(string="Conteo operativo", compute="_compute_dashboard", sanitize=False)
     sync_summary_html = fields.Html(string="Control operativo", compute="_compute_dashboard", sanitize=False)
     exceptions_summary_html = fields.Html(string="Riesgos y excepciones", compute="_compute_dashboard", sanitize=False)
+    top_users_summary_html = fields.Html(string="Usuarios destacados", compute="_compute_dashboard", sanitize=False)
     executive_summary_html = fields.Html(string="Resumen ejecutivo", compute="_compute_dashboard", sanitize=False)
     financial_summary_html = fields.Html(string="Finanzas", compute="_compute_dashboard", sanitize=False)
 
@@ -150,9 +151,11 @@ class PfGatewayDashboard(models.TransientModel):
         self.transaction_count_summary_html = self._build_transaction_count_summary_html(transaction_count_rows)
         self.sync_summary_html = self._build_sync_summary_html(job_model.search([], order="sequence, id"), period_logs)
         self.exceptions_summary_html = self._build_exceptions_html(exception_values)
+        self.top_users_summary_html = self._build_top_users_summary_html(period_transfers, bank_accounts)
         self.executive_summary_html = (
             self.global_summary_html
             + self.wallet_summary_html
+            + self.top_users_summary_html
             + self.charts_summary_html
             + self.reconciliation_summary_html
             + self.temporal_reconciliation_html
@@ -1230,6 +1233,77 @@ class PfGatewayDashboard(models.TransientModel):
             rows,
         )
 
+    def _build_top_users_summary_html(self, period_transfers, bank_accounts):
+        visible_account_ids = set(self._visible_bank_accounts(bank_accounts).ids)
+        all_account_ids = set(bank_accounts.ids)
+        incoming_transfers = period_transfers.filtered(
+            lambda t: self._is_external_incoming_transfer(t, visible_account_ids, all_account_ids)
+        )
+
+        counts_fisica = {}
+        amounts_fisica = {}
+        counts_empresa = {}
+        amounts_empresa = {}
+
+        for t in incoming_transfers:
+            user = t.destination_user_id
+            if not user:
+                continue
+
+            dni_digits = "".join(filter(str.isdigit, str(user.dni or "")))
+            cuit_digits = "".join(filter(str.isdigit, str(user.cuit_cuil or user.dni or "")))
+
+            if len(cuit_digits) == 11:
+                counts_empresa[user] = counts_empresa.get(user, 0) + 1
+                amounts_empresa[user] = amounts_empresa.get(user, 0.0) + (t.amount or 0.0)
+            elif len(dni_digits) <= 8 and dni_digits:
+                counts_fisica[user] = counts_fisica.get(user, 0) + 1
+                amounts_fisica[user] = amounts_fisica.get(user, 0.0) + (t.amount or 0.0)
+
+        top_fisica_list = sorted(counts_fisica.items(), key=lambda x: amounts_fisica[x[0]], reverse=True)[:10]
+        top_empresa_list = sorted(counts_empresa.items(), key=lambda x: amounts_empresa[x[0]], reverse=True)[:10]
+
+        def _render_ranking(title, items, amounts_dict, color, icon):
+            if not items:
+                return (
+                    "<div class='pf_dashboard_wallet_card pf_dashboard_wallet_%s'>"
+                    "<div class='pf_dashboard_wallet_title'><i class='fa fa-%s'></i><h3>%s</h3></div>"
+                    "<div class='pf_dashboard_empty text-center p-3'>%s</div>"
+                    "</div>"
+                ) % (color, icon, escape(title), escape(_("Sin datos en este período")))
+            
+            max_amount = max(amounts_dict[user] for user, _ in items) if items else 1
+            if max_amount <= 0:
+                max_amount = 1
+                
+            rows_html = ""
+            for user, count in items:
+                amount = amounts_dict[user]
+                label = f"{user.name} ({count} txs)"
+                rows_html += self._bar_row_html(label, amount, max_amount, color)
+                
+            return (
+                "<div class='pf_dashboard_wallet_card pf_dashboard_wallet_%s'>"
+                "<div class='pf_dashboard_wallet_title'><i class='fa fa-%s'></i><h3>%s</h3></div>"
+                "<div style='padding-bottom: 10px;'>%s</div>"
+                "</div>"
+            ) % (color, icon, escape(title), rows_html)
+
+        html_fisica = _render_ranking(_("Personas Físicas Top 10"), top_fisica_list, amounts_fisica, "green", "user")
+        html_empresa = _render_ranking(_("Empresas Top 10"), top_empresa_list, amounts_empresa, "blue", "building")
+
+        return (
+            "<article class='pf_dashboard_panel pf_dashboard_top_users'>"
+            "<div class='pf_dashboard_panel_header'><h2>%s</h2><span>%s</span></div>"
+            "<div class='pf_dashboard_wallet_grid' style='padding: 16px; margin-bottom: 0;'>%s%s</div>"
+            "</article>"
+        ) % (
+            escape(_("Usuarios destacados")),
+            escape(_("Top 10 de usuarios con mayor volumen de transferencias entrantes externas")),
+            html_fisica,
+            html_empresa,
+        )
+
     def _metric_card_html(self, icon, label, value, helper, color):
         return (
             "<div class='pf_dashboard_metric pf_dashboard_metric_%s'>"
@@ -1252,7 +1326,7 @@ class PfGatewayDashboard(models.TransientModel):
     def _ops_tile_html(self, icon, label, value, helper):
         return (
             "<div class='pf_dashboard_ops_tile'><i class='fa fa-%s'></i><strong>%s</strong><span>%s</span><small>%s</small></div>"
-        ) % (escape(icon), value, escape(label), escape(helper))
+        ) % (escape(icon), value, escape(label), helper)
 
     def _display_app_name(self, app_name):
         return self.env["pf.gateway.dashboard.app.config"]._display_app_name(app_name)
