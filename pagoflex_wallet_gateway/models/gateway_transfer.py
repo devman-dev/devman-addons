@@ -582,7 +582,7 @@ class PfGatewayTransfer(models.Model):
                 ("status_validation_last_at", "<=", cooldown_limit),
                 "|",
                 ("status", "=", False),
-                ("status", "not in", ["COMPLETED", "FAILED_1"]),
+                ("status", "not in", ["COMPLETED", "FAILED"]),
             ],
             order="transaction_at desc, id desc",
             limit=limit,
@@ -613,7 +613,7 @@ class PfGatewayTransfer(models.Model):
                 target_status = transfer._target_status_from_bank_response(response)
                 target_status = (target_status or "").strip().upper()
                 current_status = (transfer.status or "").strip().upper()
-                exhausted = target_status in ("COMPLETED", "FAILED_1") or attempts >= max_attempts
+                exhausted = target_status in ("COMPLETED", "FAILED") or attempts >= max_attempts
                 values = {
                     "connector_response": response_text,
                     "last_sync_at": attempt_now,
@@ -625,7 +625,7 @@ class PfGatewayTransfer(models.Model):
                 if target_status and target_status != (transfer.status or "").strip().upper():
                     values["status"] = target_status
                     updated += 1
-                elif current_status in ("COMPLETED", "FAILED_1"):
+                elif current_status in ("COMPLETED", "FAILED"):
                     values["status_validation_exhausted"] = True
                 transfer.write(values)
                 processed += 1
