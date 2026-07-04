@@ -17,6 +17,7 @@
                 <field name="app"/>
                 <field name="currency"/>
                 <field name="balance"/>
+                <button name="action_refresh_balance_async" type="object" icon="fa-refresh" title="Actualizar saldo" groups="pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_admin,pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_operator"/>
                 <field name="source_updated_at"/>
             </list>
         </field>
@@ -29,6 +30,7 @@
             <form>
                 <header>
                     <button name="action_sync_bank_accounts" type="object" string="Sincronizar cuentas" class="btn-primary" groups="pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_admin,pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_operator"/>
+                    <button name="action_refresh_balance_async" type="object" string="Actualizar saldo" class="btn-secondary" groups="pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_admin,pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_operator"/>
                     <button name="action_open_bank_movement_sync_wizard" type="object" string="Consultar movimientos" class="btn-secondary" groups="pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_admin,pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_operator"/>
                 </header>
                 <sheet>
