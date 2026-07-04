@@ -666,7 +666,6 @@ class PfGatewayTransfer(models.Model):
                 "error_detail": "\n".join(errors) if errors else False,
             }
         )
-        )
         if affected_account_ids:
             accounts = self.env["pf.gateway.bank.account"].sudo().browse(list(affected_account_ids)).exists()
             if accounts:
