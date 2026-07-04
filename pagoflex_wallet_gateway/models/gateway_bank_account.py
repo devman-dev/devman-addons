@@ -322,9 +322,14 @@ class PfGatewayBankAccount(models.Model):
         if not account_ids:
             return False
 
-        queue_ids = set(self._get_balance_refresh_queue_ids())
-        queue_ids.update(account_ids)
-        self._set_balance_refresh_queue_ids(list(queue_ids))
+        current_queue = self._get_balance_refresh_queue_ids()
+        new_queue = list(current_queue)
+        existing_set = set(current_queue)
+        for account_id in account_ids:
+            if account_id not in existing_set:
+                new_queue.append(account_id)
+                existing_set.add(account_id)
+        self._set_balance_refresh_queue_ids(new_queue)
 
         # Forzamos un flush_all aquí ANTES del bloque try..except. 
         # Esto asegura que si hubo algún error de base de datos en las escrituras 
@@ -373,15 +378,17 @@ class PfGatewayBankAccount(models.Model):
 
     @api.model
     def _set_balance_refresh_queue_ids(self, account_ids):
+        seen = set()
         sanitized = []
         for value in account_ids or []:
             try:
                 account_id = int(value)
             except (TypeError, ValueError):
                 continue
-            if account_id > 0:
+            if account_id > 0 and account_id not in seen:
                 sanitized.append(account_id)
-        payload = json.dumps(sorted(set(sanitized)))
+                seen.add(account_id)
+        payload = json.dumps(sanitized)
         self.env["ir.config_parameter"].sudo().set_param(self._BALANCE_REFRESH_QUEUE_PARAM, payload)
 
     @api.model
