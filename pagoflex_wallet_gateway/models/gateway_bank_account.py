@@ -203,7 +203,7 @@ class PfGatewayBankAccount(models.Model):
 
         return None
 
-    def _refresh_balance_from_gateway(self):
+    def _refresh_balance_from_gateway(self, auto_commit=False):
         _logger.info("Inicio de actualización de saldo para %s cuenta(s).", len(self))
         processed = 0
         failed = 0
@@ -245,6 +245,8 @@ class PfGatewayBankAccount(models.Model):
                         (record._payload_to_text(response) or "")[:600],
                     )
                     failed += 1
+                    if auto_commit:
+                        self.env.cr.commit()
                     continue
                 record.write(
                     {
@@ -261,6 +263,8 @@ class PfGatewayBankAccount(models.Model):
                     balance,
                 )
                 processed += 1
+                if auto_commit:
+                    self.env.cr.commit()
             except UserError as exc:
                 message = str(exc)
                 if "(404)" in message and "Cuenta no encontrada" in message:
@@ -279,6 +283,8 @@ class PfGatewayBankAccount(models.Model):
                         record.cvu_cbu,
                         message,
                     )
+                    if auto_commit:
+                        self.env.cr.commit()
                     continue
                 record.write(
                     {
@@ -294,6 +300,8 @@ class PfGatewayBankAccount(models.Model):
                     record.app,
                     record.cvu_cbu,
                 )
+                if auto_commit:
+                    self.env.cr.commit()
                 continue
             except Exception:
                 record.write(
@@ -310,6 +318,8 @@ class PfGatewayBankAccount(models.Model):
                     record.app,
                     record.cvu_cbu,
                 )
+                if auto_commit:
+                    self.env.cr.commit()
                 continue
         _logger.info(
             "Fin de actualización de saldos para cuentas bancarias. Exitosas=%s Fallidas=%s",
@@ -452,7 +462,7 @@ class PfGatewayBankAccount(models.Model):
     @api.model
     def _cron_refresh_balances(self, account_ids=None):
         records = self.sudo().browse(account_ids or []).exists()
-        records._refresh_balance_from_gateway()
+        records._refresh_balance_from_gateway(auto_commit=True)
 
     @api.model
     def _cron_refresh_balances_reusable(self):
@@ -478,7 +488,7 @@ class PfGatewayBankAccount(models.Model):
         
         records = self.sudo().browse(batch_ids).exists()
         try:
-            records._refresh_balance_from_gateway()
+            records._refresh_balance_from_gateway(auto_commit=True)
         finally:
             pending_ids = self._get_balance_refresh_queue_ids()
             if pending_ids:
