@@ -30,6 +30,7 @@ class PfGatewayBankAccount(models.Model):
         ],
         index=True,
     )
+    allow_outgoing_transfers = fields.Boolean(string="Permitir transferencias salientes", default=False)
     is_primary = fields.Boolean()
     bdc_account_id = fields.Char(index=True)
     app = fields.Char(index=True)
@@ -131,6 +132,8 @@ class PfGatewayBankAccount(models.Model):
                 payload["status"] = normalized.upper()
         if "alias" in vals:
             payload["alias"] = vals.get("alias")
+        if "allow_outgoing_transfers" in vals:
+            payload["allow_outgoing_transfers"] = vals.get("allow_outgoing_transfers")
         return payload
 
     def _push_sub_account_update(self, vals):
@@ -154,7 +157,7 @@ class PfGatewayBankAccount(models.Model):
         if self.env.context.get("skip_gateway_sub_account_push"):
             return super().write(vals)
 
-        push_fields = {"status", "alias"}
+        push_fields = {"status", "alias", "allow_outgoing_transfers"}
         if not push_fields.intersection(vals):
             return super().write(vals)
 
@@ -674,6 +677,7 @@ class PfGatewayBankAccount(models.Model):
                     "account_type": item.get("account_type"),
                     "alias": item.get("alias"),
                     "status": self._normalize_status(item.get("status")),
+                    "allow_outgoing_transfers": item.get("allow_outgoing_transfers", True),
                     "is_primary": item.get("is_primary", False),
                     "bdc_account_id": item.get("bdc_account_id"),
                     "app": item.get("app"),

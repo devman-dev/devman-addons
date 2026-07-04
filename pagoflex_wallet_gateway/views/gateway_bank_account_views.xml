@@ -14,6 +14,7 @@
                 <field name="cvu_cbu"/>
                 <field name="alias"/>
                 <field name="status"/>
+                <field name="allow_outgoing_transfers" optional="hide"/>
                 <field name="app"/>
                 <field name="currency"/>
                 <field name="balance"/>
@@ -45,6 +46,7 @@
                         </group>
                         <group>
                             <field name="status"/>
+                            <field name="allow_outgoing_transfers"/>
                             <field name="is_primary" readonly="1"/>
                             <field name="bdc_account_id" readonly="1"/>
                             <field name="app" readonly="1"/>
