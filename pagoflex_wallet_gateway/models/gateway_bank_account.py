@@ -533,6 +533,25 @@ class PfGatewayBankAccount(models.Model):
         )
         _logger.debug("Cron de refresco de saldos desactivado (id=%s, cola vacía).", cron.id)
 
+    def action_refresh_balance_sync(self):
+        accounts = self.filtered(lambda record: record.app and record.cvu_cbu)
+        if not accounts:
+            raise UserError(_("Las cuentas deben tener App y CVU/CBU para consultar saldo."))
+        if len(accounts) > 10:
+            raise UserError(_("Por favor, utilice la actualización en segundo plano (botón superior) para más de 10 cuentas."))
+            
+        accounts._refresh_balance_from_gateway()
+        return {
+            "type": "ir.actions.client",
+            "tag": "display_notification",
+            "params": {
+                "title": _("Saldo actualizado"),
+                "message": _("Se actualizó el saldo de %(count)s cuenta(s) exitosamente.") % {"count": len(accounts)},
+                "type": "success",
+                "sticky": False,
+            }
+        }
+
     def action_refresh_balance_async(self):
         records = self
         if not records:
