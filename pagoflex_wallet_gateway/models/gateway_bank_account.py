@@ -562,7 +562,6 @@ class PfGatewayBankAccount(models.Model):
             }
         }
 
-    @api.model
     def action_refresh_all_balances_force(self):
         """
         Consulta y actualiza el saldo de las cuentas seleccionadas sin límite de batch.
