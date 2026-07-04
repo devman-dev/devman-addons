@@ -633,11 +633,11 @@ class PfGatewayTransfer(models.Model):
                     updated += 1
                 elif current_status in ("COMPLETED", "FAILED"):
                     values["status_validation_exhausted"] = True
-                transfer.write(values)
+                transfer.with_context(skip_gateway_status_push=True).write(values)
                 processed += 1
             except Exception as exc:
                 exhausted = attempts >= max_attempts
-                transfer.write(
+                transfer.with_context(skip_gateway_status_push=True).write(
                     {
                         "last_sync_at": attempt_now,
                         "status_validation_attempts": attempts,
