@@ -597,6 +597,7 @@ class PfGatewayTransfer(models.Model):
         processed = 0
         updated = 0
         errors = []
+        affected_account_ids = set()
         for transfer in transfers:
             attempt_now = fields.Datetime.now()
             attempts = (transfer.status_validation_attempts or 0) + 1
@@ -624,6 +625,11 @@ class PfGatewayTransfer(models.Model):
                 }
                 if target_status and target_status != (transfer.status or "").strip().upper():
                     values["status"] = target_status
+                    if target_status == "COMPLETED":
+                        if transfer.source_bank_account_id:
+                            affected_account_ids.add(transfer.source_bank_account_id.id)
+                        if transfer.destination_bank_account_id:
+                            affected_account_ids.add(transfer.destination_bank_account_id.id)
                     updated += 1
                 elif current_status in ("COMPLETED", "FAILED"):
                     values["status_validation_exhausted"] = True
@@ -660,6 +666,11 @@ class PfGatewayTransfer(models.Model):
                 "error_detail": "\n".join(errors) if errors else False,
             }
         )
+        )
+        if affected_account_ids:
+            accounts = self.env["pf.gateway.bank.account"].sudo().browse(list(affected_account_ids)).exists()
+            if accounts:
+                accounts._refresh_balance_from_gateway(auto_commit=True)
         return processed
 
     @api.model
@@ -912,6 +923,7 @@ class PfGatewayTransfer(models.Model):
             }
         )
         try:
+            affected_account_ids = set()
             items = self._gateway_paginated_get("/admin/gateway/transfers", updated_since=updated_since)
             for item in items:
                 transaction_at = self._coerce_datetime(item.get("transaction_at"), field_name="transaction_at")
@@ -947,6 +959,11 @@ class PfGatewayTransfer(models.Model):
                     "raw_payload": self._payload_to_text(item),
                 }
                 values.update(self._transfer_link_values_from_item(item))
+                if values.get("source_bank_account_id"):
+                    affected_account_ids.add(values["source_bank_account_id"])
+                if values.get("destination_bank_account_id"):
+                    affected_account_ids.add(values["destination_bank_account_id"])
+                    
                 record = transfer_model.search([("external_id", "=", values["external_id"])], limit=1)
                 if business_date:
                     values["fecha_negocio"] = business_date
@@ -956,6 +973,12 @@ class PfGatewayTransfer(models.Model):
                     transfer_model.create(values)
 
             relinked = transfer_model._relink_orphan_transfers()
+            
+            if affected_account_ids:
+                accounts = self.env["pf.gateway.bank.account"].sudo().browse(list(affected_account_ids)).exists()
+                if accounts:
+                    accounts._refresh_balance_from_gateway(auto_commit=True)
+                    
             log.write(
                 {
                     "status": "success",

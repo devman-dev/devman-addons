@@ -6,7 +6,7 @@
         <field name="arch" type="xml">
             <list>
                 <header>
-                    <button name="action_refresh_balance_async" type="object" string="Actualizar saldo" class="btn-secondary" display="always" groups="pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_admin,pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_operator"/>
+                    <button name="action_refresh_all_balances_force" type="object" string="Actualizar saldo" class="btn-secondary" display="always" groups="pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_admin,pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_operator"/>
                     <button name="action_open_bank_movement_sync_wizard" type="object" string="Consultar movimientos" class="btn-secondary" display="always" groups="pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_admin,pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_operator"/>
                 </header>
                 <field name="name"/>

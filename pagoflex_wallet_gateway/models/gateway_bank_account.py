@@ -562,6 +562,36 @@ class PfGatewayBankAccount(models.Model):
             }
         }
 
+    @api.model
+    def action_refresh_all_balances_force(self):
+        """
+        Consulta y actualiza el saldo de las cuentas seleccionadas sin límite de batch.
+        Guarda permanentemente (commit) después de cada consulta para que ninguna 
+        petición se pierda. Ideal para correr desde la UI o script donde no 
+        aplica el timeout de los crons.
+        """
+        records = self
+        if not records:
+            active_domain = self.env.context.get("active_domain")
+            domain = active_domain if isinstance(active_domain, list) else []
+            if not domain:
+                domain_ctx = self.env.context.get("domain")
+                domain = domain_ctx if isinstance(domain_ctx, list) else []
+            records = self.search(domain)
+
+        accounts = records.filtered(lambda record: record.app and record.cvu_cbu)
+        accounts._refresh_balance_from_gateway(auto_commit=True)
+        return {
+            "type": "ir.actions.client",
+            "tag": "display_notification",
+            "params": {
+                "title": _("Actualización forzada finalizada"),
+                "message": _("Se procesaron %(count)s cuenta(s).") % {"count": len(accounts)},
+                "type": "success",
+                "sticky": False,
+            }
+        }
+
     def action_refresh_balance_async(self):
         records = self
         if not records:
