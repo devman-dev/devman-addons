@@ -567,14 +567,23 @@ class PfGatewayTransfer(models.Model):
             cooldown_minutes = int(params.get_param("pagoflex_wallet_gateway.pending_status_cooldown_minutes", "30") or 30)
         except ValueError:
             cooldown_minutes = 30
+        try:
+            max_days = int(params.get_param("pagoflex_wallet_gateway.pending_status_max_days", "3") or 3)
+        except ValueError:
+            max_days = 3
+            
         max_attempts = max(1, max_attempts)
         cooldown_minutes = max(0, cooldown_minutes)
+        max_days = max(1, max_days)
+        
         now = fields.Datetime.now()
         cooldown_limit = fields.Datetime.subtract(now, minutes=cooldown_minutes) if cooldown_minutes else now
+        time_limit = fields.Datetime.subtract(now, days=max_days)
         transfers = transfer_model.search(
             [
                 ("active", "=", True),
                 ("origin_id", "!=", False),
+                ("transaction_at", ">=", time_limit),
                 ("status_validation_exhausted", "=", False),
                 ("status_validation_attempts", "<", max_attempts),
                 "|",
@@ -647,6 +656,8 @@ class PfGatewayTransfer(models.Model):
                     }
                 )
                 errors.append("%s: %s" % (transfer.origin_id or transfer.id, exc))
+
+            self.env.cr.commit()
 
         status = "failed" if errors and not processed else "success"
         message = _("Transferencias validadas: %(processed)s. Estados actualizados: %(updated)s. Intentos maximos: %(max_attempts)s. Enfriamiento: %(cooldown)s min.") % {
