@@ -556,6 +556,24 @@ class PfGatewayTransfer(models.Model):
         return False
 
     @api.model
+    def _expire_pending_status_validation_records(self, max_attempts):
+        self.env.cr.execute(
+            """
+            UPDATE pf_gateway_transfer
+               SET status_validation_exhausted = TRUE
+             WHERE active IS TRUE
+               AND origin_id IS NOT NULL
+               AND status_validation_exhausted IS NOT TRUE
+               AND (
+                    COALESCE(status_validation_attempts, 0) >= %s
+                    OR UPPER(TRIM(COALESCE(status, ''))) IN ('COMPLETED', 'FAILED')
+               )
+            """,
+            [max_attempts],
+        )
+        return self.env.cr.rowcount
+
+    @api.model
     def cron_validate_pending_transfer_statuses(self, limit=10):
         transfer_model = self.sudo()
         params = self.env["ir.config_parameter"].sudo()
@@ -579,12 +597,15 @@ class PfGatewayTransfer(models.Model):
         now = fields.Datetime.now()
         cooldown_limit = fields.Datetime.subtract(now, minutes=cooldown_minutes) if cooldown_minutes else now
         time_limit = fields.Datetime.subtract(now, days=max_days)
+        expired_before_search = transfer_model._expire_pending_status_validation_records(max_attempts)
         transfers = transfer_model.search(
             [
                 ("active", "=", True),
                 ("origin_id", "!=", False),
                 ("transaction_at", ">=", time_limit),
                 ("status_validation_exhausted", "=", False),
+                "|",
+                ("status_validation_attempts", "=", False),
                 ("status_validation_attempts", "<", max_attempts),
                 "|",
                 ("status_validation_last_at", "=", False),
@@ -660,9 +681,10 @@ class PfGatewayTransfer(models.Model):
             self.env.cr.commit()
 
         status = "failed" if errors and not processed else "success"
-        message = _("Transferencias validadas: %(processed)s. Estados actualizados: %(updated)s. Intentos maximos: %(max_attempts)s. Enfriamiento: %(cooldown)s min.") % {
+        message = _("Transferencias validadas: %(processed)s. Estados actualizados: %(updated)s. Validaciones agotadas antes de consultar: %(expired)s. Intentos maximos: %(max_attempts)s. Enfriamiento: %(cooldown)s min.") % {
             "processed": processed,
             "updated": updated,
+            "expired": expired_before_search,
             "max_attempts": max_attempts,
             "cooldown": cooldown_minutes,
         }
