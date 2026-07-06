@@ -454,7 +454,7 @@ class PfGatewayUser(models.Model):
             "full_name": vals.get("full_name") or vals.get("name") or None,
             "first_name": vals.get("first_name") or None,
             "last_name": vals.get("last_name") or None,
-            "birth_date": vals.get("birth_date") or None,
+            "birth_date": vals.get("birth_date").strftime("%Y-%m-%d") if hasattr(vals.get("birth_date"), "strftime") else (vals.get("birth_date") or None),
             "dni": vals.get("dni") or None,
             "gender": vals.get("gender") or None,
             "cuit_cuil": vals.get("cuit_cuil") or None,
