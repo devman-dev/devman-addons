@@ -76,7 +76,6 @@ class PfGatewayUserStatementLine(models.Model):
                         transfer.amount AS amount,
                         CASE
                             WHEN transfer.status NOT IN ('CREATED', 'AUTHORIZED', 'CAPTURED', 'COMPLETED') THEN 0.0
-                            WHEN transfer.source_user_id = transfer.destination_user_id THEN 0.0
                             ELSE -transfer.amount
                         END AS signed_amount,
                         transfer.currency AS currency
@@ -100,7 +99,10 @@ class PfGatewayUserStatementLine(models.Model):
                         transfer.payment_id AS payment_id,
                         transfer.movement_nature AS movement_nature,
                         transfer.status AS status,
-                        'incoming' AS direction,
+                        CASE
+                            WHEN transfer.source_user_id = transfer.destination_user_id THEN 'internal'
+                            ELSE 'incoming'
+                        END AS direction,
                         transfer.source_bank_account_id AS source_bank_account_id,
                         transfer.destination_bank_account_id AS destination_bank_account_id,
                         transfer.source_user_id AS counterparty_user_id,
@@ -115,10 +117,6 @@ class PfGatewayUserStatementLine(models.Model):
                     LEFT JOIN pf_gateway_bank_account destination_account
                         ON destination_account.id = transfer.destination_bank_account_id
                     WHERE transfer.destination_user_id IS NOT NULL
-                        AND (
-                            transfer.source_user_id IS NULL
-                            OR transfer.source_user_id != transfer.destination_user_id
-                        )
                 )
                 SELECT
                     movement_lines.*,

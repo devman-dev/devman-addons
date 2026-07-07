@@ -196,5 +196,17 @@ class PfGatewayClientMixin(models.AbstractModel):
         try:
             return datetime.strptime(text_value[:10], "%Y-%m-%d").date()
         except ValueError:
+            pass
+
+        # Accept plain date strings like YYYYMMDD (Coelsa / BIND format)
+        try:
+            return datetime.strptime(text_value[:8], "%Y%m%d").date()
+        except ValueError:
+            pass
+            
+        # Accept plain date strings like DD/MM/YYYY
+        try:
+            return datetime.strptime(text_value[:10], "%d/%m/%Y").date()
+        except ValueError:
             _logger.warning("Unable to parse %s value from gateway: %s", field_name, value)
             return False

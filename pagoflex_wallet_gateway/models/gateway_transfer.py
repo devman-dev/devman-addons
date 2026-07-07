@@ -464,6 +464,10 @@ class PfGatewayTransfer(models.Model):
             "operationDate",
             "fecha_operacion",
             "fechaOperacion",
+            "fecha_compensacion",
+            "fechaCompensacion",
+            "fecha_liquidacion",
+            "fechaLiquidacion",
             "fecha",
         )
         for field_name in field_names:
