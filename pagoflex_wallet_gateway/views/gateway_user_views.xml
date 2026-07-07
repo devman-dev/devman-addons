@@ -53,6 +53,7 @@
                             <!-- <field name="cuit_owner"/> -->
                         </group>
                         <group>
+                            <field name="active"/>
                             <field name="is_email_verified" required="1"/>
                             <field name="is_kyc_verified" required="1"/>
                         </group>
@@ -248,7 +249,7 @@
             </search>
         </field>
     </record>
-
+    
     <record id="action_pf_gateway_user" model="ir.actions.act_window">
         <field name="name">Usuarios</field>
         <field name="res_model">pf.gateway.user</field>

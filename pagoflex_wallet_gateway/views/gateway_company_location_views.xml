@@ -118,11 +118,11 @@
         <field name="context">{'search_default_group_by_company_id': 1}</field>
     </record>
 
-    <menuitem
+    <!-- <menuitem
         id="menu_pf_gateway_company_location"
         name="Locales de empresa"
         parent="menu_pagoflex_wallet_gateway_operations"
         action="action_pf_gateway_company_location"
         sequence="16"
-    />
+    /> -->
 </odoo>

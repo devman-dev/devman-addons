@@ -602,6 +602,7 @@ class PfGatewayTransfer(models.Model):
             [
                 ("active", "=", True),
                 ("origin_id", "!=", False),
+                ("is_external_outgoing_transfer", "=", True),
                 ("transaction_at", ">=", time_limit),
                 ("status_validation_exhausted", "=", False),
                 "|",

@@ -88,5 +88,5 @@
         <field name="view_mode">list,form</field>
     </record>
 
-    <menuitem id="menu_pf_gateway_company_membership" name="Membresias" parent="menu_pagoflex_wallet_gateway_operations" action="action_pf_gateway_company_membership" sequence="16"/>
+    <!-- <menuitem id="menu_pf_gateway_company_membership" name="Membresias" parent="menu_pagoflex_wallet_gateway_operations" action="action_pf_gateway_company_membership" sequence="16"/> -->
 </odoo>
