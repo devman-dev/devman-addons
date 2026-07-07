@@ -30,7 +30,7 @@ class PfGatewayClientMixin(models.AbstractModel):
         return api_key
 
     def _gateway_timeout(self):
-        raw_value = self._gateway_param("pagoflex_wallet_gateway.timeout_seconds", "20")
+        raw_value = self._gateway_param("pagoflex_wallet_gateway.timeout_seconds", "60")
         try:
             return max(5, int(raw_value))
         except (TypeError, ValueError):

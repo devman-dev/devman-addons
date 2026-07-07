@@ -13,9 +13,9 @@ class ResConfigSettings(models.TransientModel):
         config_parameter="pagoflex_wallet_gateway.api_key",
     )
     pagoflex_gateway_timeout_seconds = fields.Integer(
-        string="Timeout (segundos)",
+        string="Timeout de Peticiones (segundos)",
         config_parameter="pagoflex_wallet_gateway.timeout_seconds",
-        default=20,
+        default=60,
     )
     pagoflex_gateway_page_size = fields.Integer(
         string="Tamano de pagina",

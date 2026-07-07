@@ -653,7 +653,8 @@ class PfGatewayBankAccount(models.Model):
     def sync_from_gateway(self, mode="manual", sync_mode="incremental", job=None):
         updated_since = None
         if sync_mode == "incremental":
-            updated_since = self.search([], order="source_updated_at desc", limit=1).source_updated_at
+            last_record = self.search([("source_updated_at", "!=", False)], order="source_updated_at desc", limit=1)
+            updated_since = last_record.source_updated_at if last_record else None
 
         log = self.env["pf.gateway.sync.log"].create(
             {
@@ -666,13 +667,25 @@ class PfGatewayBankAccount(models.Model):
         try:
             items = self._gateway_paginated_get("/admin/gateway/bank-accounts", updated_since=updated_since)
             refreshed_records = self.browse()
+            
+            # Pre-fetch para evitar búsquedas N+1 en la base de datos
+            user_external_ids = [item.get("user_id") for item in items if item.get("user_id")]
+            existing_users = self.env["pf.gateway.user"].search([("external_id", "in", user_external_ids)]) if user_external_ids else []
+            user_by_external_id = {u.external_id: u.id for u in existing_users}
+            
+            item_external_ids = [item.get("id") for item in items if item.get("id")]
+            existing_accounts = self.search([("external_id", "in", item_external_ids)]) if item_external_ids else []
+            account_by_external_id = {a.external_id: a for a in existing_accounts}
+
+            create_vals_list = []
+
             for item in items:
-                gateway_user = self.env["pf.gateway.user"].search([("external_id", "=", item.get("user_id"))], limit=1)
+                gateway_user_id = user_by_external_id.get(item.get("user_id"))
                 values = {
                     "external_id": item.get("id"),
                     "active": True,
                     "origin_id": item.get("origin_id"),
-                    "gateway_user_id": gateway_user.id,
+                    "gateway_user_id": gateway_user_id,
                     "cvu_cbu": item.get("cvu_cbu"),
                     "account_type": item.get("account_type"),
                     "alias": item.get("alias"),
@@ -689,12 +702,16 @@ class PfGatewayBankAccount(models.Model):
                     "last_sync_at": fields.Datetime.now(),
                     "raw_payload": self._payload_to_text(item),
                 }
-                record = self.search([("external_id", "=", values["external_id"])], limit=1)
+                record = account_by_external_id.get(values["external_id"])
                 if record:
                     record.with_context(skip_gateway_sub_account_push=True).write(values)
                     refreshed_records |= record
                 else:
-                    refreshed_records |= self.create(values)
+                    create_vals_list.append(values)
+
+            if create_vals_list:
+                new_records = self.create(create_vals_list)
+                refreshed_records |= new_records
 
             refreshed_records.filtered(lambda record: record.app and record.cvu_cbu)._schedule_balance_refresh()
 

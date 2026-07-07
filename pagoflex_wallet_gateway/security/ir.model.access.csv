@@ -91,3 +91,7 @@
 "access_pf_reconciliation_control_auditor","pf.reconciliation.control auditor","model_pf_reconciliation_control","pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_auditor",1,0,0,0
 "access_gateway_manual_transfer_wizard_admin","gateway.manual.transfer.wizard admin","model_gateway_manual_transfer_wizard","pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_admin",1,1,1,1
 "access_gateway_manual_transfer_wizard_operator","gateway.manual.transfer.wizard operator","model_gateway_manual_transfer_wizard","pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_operator",1,1,1,1
+
+"access_pagoflex_balance_adjustment_admin","pagoflex.balance.adjustment admin","model_pagoflex_balance_adjustment","pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_admin",1,1,1,1
+"access_pagoflex_balance_adjustment_operator","pagoflex.balance.adjustment operator","model_pagoflex_balance_adjustment","pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_operator",1,1,1,0
+"access_pagoflex_balance_adjustment_auditor","pagoflex.balance.adjustment auditor","model_pagoflex_balance_adjustment","pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_auditor",1,0,0,0

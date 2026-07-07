@@ -37,3 +37,5 @@ from . import gateway_bank_account_assignment_create_subaccount_wizard
 from . import daily_reference_report
 from . import reconciliation_control
 from . import gateway_manual_transfer_wizard
+
+from . import balance_adjustment

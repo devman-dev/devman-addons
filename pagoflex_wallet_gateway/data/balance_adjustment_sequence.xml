@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <record id="seq_pagoflex_balance_adjustment" model="ir.sequence">
+            <field name="name">Secuencia Ajustes de Saldo</field>
+            <field name="code">pagoflex.balance.adjustment</field>
+            <field name="prefix">ADJ-</field>
+            <field name="padding">5</field>
+            <field name="company_id" eval="False"/>
+        </record>
+    </data>
+</odoo>
