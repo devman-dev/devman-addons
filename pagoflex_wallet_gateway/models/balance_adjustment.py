@@ -77,9 +77,22 @@ class PagoflexBalanceAdjustment(models.Model):
             },
         }
 
+        endpoint_path = "/admin/gateway/balance-adjustments"
+        endpoint_url = f"{self._gateway_base_url()}{endpoint_path}"
+        _logger.info(
+            "Balance adjustment request method=POST url=%s payload=%s",
+            endpoint_url,
+            self._payload_to_text(payload),
+        )
+
         try:
             response = self._gateway_request_json(
-                "POST", "/admin/gateway/balance-adjustments", payload=payload
+                "POST", endpoint_path, payload=payload
+            )
+            _logger.info(
+                "Balance adjustment response url=%s payload=%s",
+                endpoint_url,
+                self._payload_to_text(response),
             )
             
             # The API usually returns {"id": "...", ...} or similar structure
@@ -89,6 +102,11 @@ class PagoflexBalanceAdjustment(models.Model):
             self.state = 'synced'
             
         except Exception as e:
+            _logger.exception(
+                "Balance adjustment failed url=%s payload=%s",
+                endpoint_url,
+                self._payload_to_text(payload),
+            )
             self.state = 'failed'
             raise UserError(_("Error al enviar el ajuste al Gateway: %s") % str(e))
 
