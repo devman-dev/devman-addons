@@ -8,6 +8,7 @@
                 <header>
                     <button name="action_confirm_and_send" string="Confirmar y Enviar al Gateway" type="object" class="oe_highlight" invisible="state != 'draft'"/>
                     <button name="action_check_status" string="Consultar Estado" type="object" invisible="not gateway_adjustment_id"/>
+                    <button name="action_force_sync" string="Forzar sincronización" type="object" groups="pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_admin" invisible="state == 'synced'"/>
                     <field name="state" widget="statusbar" statusbar_visible="draft,synced,failed"/>
                 </header>
                 <sheet>

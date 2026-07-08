@@ -81,6 +81,42 @@ class PagoflexBalanceAdjustment(models.Model):
         self.write(update_values)
         return update_values
 
+    def _sync_from_gateway_items(self, items):
+        processed = 0
+        for item in items:
+            if not isinstance(item, dict):
+                continue
+
+            matching_record = self._find_existing_gateway_adjustment(item)
+            gateway_id = str(item.get("id") or "").strip() or False
+
+            if matching_record:
+                update_values = {"state": "synced"}
+                if gateway_id:
+                    update_values["gateway_adjustment_id"] = gateway_id
+                matching_record.write(update_values)
+            else:
+                cvu_cbu = item.get("cvu_cbu")
+                account = self.env["pf.gateway.bank.account"].search([("cvu_cbu", "=", cvu_cbu)], limit=1) if cvu_cbu else self.env["pf.gateway.bank.account"].browse()
+                self.create(
+                    {
+                        "gateway_adjustment_id": gateway_id,
+                        "account_id": account.id if account else False,
+                        "cvu_cbu": cvu_cbu,
+                        "amount": float(item.get("amount", 0.0)),
+                        "direction": str(item.get("direction", "")).lower(),
+                        "reason_code": str(item.get("reason_code", "")).lower(),
+                        "description": item.get("description"),
+                        "external_reference": item.get("external_reference"),
+                        "idempotency_key": item.get("idempotency_key"),
+                        "state": "synced",
+                    }
+                )
+
+            processed += 1
+
+        return processed
+
     def action_confirm_and_send(self):
         self.ensure_one()
         if self.state != 'draft':
@@ -161,6 +197,35 @@ class PagoflexBalanceAdjustment(models.Model):
             except Exception as e:
                 raise UserError(_("Error al consultar el estado: %s") % str(e))
 
+    def action_force_sync(self):
+        self.ensure_one()
+        if not self.env.user.has_group("pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_admin"):
+            raise UserError(_("Solo los administradores pueden forzar la sincronización manual."))
+
+        response = self._gateway_request_json("GET", "/admin/gateway/balance-adjustments")
+        items = response.get("items", []) if isinstance(response, dict) else response
+        if not isinstance(items, list):
+            raise UserError(_("La respuesta del gateway no contiene una lista válida de ajustes."))
+
+        for item in items:
+            matching_record = self._find_existing_gateway_adjustment(item)
+            if matching_record and matching_record.id == self.id:
+                gateway_id = str(item.get("id") or "").strip() or self.gateway_adjustment_id
+                self._apply_gateway_adjustment_response(item, gateway_adjustment_id=gateway_id)
+                return {
+                    "type": "ir.actions.client",
+                    "tag": "display_notification",
+                    "params": {
+                        "title": _("Sincronización completada"),
+                        "message": _("El ajuste quedó marcado como sincronizado."),
+                        "type": "success",
+                        "sticky": False,
+                        "next": {"type": "ir.actions.client", "tag": "reload"},
+                    },
+                }
+
+        raise UserError(_("No se encontró el ajuste en el middleware para sincronizarlo manualmente."))
+
     @api.model
     def cron_sync_adjustments(self):
         """ Sincroniza los ajustes que hayan ocurrido directamente en el Gateway """
@@ -171,34 +236,13 @@ class PagoflexBalanceAdjustment(models.Model):
             items = response.get("items", []) if isinstance(response, dict) else response
             if not isinstance(items, list):
                 _logger.warning("Respuesta inesperada al sincronizar ajustes: %s", response)
-                return
+                return 0
 
-            for item in items:
-                gateway_id = str(item.get("id"))
-                if not gateway_id:
-                    continue
-                    
-                existing = self._find_existing_gateway_adjustment(item)
-                if not existing:
-                    cvu = item.get("cvu_cbu")
-                    account = self.env['pf.gateway.bank.account'].search([('cvu_cbu', '=', cvu)], limit=1)
-                    
-                    self.create({
-                        'gateway_adjustment_id': gateway_id,
-                        'account_id': account.id if account else False,
-                        'cvu_cbu': cvu,
-                        'amount': float(item.get("amount", 0.0)),
-                        'direction': str(item.get("direction", "")).lower(),
-                        'reason_code': str(item.get("reason_code", "")).lower(),
-                        'description': item.get("description"),
-                        'external_reference': item.get("external_reference"),
-                        'idempotency_key': item.get("idempotency_key"),
-                        'state': 'synced',
-                    })
-                else:
-                    existing.write({
-                        'gateway_adjustment_id': gateway_id,
-                        'state': 'synced',
-                    })
+            return self._sync_from_gateway_items(items)
         except Exception as e:
             _logger.error("Error sincronizando ajustes de saldo: %s", str(e))
+            return 0
+
+    @api.model
+    def sync_from_gateway(self, mode="cron", sync_mode="incremental", job=None):
+        return self.cron_sync_adjustments()

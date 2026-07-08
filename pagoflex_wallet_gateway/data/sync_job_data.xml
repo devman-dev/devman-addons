@@ -48,8 +48,16 @@
         <field name="active">True</field>
     </record>
 
-    <record id="pf_gateway_sync_job_incoming_transfer_commission_settings" model="pf.gateway.sync.job">
+    <record id="pf_gateway_sync_job_balance_adjustments" model="pf.gateway.sync.job">
         <field name="sequence">29</field>
+        <field name="name">Sincronizar Ajustes de Saldo del Gateway</field>
+        <field name="resource">balance_adjustments</field>
+        <field name="sync_mode">full</field>
+        <field name="active">True</field>
+    </record>
+
+    <record id="pf_gateway_sync_job_incoming_transfer_commission_settings" model="pf.gateway.sync.job">
+        <field name="sequence">30</field>
         <field name="name">Sincronizar Comisiones por Defecto del Gateway</field>
         <field name="resource">incoming_transfer_commission_settings</field>
         <field name="sync_mode">full</field>
@@ -57,7 +65,7 @@
     </record>
 
     <record id="pf_gateway_sync_job_incoming_transfer_commission_distribution_rules" model="pf.gateway.sync.job">
-        <field name="sequence">29</field>
+        <field name="sequence">31</field>
         <field name="name">Sincronizar Reglas de Distribución de Comisiones del Gateway</field>
         <field name="resource">incoming_transfer_commission_distribution_rules</field>
         <field name="sync_mode">full</field>
@@ -65,7 +73,7 @@
     </record>
 
     <record id="pf_gateway_sync_job_user_incoming_commission_settings" model="pf.gateway.sync.job">
-        <field name="sequence">31</field>
+        <field name="sequence">32</field>
         <field name="name">Sincronizar Comisiones por Usuario del Gateway</field>
         <field name="resource">user_incoming_commission_settings</field>
         <field name="sync_mode">full</field>
@@ -73,7 +81,7 @@
     </record>
 
     <record id="pf_gateway_sync_job_user_incoming_commission_distribution_rules" model="pf.gateway.sync.job">
-        <field name="sequence">32</field>
+        <field name="sequence">33</field>
         <field name="name">Sincronizar Reglas de Distribución por Usuario del Gateway</field>
         <field name="resource">user_incoming_commission_distribution_rules</field>
         <field name="sync_mode">full</field>
@@ -81,7 +89,7 @@
     </record>
 
     <record id="pf_gateway_sync_job_transfers" model="pf.gateway.sync.job">
-        <field name="sequence">30</field>
+        <field name="sequence">34</field>
             <field name="name">Sincronizar Transferencias del Gateway</field>
         <field name="resource">transfers</field>
         <field name="sync_mode">incremental</field>

@@ -22,6 +22,7 @@ class PfGatewaySyncJob(models.Model):
             ("user_incoming_commission_settings", "Comisiones por usuario"),
             ("user_incoming_commission_distribution_rules", "Reglas de distribución por usuario"),
             ("negative_balance_limits", "Limites de Saldo Negativo"),
+            ("balance_adjustments", "Ajustes de Saldo"),
             ("transfers", "Transferencias"),
         ],
         required=True,
@@ -61,6 +62,7 @@ class PfGatewaySyncJob(models.Model):
             "user_incoming_commission_settings": self.env["pf.gateway.user.incoming.commission.settings"],
             "user_incoming_commission_distribution_rules": self.env["pf.gateway.user.incoming.commission.distribution.rule"],
             "negative_balance_limits": self.env["pf.gateway.negative.balance.limit"],
+            "balance_adjustments": self.env["pagoflex.balance.adjustment"],
             "transfers": self.env["pf.gateway.transfer"],
         }
         model = model_map.get(resource_key)
@@ -132,6 +134,10 @@ class PfGatewaySyncJob(models.Model):
     @api.model
     def cron_sync_negative_balance_limits(self):
         return self._run_named_job("negative_balance_limits", cron_mode=True)
+
+    @api.model
+    def cron_sync_balance_adjustments(self):
+        return self._run_named_job("balance_adjustments", cron_mode=True)
 
     @api.model
     def cron_sync_incoming_transfer_commission_distribution_rules(self):
