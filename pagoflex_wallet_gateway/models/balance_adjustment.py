@@ -48,6 +48,39 @@ class PagoflexBalanceAdjustment(models.Model):
                 vals['idempotency_key'] = str(uuid.uuid4())
         return super().create(vals_list)
 
+    def _find_existing_gateway_adjustment(self, item):
+        self.ensure_one()
+        gateway_id = str(item.get("id") or "").strip()
+        idempotency_key = str(item.get("idempotency_key") or "").strip()
+        external_reference = str(item.get("external_reference") or "").strip()
+
+        if gateway_id:
+            existing = self.search([("gateway_adjustment_id", "=", gateway_id)], limit=1)
+            if existing:
+                return existing
+
+        if idempotency_key:
+            existing = self.search([("idempotency_key", "=", idempotency_key)], limit=1)
+            if existing:
+                return existing
+
+        if external_reference:
+            existing = self.search([("external_reference", "=", external_reference)], limit=1)
+            if existing:
+                return existing
+
+        return self.browse()
+
+    def _apply_gateway_adjustment_response(self, response, *, gateway_adjustment_id=None):
+        self.ensure_one()
+        response_data = response if isinstance(response, dict) else {}
+        confirmed_id = gateway_adjustment_id or str(response_data.get("id") or "").strip() or False
+        update_values = {"state": "synced"}
+        if confirmed_id:
+            update_values["gateway_adjustment_id"] = confirmed_id
+        self.write(update_values)
+        return update_values
+
     def action_confirm_and_send(self):
         self.ensure_one()
         if self.state != 'draft':
@@ -98,8 +131,8 @@ class PagoflexBalanceAdjustment(models.Model):
             # The API usually returns {"id": "...", ...} or similar structure
             if response and response.get("id"):
                 self.gateway_adjustment_id = str(response.get("id"))
-                
-            self.state = 'synced'
+
+            self._apply_gateway_adjustment_response(response, gateway_adjustment_id=self.gateway_adjustment_id)
             
         except Exception as e:
             _logger.exception(
@@ -118,14 +151,12 @@ class PagoflexBalanceAdjustment(models.Model):
             try:
                 path = f"/admin/gateway/balance-adjustments/{record.gateway_adjustment_id}"
                 response = record._gateway_request_json("GET", path)
-                
-                # Update status based on response if needed
-                # Assuming the API returns a status field
-                status = response.get("status", "").lower()
-                if status == "completed":
-                    record.state = "synced"
-                elif status == "failed":
-                    record.state = "failed"
+
+                status = str(response.get("status") or response.get("state") or "").strip().lower() if isinstance(response, dict) else ""
+                if status in {"failed", "error", "rejected"}:
+                    record.write({"state": "failed"})
+                else:
+                    record._apply_gateway_adjustment_response(response, gateway_adjustment_id=record.gateway_adjustment_id)
                     
             except Exception as e:
                 raise UserError(_("Error al consultar el estado: %s") % str(e))
@@ -147,7 +178,7 @@ class PagoflexBalanceAdjustment(models.Model):
                 if not gateway_id:
                     continue
                     
-                existing = self.search([('gateway_adjustment_id', '=', gateway_id)], limit=1)
+                existing = self._find_existing_gateway_adjustment(item)
                 if not existing:
                     cvu = item.get("cvu_cbu")
                     account = self.env['pf.gateway.bank.account'].search([('cvu_cbu', '=', cvu)], limit=1)
@@ -162,6 +193,11 @@ class PagoflexBalanceAdjustment(models.Model):
                         'description': item.get("description"),
                         'external_reference': item.get("external_reference"),
                         'idempotency_key': item.get("idempotency_key"),
+                        'state': 'synced',
+                    })
+                else:
+                    existing.write({
+                        'gateway_adjustment_id': gateway_id,
                         'state': 'synced',
                     })
         except Exception as e:
