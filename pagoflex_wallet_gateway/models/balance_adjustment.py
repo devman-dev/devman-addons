@@ -59,6 +59,9 @@ class PagoflexBalanceAdjustment(models.Model):
         if not self.idempotency_key:
             self.idempotency_key = str(uuid.uuid4())
 
+        operator = self.operator_id or self.env.user
+        operator_identifier = (operator.login or operator.name or "odoo") if operator else "odoo"
+
         payload = {
             "cvu_cbu": self.cvu_cbu,
             "amount": self.amount,
@@ -66,7 +69,12 @@ class PagoflexBalanceAdjustment(models.Model):
             "reason_code": self.reason_code.upper(),
             "description": self.description,
             "external_reference": self.external_reference or self.name,
-            "idempotency_key": self.idempotency_key
+            "idempotency_key": self.idempotency_key,
+            "operator_id": operator_identifier,
+            "metadata": {
+                "source": "odoo",
+                "requested_by": operator_identifier,
+            },
         }
 
         try:
