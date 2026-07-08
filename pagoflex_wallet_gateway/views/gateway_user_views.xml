@@ -174,10 +174,12 @@
                                     <field name="incoming_total" sum="Entradas"/>
                                     <field name="outgoing_total" sum="Salidas"/>
                                     <field name="net_total" sum="Neto"/>
+                                    <button name="action_create_balance_adjustment" type="object" title="Ajuste de Saldo" icon="fa-balance-scale"/>
                                     <field name="current_balance" sum="Saldo cuenta"/>
                                     <field name="control_difference" sum="Diferencia control"/>
                                     <field name="currency"/>
                                     <field name="last_movement_at"/>
+                                    <button name="action_open_movements" type="object" string="Detalle" icon="fa-list"/>
                                 </list>
                             </field>
                             <separator string="Detalle de movimientos"/>

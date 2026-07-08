@@ -20,6 +20,36 @@ class PfGatewayUserStatementSummary(models.Model):
     control_difference = fields.Float(string="Diferencia control", digits=(16, 2), readonly=True)
     last_movement_at = fields.Datetime(string="Ultimo movimiento", readonly=True)
 
+    def action_create_balance_adjustment(self):
+        self.ensure_one()
+        amount = abs(self.net_total)
+        direction = 'credit' if self.net_total < 0 else 'debit'
+        
+        return {
+            "name": "Ajuste de Saldo",
+            "type": "ir.actions.act_window",
+            "res_model": "pagoflex.balance.adjustment",
+            "view_mode": "form",
+            "target": "current",
+            "context": {
+                "default_account_id": self.bank_account_id.id,
+                "default_amount": amount,
+                "default_direction": direction,
+                "default_reason_code": "operational_correction",
+            },
+        }
+
+    def action_open_movements(self):
+        self.ensure_one()
+        return {
+            "name": f"Movimientos de {self.cvu_cbu or self.app}",
+            "type": "ir.actions.act_window",
+            "res_model": "pf.gateway.user.statement.line",
+            "view_mode": "list",
+            "domain": [("user_id", "=", self.user_id.id), ("bank_account_id", "=", self.bank_account_id.id), ("status", "!=", "FAILED")],
+            "context": {"create": False, "edit": False, "delete": False},
+        }
+
     def init(self):
         tools.drop_view_if_exists(self.env.cr, self._table)
         self.env.cr.execute(
