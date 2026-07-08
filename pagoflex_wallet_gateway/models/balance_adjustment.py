@@ -169,6 +169,15 @@ class PagoflexBalanceAdjustment(models.Model):
                 self.gateway_adjustment_id = str(response.get("id"))
 
             self._apply_gateway_adjustment_response(response, gateway_adjustment_id=self.gateway_adjustment_id)
+
+            try:
+                self.account_id.action_refresh_balance_sync()
+            except Exception:
+                _logger.exception(
+                    "No se pudo refrescar el saldo de la cuenta tras confirmar el ajuste account_id=%s adjustment=%s",
+                    self.account_id.id,
+                    self.id,
+                )
             
         except Exception as e:
             _logger.exception(

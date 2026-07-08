@@ -13,6 +13,7 @@
                 <field name="name"/>
                 <field name="origin_id"/>
                 <field name="payment_id" optional="hide"/>
+                <field name="adjustment_id" optional="hide"/>
                 <field name="movement_nature"/>
                 <field name="status"/>
                 <field name="direction"/>
@@ -38,6 +39,7 @@
                         <group>
                             <field name="user_id"/>
                             <field name="transfer_id"/>
+                            <field name="adjustment_id"/>
                             <field name="bank_account_id"/>
                             <field name="cvu_cbu"/>
                             <field name="app"/>

@@ -155,6 +155,7 @@ class PfGatewayUser(models.Model):
             ("AUTHORIZED", "AUTHORIZED"),
             ("CAPTURED", "CAPTURED"),
             ("COMPLETED", "COMPLETED"),
+            ("SYNCED", "SYNCED"),
             ("FAILED", "FAILED"),
             ("CANCELLED", "CANCELLED"),
         ],

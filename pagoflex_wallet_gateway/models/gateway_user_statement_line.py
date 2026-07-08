@@ -9,6 +9,7 @@ class PfGatewayUserStatementLine(models.Model):
 
     user_id = fields.Many2one("pf.gateway.user", string="Usuario", readonly=True)
     transfer_id = fields.Many2one("pf.gateway.transfer", string="Transferencia", readonly=True)
+    adjustment_id = fields.Many2one("pagoflex.balance.adjustment", string="Ajuste", readonly=True)
     bank_account_id = fields.Many2one("pf.gateway.bank.account", string="Cuenta", readonly=True)
     cvu_cbu = fields.Char(string="CVU/CBU", readonly=True)
     app = fields.Char(string="App", readonly=True)
@@ -20,6 +21,7 @@ class PfGatewayUserStatementLine(models.Model):
         [
             ("TRANSFER", "Transferencia"),
             ("COMMISSION", "Comision"),
+            ("ADJUSTMENT", "Ajuste"),
         ],
         string="Tipo",
         readonly=True,
@@ -53,6 +55,7 @@ class PfGatewayUserStatementLine(models.Model):
                         transfer.id * 10 + 1 AS id,
                         transfer.source_user_id AS user_id,
                         transfer.id AS transfer_id,
+                        NULL::integer AS adjustment_id,
                         transfer.source_bank_account_id AS bank_account_id,
                         source_account.cvu_cbu AS cvu_cbu,
                         source_account.app AS app,
@@ -90,6 +93,7 @@ class PfGatewayUserStatementLine(models.Model):
                         transfer.id * 10 + 2 AS id,
                         transfer.destination_user_id AS user_id,
                         transfer.id AS transfer_id,
+                        NULL::integer AS adjustment_id,
                         transfer.destination_bank_account_id AS bank_account_id,
                         destination_account.cvu_cbu AS cvu_cbu,
                         destination_account.app AS app,
@@ -117,6 +121,49 @@ class PfGatewayUserStatementLine(models.Model):
                     LEFT JOIN pf_gateway_bank_account destination_account
                         ON destination_account.id = transfer.destination_bank_account_id
                     WHERE transfer.destination_user_id IS NOT NULL
+
+                    UNION ALL
+
+                    SELECT
+                        adjustment.id * 10 + 3 AS id,
+                        account.gateway_user_id AS user_id,
+                        NULL::integer AS transfer_id,
+                        adjustment.id AS adjustment_id,
+                        adjustment.account_id AS bank_account_id,
+                        account.cvu_cbu AS cvu_cbu,
+                        account.app AS app,
+                        COALESCE(adjustment.write_date, adjustment.create_date, NOW()) AS transaction_at,
+                        adjustment.name AS name,
+                        COALESCE(adjustment.gateway_adjustment_id, adjustment.idempotency_key, adjustment.external_reference, adjustment.name) AS origin_id,
+                        adjustment.idempotency_key AS payment_id,
+                        'ADJUSTMENT' AS movement_nature,
+                        UPPER(adjustment.state) AS status,
+                        CASE
+                            WHEN adjustment.direction = 'credit' THEN 'incoming'
+                            ELSE 'outgoing'
+                        END AS direction,
+                        CASE
+                            WHEN adjustment.direction = 'debit' THEN adjustment.account_id
+                            ELSE NULL::integer
+                        END AS source_bank_account_id,
+                        CASE
+                            WHEN adjustment.direction = 'credit' THEN adjustment.account_id
+                            ELSE NULL::integer
+                        END AS destination_bank_account_id,
+                        NULL::integer AS counterparty_user_id,
+                        COALESCE(adjustment.description, 'Ajuste de saldo') AS counterparty_name,
+                        adjustment.amount AS amount,
+                        CASE
+                            WHEN adjustment.state <> 'synced' THEN 0.0
+                            WHEN adjustment.direction = 'credit' THEN adjustment.amount
+                            ELSE -adjustment.amount
+                        END AS signed_amount,
+                        account.currency AS currency
+                    FROM pagoflex_balance_adjustment adjustment
+                    LEFT JOIN pf_gateway_bank_account account
+                        ON account.id = adjustment.account_id
+                    WHERE adjustment.account_id IS NOT NULL
+                        AND adjustment.state = 'synced'
                 )
                 SELECT
                     movement_lines.*,
