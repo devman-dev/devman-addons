@@ -238,6 +238,20 @@ class PfGatewayTransfer(models.Model):
         destination_is_wallet = bool(self.destination_bank_account_id) or self.destination_address in account_cvus
         return destination_is_wallet and not source_is_wallet
 
+    def _is_internal_transfer_record(self):
+        self.ensure_one()
+        if self.movement_nature != "TRANSFER":
+            return False
+        account_cvus = set(
+            self.env["pf.gateway.bank.account"]
+            .sudo()
+            .search([("cvu_cbu", "!=", False)])
+            .mapped("cvu_cbu")
+        )
+        source_is_wallet = bool(self.source_bank_account_id) or self.source_address in account_cvus
+        destination_is_wallet = bool(self.destination_bank_account_id) or self.destination_address in account_cvus
+        return source_is_wallet and destination_is_wallet
+
     def _is_external_outgoing_transfer_record(self):
         self.ensure_one()
         if self.movement_nature != "TRANSFER":
@@ -732,20 +746,24 @@ class PfGatewayTransfer(models.Model):
             ("connector_id", "!=", False),
             ("origin_id", "!=", False),
         ]
-        transfers = transfer_model.search(
+        candidate_limit = batch_size * 5
+        candidate_transfers = transfer_model.search(
             domain,
             order="transaction_at asc, id asc",
-            limit=batch_size,
+            limit=candidate_limit,
         )
+        transfers = candidate_transfers.filtered(lambda transfer: not transfer._is_internal_transfer_record())[:batch_size]
         pending_before = transfer_model.search_count(domain)
+        skipped_internal = len(candidate_transfers) - len(transfers)
         log = self.env["pf.gateway.sync.log"].create(
             {
                 "name": _("Actualizar fecha negocio de transferencias completadas"),
                 "resource": "transfers",
                 "mode": "manual",
-                "message": _("Iniciando. Pendientes: %(pending)s. Lote: %(batch)s.") % {
+                "message": _("Iniciando. Pendientes candidatos: %(pending)s. Lote: %(batch)s. Internas omitidas en preselección: %(skipped_internal)s.") % {
                     "pending": pending_before,
                     "batch": len(transfers),
+                    "skipped_internal": skipped_internal,
                 },
             }
         )
@@ -803,7 +821,7 @@ class PfGatewayTransfer(models.Model):
         status = "failed" if errors and not processed else "success"
         pending_after = transfer_model.search_count(domain)
         message = _(
-            "Transferencias consultadas: %(processed)s/%(batch)s. Pendientes antes: %(pending_before)s. Pendientes despues: %(pending_after)s. Fecha negocio actualizada: %(date_updated)s. ID Coelsa completado: %(connector_updated)s. Omitidas: %(skipped)s."
+            "Transferencias consultadas: %(processed)s/%(batch)s. Pendientes candidatos antes: %(pending_before)s. Pendientes candidatos despues: %(pending_after)s. Fecha negocio actualizada: %(date_updated)s. ID Coelsa completado: %(connector_updated)s. Omitidas: %(skipped)s. Internas omitidas en preselección: %(skipped_internal)s."
         ) % {
             "processed": processed,
             "batch": len(transfers),
@@ -812,6 +830,7 @@ class PfGatewayTransfer(models.Model):
             "date_updated": date_updated,
             "connector_updated": connector_updated,
             "skipped": skipped,
+            "skipped_internal": skipped_internal,
         }
         if errors:
             message = "%s %s" % (message, _("Errores: %s") % len(errors))

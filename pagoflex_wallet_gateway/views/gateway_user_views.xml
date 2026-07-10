@@ -256,6 +256,7 @@
         <field name="name">Usuarios</field>
         <field name="res_model">pf.gateway.user</field>
         <field name="view_mode">list,form</field>
+        <field name="context">{'active_test': False}</field>
     </record>
 
     <menuitem id="menu_pf_gateway_user" name="Usuarios" parent="menu_pagoflex_wallet_gateway_operations" action="action_pf_gateway_user" sequence="10"/>

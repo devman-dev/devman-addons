@@ -1407,7 +1407,7 @@ class PfGatewayDashboard(models.TransientModel):
 
     def action_open_active_users(self):
         self.ensure_one()
-        return self._open_action("pagoflex_wallet_gateway.action_pf_gateway_user", domain=[("active", "=", True)])
+        return self._open_action("pagoflex_wallet_gateway.action_pf_gateway_user")
 
     def action_open_active_companies(self):
         self.ensure_one()
