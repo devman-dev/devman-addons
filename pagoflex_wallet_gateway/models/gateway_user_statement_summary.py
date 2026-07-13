@@ -68,7 +68,7 @@ class PfGatewayUserStatementSummary(models.Model):
                     SUM(line.signed_amount) AS net_total,
                     COALESCE(account.balance, 0.0) AS current_balance,
                     SUM(line.signed_amount) - COALESCE(account.balance, 0.0) AS control_difference,
-                    MAX(line.transaction_at) AS last_movement_at
+                    MAX(line.transaction_at)::timestamp without time zone AS last_movement_at
                 FROM pf_gateway_user_statement_line line
                 LEFT JOIN pf_gateway_bank_account account
                     ON account.id = line.bank_account_id
