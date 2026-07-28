@@ -15,7 +15,9 @@
               name="Auth Signup/ResetPassword form fields">
         <xpath expr="//div[hasclass('field-confirm_password')]"
                position="after">
-            <t t-foreach="configuration.signup_field_ids" t-as="field">
+            <t t-set="signup_configuration"
+               t-value="request.env['signup.configuration'].sudo().search([('website_id', '=', request.website.id)], limit=1)"/>
+            <t t-foreach="signup_configuration.signup_field_ids" t-as="field">
                 <t t-if="field.field_type in ['char', 'text']">
                     <div class="mb-3 field-test pt-2">
                         <label>
@@ -71,10 +73,10 @@
                 </t>
             </t>
             <!-- Display terms and conditions from the configuration -->
-            <t t-if="configuration.is_show_terms_conditions">
+            <t t-if="signup_configuration.is_show_terms_conditions">
                 <div class="form-group">
                     <input type="checkbox" name="accept_terms">I Agree to the
-                        <t t-out="configuration.terms_and_conditions"/>
+                        <t t-out="signup_configuration.terms_and_conditions"/>
                     </input>
                 </div>
             </t>

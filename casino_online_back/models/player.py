@@ -17,6 +17,8 @@ class CasinoPlayer(models.Model):
     dni_back = fields.Binary(string='Dorso DNI')
     selfie = fields.Binary(string='Selfie')
     video = fields.Binary(string='Video prueba de vida')
+    # Compatibilidad con vistas/flows heredados que aún esperan `token`.
+    token = fields.Char(related='signup_token', readonly=False)
     signup_token = fields.Char(string='Token de Registro')
     signup_type = fields.Char(string='Tipo de Registro')
     signup_expiration = fields.Datetime(string='Expiración del Token')
