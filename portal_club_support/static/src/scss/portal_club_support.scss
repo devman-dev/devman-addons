@@ -1408,3 +1408,320 @@
   font-size: 14px;
   font-weight: 600;
 }
+
+/* FEATURED_GAMES: three-card catalogue placed after the impact banner. */
+.jj-featured-games-section {
+  margin-top: 38px;
+}
+
+.jj-featured-games-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.jj-game-card {
+  min-width: 0;
+  overflow: hidden;
+  background: var(--jj-white);
+  border: 1px solid var(--jj-border);
+  border-radius: 14px;
+  box-shadow: 0 8px 28px rgba(15, 61, 42, 0.06);
+  transition: transform .2s ease, box-shadow .2s ease;
+}
+
+.jj-game-card:not(.jj-game-card-placeholder):hover {
+  transform: translateY(-3px);
+  box-shadow: 0 14px 34px rgba(15, 61, 42, 0.12);
+}
+
+.jj-game-card-cover {
+  display: block;
+  height: 150px;
+  overflow: hidden;
+  background: #edf3ef;
+}
+
+.jj-game-card-cover img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform .3s ease;
+}
+
+.jj-game-card:hover .jj-game-card-cover img { transform: scale(1.035); }
+
+.jj-game-card-content { padding: 18px; }
+
+.jj-game-card-kicker {
+  color: #138a4b;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: .14em;
+}
+
+.jj-game-card-name {
+  margin: 5px 0 8px;
+  color: var(--jj-text);
+  font-size: 18px;
+  font-weight: 800;
+}
+
+.jj-game-card-description,
+.jj-game-card-placeholder p {
+  min-height: 40px;
+  margin: 0 0 16px;
+  color: var(--jj-text-muted);
+  font-size: 12px;
+  line-height: 1.55;
+}
+
+.jj-game-card-button {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 11px 14px;
+  color: #fff !important;
+  background: var(--jj-green-dark);
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 750;
+  text-decoration: none !important;
+}
+
+.jj-game-card-placeholder {
+  min-height: 296px;
+  padding: 44px 24px;
+  text-align: center;
+  border-style: dashed;
+  background: linear-gradient(145deg, #fbfdfc, #f3f7f5);
+}
+
+.jj-game-placeholder-icon {
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  margin: 0 auto 18px;
+  color: var(--jj-green-dark);
+  background: #dff1e6;
+  border-radius: 50%;
+  font-size: 26px;
+}
+
+.jj-game-placeholder-title {
+  margin: 5px 0 8px;
+  font-size: 18px;
+  font-weight: 800;
+}
+
+@media (max-width: 768px) {
+  .jj-featured-games-grid { grid-template-columns: 1fr; }
+  .jj-game-card-cover { height: 180px; }
+  .jj-game-card-placeholder { min-height: 220px; }
+}
+
+/* DARK_DASHBOARD_THEME
+   Friendly dark-green theme requested for the JogaJunto account dashboard.
+   Everything is scoped so registration and club-selection pages keep their UI. */
+.jj-dashboard-dark {
+  --jj-dark-page: #061f17;
+  --jj-dark-panel: #0b2b21;
+  --jj-dark-panel-soft: #0d3025;
+  --jj-dark-line: #285143;
+  --jj-dark-text: #f2f8f5;
+  --jj-dark-muted: #adc1b9;
+  --jj-dark-accent: #31df72;
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at 12% 0%, rgba(49, 223, 114, .08), transparent 28rem),
+    var(--jj-dark-page);
+  color: var(--jj-dark-text);
+}
+
+.jj-dashboard-dark .jj-dash-header {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 13px 24px;
+  background: #083a29;
+  border: 1px solid rgba(49, 223, 114, .18);
+  border-radius: 0 0 12px 12px;
+}
+
+.jj-dashboard-dark .jj-dash-logo {
+  width: 34px;
+  height: 34px;
+  color: #073421;
+  background: var(--jj-dark-accent);
+}
+
+.jj-dashboard-dark .jj-dash-brand { color: #fff; font-size: 14px; }
+.jj-dashboard-dark .jj-dash-secure { color: var(--jj-dark-accent); }
+.jj-dashboard-dark .jj-dash-secure-dot { background: var(--jj-dark-accent); }
+.jj-dashboard-dark .jj-dash-logout { color: #c5d7d0; }
+
+.jj-dashboard-dark .jj-dash-content {
+  max-width: 1180px;
+  padding: 34px 24px 56px;
+}
+
+.jj-dashboard-dark .jj-dash-eyebrow,
+.jj-dashboard-dark .jj-section-eyebrow {
+  color: #a8beb5;
+  font-weight: 500;
+  letter-spacing: .16em;
+}
+
+.jj-dashboard-dark .jj-dash-heading,
+.jj-dashboard-dark .jj-section-title { color: var(--jj-dark-text); }
+.jj-dashboard-dark .jj-dash-heading { font-size: 23px; }
+.jj-dashboard-dark .jj-dash-sub { color: var(--jj-dark-muted); margin-bottom: 22px; }
+
+.jj-dashboard-dark .jj-impact-banner {
+  padding: 20px;
+  color: var(--jj-dark-text);
+  background: #0a402e;
+  border: 1px solid rgba(49, 223, 114, .08);
+  border-radius: 12px;
+  box-shadow: none;
+}
+
+.jj-dashboard-dark .jj-impact-icon {
+  width: 40px;
+  height: 40px;
+  color: #06301f;
+  background: var(--jj-dark-accent);
+  font-size: 15px;
+}
+
+.jj-dashboard-dark .jj-impact-eyebrow { color: var(--jj-dark-accent); }
+.jj-dashboard-dark .jj-impact-title { font-size: 15px; }
+.jj-dashboard-dark .jj-impact-text { color: #b9cec5; }
+.jj-dashboard-dark .jj-featured-games-section { margin-top: 28px; }
+.jj-dashboard-dark .jj-section-header { margin-bottom: 14px; }
+.jj-dashboard-dark .jj-section-title { font-size: 20px; }
+.jj-dashboard-dark .jj-section-action { color: var(--jj-dark-accent); }
+
+.jj-dashboard-dark .jj-featured-games-grid {
+  gap: 12px;
+}
+
+.jj-dashboard-dark .jj-game-card {
+  color: var(--jj-dark-text);
+  background: var(--jj-dark-panel-soft);
+  border: 1px solid var(--jj-dark-line);
+  border-radius: 11px;
+  box-shadow: none;
+}
+
+.jj-dashboard-dark .jj-game-card:not(.jj-game-card-placeholder):hover {
+  transform: translateY(-2px);
+  border-color: rgba(49, 223, 114, .55);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, .2);
+}
+
+.jj-dashboard-dark .jj-game-card-cover {
+  height: 120px;
+  margin: 15px 15px 0;
+  background: linear-gradient(130deg, #ffbd38 0%, #f2792d 45%, #b31e3b 100%);
+  border-radius: 8px;
+}
+
+.jj-dashboard-dark .jj-game-card-cover img {
+  opacity: .68;
+  mix-blend-mode: luminosity;
+}
+
+.jj-dashboard-dark .jj-game-card-content { padding: 14px 15px 15px; }
+.jj-dashboard-dark .jj-game-card-kicker { color: var(--jj-dark-accent); }
+.jj-dashboard-dark .jj-game-card-name { color: var(--jj-dark-text); font-size: 16px; }
+.jj-dashboard-dark .jj-game-card-description,
+.jj-dashboard-dark .jj-game-card-placeholder p { color: var(--jj-dark-muted); }
+
+.jj-dashboard-dark .jj-game-card-button {
+  justify-content: center;
+  color: #052617 !important;
+  background: var(--jj-dark-accent);
+  border-radius: 7px;
+}
+
+.jj-dashboard-dark .jj-game-card-button span { margin-left: 6px; }
+
+.jj-dashboard-dark .jj-game-card-placeholder {
+  min-height: 288px;
+  padding: 15px;
+  background: var(--jj-dark-panel-soft);
+  border-style: solid;
+}
+
+.jj-dashboard-dark .jj-game-placeholder-icon {
+  width: 100%;
+  height: 120px;
+  margin: 0 0 14px;
+  color: #95aea4;
+  background: transparent;
+  border: 1px dashed #3a6253;
+  border-radius: 8px;
+  font-size: 0;
+}
+
+.jj-dashboard-dark .jj-game-placeholder-icon::after {
+  content: "Próximo jogo";
+  font-size: 13px;
+}
+
+.jj-dashboard-dark .jj-game-card-placeholder .jj-game-card-kicker { text-align: left; }
+.jj-dashboard-dark .jj-game-placeholder-title { text-align: left; color: var(--jj-dark-text); }
+.jj-dashboard-dark .jj-game-card-placeholder p { text-align: left; }
+
+.jj-games-priority-note {
+  margin: 13px 0 0;
+  color: var(--jj-dark-muted);
+  font-size: 12px;
+}
+
+.jj-dashboard-dark .jj-club-cards {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin-bottom: 32px;
+}
+
+.jj-dashboard-dark .jj-club-card,
+.jj-dashboard-dark .jj-data-card {
+  color: var(--jj-dark-text);
+  background: var(--jj-dark-panel-soft);
+  border: 1px solid var(--jj-dark-line);
+  border-radius: 10px;
+  box-shadow: none;
+}
+
+.jj-dashboard-dark .jj-club-card { padding: 16px; }
+.jj-dashboard-dark .jj-club-card:hover { border-color: rgba(49, 223, 114, .5); box-shadow: none; }
+.jj-dashboard-dark .jj-club-card-category,
+.jj-dashboard-dark .jj-data-item-label { color: #a7beb4; }
+.jj-dashboard-dark .jj-club-card-name,
+.jj-dashboard-dark .jj-data-item-value { color: var(--jj-dark-text); }
+.jj-dashboard-dark .jj-club-card-logo,
+.jj-dashboard-dark .jj-club-card-status,
+.jj-dashboard-dark .jj-club-card-footer { display: none; }
+.jj-dashboard-dark .jj-club-card-body { margin: 0; }
+.jj-dashboard-dark .jj-data-card { padding: 20px 16px; }
+
+.jj-dashboard-dark .jj-impact-banner[style] {
+  background: var(--jj-dark-panel-soft) !important;
+  border: 1px dashed var(--jj-dark-line);
+}
+
+.jj-dashboard-dark strong,
+.jj-dashboard-dark .jj-responsible-note { color: #d7e4df; }
+
+@media (max-width: 768px) {
+  .jj-dashboard-dark .jj-dash-header { border-radius: 0; padding: 12px 16px; }
+  .jj-dashboard-dark .jj-dash-content { padding: 26px 16px 40px; }
+  .jj-dashboard-dark .jj-featured-games-grid,
+  .jj-dashboard-dark .jj-club-cards { grid-template-columns: 1fr; }
+  .jj-dashboard-dark .jj-game-card-cover { height: 150px; }
+  .jj-dashboard-dark .jj-game-card-placeholder { min-height: 230px; }
+  .jj-dashboard-dark .jj-game-placeholder-icon { height: 92px; }
+}

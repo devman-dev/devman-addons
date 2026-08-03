@@ -1,6 +1,6 @@
 {
     "name": "Portal Club Support",
-    "version": "18.0.1.1.0",
+    "version": "18.0.1.3.0",
     "category": "Website/Portal",
     "summary": "Portal para registro de usuario y selección de clubes de apoyo",
     "description": """
@@ -29,6 +29,9 @@ Funcionalidades:
         "auth_signup",
         # FEDERATION_CLUB_PICKER: source catalogue for searchable club fields.
         "casino_federacion_club",
+        # FEATURED_GAMES: game catalogue and website publication fields.
+        "casino_online_back",
+        "website_sale",
     ],
     "data": [
         "security/security.xml",

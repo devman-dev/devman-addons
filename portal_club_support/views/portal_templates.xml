@@ -266,7 +266,7 @@
         <t t-call="portal_club_support.jj_dashboard_layout">
             <div class="jj-dash-eyebrow">MINHA CONTA</div>
             <h1 class="jj-dash-heading">Olá, <t t-esc="partner.name or 'Torcedor'"/>! 👋</h1>
-            <p class="jj-dash-sub">Confira os clubes que recebem seu apoio em cada modalidade.</p>
+            <p class="jj-dash-sub">Confira os clubes que recebem seu apoio e escolha onde jogar.</p>
 
             <!-- Impact Banner -->
             <div class="jj-impact-banner">
@@ -277,6 +277,48 @@
                     <div class="jj-impact-text">As comissões são direcionadas automaticamente aos clubes que você escolheu.</div>
                 </div>
             </div>
+
+            <!-- FEATURED_GAMES: configured catalogue, always preserving three slots. -->
+            <section class="jj-featured-games-section">
+                <div class="jj-section-header">
+                    <div>
+                        <div class="jj-section-eyebrow">AGORA É HORA DE JOGAR</div>
+                        <div class="jj-section-title">Jogos para você</div>
+                    </div>
+                    <a t-if="featured_games" href="/shop" class="jj-section-action">Ver todos</a>
+                </div>
+
+                <div class="jj-featured-games-grid">
+                    <t t-foreach="featured_games" t-as="game">
+                        <article class="jj-game-card">
+                            <a t-att-href="game.website_url or '/shop'" class="jj-game-card-cover">
+                                <img t-att-src="'/web/image/product.template/%s/image_512' % game.id"
+                                     t-att-alt="game.name" loading="lazy"/>
+                            </a>
+                            <div class="jj-game-card-content">
+                                <div class="jj-game-card-kicker">JOGO EM DESTAQUE</div>
+                                <h3 class="jj-game-card-name" t-esc="game.name"/>
+                                <p class="jj-game-card-description"
+                                   t-esc="game.description_sale or 'Jogue agora e fortaleça os clubes que você escolheu.'"/>
+                                <a t-att-href="game.website_url or '/shop'" class="jj-game-card-button">
+                                    Jogar agora <span aria-hidden="true">›</span>
+                                </a>
+                            </div>
+                        </article>
+                    </t>
+                    <t t-foreach="range(featured_game_empty_slots or 0)" t-as="slot">
+                        <article class="jj-game-card jj-game-card-placeholder">
+                            <div class="jj-game-placeholder-icon">+</div>
+                            <div class="jj-game-card-kicker">EM BREVE</div>
+                            <div class="jj-game-placeholder-title">Novo jogo</div>
+                            <p>Este espaço está reservado para o próximo lançamento.</p>
+                        </article>
+                    </t>
+                </div>
+                <p class="jj-games-priority-note">
+                    Damos prioridade aos jogos selecionados, sem interromper suas escolhas de apoio.
+                </p>
+            </section>
 
             <!-- Clubes Section -->
             <div class="jj-section-header" t-if="clubs_data">
@@ -475,7 +517,8 @@
             <t t-set="no_header" t-value="True"/>
             <t t-set="no_footer" t-value="True"/>
             <div class="jj-wrapper">
-                <div class="jj-dashboard">
+                <!-- DARK_DASHBOARD_THEME: visual theme scoped to this dashboard only. -->
+                <div class="jj-dashboard jj-dashboard-dark">
                     <!-- Header -->
                     <div class="jj-dash-header">
                         <div class="jj-dash-header-left">

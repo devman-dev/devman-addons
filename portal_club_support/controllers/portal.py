@@ -197,10 +197,23 @@ class PortalClubSupport(CustomerPortal):
                 "pref_id": pref.id,
             })
 
+        # FEATURED_GAMES: merge configured games and expose at most three cards.
+        categories = request.env["club.support.game.category"].sudo().search(
+            [("active", "=", True)], order="sequence, name, id"
+        )
+        featured_games = request.env["product.template"]
+        for category in categories:
+            featured_games |= category.featured_game_ids.filtered(
+                lambda game: game.active and game.is_game and game.website_published
+            )
+        featured_games = featured_games[:3]
+
         return request.render("portal_club_support.jj_dashboard_page", {
             "partner": partner,
             "clubs_data": clubs_data,
             "success": success,
+            "featured_games": featured_games,
+            "featured_game_empty_slots": max(0, 3 - len(featured_games)),
             "success_message": "Cadastro concluído com sucesso!",
         })
 
