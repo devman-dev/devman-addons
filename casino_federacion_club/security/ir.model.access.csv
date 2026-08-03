@@ -1,0 +1,7 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_casino_federation,access_casino_federation,model_casino_federation,base.group_user,1,1,1,0
+access_casino_federation_portal,access_casino_federation_portal,model_casino_federation,base.group_portal,1,0,0,0
+access_casino_federation_public,access_casino_federation_public,model_casino_federation,base.group_public,1,0,0,0
+access_casino_club_user,access_casino_club_user,model_casino_club,base.group_user,1,1,1,0
+access_casino_club_portal,access_casino_club_portal,model_casino_club,base.group_portal,1,0,0,0
+access_casino_club_public,access_casino_club_public,model_casino_club,base.group_public,1,0,0,0

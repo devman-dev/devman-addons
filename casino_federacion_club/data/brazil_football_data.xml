@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+    <!-- CASINO_FEDERATION_ODOO18: small Brazilian football catalogue. -->
+    <record id="federation_ferj" model="casino.federation">
+        <field name="name">FERJ - Federação de Futebol do Estado do Rio de Janeiro</field>
+        <field name="commission">2.5</field>
+    </record>
+    <record id="federation_fpf" model="casino.federation">
+        <field name="name">FPF - Federação Paulista de Futebol</field>
+        <field name="commission">2.5</field>
+    </record>
+    <record id="federation_fmf" model="casino.federation">
+        <field name="name">FMF - Federação Mineira de Futebol</field>
+        <field name="commission">2.5</field>
+    </record>
+
+    <record id="club_flamengo" model="casino.club">
+        <field name="name">Clube de Regatas do Flamengo</field>
+        <field name="short_name">FLA</field>
+        <field name="federation_id" ref="federation_ferj"/>
+        <field name="primary_color">#c8102e</field>
+        <field name="commission">2.5</field>
+        <field name="sequence">10</field>
+    </record>
+    <record id="club_vasco" model="casino.club">
+        <field name="name">Club de Regatas Vasco da Gama</field>
+        <field name="short_name">VAS</field>
+        <field name="federation_id" ref="federation_ferj"/>
+        <field name="primary_color">#111111</field>
+        <field name="commission">2.5</field>
+        <field name="sequence">20</field>
+    </record>
+    <record id="club_corinthians" model="casino.club">
+        <field name="name">Sport Club Corinthians Paulista</field>
+        <field name="short_name">COR</field>
+        <field name="federation_id" ref="federation_fpf"/>
+        <field name="primary_color">#111111</field>
+        <field name="commission">2.5</field>
+        <field name="sequence">10</field>
+    </record>
+    <record id="club_palmeiras" model="casino.club">
+        <field name="name">Sociedade Esportiva Palmeiras</field>
+        <field name="short_name">PAL</field>
+        <field name="federation_id" ref="federation_fpf"/>
+        <field name="primary_color">#006437</field>
+        <field name="commission">2.5</field>
+        <field name="sequence">20</field>
+    </record>
+    <record id="club_atletico_mg" model="casino.club">
+        <field name="name">Clube Atlético Mineiro</field>
+        <field name="short_name">CAM</field>
+        <field name="federation_id" ref="federation_fmf"/>
+        <field name="primary_color">#111111</field>
+        <field name="commission">2.5</field>
+        <field name="sequence">10</field>
+    </record>
+    <record id="club_cruzeiro" model="casino.club">
+        <field name="name">Cruzeiro Esporte Clube</field>
+        <field name="short_name">CRU</field>
+        <field name="federation_id" ref="federation_fmf"/>
+        <field name="primary_color">#005baa</field>
+        <field name="commission">2.5</field>
+        <field name="sequence">20</field>
+    </record>
+</odoo>

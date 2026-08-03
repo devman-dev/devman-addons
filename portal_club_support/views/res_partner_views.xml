@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Extensión de la vista form de res.partner -->
+    <record id="view_partner_form_inherit" model="ir.ui.view">
+        <field name="name">res.partner.form.club.support</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_partner_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//page[@name='internal_notes']" position="before">
+                <page string="JogaJunto" name="jogajunto">
+                    <group>
+                        <group string="Dados do Portal">
+                            <field name="l10n_br_cpf"/>
+                            <field name="birth_date"/>
+                            <field name="age_confirmed"/>
+                            <field name="terms_accepted_date"/>
+                            <field name="preferences_count"/>
+                        </group>
+                    </group>
+                </page>
+            </xpath>
+        </field>
+    </record>
+</odoo>

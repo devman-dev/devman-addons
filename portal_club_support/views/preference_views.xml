@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Tree (lista) de preferencias -->
+    <record id="view_preference_tree" model="ir.ui.view">
+        <field name="name">club.support.preference.tree</field>
+        <field name="model">club.support.preference</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="partner_id"/>
+                <field name="category_id"/>
+                <field name="casino_club_id"/>
+                <field name="club_id" optional="hide"/>
+                <!-- ODOO18_PORTAL_FIX: use the related model field. -->
+                <field name="commission_percentage"/>
+                <field name="selected_date"/>
+                <field name="changed_date"/>
+                <field name="active"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Form de preferencia (solo lectura informativa) -->
+    <record id="view_preference_form" model="ir.ui.view">
+        <field name="name">club.support.preference.form</field>
+        <field name="model">club.support.preference</field>
+        <field name="arch" type="xml">
+            <form string="Preferencia">
+                <sheet>
+                    <group>
+                        <group string="Usuario y Categoría">
+                            <field name="partner_id"/>
+                            <field name="category_id"/>
+                        </group>
+                        <group string="Club">
+                            <field name="casino_club_id"/>
+                            <field name="club_id" invisible="casino_club_id"/>
+                            <field name="active"/>
+                        </group>
+                    </group>
+                    <group string="Fechas">
+                        <field name="selected_date"/>
+                        <field name="changed_date"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Search -->
+    <record id="view_preference_search" model="ir.ui.view">
+        <field name="name">club.support.preference.search</field>
+        <field name="model">club.support.preference</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="partner_id"/>
+                <field name="category_id"/>
+                <field name="club_id"/>
+                <filter name="active" string="Vigentes"
+                        domain="[('active', '=', True)]"/>
+                <filter name="inactive" string="Históricas"
+                        domain="[('active', '=', False)]"/>
+                <separator/>
+                <filter name="today" string="Hoy"
+                        domain="[('selected_date', '>=', datetime.datetime.now().strftime('%Y-%m-%d 00:00:00'))]"/>
+                <group expand="0" string="Agrupar por">
+                    <filter name="group_by_partner" string="Usuario"
+                            context="{'group_by': 'partner_id'}"/>
+                    <filter name="group_by_category" string="Categoría"
+                            context="{'group_by': 'category_id'}"/>
+                    <filter name="group_by_club" string="Club"
+                            context="{'group_by': 'club_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- Action -->
+    <record id="action_preference" model="ir.actions.act_window">
+        <field name="name">Preferencias de Usuarios</field>
+        <field name="res_model">club.support.preference</field>
+        <field name="view_mode">list,form</field>
+        <field name="context">{}</field>
+    </record>
+
+</odoo>

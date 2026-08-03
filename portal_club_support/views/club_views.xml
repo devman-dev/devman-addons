@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Tree (lista) de clubes -->
+    <record id="view_club_tree" model="ir.ui.view">
+        <field name="name">club.support.club.tree</field>
+        <field name="model">club.support.club</field>
+        <field name="arch" type="xml">
+            <list editable="bottom">
+                <field name="sequence" widget="handle"/>
+                <field name="logo" widget="image" class="oe-avatar"/>
+                <field name="name"/>
+                <field name="short_name"/>
+                <field name="commission_percentage" string="Comisión (%)"/>
+                <field name="category_ids" widget="many2many_tags"/>
+                <field name="primary_color" widget="color_picker"/>
+                <field name="active"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Form de club -->
+    <record id="view_club_form" model="ir.ui.view">
+        <field name="name">club.support.club.form</field>
+        <field name="model">club.support.club</field>
+        <field name="arch" type="xml">
+            <form string="Club">
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="toggle_active" type="object"
+                                class="oe_stat_button" icon="fa-archive"
+                                invisible="active">
+                            <field name="active" widget="boolean_button"
+                                   options='{"terminology": "archive"}'/>
+                        </button>
+                    </div>
+                    <widget name="web_ribbon" title="Archivado"
+                            bg_color="bg-danger" text_color="text-white"
+                            invisible="active"/>
+
+                    <group>
+                        <group string="Identificación">
+                            <field name="name"/>
+                            <field name="short_name"/>
+                            <field name="sequence"/>
+                            <field name="active"/>
+                        </group>
+                        <group string="Escudo e Imagem">
+                            <field name="logo" widget="image"
+                                   options='{"preview_image": "logo"}'/>
+                        </group>
+                    </group>
+
+                    <group string="Colores">
+                        <group>
+                            <field name="primary_color" widget="color_picker"/>
+                        </group>
+                        <group>
+                            <field name="secondary_color" widget="color_picker"/>
+                        </group>
+                    </group>
+
+                    <group string="Comisión">
+                        <field name="commission_percentage" string="Comisión (%)"/>
+                        <field name="website_url" widget="url"/>
+                    </group>
+
+                    <group string="Categorías donde participa">
+                        <field name="category_ids" widget="many2many_tags"
+                               domain="[('active', '=', True)]"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Search -->
+    <record id="view_club_search" model="ir.ui.view">
+        <field name="name">club.support.club.search</field>
+        <field name="model">club.support.club</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="short_name"/>
+                <field name="category_ids"/>
+                <filter name="active" string="Activos"
+                        domain="[('active', '=', True)]"/>
+                <filter name="inactive" string="Archivados"
+                        domain="[('active', '=', False)]"/>
+                <separator/>
+                <filter name="with_commission" string="Con Comisión"
+                        domain="[('commission_percentage', '>', 0)]"/>
+                <group expand="0" string="Agrupar por">
+                    <filter name="group_by_category" string="Categoría"
+                            context="{'group_by': 'category_ids'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- Action -->
+    <record id="action_club" model="ir.actions.act_window">
+        <field name="name">Clubes</field>
+        <field name="res_model">club.support.club</field>
+        <field name="view_mode">list,form</field>
+        <field name="context">{}</field>
+    </record>
+
+</odoo>

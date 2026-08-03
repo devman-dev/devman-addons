@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="casino_club_grouped_tree" model="ir.ui.view">
+        <field name="name">casino.club.grouped.tree</field>
+        <field name="model">casino.club</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="name"/>
+                <field name="commission" string="Comision %"/>
+                <field name="active"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="casino_club_tree" model="ir.ui.view">
+        <field name="name">casino.club.tree</field>
+        <field name="model">casino.club</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="sequence" widget="handle"/>
+                <field name="name"/>
+                <field name="federation_id"/>
+                <field name="commission" string="Comision %"/>
+                <field name="active"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="casino_club_form" model="ir.ui.view">
+        <field name="name">casino.club.form</field>
+        <field name="model">casino.club</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="name"/>
+                            <field name="federation_id"/>
+                            <label for="commission"/>
+                            <div class="o_row">
+                                <field name="commission" class="o_input" style="width:80px"/>
+                                <span>%</span>
+                            </div>
+                        </group>
+                        <group>
+                            <field name="active"/>
+                            <field name="sequence"/>
+                            <field name="logo" widget="image" class="oe_avatar"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="casino_club_grouped_search" model="ir.ui.view">
+        <field name="name">casino.club.grouped.search</field>
+        <field name="model">casino.club</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="federation_id"/>
+                <field name="commission"/>
+                <filter string="Agrupado por Federacion" name="group_federation" context="{'group_by': 'federation_id'}"/>
+                <separator/>
+                <filter string="Activos" name="active" domain="[('active','=',True)]"/>
+            </search>
+        </field>
+    </record>
+
+    <record id="casino_club_search" model="ir.ui.view">
+        <field name="name">casino.club.search</field>
+        <field name="model">casino.club</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="federation_id"/>
+                <field name="commission"/>
+                <filter string="Activos" name="active" domain="[('active','=',True)]"/>
+            </search>
+        </field>
+    </record>
+
+    <record id="casino_club_by_federation_action" model="ir.actions.act_window">
+        <field name="name">Clubes por Federacion</field>
+        <field name="res_model">casino.club</field>
+        <field name="view_mode">list,form</field>
+        <field name="context">{'search_default_group_federation': 1, 'search_default_active': 1}</field>
+    </record>
+
+    <record id="casino_club_action" model="ir.actions.act_window">
+        <field name="name">Clubes</field>
+        <field name="res_model">casino.club</field>
+        <field name="view_mode">list,form</field>
+    </record>
+</odoo>

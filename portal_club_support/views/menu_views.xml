@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Menú principal en Configuración (o independiente) -->
+    <menuitem
+        id="menu_club_support_root"
+        name="JogaJunto"
+        sequence="90"
+        web_icon="portal_club_support,static/src/img/icon.png"
+    />
+
+    <menuitem
+        id="menu_club_support_config"
+        name="Configuración"
+        parent="menu_club_support_root"
+        sequence="10"
+    />
+
+    <menuitem
+        id="menu_game_category"
+        name="Categorías de Juego"
+        parent="menu_club_support_config"
+        action="action_game_category"
+        sequence="10"
+    />
+
+    <menuitem
+        id="menu_club"
+        name="Clubes"
+        parent="menu_club_support_config"
+        action="action_club"
+        sequence="20"
+    />
+
+    <menuitem
+        id="menu_preference"
+        name="Preferencias de Usuarios"
+        parent="menu_club_support_root"
+        action="action_preference"
+        sequence="20"
+    />
+
+</odoo>

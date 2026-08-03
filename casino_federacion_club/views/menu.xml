@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <menuitem id="menu_casino_federation_root"
+              name="Federaciones"
+              parent="casino_online_back.menu_casino_root"
+              sequence="15"
+              action="casino_federation_action"/>
+
+    <menuitem id="menu_casino_club_by_federation"
+              name="Clubes"
+              parent="casino_online_back.menu_casino_root"
+              sequence="16"
+              action="casino_club_by_federation_action"/>
+</odoo>

@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="access_casino_federation_user" model="ir.model.access">
+        <field name="name">Casino Federation User Access</field>
+        <field name="model_id" ref="model_casino_federation"/>
+        <field name="group_id" ref="base.group_user"/>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_write" eval="True"/>
+        <field name="perm_create" eval="True"/>
+        <field name="perm_unlink" eval="False"/>
+    </record>
+    <record id="access_casino_federation_portal" model="ir.model.access">
+        <field name="name">Casino Federation Portal Access</field>
+        <field name="model_id" ref="model_casino_federation"/>
+        <field name="group_id" ref="base.group_portal"/>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_write" eval="False"/>
+        <field name="perm_create" eval="False"/>
+        <field name="perm_unlink" eval="False"/>
+    </record>
+    <record id="access_casino_federation_public" model="ir.model.access">
+        <field name="name">Casino Federation Public Access</field>
+        <field name="model_id" ref="model_casino_federation"/>
+        <field name="group_id" ref="base.group_public"/>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_write" eval="False"/>
+        <field name="perm_create" eval="False"/>
+        <field name="perm_unlink" eval="False"/>
+    </record>
+</odoo>
