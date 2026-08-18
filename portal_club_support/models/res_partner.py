@@ -28,9 +28,18 @@ class ResPartner(models.Model):
         string="Preferências Ativas",
         compute="_compute_preferences_count",
     )
+    street_number = fields.Char(
+        string="Número",
+        size=20,
+        help="Número de la dirección.",
+    )
+    district = fields.Char(
+        string="Barrio/Localidad",
+        size=100,
+        help="Barrio o localidad de la dirección.",
+    )
 
     def _compute_preferences_count(self):
-        """Contar preferencias activas del portal user actual."""
         for partner in self:
             partner.preferences_count = self.env["club.support.preference"].search_count([
                 ("partner_id", "=", partner.id),
