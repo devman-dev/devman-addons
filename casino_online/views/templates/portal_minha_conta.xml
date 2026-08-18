@@ -1,0 +1,845 @@
+<odoo>
+    <template id="portal_minha_conta" name="Minha Conta - Portal">
+        <t t-call="website.layout">
+
+            <t t-set="title">Minha Conta</t>
+
+            <div class="jj-minha-conta">
+
+                <style>
+                    /* === Bone/light theme — dashboard + sidebar #F7F5F0, dark green cards retained === */
+                    .jj-minha-conta{background:#F7F5F0!important;color:#1A1D1B!important;min-height:100vh!important}
+                    .jj-mc-layout,.jj-mc-main{background:transparent!important;color:#1A1D1B!important}
+                    .jj-mc-sidebar{background:#F7F5F0!important;border-color:rgba(0,0,0,0.08)!important}
+                    /* Cards: keep dark green, white text */
+                    .jj-mc-card,.jj-mc-stat-card,.jj-mc-action-card{background:#0F1F17!important;border-color:rgba(255,255,255,0.14)!important}
+                    .jj-mc-card,.jj-mc-stat-card,.jj-mc-action-card,.jj-mc-action-card span{color:#F7F5F0!important}
+                    .jj-mc-card-title{color:#FFFFFF!important}
+                    .jj-mc-panel-title{color:#1A1D1B!important}
+                    .jj-mc-stat-label{color:rgba(255,255,255,0.85)!important}
+                    .jj-mc-stat-value{color:#FFFFFF!important}
+                    .jj-mc-stat-balance,.jj-mc-positive{color:#FFFFFF!important}
+                    .jj-mc-row-label{color:rgba(255,255,255,0.8)!important}
+                    .jj-mc-row-value{color:#FFFFFF!important}
+                    /* Sidebar nav on bone */
+                    .jj-mc-nav-item{color:#4A5A52!important}
+                    .jj-mc-nav-item:hover{color:#1A1D1B!important;background:rgba(0,0,0,0.04)!important}
+                    .jj-mc-nav-item.active{color:#1B7A4A!important;background:rgba(27,122,74,0.08)!important;font-weight:600!important;border-left:3px solid #1B7A4A!important}
+                    .jj-mc-user-name{color:#1A1D1B!important}
+                    .jj-mc-user-email{color:#6B7A72!important}
+                    .jj-mc-balance-value{color:#1B7A4A!important;font-size:21px!important;font-weight:800!important}
+                    .jj-mc-balance-label{color:#6B7A72!important}
+                    /* Table inside dark wrap */
+                    .jj-mc-table th{color:rgba(255,255,255,0.85)!important}
+                    .jj-mc-table td{color:#FFFFFF!important}
+                    .jj-mc-table tbody tr:hover td{background:rgba(255,255,255,0.04)!important}
+                    .jj-mc-table-wrap{border-color:rgba(255,255,255,0.14)!important;background:#0F1F17!important}
+                    .jj-mc-table thead{background:rgba(11,40,24,0.8)!important}
+                    /* Buttons on bone */
+                    .jj-mc-btn-deposit,.jj-mc-btn-primary{background:#1B7A4A!important;color:#FFFFFF!important;box-shadow:0 2px 12px rgba(27,122,74,0.2)!important}
+                    .jj-mc-btn-deposit:hover,.jj-mc-btn-primary:hover{background:#178A4E!important;box-shadow:0 4px 18px rgba(27,122,74,0.3)!important}
+                    .jj-mc-btn-withdraw{background:transparent!important;border:1px solid #1B7A4A!important;color:#1B7A4A!important}
+                    .jj-mc-btn-withdraw:hover{border-color:#178A4E!important;background:rgba(27,122,74,0.08)!important}
+                    .jj-mc-link{color:#1B7A4A!important;text-decoration:underline!important}
+                    /* Link cards inside dark cards */
+                    .jj-mc-link-card,.jj-mc-link-card-body{background:transparent!important}
+                    .jj-mc-link-card-title{color:#FFFFFF!important}
+                    .jj-mc-link-card-desc{color:rgba(255,255,255,0.8)!important}
+                    .jj-mc-link-card-icon{background:rgba(255,255,255,0.1)!important;color:#FFFFFF!important}
+                    .jj-mc-section-header h3{color:#1A1D1B!important}
+                    .jj-mc-empty p,.jj-mc-empty-sub,.jj-mc-empty-inline{color:#6B7A72!important}
+                    /* Alerts on bone */
+                    .jj-mc-alert-success{color:#1B7A4A!important;background:rgba(27,122,74,0.07)!important;border-color:rgba(27,122,74,0.2)!important}
+                    .jj-mc-alert-warning{color:#9A6B00!important;background:rgba(154,107,0,0.07)!important;border-color:rgba(154,107,0,0.2)!important}
+                    .jj-mc-alert-info{color:#2B5B8A!important;background:rgba(43,91,138,0.07)!important;border-color:rgba(43,91,138,0.2)!important}
+                    .jj-mc-tag{background:rgba(255,255,255,0.1)!important;color:#FFFFFF!important}
+                    .jj-mc-pagination-info{color:#6B7A72!important}
+                    .jj-mc-field+.jj-mc-field,.jj-mc-row+.jj-mc-row,.jj-mc-card-title{border-color:rgba(255,255,255,0.14)!important}
+                    .jj-mc-menu-toggle{color:#1A1D1B!important}
+                    .jj-mc-mobile-header{background:#F7F5F0!important}
+                </style>
+
+                <!-- Mobile Header -->
+                <header class="jj-mc-mobile-header d-lg-none">
+                    <button class="jj-mc-menu-toggle" aria-label="Abrir menu" onclick="document.querySelector('.jj-minha-conta').classList.toggle('sidebar-open')">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M3 12h18M3 6h18M3 18h18"/>
+                        </svg>
+                    </button>
+                    <span class="jj-mc-mobile-title">Minha Conta</span>
+                    <span class="jj-mc-mobile-balance" t-esc="currency.symbol + ' ' + ('{:,.2f}'.format(abs(saldo_final) if saldo_final else 0)).replace(',','X').replace('.',',').replace('X','.')"/>
+                </header>
+
+                <!-- Overlay for mobile sidebar -->
+                <div class="jj-mc-overlay" onclick="document.querySelector('.jj-minha-conta').classList.remove('sidebar-open')"/>
+
+                <div class="jj-mc-layout">
+
+                    <!-- Sidebar -->
+                    <aside class="jj-mc-sidebar">
+                        <div class="jj-mc-sidebar-inner">
+                            <!-- User card -->
+                            <div class="jj-mc-user-card">
+                                <div class="jj-mc-avatar">
+                                    <t t-set="initials" t-value="partner_sudo.name[:2].upper() if partner_sudo and partner_sudo.name else '?'"/>
+                                    <span t-esc="initials"/>
+                                </div>
+                                <div class="jj-mc-user-info">
+                                    <div class="jj-mc-user-name" t-esc="partner_sudo.name"/>
+                                    <div class="jj-mc-user-email" t-esc="partner_sudo.email or ''"/>
+                                </div>
+                                <div class="jj-mc-user-balance">
+                                    <span class="jj-mc-balance-label">Saldo</span>
+                                    <span class="jj-mc-balance-value">
+                                        <t t-if="saldo_final">
+                                            <t t-esc="currency.symbol"/>
+                                            <t t-esc="('{:,.2f}'.format(abs(saldo_final))).replace(',','X').replace('.',',').replace('X','.')"/>
+                                        </t>
+                                        <t t-else="">
+                                            <t t-esc="currency.symbol"/>0,00
+                                        </t>
+                                    </span>
+                                </div>
+                            </div>
+
+                            <!-- Navigation -->
+                            <nav class="jj-mc-nav" aria-label="Minha Conta">
+                                <a href="#visao-geral" class="jj-mc-nav-item active" data-section="visao-geral">
+                                    <span class="jj-mc-nav-icon">
+                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                            <rect x="3" y="3" width="7" height="7" rx="1"/>
+                                            <rect x="14" y="3" width="7" height="7" rx="1"/>
+                                            <rect x="3" y="14" width="7" height="7" rx="1"/>
+                                            <rect x="14" y="14" width="7" height="7" rx="1"/>
+                                        </svg>
+                                    </span>
+                                    <span class="jj-mc-nav-label">Visão geral</span>
+                                </a>
+                                <a href="#dados-pessoais" class="jj-mc-nav-item" data-section="dados-pessoais">
+                                    <span class="jj-mc-nav-icon">
+                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                            <circle cx="12" cy="8" r="4"/>
+                                            <path d="M4 20c0-4 4-7 8-7s8 3 8 7"/>
+                                        </svg>
+                                    </span>
+                                    <span class="jj-mc-nav-label">Dados pessoais</span>
+                                </a>
+                                <a href="#verificacao" class="jj-mc-nav-item" data-section="verificacao">
+                                    <span class="jj-mc-nav-icon">
+                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                            <path d="M9 12l2 2 4-4"/>
+                                            <circle cx="12" cy="12" r="9"/>
+                                        </svg>
+                                    </span>
+                                    <span class="jj-mc-nav-label">Verificação</span>
+                                    <t t-if="onboarding_state and onboarding_state not in ('approved',)">
+                                        <span class="jj-mc-nav-badge">!</span>
+                                    </t>
+                                </a>
+                                <a href="#seguranca" class="jj-mc-nav-item" data-section="seguranca">
+                                    <span class="jj-mc-nav-icon">
+                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                            <rect x="3" y="11" width="18" height="11" rx="2"/>
+                                            <path d="M7 11V7a5 5 0 0110 0v4"/>
+                                            <circle cx="12" cy="16" r="1"/>
+                                        </svg>
+                                    </span>
+                                    <span class="jj-mc-nav-label">Segurança</span>
+                                </a>
+                                <a href="#movimentos" class="jj-mc-nav-item" data-section="movimentos">
+                                    <span class="jj-mc-nav-icon">
+                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                            <path d="M3 18h18M3 6h18M3 12h18"/>
+                                        </svg>
+                                    </span>
+                                    <span class="jj-mc-nav-label">Movimentos</span>
+                                </a>
+                                <a href="#pagamentos" class="jj-mc-nav-item" data-section="pagamentos">
+                                    <span class="jj-mc-nav-icon">
+                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                            <rect x="2" y="5" width="20" height="14" rx="2"/>
+                                            <line x1="2" y1="10" x2="22" y2="10"/>
+                                        </svg>
+                                    </span>
+                                    <span class="jj-mc-nav-label">Pagamentos</span>
+                                </a>
+                                <a href="#minha-atividade" class="jj-mc-nav-item" data-section="minha-atividade">
+                                    <span class="jj-mc-nav-icon">
+                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                            <polygon points="5 3 19 12 5 21 5 3"/>
+                                        </svg>
+                                    </span>
+                                    <span class="jj-mc-nav-label">Minha atividade</span>
+                                </a>
+                                <a href="#notificacoes" class="jj-mc-nav-item" data-section="notificacoes">
+                                    <span class="jj-mc-nav-icon">
+                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                            <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+                                            <path d="M13.73 21a2 2 0 01-3.46 0"/>
+                                        </svg>
+                                    </span>
+                                    <span class="jj-mc-nav-label">Notificações</span>
+                                </a>
+                                <a href="#preferencias" class="jj-mc-nav-item" data-section="preferencias">
+                                    <span class="jj-mc-nav-icon">
+                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                            <circle cx="12" cy="12" r="3"/>
+                                            <path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/>
+                                        </svg>
+                                    </span>
+                                    <span class="jj-mc-nav-label">Preferências</span>
+                                </a>
+                                <a href="#central-ajuda" class="jj-mc-nav-item" data-section="central-ajuda">
+                                    <span class="jj-mc-nav-icon">
+                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                            <circle cx="12" cy="12" r="9"/>
+                                            <path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"/>
+                                            <circle cx="12" cy="17" r=".5"/>
+                                        </svg>
+                                    </span>
+                                    <span class="jj-mc-nav-label">Central de ajuda</span>
+                                </a>
+                                <a href="#sair" class="jj-mc-nav-item jj-mc-nav-danger" data-section="sair">
+                                    <span class="jj-mc-nav-icon">
+                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                            <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/>
+                                            <polyline points="16 17 21 12 16 7"/>
+                                            <line x1="21" y1="12" x2="9" y2="12"/>
+                                        </svg>
+                                    </span>
+                                    <span class="jj-mc-nav-label">Sair</span>
+                                </a>
+                            </nav>
+
+                            <!-- Deposit CTA -->
+                            <div class="jj-mc-sidebar-cta">
+                                <a href="/my/depositar" class="jj-mc-btn jj-mc-btn-deposit">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <line x1="12" y1="5" x2="12" y2="19"/>
+                                        <polyline points="19 12 12 19 5 12"/>
+                                    </svg>
+                                    Depósito
+                                </a>
+                                <a href="/casino/withdrawal/form" class="jj-mc-btn jj-mc-btn-withdraw">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <line x1="12" y1="19" x2="12" y2="5"/>
+                                        <polyline points="5 12 12 5 19 12"/>
+                                    </svg>
+                                    Extrair
+                                </a>
+                            </div>
+                        </div>
+                    </aside>
+
+                    <!-- Main Content -->
+                    <main class="jj-mc-main" id="jj-mc-main-content">
+
+                        <!-- 1. Visão geral -->
+                        <section id="visao-geral" class="jj-mc-panel active">
+                            <h2 class="jj-mc-panel-title">Visão geral</h2>
+
+                            <!-- Stats cards row -->
+                            <div class="jj-mc-stats">
+                                <div class="jj-mc-stat-card">
+                                    <span class="jj-mc-stat-icon">
+                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--jj-green, #00c853)" stroke-width="1.5">
+                                            <rect x="2" y="3" width="20" height="14" rx="2"/>
+                                            <line x1="2" y1="10" x2="22" y2="10"/>
+                                        </svg>
+                                    </span>
+                                    <span class="jj-mc-stat-label">Saldo disponível</span>
+                                    <span class="jj-mc-stat-value jj-mc-stat-balance">
+                                        <t t-if="saldo_final">
+                                            <t t-esc="currency.symbol"/>
+                                            <t t-esc="('{:,.2f}'.format(abs(saldo_final))).replace(',','X').replace('.',',').replace('X','.')"/>
+                                        </t>
+                                        <t t-else="">
+                                            <t t-esc="currency.symbol"/>0,00
+                                        </t>
+                                    </span>
+                                </div>
+                                <div class="jj-mc-stat-card">
+                                    <span class="jj-mc-stat-icon">
+                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                            <circle cx="12" cy="12" r="9"/>
+                                            <path d="M9 12l2 2 4-4"/>
+                                        </svg>
+                                    </span>
+                                    <span class="jj-mc-stat-label">Verificação</span>
+                                    <span class="jj-mc-stat-value jj-mc-status">
+                                        <t t-if="onboarding_state == 'approved'">
+                                            <span class="jj-badge-success">Verificado</span>
+                                        </t>
+                                        <t t-elif="onboarding_state in ('submitted', 'in_review')">
+                                            <span class="jj-badge-warning">Em análise</span>
+                                        </t>
+                                        <t t-else="">
+                                            <span class="jj-badge-muted">Pendente</span>
+                                        </t>
+                                    </span>
+                                </div>
+                                <div class="jj-mc-stat-card">
+                                    <span class="jj-mc-stat-icon">
+                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                            <rect x="3" y="4" width="18" height="18" rx="2"/>
+                                            <line x1="16" y1="2" x2="16" y2="6"/>
+                                            <line x1="8" y1="2" x2="8" y2="6"/>
+                                            <line x1="3" y1="10" x2="21" y2="10"/>
+                                        </svg>
+                                    </span>
+                                    <span class="jj-mc-stat-label">Membro desde</span>
+                                    <span class="jj-mc-stat-value" t-esc="member_since"/>
+                                </div>
+                            </div>
+
+                            <!-- Quick actions -->
+                            <div class="jj-mc-quick-actions">
+                                <a href="/my/depositar" class="jj-mc-action-card">
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--jj-green, #00c853)" stroke-width="1.5">
+                                        <line x1="12" y1="5" x2="12" y2="19"/>
+                                        <polyline points="19 12 12 19 5 12"/>
+                                    </svg>
+                                    <span>Depósito</span>
+                                </a>
+                                <a href="/casino/withdrawal/form" class="jj-mc-action-card">
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ff9800" stroke-width="1.5">
+                                        <line x1="12" y1="19" x2="12" y2="5"/>
+                                        <polyline points="5 12 12 5 19 12"/>
+                                    </svg>
+                                    <span>Extrair</span>
+                                </a>
+                                <a href="/my/movimientos" class="jj-mc-action-card">
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#2196f3" stroke-width="1.5">
+                                        <path d="M3 18h18M3 6h18M3 12h18"/>
+                                    </svg>
+                                    <span>Movimentos</span>
+                                </a>
+                                <a href="/my/medios_pagos" class="jj-mc-action-card">
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#9c27b0" stroke-width="1.5">
+                                        <rect x="2" y="5" width="20" height="14" rx="2"/>
+                                        <line x1="2" y1="10" x2="22" y2="10"/>
+                                    </svg>
+                                    <span>Meios de pagamento</span>
+                                </a>
+                            </div>
+
+                            <!-- Last movements -->
+                            <div class="jj-mc-section">
+                                <div class="jj-mc-section-header">
+                                    <h3>Últimos movimentos</h3>
+                                    <a href="/my/movimientos" class="jj-mc-link">Ver todos</a>
+                                </div>
+                                <t t-if="movements">
+                                    <div class="jj-mc-table-wrap">
+                                        <table class="jj-mc-table">
+                                            <thead>
+                                                <tr>
+                                                    <th>Data</th>
+                                                    <th>Descrição</th>
+                                                    <th>Tipo</th>
+                                                    <th class="jj-mc-right">Valor</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <t t-foreach="movements[:5]" t-as="m">
+                                                    <tr>
+                                                        <td class="jj-mc-date" t-esc="m['date']"/>
+                                                        <td t-esc="m['description']"/>
+                                                        <td>
+                                                            <span class="jj-mc-tag" t-esc="m['type_display']"/>
+                                                        </td>
+                                                        <td class="jj-mc-right">
+                                                            <span t-att-class="'jj-mc-amount ' + ('jj-mc-positive' if m['amount'] &gt;= 0 else 'jj-mc-negative')">
+                                                                <t t-esc="('{:+,.2f}'.format(m['amount'])).replace(',','X').replace('.',',').replace('X','.')"/>
+                                                            </span>
+                                                        </td>
+                                                    </tr>
+                                                </t>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    <t t-if="not movements">
+                                        <div class="jj-mc-empty">Nenhum movimento registrado.</div>
+                                    </t>
+                                </t>
+                            </div>
+                        </section>
+
+                        <!-- 2. Dados pessoais -->
+                        <section id="dados-pessoais" class="jj-mc-panel">
+                            <h2 class="jj-mc-panel-title">Dados pessoais</h2>
+                            <div class="jj-mc-card">
+                                <div class="jj-mc-row jj-mc-field">
+                                    <span class="jj-mc-row-label">Nome</span>
+                                    <span class="jj-mc-row-value" t-esc="partner_sudo.name"/>
+                                </div>
+                                <div class="jj-mc-row jj-mc-field">
+                                    <span class="jj-mc-row-label">E-mail</span>
+                                    <span class="jj-mc-row-value" t-esc="partner_sudo.email or ''"/>
+                                </div>
+                                <div class="jj-mc-row jj-mc-field">
+                                    <span class="jj-mc-row-label">CPF</span>
+                                    <span class="jj-mc-row-value" t-esc="cpf or '—'"/>
+                                </div>
+                                <div class="jj-mc-row jj-mc-field">
+                                    <span class="jj-mc-row-label">Data de nascimento</span>
+                                    <span class="jj-mc-row-value">
+                                        <t t-if="birth_date">
+                                            <t t-esc="birth_date_formatted"/>
+                                        </t>
+                                        <t t-else="">—</t>
+                                    </span>
+                                </div>
+                                <div class="jj-mc-row jj-mc-field">
+                                    <span class="jj-mc-row-label">Telefone</span>
+                                    <span class="jj-mc-row-value" t-esc="phone or '—'"/>
+                                </div>
+                                <div class="jj-mc-row jj-mc-field">
+                                    <span class="jj-mc-row-label">Endereço</span>
+                                    <span class="jj-mc-row-value" t-esc="full_address or '—'"/>
+                                </div>
+                            </div>
+                        </section>
+
+                        <!-- 3. Verificação -->
+                        <section id="verificacao" class="jj-mc-panel">
+                            <h2 class="jj-mc-panel-title">Verificação</h2>
+
+                            <t t-if="onboarding_state == 'approved'">
+                                <div class="jj-mc-alert jj-mc-alert-success">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="9"/></svg>
+                                    Sua conta foi verificada com sucesso.
+                                </div>
+                            </t>
+                            <t t-elif="onboarding_state in ('submitted', 'in_review')">
+                                <div class="jj-mc-alert jj-mc-alert-warning">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                                    Seus documentos estão em análise. Isso pode levar até 48 horas úteis.
+                                </div>
+                            </t>
+                            <t t-else="">
+                                <div class="jj-mc-alert jj-mc-alert-info">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+                                    Complete a verificação da sua conta para acessar todos os recursos.
+                                </div>
+                            </t>
+
+                            <div class="jj-mc-card jj-mc-mt">
+                                <h3 class="jj-mc-card-title">Documentos</h3>
+                                <div class="jj-mc-row jj-mc-field">
+                                    <span class="jj-mc-row-label">Frente do documento</span>
+                                    <span class="jj-mc-row-value">
+                                        <t t-if="has_dni_front"><span class="jj-badge-success">Enviado</span></t>
+                                        <t t-else=""><span class="jj-badge-muted">Pendente</span></t>
+                                    </span>
+                                </div>
+                                <div class="jj-mc-row jj-mc-field">
+                                    <span class="jj-mc-row-label">Verso do documento</span>
+                                    <span class="jj-mc-row-value">
+                                        <t t-if="has_dni_back"><span class="jj-badge-success">Enviado</span></t>
+                                        <t t-else=""><span class="jj-badge-muted">Pendente</span></t>
+                                    </span>
+                                </div>
+                                <div class="jj-mc-row jj-mc-field">
+                                    <span class="jj-mc-row-label">Selfie</span>
+                                    <span class="jj-mc-row-value">
+                                        <t t-if="has_selfie"><span class="jj-badge-success">Enviado</span></t>
+                                        <t t-else=""><span class="jj-badge-muted">Pendente</span></t>
+                                    </span>
+                                </div>
+                                <div class="jj-mc-row jj-mc-field">
+                                    <span class="jj-mc-row-label">Vídeo</span>
+                                    <span class="jj-mc-row-value">
+                                        <t t-if="has_video"><span class="jj-badge-success">Enviado</span></t>
+                                        <t t-else=""><span class="jj-badge-muted">Pendente</span></t>
+                                    </span>
+                                </div>
+                            </div>
+
+                            <div class="jj-mc-card jj-mc-mt">
+                                <h3 class="jj-mc-card-title">Endereço</h3>
+                                <div class="jj-mc-row jj-mc-field">
+                                    <span class="jj-mc-row-label">Status</span>
+                                    <span class="jj-mc-row-value">
+                                        <t t-if="full_address"><span class="jj-badge-success">Cadastrado</span></t>
+                                        <t t-else=""><span class="jj-badge-muted">Pendente</span></t>
+                                    </span>
+                                </div>
+                            </div>
+                        </section>
+
+                        <!-- 4. Segurança -->
+                        <section id="seguranca" class="jj-mc-panel">
+                            <h2 class="jj-mc-panel-title">Segurança</h2>
+                            <div class="jj-mc-card">
+                                <a href="/my/security" class="jj-mc-link-card">
+                                    <div class="jj-mc-link-card-icon">
+                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                            <rect x="3" y="11" width="18" height="11" rx="2"/>
+                                            <path d="M7 11V7a5 5 0 0110 0v4"/>
+                                        </svg>
+                                    </div>
+                                    <div class="jj-mc-link-card-body">
+                                        <span class="jj-mc-link-card-title">Alterar senha</span>
+                                        <span class="jj-mc-link-card-desc">Atualize sua senha de acesso</span>
+                                    </div>
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#666" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+                                </a>
+
+                                <div class="jj-mc-link-card jj-mc-disabled">
+                                    <div class="jj-mc-link-card-icon">
+                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                            <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
+                                            <line x1="8" y1="21" x2="16" y2="21"/>
+                                            <line x1="12" y1="17" x2="12" y2="21"/>
+                                        </svg>
+                                    </div>
+                                    <div class="jj-mc-link-card-body">
+                                        <span class="jj-mc-link-card-title">Sessões e dispositivos</span>
+                                        <span class="jj-mc-link-card-desc">Em breve</span>
+                                    </div>
+                                </div>
+
+                                <a href="/web/session/logout" class="jj-mc-link-card jj-mc-link-danger">
+                                    <div class="jj-mc-link-card-icon">
+                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ff4444" stroke-width="1.5">
+                                            <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/>
+                                            <polyline points="16 17 21 12 16 7"/>
+                                            <line x1="21" y1="12" x2="9" y2="12"/>
+                                        </svg>
+                                    </div>
+                                    <div class="jj-mc-link-card-body">
+                                        <span class="jj-mc-link-card-title">Encerrar todas as sessões</span>
+                                        <span class="jj-mc-link-card-desc">Sair de todos os dispositivos conectados</span>
+                                    </div>
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ff4444" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+                                </a>
+                            </div>
+                        </section>
+
+                        <!-- 5. Movimentos -->
+                        <section id="movimentos" class="jj-mc-panel">
+                            <h2 class="jj-mc-panel-title">Movimentos</h2>
+                            <t t-if="movements">
+                                <div class="jj-mc-table-wrap">
+                                    <table class="jj-mc-table">
+                                        <thead>
+                                            <tr>
+                                                <th>Data</th>
+                                                <th>Descrição</th>
+                                                <th>Tipo</th>
+                                                <th class="jj-mc-right">Valor</th>
+                                                <th class="jj-mc-right">Saldo</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <t t-foreach="movements" t-as="m">
+                                                <tr>
+                                                    <td class="jj-mc-date" t-esc="m['date']"/>
+                                                    <td t-esc="m['description']"/>
+                                                    <td><span class="jj-mc-tag" t-esc="m['type_display']"/></td>
+                                                    <td class="jj-mc-right">
+                                                        <span t-att-class="'jj-mc-amount ' + ('jj-mc-positive' if m['amount'] &gt;= 0 else 'jj-mc-negative')">
+                                                            <t t-esc="('{:+,.2f}'.format(m['amount'])).replace(',','X').replace('.',',').replace('X','.')"/>
+                                                        </span>
+                                                    </td>
+                                                    <td class="jj-mc-right jj-mc-balance-col" t-esc="('{:,.2f}'.format(m['balance'])).replace(',','X').replace('.',',').replace('X','.')"/>
+                                                </tr>
+                                            </t>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <!-- Pagination -->
+                                <div class="jj-mc-pagination">
+                                    <span class="jj-mc-pagination-info" t-esc="'Página ' + str(page) + ' de ' + str(page_count) + ' (' + str(total_movements) + ' movimentos)'"/>
+                                    <div class="jj-mc-pagination-controls">
+                                        <t t-if="page &gt; 1">
+                                            <a t-att-href="'?page=' + str(page - 1)" class="jj-mc-btn-sm">Anterior</a>
+                                        </t>
+                                        <t t-if="page &lt; page_count">
+                                            <a t-att-href="'?page=' + str(page + 1)" class="jj-mc-btn-sm">Próxima</a>
+                                        </t>
+                                    </div>
+                                </div>
+                            </t>
+                            <t t-else="">
+                                <div class="jj-mc-empty">Nenhum movimento registrado.</div>
+                            </t>
+                        </section>
+
+                        <!-- 6. Pagamentos -->
+                        <section id="pagamentos" class="jj-mc-panel">
+                            <h2 class="jj-mc-panel-title">Pagamentos</h2>
+                            <div class="jj-mc-quick-actions jj-mc-mb">
+                                <a href="/my/depositar" class="jj-mc-action-card">
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--jj-green, #00c853)" stroke-width="1.5">
+                                        <line x1="12" y1="5" x2="12" y2="19"/>
+                                        <polyline points="19 12 12 19 5 12"/>
+                                    </svg>
+                                    <span>Depósito</span>
+                                </a>
+                                <a href="/casino/withdrawal/form" class="jj-mc-action-card">
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ff9800" stroke-width="1.5">
+                                        <line x1="12" y1="19" x2="12" y2="5"/>
+                                        <polyline points="5 12 12 5 19 12"/>
+                                    </svg>
+                                    <span>Extrair</span>
+                                </a>
+                                <a href="/my/medios_pagos" class="jj-mc-action-card">
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#9c27b0" stroke-width="1.5">
+                                        <rect x="2" y="5" width="20" height="14" rx="2"/>
+                                        <line x1="2" y1="10" x2="22" y2="10"/>
+                                    </svg>
+                                    <span>Meios de pagamento</span>
+                                </a>
+                            </div>
+
+                            <!-- Withdrawals list -->
+                            <t t-if="withdrawals">
+                                <div class="jj-mc-card">
+                                    <h3 class="jj-mc-card-title">Histórico de saques</h3>
+                                    <div class="jj-mc-table-wrap">
+                                        <table class="jj-mc-table">
+                                            <thead>
+                                                <tr>
+                                                    <th>Data</th>
+                                                    <th>Valor</th>
+                                                    <th>Estado</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <t t-foreach="withdrawals" t-as="w">
+                                                    <tr>
+                                                        <td t-esc="w['date'] or '—'"/>
+                                                        <td>
+                                                            <span class="jj-mc-amount jj-mc-negative">
+                                                                <t t-esc="('{:+,.2f}'.format(-abs(w['amount'] if w['amount'] else 0))).replace(',','X').replace('.',',').replace('X','.')"/>
+                                                            </span>
+                                                        </td>
+                                                        <td>
+                                                            <t t-if="w['state'] == 'approved'"><span class="jj-badge-success">Aprovado</span></t>
+                                                            <t t-elif="w['state'] == 'pending'"><span class="jj-badge-warning">Pendente</span></t>
+                                                            <t t-elif="w['state'] == 'rejected'"><span class="jj-badge-danger">Rejeitado</span></t>
+                                                            <t t-else=""><span class="jj-badge-muted" t-esc="w['state']"/></t>
+                                                        </td>
+                                                    </tr>
+                                                </t>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </t>
+                            <t t-else="">
+                                <div class="jj-mc-empty">Nenhum saque registrado.</div>
+                            </t>
+                        </section>
+
+                        <!-- 7. Minha atividade -->
+                        <section id="minha-atividade" class="jj-mc-panel">
+                            <h2 class="jj-mc-panel-title">Minha atividade</h2>
+                            <t t-if="game_sessions">
+                                <div class="jj-mc-table-wrap">
+                                    <table class="jj-mc-table">
+                                        <thead>
+                                            <tr>
+                                                <th>Jogo</th>
+                                                <th>Data</th>
+                                                <th class="jj-mc-right">Valor</th>
+                                                <th>Resultado</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <t t-foreach="game_sessions" t-as="gs">
+                                                <tr>
+                                                    <td t-esc="gs['game'] or '—'"/>
+                                                    <td class="jj-mc-date" t-esc="gs['start'][:19] if gs['start'] else '—'"/>
+                                                    <td class="jj-mc-right">
+                                                        <span t-att-class="'jj-mc-amount ' + ('jj-mc-positive' if (gs['amount'] or 0) &gt;= 0 else 'jj-mc-negative')">
+                                                            <t t-esc="('{:+,.2f}'.format(gs['amount'] or 0)).replace(',','X').replace('.',',').replace('X','.')"/>
+                                                        </span>
+                                                    </td>
+                                                    <td>
+                                                        <t t-if="gs['result'] == 'win'"><span class="jj-badge-success">Ganhou</span></t>
+                                                        <t t-elif="gs['result'] == 'loss'"><span class="jj-badge-danger">Perdeu</span></t>
+                                                        <t t-elif="gs['result'] == 'draw'"><span class="jj-badge-muted">Empate</span></t>
+                                                        <t t-else=""><span class="jj-badge-muted" t-esc="gs['result'] or '—'"/></t>
+                                                    </td>
+                                                </tr>
+                                            </t>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </t>
+                            <t t-else="">
+                                <div class="jj-mc-empty">Nenhuma sessão de jogo registrada.</div>
+                            </t>
+                        </section>
+
+                        <!-- 8. Notificações -->
+                        <section id="notificacoes" class="jj-mc-panel">
+                            <h2 class="jj-mc-panel-title">Notificações</h2>
+                            <div class="jj-mc-empty">
+                                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#444" stroke-width="1.5">
+                                    <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+                                    <path d="M13.73 21a2 2 0 01-3.46 0"/>
+                                </svg>
+                                <p>Em breve</p>
+                                <span class="jj-mc-empty-sub">As notificações estarão disponíveis em uma próxima atualização.</span>
+                            </div>
+                        </section>
+
+                        <!-- 9. Preferências -->
+                        <section id="preferencias" class="jj-mc-panel">
+                            <h2 class="jj-mc-panel-title">Preferências</h2>
+
+                            <div class="jj-mc-card">
+                                <h3 class="jj-mc-card-title">Limites de aposta</h3>
+                                <div class="jj-mc-row jj-mc-field">
+                                    <span class="jj-mc-row-label">Limite diário</span>
+                                    <span class="jj-mc-row-value">
+                                        <t t-esc="currency.symbol"/>
+                                        <t t-esc="('{:,.2f}'.format((bl.limit_daily or 0.0) if bl else 0.0)).replace(',','X').replace('.',',').replace('X','.')"/>
+                                    </span>
+                                </div>
+                                <div class="jj-mc-row jj-mc-field">
+                                    <span class="jj-mc-row-label">Limite semanal</span>
+                                    <span class="jj-mc-row-value">
+                                        <t t-esc="currency.symbol"/>
+                                        <t t-esc="('{:,.2f}'.format((bl.limit_weekly or 0.0) if bl else 0.0)).replace(',','X').replace('.',',').replace('X','.')"/>
+                                    </span>
+                                </div>
+                                <div class="jj-mc-row jj-mc-field">
+                                    <span class="jj-mc-row-label">Limite mensal</span>
+                                    <span class="jj-mc-row-value">
+                                        <t t-esc="currency.symbol"/>
+                                        <t t-esc="('{:,.2f}'.format((bl.limit_monthly or 0.0) if bl else 0.0)).replace(',','X').replace('.',',').replace('X','.')"/>
+                                    </span>
+                                </div>
+                                <div class="jj-mc-mt">
+                                    <a href="/my/mis_limites" class="jj-mc-link">Gerenciar limites</a>
+                                </div>
+                            </div>
+
+                            <div class="jj-mc-card jj-mc-mt">
+                                <h3 class="jj-mc-card-title">Dados bancários</h3>
+                                <t t-if="account_number or bank_name or cbu">
+                                    <div class="jj-mc-row jj-mc-field">
+                                        <span class="jj-mc-row-label">Banco</span>
+                                        <span class="jj-mc-row-value" t-esc="bank_name or '—'"/>
+                                    </div>
+                                    <div class="jj-mc-row jj-mc-field">
+                                        <span class="jj-mc-row-label">Conta</span>
+                                        <span class="jj-mc-row-value" t-esc="account_number or '—'"/>
+                                    </div>
+                                    <div class="jj-mc-row jj-mc-field">
+                                        <span class="jj-mc-row-label">Tipo</span>
+                                        <span class="jj-mc-row-value" t-esc="account_type or '—'"/>
+                                    </div>
+                                    <div class="jj-mc-row jj-mc-field">
+                                        <span class="jj-mc-row-label">CBU</span>
+                                        <span class="jj-mc-row-value" t-esc="cbu or '—'"/>
+                                    </div>
+                                    <div class="jj-mc-row jj-mc-field">
+                                        <span class="jj-mc-row-label">CUIL</span>
+                                        <span class="jj-mc-row-value" t-esc="cuil or '—'"/>
+                                    </div>
+                                </t>
+                                <t t-else="">
+                                    <div class="jj-mc-empty-inline">Nenhum dado bancário cadastrado.</div>
+                                </t>
+                                <div class="jj-mc-mt">
+                                    <a href="/my/datos_bank" class="jj-mc-link">Gerenciar dados bancários</a>
+                                </div>
+                            </div>
+                        </section>
+
+                        <!-- 10. Central de ajuda -->
+                        <section id="central-ajuda" class="jj-mc-panel">
+                            <h2 class="jj-mc-panel-title">Central de ajuda</h2>
+                            <div class="jj-mc-card jj-mc-help-card">
+                                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--jj-green, #00c853)" stroke-width="1.5">
+                                    <circle cx="12" cy="12" r="9"/>
+                                    <path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"/>
+                                    <circle cx="12" cy="17" r=".5"/>
+                                </svg>
+                                <p>Precisa de ajuda? Consulte nossas perguntas frequentes ou entre em contato com o suporte.</p>
+                                <button type="button" class="jj-mc-btn jj-mc-btn-primary" onclick="if(typeof JJHelp !== 'undefined'){ JJHelp.open(); }else{ alert('Central de ajuda indisponível no momento.'); }">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <circle cx="12" cy="12" r="9"/>
+                                        <path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"/>
+                                        <circle cx="12" cy="17" r=".5"/>
+                                    </svg>
+                                    Abrir central de ajuda
+                                </button>
+                            </div>
+                        </section>
+
+                        <!-- 11. Sair -->
+                        <section id="sair" class="jj-mc-panel">
+                            <h2 class="jj-mc-panel-title">Sair</h2>
+                            <div class="jj-mc-card jj-mc-help-card">
+                                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#ff4444" stroke-width="1.5">
+                                    <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/>
+                                    <polyline points="16 17 21 12 16 7"/>
+                                    <line x1="21" y1="12" x2="9" y2="12"/>
+                                </svg>
+                                <p>Tem certeza que deseja sair da sua conta?</p>
+                                <a href="/web/session/logout" class="jj-mc-btn jj-mc-btn-danger">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/>
+                                        <polyline points="16 17 21 12 16 7"/>
+                                        <line x1="21" y1="12" x2="9" y2="12"/>
+                                    </svg>
+                                    Sair da conta
+                                </a>
+                            </div>
+                        </section>
+
+                    </main>
+                </div>
+
+                <!-- Mobile bottom nav -->
+                <nav class="jj-mc-bottom-nav d-lg-none">
+                    <a href="#visao-geral" class="jj-mc-bnav-item active" data-section="visao-geral">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                            <rect x="3" y="3" width="7" height="7" rx="1"/>
+                            <rect x="14" y="3" width="7" height="7" rx="1"/>
+                            <rect x="3" y="14" width="7" height="7" rx="1"/>
+                            <rect x="14" y="14" width="7" height="7" rx="1"/>
+                        </svg>
+                        <span>Início</span>
+                    </a>
+                    <a href="#movimentos" class="jj-mc-bnav-item" data-section="movimentos">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                            <path d="M3 18h18M3 6h18M3 12h18"/>
+                        </svg>
+                        <span>Movimentos</span>
+                    </a>
+                    <a href="#pagamentos" class="jj-mc-bnav-item jj-mc-bnav-cta">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="12" y1="5" x2="12" y2="19"/>
+                            <polyline points="19 12 12 19 5 12"/>
+                        </svg>
+                        <span>Depósito</span>
+                    </a>
+                    <a href="#minha-atividade" class="jj-mc-bnav-item" data-section="minha-atividade">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                            <polygon points="5 3 19 12 5 21 5 3"/>
+                        </svg>
+                        <span>Jogos</span>
+                    </a>
+                    <a href="#dados-pessoais" class="jj-mc-bnav-item" data-section="dados-pessoais">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                            <circle cx="12" cy="8" r="4"/>
+                            <path d="M4 20c0-4 4-7 8-7s8 3 8 7"/>
+                        </svg>
+                        <span>Perfil</span>
+                    </a>
+                </nav>
+
+            </div>
+<script>if(!window.location.hash)window.location.hash="visao-geral";</script>
+
+        </t>
+    </template>
+</odoo>

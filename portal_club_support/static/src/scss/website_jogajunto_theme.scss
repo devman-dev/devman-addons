@@ -1,0 +1,1226 @@
+/* ============================================================
+   JOGAJUNTO — BETANO-INSPIRED v2
+   Palette: #000000 / #ffffff / #00c853 (Celtic green)
+   High contrast, no extra colors
+   ============================================================ */
+
+:root {
+  --jj-bg: #000000;
+  --jj-surface: #0d0d0d;
+  --jj-card: #141414;
+  --jj-border: #222222;
+  --jj-border-hover: #00c853;
+  --jj-green: #00c853;
+  --jj-green-dark: #00a844;
+  --jj-text: #ffffff;
+  --jj-text-secondary: #999999;
+  --jj-text-muted: #666666;
+  --jj-danger: #ff4444;
+  --jj-radius: 8px;
+  --jj-radius-lg: 12px;
+  --jj-transition: 0.2s ease;
+}
+
+/* ============================================================
+   GLOBAL RESETS
+   ============================================================ */
+#wrapwrap {
+  background: var(--jj-bg) !important;
+  color: var(--jj-text);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+#wrapwrap a { color: var(--jj-green); text-decoration: none; }
+#wrapwrap a:hover { color: var(--jj-green-dark); }
+
+/* Odoo cleanup */
+#wrapwrap .oe_structure,
+#wrapwrap .oe_website_sale,
+#wrapwrap .o_website_sale {
+  background: var(--jj-bg);
+}
+.o_header_standard,
+.o_header_affix,
+.o_header_dropdown,
+.o_footer_default,
+#oe_main_menu_navbar,
+.o_main_navbar,
+.o_form_view .o_form_sheet_bg,
+.o_form_view,
+.o_control_panel,
+.o_search_view,
+.o_view_manager_content {
+  display: none !important;
+}
+
+/* ============================================================
+   NAVBAR — Custom JogaJunto glass navbar
+   ============================================================ */
+
+/* Style Odoo default header — keep visible for navigation */
+#wrapwrap > header.o_header_standard,
+#wrapwrap header.o_top_fixed_element,
+#wrapwrap .o_header_standard,
+#wrapwrap nav.navbar:not(.jj-navbar) {
+  background: rgba(0,0,0,0.92) !important;
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
+  border-bottom: 1px solid rgba(0,200,83,0.15) !important;
+}
+
+/* Style Odoo navbar links */
+#wrapwrap .o_header_standard .navbar-nav .nav-link,
+#wrapwrap nav.navbar .nav-link,
+#wrapwrap .o_header_standard a {
+  color: #ffffff !important;
+}
+#wrapwrap .o_header_standard .navbar-nav .nav-link:hover,
+#wrapwrap nav.navbar .nav-link:hover {
+  color: #00c853 !important;
+}
+
+/* Style Odoo header buttons */
+#wrapwrap .o_header_standard .btn,
+#wrapwrap nav.navbar .btn {
+  background: linear-gradient(135deg, #00c853, #00a844) !important;
+  color: #000000 !important;
+  border: none !important;
+  font-weight: 700 !important;
+  border-radius: 10px !important;
+}
+#wrapwrap .o_header_standard .btn:hover,
+#wrapwrap nav.navbar .btn:hover {
+  transform: translateY(-1px) !important;
+  box-shadow: 0 4px 16px rgba(0,200,83,0.25) !important;
+}
+
+/* Custom navbar */
+header.jj-navbar-header {
+  display: block !important;
+  position: sticky !important;
+  top: 0;
+  z-index: 1000;
+}
+.jj-navbar {
+  background: rgba(0,0,0,0.85) !important;
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
+  border-bottom: 1px solid rgba(0,200,83,0.15);
+  padding: 0;
+}
+.jj-navbar-container {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 64px;
+}
+
+/* Brand */
+.jj-navbar-brand {
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.jj-brand-text {
+  font-size: 22px;
+  font-weight: 800;
+  color: #ffffff;
+  letter-spacing: -0.5px;
+}
+.jj-brand-accent {
+  color: #00c853;
+}
+
+/* Navigation links */
+.jj-nav-links {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.jj-nav-link {
+  color: #999999;
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 500;
+  padding: 8px 16px;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+.jj-nav-link:hover,
+.jj-nav-link.active {
+  color: #ffffff;
+  background: rgba(255,255,255,0.06);
+}
+.jj-nav-link.active { color: #00c853; }
+
+/* Action buttons */
+.jj-nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.jj-nav-btn {
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 700;
+  padding: 8px 20px;
+  border-radius: 10px;
+  transition: all 0.2s ease;
+}
+.jj-nav-btn-outline {
+  color: #00c853;
+  border: 1px solid rgba(0,200,83,0.4);
+  background: transparent;
+}
+.jj-nav-btn-outline:hover {
+  background: rgba(0,200,83,0.1);
+  border-color: #00c853;
+  color: #00c853;
+}
+.jj-nav-btn-primary {
+  background: linear-gradient(135deg, #00c853, #00a844);
+  color: #000000;
+}
+.jj-nav-btn-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 16px rgba(0,200,83,0.25);
+  color: #000000;
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+  .jj-nav-links { display: none; }
+  .jj-navbar-container { padding: 0 16px; }
+}
+
+/* ============================================================
+   HERO SECTION
+   ============================================================ */
+.jj-hero {
+  position: relative;
+  padding: 100px 0 80px;
+  text-align: center;
+  overflow: hidden;
+}
+
+.jj-hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(0,200,83,0.10);
+  border: 1px solid rgba(0,200,83,0.20);
+  color: var(--jj-green);
+  font-size: 13px;
+  font-weight: 600;
+  padding: 6px 16px;
+  border-radius: 50px;
+  margin-bottom: 28px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  animation: jj-pulse 2.5s ease-in-out infinite;
+}
+.jj-hero-badge-dot {
+  width: 8px;
+  height: 8px;
+  background: var(--jj-green);
+  border-radius: 50%;
+  display: inline-block;
+}
+@keyframes jj-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(0,200,83,0.3); }
+  50% { box-shadow: 0 0 0 10px rgba(0,200,83,0); }
+}
+
+.jj-hero h1 {
+  font-size: 52px;
+  font-weight: 800;
+  line-height: 1.15;
+  letter-spacing: -1px;
+  color: var(--jj-text);
+  margin-bottom: 20px;
+}
+.jj-hero h1 span { color: var(--jj-green); }
+
+.jj-hero p {
+  font-size: 17px;
+  color: var(--jj-text-secondary);
+  max-width: 560px;
+  margin: 0 auto 36px;
+  line-height: 1.6;
+}
+
+.jj-hero-actions {
+  display: flex;
+  gap: 14px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+/* ============================================================
+   BUTTONS — strict black/white/green
+   ============================================================ */
+.jj-btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--jj-green);
+  color: #000000 !important;
+  font-size: 15px;
+  font-weight: 700;
+  padding: 14px 32px;
+  border-radius: var(--jj-radius);
+  border: none;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all var(--jj-transition);
+  letter-spacing: 0.3px;
+}
+.jj-btn-primary:hover {
+  background: var(--jj-green-dark);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0,200,83,0.25);
+  color: #000000 !important;
+}
+.jj-btn-primary svg { flex-shrink: 0; }
+
+.jj-btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: transparent;
+  color: var(--jj-text) !important;
+  font-size: 15px;
+  font-weight: 600;
+  padding: 14px 32px;
+  border-radius: var(--jj-radius);
+  border: 1px solid var(--jj-border);
+  cursor: pointer;
+  text-decoration: none;
+  transition: all var(--jj-transition);
+}
+.jj-btn-secondary:hover {
+  border-color: var(--jj-green);
+  color: var(--jj-green) !important;
+  background: rgba(0,200,83,0.05);
+}
+
+.jj-btn-dark {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #ffffff;
+  color: #000000 !important;
+  font-size: 14px;
+  font-weight: 700;
+  padding: 10px 24px;
+  border-radius: var(--jj-radius);
+  border: none;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all var(--jj-transition);
+}
+.jj-btn-dark:hover {
+  background: var(--jj-green);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(0,200,83,0.2);
+}
+
+.jj-btn-outline {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: transparent;
+  color: var(--jj-green) !important;
+  font-size: 14px;
+  font-weight: 600;
+  padding: 10px 24px;
+  border-radius: var(--jj-radius);
+  border: 1px solid var(--jj-green);
+  cursor: pointer;
+  text-decoration: none;
+  transition: all var(--jj-transition);
+}
+.jj-btn-outline:hover {
+  background: var(--jj-green);
+  color: #000000 !important;
+}
+
+/* Smaller button variant */
+.jj-btn-sm {
+  padding: 8px 18px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+/* ============================================================
+   SECTION LAYOUT
+   ============================================================ */
+.jj-section {
+  padding: 80px 0;
+}
+.jj-section-surface { background: var(--jj-surface); }
+.jj-section-dark { background: var(--jj-bg); }
+
+.jj-section-header {
+  text-align: center;
+  margin-bottom: 56px;
+}
+.jj-section-eyebrow {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: var(--jj-green);
+  margin-bottom: 12px;
+}
+.jj-section-header h2 {
+  font-size: 36px;
+  font-weight: 800;
+  color: var(--jj-text);
+  margin-bottom: 12px;
+  letter-spacing: -0.5px;
+}
+.jj-section-header .subtitle {
+  font-size: 16px;
+  color: var(--jj-text-secondary);
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+/* ============================================================
+   CATEGORIES
+   ============================================================ */
+.jj-categories {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+}
+.jj-category-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: var(--jj-card);
+  border: 1px solid var(--jj-border);
+  border-radius: var(--jj-radius-lg);
+  padding: 20px;
+  text-decoration: none;
+  transition: all var(--jj-transition);
+  cursor: pointer;
+}
+.jj-category-card:hover {
+  border-color: var(--jj-green);
+  background: #1a1a1a;
+  transform: translateY(-2px);
+}
+.jj-category-icon {
+  font-size: 28px;
+  width: 52px;
+  height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0,200,83,0.08);
+  border-radius: var(--jj-radius);
+  flex-shrink: 0;
+}
+.jj-category-info h4 {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--jj-text);
+  margin: 0 0 4px;
+}
+.jj-category-info p {
+  font-size: 13px;
+  color: var(--jj-text-muted);
+  margin: 0;
+}
+
+/* ============================================================
+   STATS
+   ============================================================ */
+.jj-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 40px;
+  text-align: center;
+}
+.jj-stat-value {
+  font-size: 36px;
+  font-weight: 800;
+  color: var(--jj-green);
+  letter-spacing: -0.5px;
+}
+.jj-stat-label {
+  font-size: 14px;
+  color: var(--jj-text-secondary);
+  margin-top: 6px;
+}
+
+/* ============================================================
+   HOW IT WORKS
+   ============================================================ */
+.jj-steps-horizontal {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+  max-width: 900px;
+  margin: 0 auto;
+}
+.jj-step-card {
+  background: var(--jj-card);
+  border: 1px solid var(--jj-border);
+  border-radius: var(--jj-radius-lg);
+  padding: 28px 24px;
+  text-align: center;
+  transition: border-color var(--jj-transition);
+}
+.jj-step-card:hover { border-color: var(--jj-green); }
+.jj-step-number {
+  width: 44px;
+  height: 44px;
+  background: var(--jj-green);
+  color: #000000;
+  font-weight: 800;
+  font-size: 18px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 16px;
+}
+.jj-step-card h4 {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--jj-text);
+  margin-bottom: 8px;
+}
+.jj-step-card p {
+  font-size: 14px;
+  color: var(--jj-text-secondary);
+  line-height: 1.5;
+  margin: 0;
+}
+
+/* ============================================================
+   CATEGORY PILLS (shop nav)
+   ============================================================ */
+.jj-cat-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--jj-card);
+  color: var(--jj-text-secondary) !important;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 10px 20px;
+  border-radius: 50px;
+  border: 1px solid var(--jj-border);
+  text-decoration: none;
+  transition: all var(--jj-transition);
+}
+.jj-cat-pill:hover,
+.jj-cat-pill.active {
+  background: var(--jj-green);
+  color: #000000 !important;
+  border-color: var(--jj-green);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 16px rgba(0,200,83,0.25);
+}
+
+/* ============================================================
+   FOOTER
+   ============================================================ */
+#wrapwrap footer,
+#wrapwrap .o_footer_default {
+  background: var(--jj-surface) !important;
+  border-top: 1px solid var(--jj-border);
+  padding: 48px 0 32px;
+  color: var(--jj-text-secondary);
+}
+#wrapwrap footer a,
+#wrapwrap .o_footer_default a {
+  color: var(--jj-text-secondary) !important;
+  transition: color var(--jj-transition);
+}
+#wrapwrap footer a:hover,
+#wrapwrap .o_footer_default a:hover {
+  color: var(--jj-green) !important;
+}
+#wrapwrap footer .footer-links,
+#wrapwrap .o_footer_default .footer-links {
+  display: flex;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+#wrapwrap footer p,
+#wrapwrap .o_footer_default p {
+  color: var(--jj-text-muted);
+}
+
+/* ============================================================
+   SHOP / GAMES PAGE — Glass morphism + Grid fix
+   ============================================================ */
+
+/* Shop wrapper */
+.o_wsale_products_main_row,
+.oe_website_sale {
+  background: var(--jj-bg) !important;
+}
+
+/* Breadcrumb */
+#wrapwrap .breadcrumb,
+#wrapwrap .o_wsale_breadcrumb {
+  background: transparent !important;
+  padding: 16px 0;
+  font-size: 13px;
+}
+#wrapwrap .breadcrumb-item a,
+#wrapwrap .o_wsale_breadcrumb a {
+  color: var(--jj-text-muted) !important;
+}
+#wrapwrap .breadcrumb-item.active,
+#wrapwrap .o_wsale_breadcrumb .active {
+  color: var(--jj-green) !important;
+  font-weight: 600;
+}
+
+/* Shop title */
+#wrapwrap .o_wsale_products_main_row h1,
+#wrapwrap .oe_website_sale h1,
+#wrapwrap #products_grid h1 {
+  font-size: 28px;
+  font-weight: 800;
+  color: var(--jj-text);
+  letter-spacing: -0.5px;
+  margin-bottom: 8px;
+}
+
+/* ============================================================
+   GLASS MORPHISM FILTER SIDEBAR
+   ============================================================ */
+#wrapwrap .position-sticky,
+#wrapwrap aside,
+#wrapwrap [class*="sidebar"],
+#wrapwrap .o_wsale_sidebar {
+  background: rgba(255,255,255,0.03) !important;
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
+  border: 1px solid rgba(255,255,255,0.06) !important;
+  border-radius: 16px !important;
+  padding: 20px !important;
+}
+#wrapwrap .position-sticky h3,
+#wrapwrap .position-sticky h4,
+#wrapwrap .position-sticky .accordion-button,
+#wrapwrap aside h3,
+#wrapwrap aside h4 {
+  color: var(--jj-text) !important;
+  font-weight: 700;
+  font-size: 14px;
+}
+
+/* ============================================================
+   PRODUCT GRID — Fixed (Bootstrap-native, no CSS grid override)
+   ============================================================ */
+
+/* CRITICAL FIX: Do NOT override the grid container's display.
+   Odoo uses Bootstrap 5 .row > .col-* for the product grid.
+   We only style the card internals, not the container. */
+
+/* Individual product card — glass morphism */
+#wrapwrap .oe_product_cart,
+#wrapwrap .oe_product_cart section,
+#wrapwrap .oe_product,
+#wrapwrap .card,
+#wrapwrap [class*="product_grid"] .card {
+  background: rgba(255,255,255,0.03) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+  border: 1px solid rgba(255,255,255,0.06) !important;
+  border-radius: 16px !important;
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  position: relative;
+}
+#wrapwrap .oe_product_cart::before,
+#wrapwrap .card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(135deg, rgba(0,200,83,0.04) 0%, transparent 50%, rgba(0,200,83,0.02) 100%);
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+#wrapwrap .oe_product_cart:hover::before,
+#wrapwrap .card:hover::before {
+  opacity: 1;
+}
+#wrapwrap .oe_product_cart:hover,
+#wrapwrap .card:hover {
+  border-color: rgba(0,200,83,0.25) !important;
+  transform: translateY(-4px);
+  box-shadow: 0 8px 32px rgba(0,200,83,0.1), 0 2px 8px rgba(0,0,0,0.4);
+}
+
+/* Product image */
+#wrapwrap .oe_product_image,
+#wrapwrap .oe_product_cart img,
+#wrapwrap .card-img-top,
+#wrapwrap [class*="product_grid"] img {
+  width: 100%;
+  aspect-ratio: 3/4;
+  object-fit: cover;
+  background: linear-gradient(180deg, rgba(0,200,83,0.05) 0%, rgba(0,0,0,0.3) 100%);
+}
+#wrapwrap .oe_product_cart:hover img,
+#wrapwrap .card:hover img {
+  transform: scale(1.03);
+  transition: transform 0.4s ease;
+}
+
+/* Product info block */
+#wrapwrap .oe_product_cart section,
+#wrapwrap .card-body,
+#wrapwrap [class*="product_grid"] .card-body {
+  padding: 16px;
+  background: transparent !important;
+  position: relative;
+  z-index: 1;
+}
+
+/* Product name */
+#wrapwrap .oe_product_cart h6,
+#wrapwrap .oe_product_cart .o_wsale_product_title,
+#wrapwrap .card-title,
+#wrapwrap [class*="product_grid"] .product-name,
+#wrapwrap .oe_product_cart a[itemprop="name"],
+#wrapwrap .o_wsale_product_heading {
+  font-size: 14px !important;
+  font-weight: 700 !important;
+  color: var(--jj-text) !important;
+  line-height: 1.3;
+  margin-bottom: 6px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+#wrapwrap .oe_product_cart h6 a,
+#wrapwrap .card-title a,
+#wrapwrap [class*="product_grid"] a {
+  color: var(--jj-text) !important;
+  text-decoration: none;
+}
+#wrapwrap .oe_product_cart h6 a:hover,
+#wrapwrap .card-title a:hover {
+  color: var(--jj-green) !important;
+}
+
+/* Price */
+#wrapwrap .oe_product_cart .product_price,
+#wrapwrap .card-text.product_price,
+#wrapwrap .oe_product_cart .oe_price,
+#wrapwrap [class*="product_grid"] .price,
+#wrapwrap .o_product_price,
+#wrapwrap .oe_product_cart .text-muted .oe_currency_value {
+  font-size: 20px !important;
+  font-weight: 800 !important;
+  color: var(--jj-green) !important;
+}
+
+/* Original price (strikethrough) */
+#wrapwrap .oe_product_cart .text-danger,
+#wrapwrap .oe_product_cart .oe_default_price,
+#wrapwrap [class*="product_grid"] del {
+  text-decoration: line-through;
+  color: var(--jj-text-muted) !important;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+/* Add to cart button — glass morphism with glow */
+#wrapwrap .oe_product_cart .btn,
+#wrapwrap .oe_product_cart a.btn,
+#wrapwrap .card-body .btn,
+#wrapwrap [class*="product_grid"] .btn,
+#wrapwrap a.a-submit,
+#wrapwrap .o_add_to_cart_button,
+#wrapwrap #add_to_cart,
+#wrapwrap .oe_product_cart form button {
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  background: linear-gradient(135deg, rgba(0,200,83,0.9) 0%, rgba(0,180,73,0.9) 100%) !important;
+  backdrop-filter: blur(8px) !important;
+  color: #000000 !important;
+  border: 1px solid rgba(0,200,83,0.3) !important;
+  font-size: 13px !important;
+  font-weight: 700 !important;
+  padding: 10px 20px !important;
+  border-radius: 10px !important;
+  text-transform: none !important;
+  letter-spacing: 0.2px;
+  cursor: pointer;
+  transition: all 0.25s ease !important;
+  text-decoration: none;
+  position: relative;
+  z-index: 1;
+}
+#wrapwrap .oe_product_cart .btn:hover,
+#wrapwrap .card-body .btn:hover,
+#wrapwrap [class*="product_grid"] .btn:hover,
+#wrapwrap a.a-submit:hover,
+#wrapwrap .o_add_to_cart_button:hover,
+#wrapwrap #add_to_cart:hover {
+  background: linear-gradient(135deg, rgba(0,200,83,1) 0%, rgba(0,190,83,1) 100%) !important;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 24px rgba(0,200,83,0.35), 0 0 0 1px rgba(0,200,83,0.1);
+  color: #000000 !important;
+}
+
+/* Compare/Wishlist icons */
+#wrapwrap .oe_product_cart .o_product_compare,
+#wrapwrap .oe_product_cart .o_product_wishlist,
+#wrapwrap [class*="product_grid"] .fa-heart,
+#wrapwrap [class*="product_grid"] .fa-exchange {
+  color: var(--jj-text-muted) !important;
+  transition: color var(--jj-transition);
+}
+#wrapwrap .oe_product_cart .o_product_wishlist:hover,
+#wrapwrap [class*="product_grid"] .fa-heart:hover {
+  color: var(--jj-danger) !important;
+}
+
+/* Badges/ribbons */
+#wrapwrap .oe_product_cart .ribbon,
+#wrapwrap [class*="product_grid"] .ribbon,
+#wrapwrap .badge {
+  background: linear-gradient(135deg, rgba(0,200,83,0.9), rgba(0,170,70,0.9)) !important;
+  backdrop-filter: blur(8px) !important;
+  color: #000000 !important;
+  font-weight: 700;
+  font-size: 11px;
+  padding: 4px 10px;
+  border-radius: 4px;
+}
+
+/* ============================================================
+   GAME CARD — Complete custom card for shop
+   ============================================================ */
+.jj-game-card {
+  background: var(--jj-card);
+  border: 1px solid var(--jj-border);
+  border-radius: var(--jj-radius-lg);
+  overflow: hidden;
+  transition: all 0.25s ease;
+  position: relative;
+}
+.jj-game-card:hover {
+  border-color: var(--jj-green);
+  transform: translateY(-3px);
+  box-shadow: 0 12px 40px rgba(0,200,83,0.12);
+}
+.jj-game-card:hover img {
+  transform: scale(1.05);
+}
+.jj-game-card:hover .jj-game-overlay {
+  opacity: 1;
+}
+.jj-game-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.25s ease;
+  z-index: 2;
+  pointer-events: none;
+}
+.jj-game-play-btn {
+  width: 52px;
+  height: 52px;
+  background: var(--jj-green);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 24px rgba(0,200,83,0.4);
+}
+
+/* Game card apostar button */
+.jj-apostar-btn {
+  display: inline-flex !important;
+  align-items: center;
+  gap: 6px;
+  background: var(--jj-green) !important;
+  color: #000000 !important;
+  font-size: 12px !important;
+  font-weight: 700 !important;
+  padding: 8px 18px !important;
+  border-radius: 6px !important;
+  border: none !important;
+  text-decoration: none !important;
+  transition: all 0.2s ease !important;
+  cursor: pointer;
+  letter-spacing: 0.2px;
+}
+.jj-apostar-btn:hover {
+  background: var(--jj-green-dark) !important;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 16px rgba(0,200,83,0.35);
+  color: #000000 !important;
+}
+
+/* Odoo default button overrides — force black/white/green */
+#wrapwrap .btn-primary,
+#wrapwrap .btn-secondary,
+#wrapwrap .btn-success,
+#wrapwrap .btn-info,
+#wrapwrap .btn-warning,
+#wrapwrap .btn-danger,
+#wrapwrap .btn-light,
+#wrapwrap .btn-dark,
+#wrapwrap .btn-outline-primary,
+#wrapwrap .btn-outline-secondary,
+#wrapwrap .btn-outline-success,
+#wrapwrap .btn-outline-info,
+#wrapwrap .btn-outline-warning {
+  background: var(--jj-green) !important;
+  color: #000000 !important;
+  border: none !important;
+  font-weight: 700 !important;
+  transition: all var(--jj-transition) !important;
+}
+#wrapwrap .btn-primary:hover,
+#wrapwrap .btn-secondary:hover,
+#wrapwrap .btn-success:hover,
+#wrapwrap .btn-info:hover,
+#wrapwrap .btn-warning:hover,
+#wrapwrap .btn-danger:hover,
+#wrapwrap .btn-dark:hover {
+  background: var(--jj-green-dark) !important;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 16px rgba(0,200,83,0.3);
+}
+#wrapwrap .btn-outline-primary,
+#wrapwrap .btn-outline-secondary,
+#wrapwrap .btn-outline-success,
+#wrapwrap .btn-outline-info,
+#wrapwrap .btn-outline-warning {
+  background: transparent !important;
+  color: var(--jj-green) !important;
+  border: 1px solid var(--jj-green) !important;
+}
+#wrapwrap .btn-outline-primary:hover,
+#wrapwrap .btn-outline-secondary:hover,
+#wrapwrap .btn-outline-success:hover,
+#wrapwrap .btn-outline-info:hover,
+#wrapwrap .btn-outline-warning:hover {
+  background: var(--jj-green) !important;
+  color: #000000 !important;
+}
+
+/* Force sticky elements to black */
+#wrapwrap .affix,
+#wrapwrap .sticky-top,
+#wrapwrap .fixed-top,
+#wrapwrap .o_header_affix {
+  background: rgba(0,0,0,0.95) !important;
+  color: var(--jj-text) !important;
+}
+
+/* ============================================================
+   KILL ODOO SHOP COLORS — shop-specific overrides
+   ============================================================ */
+
+/* Grid/List toggle buttons */
+#wrapwrap .btn-light {
+  background: var(--jj-card) !important;
+  color: var(--jj-text) !important;
+  border: 1px solid var(--jj-border) !important;
+}
+#wrapwrap .btn-light:hover,
+#wrapwrap .btn-light.active {
+  background: var(--jj-green) !important;
+  color: #000000 !important;
+  border-color: var(--jj-green) !important;
+}
+#wrapwrap .btn-light.active {
+  background: var(--jj-green) !important;
+  color: #000000 !important;
+}
+
+/* Kill Odoo color classes */
+#wrapwrap .bg-o-color-1,
+#wrapwrap .bg-o-color-2,
+#wrapwrap .bg-o-color-3,
+#wrapwrap .bg-o-color-4,
+#wrapwrap .bg-o-color-5,
+#wrapwrap [class*="bg-o-color"] {
+  background: var(--jj-green) !important;
+  background-color: var(--jj-green) !important;
+  color: #000000 !important;
+}
+
+/* Search button */
+#wrapwrap .oe_search_button {
+  background: var(--jj-green) !important;
+  color: #000000 !important;
+  border: 1px solid var(--jj-green) !important;
+  font-weight: 700 !important;
+  transition: all var(--jj-transition) !important;
+}
+#wrapwrap .oe_search_button:hover {
+  background: var(--jj-green-dark) !important;
+  border-color: var(--jj-green-dark) !important;
+}
+
+/* Text badges */
+#wrapwrap .badge.text-bg-light,
+#wrapwrap .text-bg-light {
+  background: rgba(0,200,83,0.12) !important;
+  color: var(--jj-green) !important;
+}
+
+/* Navlink back button */
+#wrapwrap .o_navlink_background {
+  background: var(--jj-card) !important;
+  color: var(--jj-text) !important;
+  border: 1px solid var(--jj-border) !important;
+}
+#wrapwrap .o_navlink_background:hover {
+  background: var(--jj-green) !important;
+  color: #000000 !important;
+  border-color: var(--jj-green) !important;
+}
+
+/* Sort dropdown */
+#wrapwrap .dropdown-toggle.btn-light {
+  background: var(--jj-card) !important;
+  color: var(--jj-text) !important;
+  border: 1px solid var(--jj-border) !important;
+}
+
+/* Category filter checkboxes and accordion */
+#wrapwrap .form-check-input:checked {
+  background-color: var(--jj-green) !important;
+  border-color: var(--jj-green) !important;
+}
+#wrapwrap .accordion-button:not(.collapsed) {
+  color: var(--jj-green) !important;
+  background: transparent !important;
+}
+#wrapwrap .accordion-button:focus {
+  border-color: var(--jj-green) !important;
+  box-shadow: 0 0 0 3px rgba(0,200,83,0.15) !important;
+}
+
+/* Attribute/price filter links */
+#wrapwrap .list-group-item a,
+#wrapwrap .form-check-label {
+  color: var(--jj-text-secondary) !important;
+}
+#wrapwrap .list-group-item a:hover,
+#wrapwrap .form-check-label:hover {
+  color: var(--jj-green) !important;
+}
+
+/* Kill colored backgrounds from Odoo */
+#wrapwrap .bg-primary,
+#wrapwrap .bg-secondary,
+#wrapwrap .bg-success,
+#wrapwrap .bg-info,
+#wrapwrap .bg-warning,
+#wrapwrap .bg-danger,
+#wrapwrap .bg-light,
+#wrapwrap [class*="bg-"] {
+  background-color: var(--jj-bg) !important;
+  background-image: none !important;
+}
+#wrapwrap .bg-primary *,
+#wrapwrap .bg-secondary *,
+#wrapwrap .bg-success *,
+#wrapwrap .bg-info *,
+#wrapwrap .bg-warning *,
+#wrapwrap .bg-danger * {
+  color: var(--jj-text) !important;
+}
+
+/* Kill extra Odoo colors - text */
+#wrapwrap .text-primary,
+#wrapwrap .text-secondary,
+#wrapwrap .text-success,
+#wrapwrap .text-info,
+#wrapwrap .text-warning,
+#wrapwrap .text-danger {
+  color: var(--jj-text) !important;
+}
+#wrapwrap .text-muted { color: var(--jj-text-secondary) !important; }
+
+/* ============================================================
+   SHOP SIDEBAR / FILTERS
+   ============================================================ */
+#wrapwrap .o_wsale_products_sidebar,
+#wrapwrap #products_grid_before,
+#wrapwrap .o_wsale_sidebar {
+  background: var(--jj-surface) !important;
+  border-right: 1px solid var(--jj-border);
+  padding: 20px;
+}
+
+#wrapwrap .o_wsale_products_sidebar .nav-link,
+#wrapwrap .o_wsale_sidebar a {
+  color: var(--jj-text-secondary) !important;
+  font-size: 13px;
+  padding: 6px 12px;
+  border-radius: var(--jj-radius);
+  transition: all var(--jj-transition);
+}
+#wrapwrap .o_wsale_products_sidebar .nav-link:hover,
+#wrapwrap .o_wsale_products_sidebar .nav-link.active,
+#wrapwrap .o_wsale_sidebar a:hover {
+  color: var(--jj-green) !important;
+  background: rgba(0,200,83,0.05);
+}
+
+/* Search input */
+#wrapwrap .o_wsale_products_searchbar_form input,
+#wrapwrap .search-query,
+#wrapwrap [class*="search"] input[type="text"] {
+  background: var(--jj-card) !important;
+  border: 1px solid var(--jj-border) !important;
+  color: var(--jj-text) !important;
+  border-radius: var(--jj-radius);
+  padding: 10px 14px;
+  font-size: 14px;
+  transition: border-color var(--jj-transition);
+}
+#wrapwrap .o_wsale_products_searchbar_form input:focus,
+#wrapwrap .search-query:focus {
+  border-color: var(--jj-green) !important;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(0,200,83,0.1);
+}
+#wrapwrap .o_wsale_products_searchbar_form input::placeholder,
+#wrapwrap .search-query::placeholder {
+  color: var(--jj-text-muted);
+}
+
+/* Sort dropdown */
+#wrapwrap .dropdown_sortby .dropdown-toggle,
+#wrapwrap .o_sortby_dropdown button,
+#wrapwrap .o_wsale_sort_btn {
+  background: var(--jj-card) !important;
+  border: 1px solid var(--jj-border) !important;
+  color: var(--jj-text) !important;
+  border-radius: var(--jj-radius);
+  padding: 10px 16px;
+  font-size: 13px;
+  font-weight: 500;
+  transition: border-color var(--jj-transition);
+}
+#wrapwrap .dropdown_sortby .dropdown-toggle:hover,
+#wrapwrap .o_sortby_dropdown button:hover {
+  border-color: var(--jj-green);
+}
+#wrapwrap .dropdown_sortby .dropdown-menu,
+#wrapwrap .o_sortby_dropdown .dropdown-menu {
+  background: var(--jj-card);
+  border: 1px solid var(--jj-border);
+  border-radius: var(--jj-radius);
+}
+#wrapwrap .dropdown_sortby .dropdown-item,
+#wrapwrap .o_sortby_dropdown .dropdown-item {
+  color: var(--jj-text-secondary);
+  font-size: 13px;
+  padding: 8px 16px;
+}
+#wrapwrap .dropdown_sortby .dropdown-item:hover,
+#wrapwrap .dropdown_sortby .dropdown-item.active {
+  background: rgba(0,200,83,0.08);
+  color: var(--jj-green);
+}
+
+/* ============================================================
+   PAGINATION
+   ============================================================ */
+#wrapwrap .pagination {
+  margin-top: 40px;
+}
+#wrapwrap .page-link {
+  background: var(--jj-card) !important;
+  border: 1px solid var(--jj-border) !important;
+  color: var(--jj-text-secondary) !important;
+  border-radius: var(--jj-radius);
+  padding: 8px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  transition: all var(--jj-transition);
+}
+#wrapwrap .page-link:hover {
+  border-color: var(--jj-green) !important;
+  color: var(--jj-green) !important;
+  background: rgba(0,200,83,0.05) !important;
+}
+#wrapwrap .page-item.active .page-link {
+  background: var(--jj-green) !important;
+  border-color: var(--jj-green) !important;
+  color: #000000 !important;
+}
+
+/* ============================================================
+   MODAL / QUICK VIEW
+   ============================================================ */
+#wrapwrap .modal-content {
+  background: var(--jj-surface) !important;
+  border: 1px solid var(--jj-border);
+  border-radius: var(--jj-radius-lg);
+}
+#wrapwrap .modal-header {
+  border-bottom: 1px solid var(--jj-border);
+  color: var(--jj-text);
+}
+#wrapwrap .modal-footer {
+  border-top: 1px solid var(--jj-border);
+}
+#wrapwrap .modal-header .close {
+  color: var(--jj-text-secondary);
+}
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+@media (max-width: 768px) {
+  .jj-hero { padding: 60px 0 50px; }
+  .jj-hero h1 { font-size: 32px; }
+  .jj-hero p { font-size: 15px; }
+
+  .jj-categories { grid-template-columns: repeat(2, 1fr); }
+  .jj-stats { grid-template-columns: repeat(2, 1fr); gap: 24px; }
+  .jj-steps-horizontal { grid-template-columns: 1fr; }
+
+  .o_wsale_product_grid_wrapper,
+  #products_grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 12px;
+  }
+
+  .jj-hero-actions { flex-direction: column; align-items: center; }
+  .jj-btn-primary, .jj-btn-secondary { width: 100%; justify-content: center; }
+}
+
+@media (max-width: 480px) {
+  .jj-categories { grid-template-columns: 1fr; }
+  .o_wsale_product_grid_wrapper,
+  #products_grid { grid-template-columns: 1fr !important; }
+}

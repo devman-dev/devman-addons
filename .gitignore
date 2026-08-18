@@ -4,3 +4,5 @@ __pycache__/*
 **/keypagoflex.json
 .vscode/
 **/.vscode/
+*.bak
+fix_view.py

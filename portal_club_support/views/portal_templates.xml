@@ -47,13 +47,6 @@
 
                 <div class="jj-form-row">
                     <div class="jj-field">
-                        <label for="jj_email">E-mail</label>
-                        <input type="email" id="jj_email" name="email"
-                               placeholder="voce@email.com"
-                               required="required"
-                               t-att-value="email or ''"/>
-                    </div>
-                    <div class="jj-field">
                         <label for="jj_birth_date">Data de nascimento</label>
                         <div class="jj-input-icon">
                             <input type="date" id="jj_birth_date" name="birth_date"
@@ -62,15 +55,79 @@
                             <svg class="jj-icon-cal" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
                         </div>
                     </div>
+                    <div class="jj-field">
+                        <label for="jj_address" class="jj-label-row">Endereço <span class="jj-info-btn" onclick="event.stopPropagation();var t=this.querySelector('.jj-info-tip');t.classList.toggle('show')"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="6" stroke="#20B967" stroke-width="1.3"/><path d="M7 6.2v3.8M7 4.5v.01" stroke="#20B967" stroke-width="1.3" stroke-linecap="round"/></svg><span class="jj-info-tip">Preencha no formato: <strong>Rua, número, cidade, país</strong></span></span></label>
+                        <input type="text" id="jj_address" name="address"
+                               placeholder="Digite seu endereço"
+                               t-att-value="address or ''" autocomplete="off"/>
+                    </div>
                 </div>
 
-                <div class="jj-form-row single">
+                <div class="jj-cin-row">
+                    <div class="jj-field">
+                        <label>Frente do CIN</label>
+                        <div class="jj-file-upload-wrap">
+                            <input type="file" id="jj_frente_cartao" name="frente_cartao" accept="image/*,.pdf" class="jj-file-input"/>
+                            <label for="jj_frente_cartao" class="jj-file-label">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                                <span class="jj-file-placeholder">Selecionar arquivo</span>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="jj-field">
+                        <label>Verso do CIN</label>
+                        <div class="jj-file-upload-wrap">
+                            <input type="file" id="jj_verso_cartao" name="verso_cartao" accept="image/*,.pdf" class="jj-file-input"/>
+                            <label for="jj_verso_cartao" class="jj-file-label">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                                <span class="jj-file-placeholder">Selecionar arquivo</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="jj-form-row">
+                    <div class="jj-field">
+                        <label for="jj_email">E-mail</label>
+                        <input type="email" id="jj_email" name="email"
+                               placeholder="voce@email.com"
+                               required="required"
+                               t-att-value="email or ''"/>
+                    </div>
+                    <div class="jj-field">
+                        <label for="jj_confirm_email">Confirme seu E-mail</label>
+                        <input type="email" id="jj_confirm_email" name="confirm_email"
+                               placeholder="voce@email.com"
+                               required="required"/>
+                    </div>
+                </div>
+
+                <div class="jj-form-row">
                     <div class="jj-field">
                         <label for="jj_password">Senha</label>
-                        <input type="password" id="jj_password" name="password"
-                               placeholder="Mínimo 6 caracteres"
-                               required="required"
-                               minlength="6"/>
+                        <div class="jj-password-wrap">
+                            <input type="password" id="jj_password" name="password"
+                                   placeholder="Minimo 6 caracteres"
+                                   required="required"
+                                   minlength="6"/>
+                            <button type="button" class="jj-password-toggle" data-target="jj_password" aria-label="Mostrar senha">
+                                <svg class="jj-eye-open" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                                <svg class="jj-eye-closed" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="display:none"><path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="jj-field">
+                        <label for="jj_confirm_password">Confirme sua senha</label>
+                        <div class="jj-password-wrap">
+                            <input type="password" id="jj_confirm_password" name="confirm_password"
+                                   placeholder="Repita a senha"
+                                   required="required"
+                                   minlength="6"/>
+                            <button type="button" class="jj-password-toggle" data-target="jj_confirm_password" aria-label="Mostrar senha">
+                                <svg class="jj-eye-open" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                                <svg class="jj-eye-closed" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="display:none"><path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+                            </button>
+                        </div>
                     </div>
                 </div>
 
@@ -80,7 +137,7 @@
                     <label for="jj_age_terms">
                         Confirmo que tenho mais de 18 anos e aceito os
                         <a href="/terms" target="_blank">Termos de Uso</a> e a
-                        <a href="/privacy" target="_blank">Política de Privacidade</a>.
+                        <a href="/privacy" target="_blank">Politica de Privacidade</a>.
                     </label>
                 </div>
 
@@ -99,7 +156,7 @@
             </form>
 
             <p class="jj-login-link">
-                Já tem uma conta? <a href="/web/login">Fazer login</a>
+                Ja tem uma conta? <a href="/web/login">Fazer login</a>
             </p>
         </t>
     </template>
@@ -164,7 +221,10 @@
                                                         t-att-data-search="(club.name + ' ' + (club.short_name or '') + ' ' + fed.name).lower()">
                                                     <span class="jj-club-option-badge"
                                                           t-attf-style="background: {{club.primary_color or '#073b2a'}}">
-                                                        <t t-esc="club.short_name or club.name[:2].upper()"/>
+                                                        <img t-if="club.logo"
+                                                             t-att-src="'data:image/png;base64,' + club.logo.decode()"
+                                                             style="width:100%;height:100%;object-fit:cover;border-radius:50%"/>
+                                                        <t t-else="" t-esc="club.short_name or club.name[:2].upper()"/>
                                                     </span>
                                                     <span class="jj-club-option-copy">
                                                         <strong t-esc="club.name"/>

@@ -41,13 +41,9 @@ def _serialize_game_session(session):
 class CasinoHome(CustomerPortal):
     @http.route(['/my', '/my/home'], type='http', auth='user', website=True)
     def home(self, **kw):
-        res = super().home(**kw)
+        values = self._prepare_portal_layout_values()
         partner_sudo = request.env.user.partner_id.sudo()
-        res.qcontext['partner_sudo'] = partner_sudo
-        _logger.warning("Entered custom home method with kw: %s", res.qcontext)
-        
-        # values = self._prepare_portal_layout_values()
-        values = res.qcontext
+        values['partner_sudo'] = partner_sudo
 
         # === usar MultiDict para soportar getlist ===
         args = request.httprequest.args
@@ -237,6 +233,63 @@ class CasinoHome(CustomerPortal):
         nuevo_cbu = partner.nuevo_cbu
         nickname = partner.nickname if partner.nickname else partner.name
 
+        # --- Minha Conta: dados adicionais ---
+        user = request.env.user
+        user_sudo = user.sudo()
+        
+        # Sessões de jogo (Minha atividade)
+        GameSession = request.env['casino.game.session'].sudo()
+        game_sessions = GameSession.search([
+            ('user_id', '=', user.id),
+        ], order='id desc', limit=10)
+        sessions_prepared = []
+        for s in game_sessions:
+            sessions_prepared.append({
+                'id': s.id,
+                'game': s.game_id.name if s.game_id else '',
+                'amount': round(float(s.amount or 0.0), 2),
+                'result': s.result or '',
+                'start': str(s.start_datetime or s.start or ''),
+                'transaction_id': s.transaction_id or '',
+                'state': s.state or '',
+            })
+        
+        # Retiros (histórico para Pagamentos)
+        Withdrawals = request.env['casino.game.withdrawals'].sudo()
+        withdrawals = Withdrawals.search([
+            ('partner_id', '=', partner.id),
+        ], order='id desc', limit=10)
+        withdrawals_prepared = []
+        for w in withdrawals:
+            withdrawals_prepared.append({
+                'id': w.id,
+                'transaction_id': w.transaction_id or '',
+                'date': str(w.date or ''),
+                'amount': round(float(w.amount or 0.0), 2),
+                'state': w.state or '',
+                'description': w.description or '',
+            })
+        
+        # Provedores de pagamento habilitados
+        payment_providers = request.env['payment.provider'].sudo().search([
+            ('state', 'in', ['enabled', 'test']),
+        ])
+        
+        # Métodos de pagamento do usuário
+        payment_configs = request.env['partner.payment.method.config'].sudo().search([
+            ('partner_id', '=', partner.id),
+        ])
+        
+        # Endereço completo
+        address_parts = [p for p in [
+            partner_sudo.street, partner_sudo.street2,
+            partner_sudo.city,
+            partner_sudo.state_id.name if partner_sudo.state_id else '',
+            partner_sudo.zip,
+            partner_sudo.country_id.name if partner_sudo.country_id else ''
+        ] if p]
+        full_address = ', '.join(address_parts) if address_parts else ''
+        
         values.update({
             'movements': rows,
             'saldo_final': round(saldo_total, 2),
@@ -248,9 +301,6 @@ class CasinoHome(CustomerPortal):
             'end_date': end_date_s,
             'selected_types': selected_types,
             'bl': bl,
-            # 'limit_daily': limit_daily,
-            # 'limit_weekly': limit_weekly,
-            # 'limit_monthly': limit_monthly,
 
             'account_number': account_number,
             'bank_name': bank_name,
@@ -260,11 +310,24 @@ class CasinoHome(CustomerPortal):
             'nuevo_cbu': nuevo_cbu,
             'currency': company.currency_id,
             'nickname': nickname,
+            # --- Minha Conta: novos dados ---
+            'game_sessions': sessions_prepared,
+            'withdrawals': withdrawals_prepared,
+            'payment_providers': payment_providers,
+            'payment_configs': payment_configs,
+            'full_address': full_address,
+            'phone': partner_sudo.phone or partner_sudo.mobile or '',
+            'cpf': partner_sudo.l10n_br_cpf or user_sudo.dni or '',
+            'birth_date_formatted': (partner_sudo.birth_date or user_sudo.birth_date or False) and str(partner_sudo.birth_date or user_sudo.birth_date or False),
+            'birth_date': partner_sudo.birth_date or user_sudo.birth_date or False,
+            'member_since': (partner_sudo.create_date or user_sudo.create_date or '') and str(partner_sudo.create_date or user_sudo.create_date or '')[:10],
+            'onboarding_state': user_sudo.onboarding_state or 'draft',
+            'has_dni_front': bool(user_sudo.dni_front),
+            'has_dni_back': bool(user_sudo.dni_back),
+            'has_selfie': bool(user_sudo.selfie),
+            'has_video': bool(user_sudo.video),
         })
-        res.qcontext.update(values)
-        _logger.info("Rendering portal home for partner %s", values)
-        # return request.render("portal.portal_my_home", values)
-        return res
+        return request.render("casino_online.portal_minha_conta", values)
 
 
 

@@ -15,6 +15,7 @@
     'depends': ['website_sale', 'portal', 'account', 'payment', 'web', 'auth_signup'],
     'data': [
         'security/ir.model.access.csv',
+        'views/templates/portal_minha_conta.xml',
         'views/templates/transactions_template.xml',
         'views/templates/website_header.xml',
         'views/templates/strip_template.xml',
@@ -25,9 +26,14 @@
         # 'data/balance_cron.xml',
     ],
     "assets": {
+        "web.assets_backend": [
+            "casino_online/static/src/css/user_menu.css",
+        ],
         # JS que debe estar disponible en frontend
         "web.assets_frontend": [
             "casino_online/static/src/js/wallet_balance.js",
+            "casino_online/static/src/js/portal_minha_conta.js",
+            "casino_online/static/src/css/portal_minha_conta.css",
             # "casino_online/static/src/js/movements_live.js",
         ],
         # JS lazy-loaded para optimización

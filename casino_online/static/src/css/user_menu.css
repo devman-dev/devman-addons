@@ -1,0 +1,3 @@
+.o_main_navbar .o_user_menu .dropdown-toggle:not(:hover) .oe_topbar_name {
+    color: #FFFFFF !important;
+}
