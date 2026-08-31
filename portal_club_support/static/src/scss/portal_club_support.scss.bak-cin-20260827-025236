@@ -23,7 +23,7 @@
   --jj-shadow-lg: 0 4px 12px rgba(0, 0, 0, 0.1);
   --jj-transition: 0.2s ease;
   --jj-font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  --jj-brand-width: 30%;
+  --jj-brand-width: 42%;
 }
 
 /* ----- Reset dentro del módulo ----- */
@@ -325,43 +325,10 @@ body:has(.jj-wrapper) {
   padding: 40px 40px 60px;
   height: 100vh;
   overflow-y: auto;
-  overflow-x: hidden;
-  scrollbar-width: thin;
-  scrollbar-color: rgba(255, 189, 56, 0.25) transparent;
   position: relative;
   background:
     radial-gradient(ellipse at 50% 0%, rgba(255,189,56,0.06) 0%, transparent 55%),
     linear-gradient(175deg, #013220 0%, #012a1b 40%, #011f15 100%);
-}
-
-/* Thin overlay scrollbar for form panel */
-.jj-form-panel::-webkit-scrollbar {
-  width: 5px;
-}
-.jj-form-panel::-webkit-scrollbar-track {
-  background: transparent;
-}
-.jj-form-panel::-webkit-scrollbar-thumb {
-  background: rgba(255, 189, 56, 0.25);
-  border-radius: 3px;
-}
-.jj-form-panel::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 189, 56, 0.45);
-}
-
-/* Thin overlay scrollbar for form panel */
-.jj-form-panel::-webkit-scrollbar {
-  width: 5px;
-}
-.jj-form-panel::-webkit-scrollbar-track {
-  background: transparent;
-}
-.jj-form-panel::-webkit-scrollbar-thumb {
-  background: rgba(255, 189, 56, 0.25);
-  border-radius: 3px;
-}
-.jj-form-panel::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 189, 56, 0.45);
 }
 
 /* Warm texture overlay on form panel */
@@ -393,7 +360,7 @@ body:has(.jj-wrapper) {
 
 .jj-form-inner {
   width: 100%;
-  max-width: 640px;
+  max-width: 480px;
 }
 
 /* ============================================================
@@ -1297,380 +1264,133 @@ body:has(.jj-wrapper) {
   padding: 16px 20px;
 }
 
-/* FEDERATION_ACCORDION: accordion-based club picker.
-   Global search bar + 27 federation accordion items.
-   Only one federation open at a time. */
+/* FEDERATION_CLUB_PICKER: searchable selector backed by casino.club. */
 .jj-club-picker {
   position: relative;
   width: 100%;
 }
 
-/* ----- Selected club bar (shown when a club is chosen) ----- */
-.jj-club-selected-bar {
+.jj-club-search-wrap {
+  position: relative;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  padding: 12px 14px;
-  margin-bottom: 14px;
-  border: 1px solid rgba(255, 189, 56, 0.2);
-  border-left: 4px solid var(--jj-accent, #073b2a);
-  border-radius: 10px;
-  background: linear-gradient(135deg, rgba(0, 25, 15, 0.9) 0%, rgba(0, 18, 10, 0.95) 100%);
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.03);
 }
 
-.jj-club-selected-left {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-}
-
-.jj-club-selected-badge {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  flex: 0 0 42px;
-  width: 42px;
-  height: 42px;
-  font-size: 11px;
-  font-weight: 700;
-  color: #fff;
-  clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
-  overflow: hidden;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
-}
-
-.jj-club-selected-badge img {
+.jj-club-search {
   width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.jj-club-selected-info {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.jj-club-selected-label {
-  font-size: 9px;
-  text-transform: uppercase;
-  letter-spacing: 1.8px;
-  color: rgba(255, 189, 56, 0.7);
-  font-weight: 600;
-}
-
-.jj-club-selected-name {
-  color: #f0fff0;
-  font-size: 14px;
-  font-weight: 700;
-}
-
-.jj-club-selected-bar .jj-club-clear {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 30px;
-  height: 30px;
-  padding: 0;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 50%;
-  background: rgba(0, 0, 0, 0.25);
-  color: rgba(255, 255, 255, 0.4);
-  font-size: 16px;
-  font-weight: 300;
-  cursor: pointer;
-  transition: all 0.2s;
-  flex-shrink: 0;
-}
-
-.jj-club-selected-bar .jj-club-clear:hover {
-  background: rgba(239, 68, 68, 0.25);
-  border-color: rgba(239, 68, 68, 0.4);
-  color: #fca5a5;
-}
-
-/* ----- Sticky search bar inside accordion ----- */
-.jj-accordion-search-wrap {
-  position: sticky;
-  top: 0;
-  z-index: 5;
-  display: flex;
-  align-items: center;
-  padding: 6px 6px;
-  background: var(--jj-bg, #071a0f);
-}
-
-.jj-accordion-search {
-  width: 100%;
-  height: 44px;
-  padding: 0 40px 0 40px;
-  border: 1px solid rgba(49, 223, 114, 0.28);
+  height: 50px;
+  padding: 0 46px 0 43px;
+  border: 1px solid var(--jj-border);
   border-radius: 10px;
-  background: #0a2e1f;
-  color: #e9ffe9;
+  background: var(--jj-white);
+  color: var(--jj-text);
   font-family: var(--jj-font);
-  font-size: 14px;
+  font-size: 15px;
   outline: none;
   transition: border-color var(--jj-transition), box-shadow var(--jj-transition);
 }
 
-.jj-accordion-search::placeholder {
-  color: #6f8f7a;
+.jj-club-search::placeholder {
+  color: #8a9390;
 }
 
-.jj-accordion-search:focus {
-  border-color: var(--jj-lime);
-  box-shadow: 0 0 0 3px rgba(49, 223, 114, 0.22);
+.jj-club-search:focus {
+  border-color: var(--jj-green-dark);
+  box-shadow: 0 0 0 3px rgba(10, 46, 31, 0.12);
 }
 
-.jj-accordion-search-icon {
+.jj-club-search-icon {
   position: absolute;
-  left: 14px;
-  color: #6f8f7a;
+  left: 15px;
+  color: var(--jj-green-dark);
   pointer-events: none;
-  font-size: 14px;
 }
 
-/* ----- Federation accordion ----- */
-.jj-federation-accordion {
-  display: flex;
-  flex-direction: column;
-  max-height: 440px;
-  overflow-y: auto;
-  border: 1px solid rgba(49, 223, 114, 0.16);
-  border-radius: 10px;
-  background: rgba(0, 0, 0, 0.18);
-}
-
-.jj-accordion-item {
-  border-bottom: 1px solid rgba(49, 223, 114, 0.07);
-  background: transparent;
-  transition: background var(--jj-transition);
-}
-.jj-accordion-item:first-child { border-top: none; }
-.jj-accordion-item:last-child { border-bottom: none; }
-
-.jj-accordion-item.open {
-  background: rgba(15, 61, 42, 0.55);
-}
-
-.jj-accordion-item:hover {
-  background: rgba(49, 223, 114, 0.04);
-}
-.jj-accordion-item.open:hover {
-  background: rgba(15, 61, 42, 0.6);
-}
-
-.jj-accordion-header {
-  display: flex;
-  align-items: center;
-  width: 100%;
-  gap: 10px;
-  padding: 11px 14px;
+.jj-club-clear {
+  position: absolute;
+  right: 12px;
+  display: none;
+  width: 28px;
+  height: 28px;
+  padding: 0;
   border: 0;
-  border-left: 3px solid transparent;
-  background: transparent;
-  color: #c8e6d0;
-  font-family: var(--jj-font);
-  font-size: 13px;
-  font-weight: 700;
+  border-radius: 50%;
+  background: #eef2f0;
+  color: var(--jj-text-muted);
   cursor: pointer;
-  transition: color var(--jj-transition), background var(--jj-transition), border-left-color 0.25s ease;
-  text-align: left;
 }
 
-.jj-accordion-header:hover {
-  color: #e9ffe9;
-}
-
-.jj-accordion-item.open > .jj-accordion-header {
-  color: var(--jj-lime);
-  border-bottom: 1px solid rgba(49, 223, 114, 0.12);
-}
-
-.jj-accordion-header-logo {
-  flex-shrink: 0;
-  clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
-  object-fit: contain;
-  background: rgba(255, 255, 255, 0.08);
-}
-
-.jj-accordion-header-name {
-  flex: 1;
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.jj-accordion-header-count {
+.jj-club-picker.selected .jj-club-clear {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
-  min-width: 22px;
-  height: 20px;
-  padding: 0 8px 0 6px;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.07);
-  color: inherit;
-  font-size: 10px;
-  font-weight: 700;
-}
-.jj-accordion-header-count .fa-users {
-  font-size: 9px;
-  opacity: 0.7;
-}
-.jj-accordion-header-count .jj-count-label {
-  font-weight: 400;
-  opacity: 0.6;
-  font-size: 9px;
-  margin-left: -2px;
+  justify-content: center;
 }
 
-.jj-accordion-item.open > .jj-accordion-header .jj-accordion-header-count {
-  background: rgba(49, 223, 114, 0.2);
-  color: var(--jj-lime);
+.jj-club-dropdown {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  z-index: 30;
+  display: none;
+  max-height: 292px;
+  overflow-y: auto;
+  border: 1px solid var(--jj-border);
+  border-radius: 10px;
+  background: var(--jj-white);
+  box-shadow: 0 14px 32px rgba(10, 46, 31, 0.16);
 }
 
-.jj-accordion-chevron {
-  font-size: 10px;
-  transition: transform 0.25s ease;
-  color: inherit;
-  opacity: 0.5;
+.jj-club-dropdown.open {
+  display: block;
 }
 
-.jj-accordion-item.open > .jj-accordion-header .jj-accordion-chevron {
-  transform: rotate(180deg);
-  opacity: 1;
+.jj-club-group-title {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  padding: 8px 14px;
+  background: #f0f7f2;
+  color: var(--jj-green-dark);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
 }
 
-/* ----- Accordion body (club options list) ----- */
-.jj-accordion-body {
-  background: rgba(0, 0, 0, 0.2);
-}
-
-@media (min-width: 600px) {
-  .jj-accordion-body {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 2px;
-  }
-  .jj-accordion-body .jj-club-option {
-    border-right: 1px solid rgba(255, 255, 255, 0.05);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-  }
-  .jj-accordion-body .jj-club-option:nth-child(even) {
-    border-right: 0;
-  }
-}
-
-/* ============================================================
-   CLUB OPTION (shared: accordion body + tiles) */
 .jj-club-option {
   display: flex;
   align-items: center;
   width: 100%;
-  min-height: 52px;
   gap: 12px;
-  padding: 12px 14px;
+  padding: 10px 14px;
   border: 0;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
-  border-left: 2px solid transparent;
-  background: transparent;
-  color: #e9ffe9;
+  border-bottom: 1px solid #edf0ef;
+  background: var(--jj-white);
+  color: var(--jj-text);
   text-align: left;
   cursor: pointer;
-  transition: background 0.2s, border-left-color 0.2s, border-left-width 0.2s, padding-left 0.2s;
-  font-family: var(--jj-font);
-}
-
-.jj-club-option:last-child {
-  border-bottom: 0;
 }
 
 .jj-club-option:hover,
-.jj-club-option:focus {
-  background: rgba(49, 223, 114, 0.08);
-  border-left: 4px solid var(--club-accent, #31df72);
-  padding-left: 15px;
-  outline: none;
-}
-
+.jj-club-option:focus,
 .jj-club-option.selected {
-  background: rgba(49, 223, 114, 0.12);
-  border-left: 3px solid var(--club-accent, #31df72);
+  background: #f5faf7;
   outline: none;
-}
-
-/* Celebration glow on selection */
-@keyframes jjCelebrate {
-  0%   { box-shadow: 0 0 0 0 rgba(49, 223, 114, 0); }
-  20%  { box-shadow: 0 0 0 6px rgba(49, 223, 114, 0.45); }
-  50%  { box-shadow: 0 0 0 12px rgba(255, 215, 0, 0.35), 0 0 24px 4px rgba(49, 223, 114, 0.25); }
-  80%  { box-shadow: 0 0 0 6px rgba(49, 223, 114, 0.15); }
-  100% { box-shadow: 0 0 0 0 rgba(49, 223, 114, 0); }
-}
-
-.jj-club-option.celebrate {
-  animation: jjCelebrate 600ms ease-out;
-}
-
-/* ============================================================
-   SPORTS UX ROUND 2: selected glow, stagger fade, badge bounce
-   ============================================================ */
-
-/* 1. Selected state: golden badge ring + gold name */
-.jj-club-option.selected .jj-club-option-badge {
-  box-shadow: 0 0 0 3px rgba(255,215,0,0.50), 0 2px 8px rgba(0,0,0,0.4);
-  transition: box-shadow 0.25s ease, transform 0.25s ease;
-}
-.jj-club-option.selected .jj-club-option-copy strong {
-  color: #ffc107;
-  text-shadow: 0 0 6px rgba(255,193,7,0.25);
-}
-.jj-club-option.selected .jj-club-option-chek {
-  color: #ffc107;
-}
-
-/*2. Staggered fade-in on accordion expand */
-@keyframes jjClubIn {
-  from { opacity: 0; transform: translateY(8px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-.jj-club-option.stagger-in {
-  animation: jjClubIn 350ms ease-out both;
-}
-
-/*3a. Badge bounce on selection */
-@keyframes jjBadgeBounce {
-  0%   { transform: scale(1); }
-  40%  { transform: scale(1.20); }
-  70%  { transform: scale(0.93); }
-  100% { transform: scale(1); }
-}
-.jj-club-option-badge.bounce {
-  animation: jjBadgeBounce 300ms cubic-bezier(0.34, 1.56, 0.64, 1);
-}
-
-/*3b. Badge subtle gradient overay */
-.jj-club-option-badge {
-  background-image: linear-gradent(135deg, rgba(255,255,255,0.12) 0%, rgba(0,0,0,0.08) 100%) !important;
 }
 
 .jj-club-option-badge {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  flex: 0 0 40px;
-  width: 40px;
-  height: 40px;
+  flex: 0 0 36px;
+  width: 36px;
+  height: 36px;
   overflow: hidden;
-  clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+  border-radius: 50%;
   color: #fff;
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 800;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35);
 }
 
 .jj-club-option-badge img {
@@ -1685,211 +1405,25 @@ body:has(.jj-wrapper) {
   flex-direction: column;
 }
 
-.jj-club-option-copy strong {
-  display: block;
-  font-size: 13px;
-  font-weight: 700;
-  line-height: 1.3;
+.jj-club-option-name {
   overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  color: #f0fff0;
-}
-
-.jj-club-option-copy small {
-  display: block;
-  font-size: 10px;
-  font-weight: 500;
-  color: rgba(255, 255, 255, 0.45);
-  letter-spacing: 0.2px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.jj-club-option-check {
-  margin-left: auto;
-  opacity: 0;
-  color: var(--jj-lime);
   font-size: 14px;
-  transition: opacity var(--jj-transition);
+  font-weight: 650;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-.jj-club-option.selected .jj-club-option-check {
-  opacity: 1;
-}
-
-/* Search highlight mark */
-.jj-club-hl {
-  background: rgba(49, 223, 114, 0.32);
-  color: #eaffea;
-  border-radius: 2px;
-  padding: 0 1px;
+.jj-club-option-federation {
+  margin-top: 2px;
+  color: var(--jj-text-muted);
+  font-size: 11px;
 }
 
 .jj-club-empty {
-  padding: 32px 14px 24px;
-  color: #9fd6ab;
+  padding: 18px 14px;
+  color: var(--jj-text-muted);
   font-size: 13px;
   text-align: center;
-}
-.jj-empty-icon {
-  display: block;
-  margin: 0 auto 14px;
-  opacity: 0.6;
-}
-.jj-empty-title {
-  margin: 0 0 4px;
-  font-weight: 700;
-  font-size: 14px;
-  color: #c8e6d0;
-}
-.jj-empty-hint {
-  margin: 0;
-  font-size: 11px;
-  color: #6b8e72;
-}
-
-/* ============================================================
-   LOTE 2+1: TUS CLUBES section (cross-category chips)
-   ============================================================ */
-.jj-myclubs-section {
-  margin-bottom: 14px;
-}
-
-.jj-myclubs-label {
-  color: #6f8f7a;
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  margin-bottom: 8px;
-}
-
-.jj-myclubs-tiles {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-.jj-myclub-chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 6px 12px 6px 6px;
-  border: 1px solid rgba(212, 175, 55, 0.35);
-  border-radius: 999px;
-  background: rgba(212, 175, 55, 0.08);
-  color: #ffd866;
-  font-family: var(--jj-font);
-  font-size: 12px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all var(--jj-transition);
-}
-
-.jj-myclub-chip:hover,
-.jj-myclub-chip:focus {
-  border-color: #d4af37;
-  background: rgba(212, 175, 55, 0.18);
-  outline: none;
-}
-
-.jj-myclub-chip-badge {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 24px;
-  height: 24px;
-  overflow: hidden;
-  clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
-  color: #fff;
-  font-size: 9px;
-  font-weight: 800;
-}
-
-.jj-myclub-chip-name {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  max-width: 120px;
-}
-
-/* ============================================================
-   LOTE 2+1: auto-scroll flash animation
-   ============================================================ */
-.jj-club-option.jj-flash-once {
-  animation: jj-flash-once 800ms ease-out;
-}
-
-@keyframes jj-flash-once {
-  0%   { background: rgba(49, 223, 114, 0.25); }
-  100% { background: transparent; }
-}
-
-/* ============================================================
-   LOTE 2: popular clubs chip section
-   ============================================================ */
-.jj-popular-section {
-  margin-bottom: 16px;
-}
-
-.jj-popular-label {
-  color: #6f8f7a;
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  margin-bottom: 8px;
-}
-
-.jj-popular-tiles {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-.jj-popular-chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 6px 12px 6px 6px;
-  border: 1px solid rgba(49, 223, 114, 0.18);
-  border-radius: 999px;
-  background: rgba(49, 223, 114, 0.06);
-  color: #e9ffe9;
-  font-family: var(--jj-font);
-  font-size: 12px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all var(--jj-transition);
-}
-
-.jj-popular-chip:hover,
-.jj-popular-chip:focus {
-  border-color: var(--jj-lime);
-  background: rgba(49, 223, 114, 0.15);
-  outline: none;
-}
-
-.jj-popular-chip-badge {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 24px;
-  height: 24px;
-  overflow: hidden;
-  clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
-  color: #fff;
-  font-size: 9px;
-  font-weight: 800;
-}
-
-.jj-popular-chip-name {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  max-width: 120px;
 }
 
 .jj-club-tiles {
@@ -3119,87 +2653,8 @@ body:has(.jj-wrapper) {
     display: none !important;
 }
 
-/* ============================================================
-   CIN DROP-ZONE REDESIGN (Frente / Verso)
-   Illustrated drop zones + preview + drag & drop
-   ============================================================ */
-.jj-file-upload-wrap .jj-file-label {
-  height: auto;
-  min-height: 128px;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  padding: 16px 12px;
-  border: 2px dashed rgba(255, 189, 56, 0.45);
-  border-radius: var(--jj-radius);
-  background: rgba(255, 255, 255, 0.35);
-  text-align: center;
-}
 
-.jj-file-upload-wrap .jj-file-label > svg {
-  display: none;
-}
 
-.jj-file-upload-wrap .jj-file-label::before {
-  content: "";
-  width: 46px;
-  height: 46px;
-  background-repeat: no-repeat;
-  background-position: center;
-  background-size: contain;
-  opacity: 0.9;
-}
 
-.jj-file-upload-wrap .jj-file-label[for="jj_frente_cartao"]::before {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23c4942e' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='4' width='18' height='16' rx='2'/%3E%3Ccircle cx='8.5' cy='10.5' r='1.8'/%3E%3Cpath d='M6 15.5c.6-1.4 1.6-2 2.5-2s1.9.6 2.5 2'/%3E%3Cline x1='13' y1='9' x2='17' y2='9'/%3E%3Cline x1='13' y1='12' x2='17' y2='12'/%3E%3C/svg%3E");
-}
 
-.jj-file-upload-wrap .jj-file-label[for="jj_verso_cartao"]::before {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23c4942e' stroke-width='1.6' stroke-linecap='round'%3E%3Crect x='3' y='4' width='18' height='16' rx='2'/%3E%3Cline x1='6' y1='9' x2='6' y2='16'/%3E%3Cline x1='9' y1='9' x2='9' y2='16'/%3E%3Cline x1='12' y1='9' x2='12' y2='16'/%3E%3Cline x1='14' y1='9' x2='14' y2='16'/%3E%3Cline x1='16' y1='9' x2='16' y2='16'/%3E%3Cline x1='18' y1='9' x2='18' y2='16'/%3E%3C/svg%3E");
-}
 
-.jj-file-upload-wrap .jj-file-label .jj-file-placeholder {
-  font-weight: 600;
-  color: #c4942e;
-}
-
-.jj-file-upload-wrap .jj-file-label::after {
-  content: "";
-  font-size: 11px;
-  color: #9a8b70;
-  line-height: 1.3;
-}
-
-.jj-file-upload-wrap .jj-file-label[for="jj_frente_cartao"]::after {
-  content: "Foto de frente do documento (JPG ou PNG)";
-}
-
-.jj-file-upload-wrap .jj-file-label[for="jj_verso_cartao"]::after {
-  content: "Foto do verso (lado do código de barras)";
-}
-
-/* preview thumbnail */
-.jj-file-upload-wrap .jj-file-label .jj-file-preview-img {
-  display: none;
-  max-width: 100%;
-  max-height: 76px;
-  border-radius: var(--jj-radius-sm);
-  object-fit: contain;
-}
-
-.jj-file-upload-wrap .jj-file-label.has-file .jj-file-preview-img {
-  display: block;
-}
-
-.jj-file-upload-wrap .jj-file-label.has-file {
-  border-style: solid;
-  border-color: #2ecc71;
-  background: rgba(46, 204, 113, 0.08);
-}
-
-.jj-file-upload-wrap .jj-file-label.is-dragover {
-  border-color: #ffbd38;
-  background: rgba(255, 189, 56, 0.14);
-  box-shadow: 0 0 0 4px rgba(255, 189, 56, 0.10);
-}

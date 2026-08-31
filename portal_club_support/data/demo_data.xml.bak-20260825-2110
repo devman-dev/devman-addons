@@ -1,0 +1,189 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="0">
+
+        <!-- ============================================================ -->
+        <!-- Categorías de Juego -->
+        <!-- ============================================================ -->
+        <record id="cat_apostas_esportivas" model="club.support.game.category">
+            <field name="name">Apostas Esportivas</field>
+            <field name="code">SPORTS</field>
+            <field name="description">Aposte nos seus times e ligas favoritas. Futebol, basquete, vôlei e muito mais.</field>
+            <field name="icon">fa-futbol-o</field>
+            <field name="color">#1B5E20</field>
+            <field name="sequence">10</field>
+            <field name="active" eval="True"/>
+            <field name="commission_description">Parte do valor apostado é destinado ao clube que você escolher apoiar.</field>
+            <field name="require_selection" eval="True"/>
+        </record>
+
+        <record id="cat_cassino_online" model="club.support.game.category">
+            <field name="name">Cassino Online</field>
+            <field name="code">CASINO</field>
+            <field name="description">Roleta, blackjack, poker e centenas de jogos de cassino ao vivo.</field>
+            <field name="icon">fa-diamond</field>
+            <field name="color">#B71C1C</field>
+            <field name="sequence">20</field>
+            <field name="active" eval="True"/>
+            <field name="commission_description">Uma porcentagem das apostas no cassino é revertida ao clube apoiado.</field>
+            <field name="require_selection" eval="True"/>
+        </record>
+
+        <record id="cat_bingo_instantaneos" model="club.support.game.category">
+            <field name="name">Bingo &amp; Instantâneos</field>
+            <field name="code">BINGO</field>
+            <field name="description">Bingo online, raspadinhas virtuais e jogos instantâneos.</field>
+            <field name="icon">fa-star</field>
+            <field name="color">#E65100</field>
+            <field name="sequence">30</field>
+            <field name="active" eval="True"/>
+            <field name="commission_description">Nos jogos instantâneos, o clube recebe uma comissão por cada rodada.</field>
+            <field name="require_selection" eval="False"/>
+        </record>
+
+        <!-- ============================================================ -->
+        <!-- Clubes Brasileños -->
+        <!-- ============================================================ -->
+        <record id="club_flamengo" model="casino.club">
+            <field name="name">Flamengo</field>
+            <field name="short_name">FLA</field>
+            <field name="primary_color">#000000</field>
+            <field name="secondary_color">#E50B17</field>
+            <field name="sequence">10</field>
+            <field name="active" eval="True"/>
+                    </record>
+
+        <record id="club_palmeiras" model="casino.club">
+            <field name="name">Palmeiras</field>
+            <field name="short_name">PAL</field>
+            <field name="primary_color">#006437</field>
+            <field name="secondary_color">#FFFFFF</field>
+            <field name="sequence">20</field>
+            <field name="active" eval="True"/>
+                    </record>
+
+        <record id="club_corinthians" model="casino.club">
+            <field name="name">Corinthians</field>
+            <field name="short_name">COR</field>
+            <field name="primary_color">#000000</field>
+            <field name="secondary_color">#FFFFFF</field>
+            <field name="sequence">30</field>
+            <field name="active" eval="True"/>
+                    </record>
+
+        <record id="club_sao_paulo" model="casino.club">
+            <field name="name">São Paulo</field>
+            <field name="short_name">SAO</field>
+            <field name="primary_color">#000000</field>
+            <field name="secondary_color">#E50B17</field>
+            <field name="sequence">40</field>
+            <field name="active" eval="True"/>
+                    </record>
+
+        <record id="club_vasco" model="casino.club">
+            <field name="name">Vasco da Gama</field>
+            <field name="short_name">VAS</field>
+            <field name="primary_color">#000000</field>
+            <field name="secondary_color">#FFFFFF</field>
+            <field name="sequence">50</field>
+            <field name="active" eval="True"/>
+                    </record>
+
+        <record id="club_gremio" model="casino.club">
+            <field name="name">Grêmio</field>
+            <field name="short_name">GRE</field>
+            <field name="primary_color">#00A1E0</field>
+            <field name="secondary_color">#000000</field>
+            <field name="sequence">60</field>
+            <field name="active" eval="True"/>
+                    </record>
+
+        <record id="club_internacional" model="casino.club">
+            <field name="name">Internacional</field>
+            <field name="short_name">INT</field>
+            <field name="primary_color">#E50B17</field>
+            <field name="secondary_color">#FFFFFF</field>
+            <field name="sequence">70</field>
+            <field name="active" eval="True"/>
+                    </record>
+
+        <record id="club_cruzeiro" model="casino.club">
+            <field name="name">Cruzeiro</field>
+            <field name="short_name">CRU</field>
+            <field name="primary_color">#004F9F</field>
+            <field name="secondary_color">#FFFFFF</field>
+            <field name="sequence">80</field>
+            <field name="active" eval="True"/>
+                    </record>
+
+        <record id="club_atletico_mineiro" model="casino.club">
+            <field name="name">Atlético Mineiro</field>
+            <field name="short_name">CAM</field>
+            <field name="primary_color">#000000</field>
+            <field name="secondary_color">#FFFFFF</field>
+            <field name="sequence">90</field>
+            <field name="active" eval="True"/>
+                    </record>
+
+        <record id="club_botafogo" model="casino.club">
+            <field name="name">Botafogo</field>
+            <field name="short_name">BOT</field>
+            <field name="primary_color">#000000</field>
+            <field name="secondary_color">#FFFFFF</field>
+            <field name="sequence">100</field>
+            <field name="active" eval="True"/>
+                    </record>
+
+        <record id="club_bahia" model="casino.club">
+            <field name="name">Bahia</field>
+            <field name="short_name">BAH</field>
+            <field name="primary_color">#004F9F</field>
+            <field name="secondary_color">#E50B17</field>
+            <field name="sequence">110</field>
+            <field name="active" eval="True"/>
+                    </record>
+
+        <record id="club_fortaleza" model="casino.club">
+            <field name="name">Fortaleza</field>
+            <field name="short_name">FOR</field>
+            <field name="primary_color">#004F9F</field>
+            <field name="secondary_color">#E50B17</field>
+            <field name="sequence">120</field>
+            <field name="active" eval="True"/>
+                    </record>
+
+        <!-- ============================================================ -->
+        <!-- Relacionar clubes con categorías -->
+        <!-- ============================================================ -->
+        <function model="club.support.game.category" name="write">
+            <value eval="[ref('cat_apostas_esportivas')]"/>
+            <value eval="{
+                'club_ids': [(6, 0, [
+                    ref('club_flamengo'), ref('club_palmeiras'),
+                    ref('club_corinthians'), ref('club_sao_paulo')
+                ])]
+            }"/>
+        </function>
+
+        <function model="club.support.game.category" name="write">
+            <value eval="[ref('cat_cassino_online')]"/>
+            <value eval="{
+                'club_ids': [(6, 0, [
+                    ref('club_vasco'), ref('club_gremio'),
+                    ref('club_internacional'), ref('club_cruzeiro')
+                ])]
+            }"/>
+        </function>
+
+        <function model="club.support.game.category" name="write">
+            <value eval="[ref('cat_bingo_instantaneos')]"/>
+            <value eval="{
+                'club_ids': [(6, 0, [
+                    ref('club_atletico_mineiro'), ref('club_botafogo'),
+                    ref('club_bahia'), ref('club_fortaleza')
+                ])]
+            }"/>
+        </function>
+
+    </data>
+</odoo>

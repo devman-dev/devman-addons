@@ -442,8 +442,8 @@
                 <div class="jj-confirmation-icon">
                     <div class="jj-confirmation-icon-inner">✓</div>
                 </div>
-                <h3>Bem-vindo, <t t-esc="partner.name or 'Torcedor'"/>! Seu cadastro foi concluído 🎉</h3>
-                <p>Tudo pronto! Seus clubes foram registrados com sucesso e suas apostas agora apoiam quem você escolheu.</p>
+                <h3>Cadastro concluído!</h3>
+                <p>Seus clubes foram registrados com sucesso. Suas apostas agora apoiam quem você escolheu.</p>
 
                 <div class="jj-confirmation-summary" t-if="selected_clubs">
                     <h4>Seus clubes</h4>

@@ -9,10 +9,8 @@
                 <field name="partner_id"/>
                 <field name="category_id"/>
                 <field name="casino_club_id"/>
-                <field name="club_id" optional="hide"/>
-                <!-- ODOO18_PORTAL_FIX: use the related model field. -->
-                <field name="commission_percentage"/>
-                <field name="selected_date"/>
+                                <!-- ODOO18_PORTAL_FIX: use the related model field. -->
+                                <field name="selected_date"/>
                 <field name="changed_date"/>
                 <field name="active"/>
             </list>
@@ -33,8 +31,7 @@
                         </group>
                         <group string="Club">
                             <field name="casino_club_id"/>
-                            <field name="club_id" invisible="casino_club_id"/>
-                            <field name="active"/>
+                                                        <field name="active"/>
                         </group>
                     </group>
                     <group string="Fechas">
@@ -54,8 +51,7 @@
             <search>
                 <field name="partner_id"/>
                 <field name="category_id"/>
-                <field name="club_id"/>
-                <filter name="active" string="Vigentes"
+                                <filter name="active" string="Vigentes"
                         domain="[('active', '=', True)]"/>
                 <filter name="inactive" string="Históricas"
                         domain="[('active', '=', False)]"/>
@@ -67,9 +63,7 @@
                             context="{'group_by': 'partner_id'}"/>
                     <filter name="group_by_category" string="Categoría"
                             context="{'group_by': 'category_id'}"/>
-                    <filter name="group_by_club" string="Club"
-                            context="{'group_by': 'club_id'}"/>
-                </group>
+                                    </group>
             </search>
         </field>
     </record>

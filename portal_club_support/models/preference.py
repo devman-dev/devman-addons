@@ -24,11 +24,11 @@ class Preference(models.Model):
         ondelete="set null",
         index=True,
     )
-    club_id = fields.Many2one(
+    casino_club_id = fields.Many2one(
         comodel_name="casino.club",
         string="Club Elegido",
         required=True,
-        ondelete="cascade",
+        ondelete="restrict",
     )
     active = fields.Boolean(
         string="Vigente",
@@ -49,26 +49,26 @@ class Preference(models.Model):
         store=True,
     )
 
-    @api.depends("partner_id.name", "club_id.short_name")
+    @api.depends("partner_id.name", "casino_club_id.name")
     def _compute_display_name(self):
         for rec in self:
             parts = []
             if rec.partner_id.name:
                 parts.append(rec.partner_id.name)
-            if rec.club_id.short_name:
-                parts.append(f"→ {rec.club_id.short_name}")
+            if rec.casino_club_id.name:
+                parts.append(f"→ {rec.casino_club_id.name}")
             rec.display_name = " | ".join(parts) if parts else "Preferencia"
-
-
 
     @api.model_create_multi
     def create(self, vals_list):
-        """Al crear, desactivar cualquier preferencia previa del mismo usuario."""
+        """Al crear, desactivar preferencia previa para la misma categoría del mismo usuario."""
         for vals in vals_list:
             partner_id = vals.get("partner_id")
-            if partner_id:
+            category_id = vals.get("category_id")
+            if partner_id and category_id:
                 existing = self.search([
                     ("partner_id", "=", partner_id),
+                    ("category_id", "=", category_id),
                     ("active", "=", True),
                 ])
                 if existing:
@@ -76,14 +76,7 @@ class Preference(models.Model):
         return super().create(vals_list)
 
     def write(self, vals):
-        if "club_id" in vals or "active" in vals:
+        if "casino_club_id" in vals or "club_id" in vals or "active" in vals:
             vals["changed_date"] = fields.Datetime.now()
         return super().write(vals)
 
-    _sql_constraints = [
-        (
-            "unique_active_preference_per_user",
-            "UNIQUE(partner_id, active)",
-            "Ya existe una preferencia activa para este usuario.",
-        ),
-    ]

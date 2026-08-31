@@ -11,8 +11,7 @@
                 <field name="code"/>
                 <field name="icon"/>
                 <field name="color" widget="color_picker"/>
-                <field name="club_ids" widget="many2many_tags"/>
-                <!-- FEATURED_GAMES: selectable games displayed on the portal. -->
+                                <!-- FEATURED_GAMES: selectable games displayed on the portal. -->
                 <field name="featured_game_ids" widget="many2many_tags"
                        options="{'no_create': True, 'no_create_edit': True}"
                        domain="[('is_game', '=', True), ('active', '=', True), ('website_published', '=', True)]"/>
@@ -64,9 +63,7 @@
                     </group>
 
                     <group string="Clubes en esta categoría">
-                        <field name="club_ids" widget="many2many_tags"
-                               domain="[('active', '=', True)]"/>
-                    </group>
+                                            </group>
 
                     <!-- FEATURED_GAMES: full selector in the category form. -->
                     <group string="Juegos destacados en JogaJunto">

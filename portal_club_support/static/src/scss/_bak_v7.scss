@@ -325,43 +325,10 @@ body:has(.jj-wrapper) {
   padding: 40px 40px 60px;
   height: 100vh;
   overflow-y: auto;
-  overflow-x: hidden;
-  scrollbar-width: thin;
-  scrollbar-color: rgba(255, 189, 56, 0.25) transparent;
   position: relative;
   background:
     radial-gradient(ellipse at 50% 0%, rgba(255,189,56,0.06) 0%, transparent 55%),
     linear-gradient(175deg, #013220 0%, #012a1b 40%, #011f15 100%);
-}
-
-/* Thin overlay scrollbar for form panel */
-.jj-form-panel::-webkit-scrollbar {
-  width: 5px;
-}
-.jj-form-panel::-webkit-scrollbar-track {
-  background: transparent;
-}
-.jj-form-panel::-webkit-scrollbar-thumb {
-  background: rgba(255, 189, 56, 0.25);
-  border-radius: 3px;
-}
-.jj-form-panel::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 189, 56, 0.45);
-}
-
-/* Thin overlay scrollbar for form panel */
-.jj-form-panel::-webkit-scrollbar {
-  width: 5px;
-}
-.jj-form-panel::-webkit-scrollbar-track {
-  background: transparent;
-}
-.jj-form-panel::-webkit-scrollbar-thumb {
-  background: rgba(255, 189, 56, 0.25);
-  border-radius: 3px;
-}
-.jj-form-panel::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 189, 56, 0.45);
 }
 
 /* Warm texture overlay on form panel */

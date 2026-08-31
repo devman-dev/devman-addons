@@ -18,7 +18,7 @@
          REGISTER PAGE — público, Step 1 "Seus dados"
          ============================================================ -->
     <template id="jj_register_page"
-              name="Cadastro">
+              name="JogaJunto — Cadastro">
         <t t-call="portal_club_support.jj_register_layout">
             <t t-set="step" t-value="1"/>
 
@@ -29,9 +29,6 @@
             <form method="POST" action="/club-support/register" id="jj_register_form">
                 <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
 
-                <!-- ===== SECCIÓN 1: DADOS PESSOAIS ===== -->
-                <div class="jj-form-section">
-                    <div class="jj-form-section-title"><svg class="jj-section-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M20 21a8 8 0 10-16 0"/></svg> DADOS PESSOAIS</div>
                 <div class="jj-form-row">
                     <div class="jj-field">
                         <label for="jj_name">Nome completo</label>
@@ -73,18 +70,13 @@
                         </div>
                     </div>
                     <div class="jj-field">
-                        <label for="jj_address" class="jj-label-row">Endereço <span class="jj-info-btn" onclick="event.stopPropagation();var t=this.querySelector('.jj-info-tip');t.classList.toggle('show')"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="6" stroke="#20B967" stroke-width="1.3"/><path d="M7 6.2v3.8M7 4.5v.01" stroke="#20B967" stroke-width="1.3" stroke-linecap="round"/></svg><span class="jj-info-tip">A ordem deve ser: <strong>rua, número, cidade, país</strong></span></span></label>
+                        <label for="jj_address" class="jj-label-row">Endereço <span class="jj-info-btn" onclick="event.stopPropagation();var t=this.querySelector('.jj-info-tip');t.classList.toggle('show')"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="6" stroke="#20B967" stroke-width="1.3"/><path d="M7 6.2v3.8M7 4.5v.01" stroke="#20B967" stroke-width="1.3" stroke-linecap="round"/></svg><span class="jj-info-tip">Preencha no formato: <strong>Rua, número, cidade, país</strong></span></span></label>
                         <input type="text" id="jj_address" name="address"
                                placeholder="Digite seu endereço"
                                t-att-value="address or ''" autocomplete="off"/>
                     </div>
                 </div>
-                </div>
-                <!-- fim DADOS PESSOAIS -->
 
-                <!-- ===== SECCIÓN 2: DOCUMENTAÇÃO ===== -->
-                <div class="jj-form-section">
-                    <div class="jj-form-section-title"><svg class="jj-section-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg> DOCUMENTAÇÃO</div>
                 <div class="jj-cin-row">
                     <div class="jj-field">
                         <label>Frente do CIN</label>
@@ -132,13 +124,7 @@
                         </p>
                     </div>
                 </div>
-                </div>
-                </div>
-                <!-- fim DOCUMENTAÇÃO -->
 
-                <!-- ===== SECCIÓN 3: ACESSO E SEGURANÇA ===== -->
-                <div class="jj-form-section">
-                    <div class="jj-form-section-title"><svg class="jj-section-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg> ACESSO E SEGURANÇA</div>
                 <div class="jj-field">
                         <label for="jj_email">E-mail</label>
                         <div class="jj-input-icon">
@@ -155,6 +141,7 @@
                                placeholder="voce@email.com"
                                required="required"/>
                     </div>
+                </div>
 
                 <div class="jj-form-row">
                     <div class="jj-field">
@@ -184,8 +171,6 @@
                         </div>
                     </div>
                 </div>
-                </div>
-                <!-- fim ACESSO E SEGURANÇA -->
 
                 <div class="jj-checkbox-wrap">
                     <input type="checkbox" id="jj_age_terms" name="age_confirmed"
@@ -250,146 +235,50 @@
                             </div>
                         </div>
                         <div class="jj-modality-body">
-                            <!-- LOTE 2+1: TUS CLUBES — selections from other categories -->
-                            <div class="jj-myclubs-section" t-if="current_clubs">
-                                <div class="jj-myclubs-label">TUS CLUBES</div>
-                                <div class="jj-myclubs-tiles">
-                                    <t t-foreach="current_clubs" t-as="mclub">
-                                        <t t-if="mclub['category_id'] != cat.id">
-                                            <button type="button" class="jj-myclub-chip"
-                                                    t-att-data-id="str(mclub['id'])"
-                                                    t-att-aria-label="'Selecionar ' + (mclub['name'] or '')">
-                                                <span class="jj-myclub-chip-badge"
-                                                      t-attf-style="background: {{mclub['primary_color'] or '#073b2a'}}">
-                                                    <img t-if="mclub['logo']"
-                                                         t-att-src="'data:image/png;base64,' + mclub['logo'].decode()"
-                                                         style="width:100%;height:100%;object-fit:cover;border-radius:50%"/>
-                                                    <t t-else="" t-esc="mclub['short_name'] or mclub['name'][:2].upper()"/>
-                                                </span>
-                                                <span class="jj-myclub-chip-name" t-esc="mclub['short_name'] or mclub['name']"/>
-                                            </button>
-                                        </t>
-                                    </t>
-                                </div>
-                            </div>
-                            <!-- LOTE 2: popular clubs section -->
-                            <div class="jj-popular-section" t-if="popular_clubs">
-                                <div class="jj-popular-label">POPULARES</div>
-                                <div class="jj-popular-tiles">
-                                    <t t-foreach="popular_clubs" t-as="pop">
-                                        <button type="button" class="jj-popular-chip"
-                                                t-att-data-id="pop.id"
-                                                t-att-federation-id="pop.federation_id.id"
-                                                t-att-aria-label="'Selecionar ' + (pop.name or '')">
-                                            <span class="jj-popular-chip-badge"
-                                                  t-attf-style="background: {{pop.primary_color or '#073b2a'}}">
-                                                <img t-if="pop.logo"
-                                                     t-att-src="'data:image/png;base64,' + pop.logo.decode()"
-                                                     style="width:100%;height:100%;object-fit:cover;border-radius:50%"/>
-                                                <t t-else="" t-esc="pop.short_name or pop.name[:2].upper()"/>
-                                            </span>
-                                            <span class="jj-popular-chip-name" t-esc="pop.short_name or pop.name"/>
-                                        </button>
-                                    </t>
-                                </div>
-                            </div>
-                            <!-- FEDERATION_ACCORDION: accordion browse by 27 federations.
-                                 Replaces pills + dropdown. Global search filters fed + club. -->
+                            <!-- FEDERATION_CLUB_PICKER: searchable catalogue
+                                 grouped by Brazilian football federation. -->
                             <t t-set="current_pref" t-value="prefs_by_category.get(cat.id)"/>
                             <t t-set="current_club" t-value="current_pref.casino_club_id if current_pref else False"/>
                             <div class="jj-club-picker">
                                 <input type="hidden" class="jj-club-value"
                                        t-att-name="'club_' + str(cat.id)"
                                        t-att-value="current_club.id if current_club else ''"/>
-                                <!-- selected-club card (elevated, accent border, big hex badge) -->
-                                <t t-if="current_club">
-                                <div class="jj-club-selected-bar"
-                                     t-attf-style="--jj-accent: {{current_club.primary_color or '#073b2a'}}">
-                                    <div class="jj-club-selected-left">
-                                        <span class="jj-club-selected-badge"
-                                              t-attf-style="background: {{current_club.primary_color or '#073b2a'}}">
-                                            <img t-if="current_club.logo"
-                                                 t-att-src="'data:image/png;base64,' + current_club.logo.decode()"
-                                                 style="width:100%;height:100%;object-fit:cover"/>
-                                            <t t-else="" t-esc="current_club.short_name or current_club.name[:2].upper()"/>
-                                        </span>
-                                        <div class="jj-club-selected-info">
-                                            <span class="jj-club-selected-label">Clube selecionado</span>
-                                            <span class="jj-club-selected-name" t-esc="current_club.name"/>
-                                        </div>
-                                    </div>
+                                <div class="jj-club-search-wrap">
+                                    <i class="fa fa-search jj-club-search-icon"/>
+                                    <input type="text" class="jj-club-search"
+                                           autocomplete="off"
+                                           placeholder="Buscar seu clube..."
+                                           t-att-value="current_club.name if current_club else ''"/>
                                     <button type="button" class="jj-club-clear"
                                             aria-label="Limpar seleção">×</button>
                                 </div>
-                                </t>
-                                <!-- Sticky global search bar (moved outside accordion for predictive dropdown) -->
-                                    <div class="jj-accordion-search-wrap">
-                                        <i class="fa fa-search jj-accordion-search-icon"/>
-                                        <input type="text" class="jj-accordion-search"
-                                               autocomplete="off"
-                                               placeholder="Digite o nome do clube..."/>
-                                        <!-- Predictive dropdown: populated by JS at runtime -->
-                                    </div>
-                                <!-- Federation accordion -->
-                                <div class="jj-federation-accordion">
-                                    
+                                <div class="jj-club-dropdown">
                                     <t t-foreach="federations" t-as="fed">
                                         <t t-set="active_clubs" t-value="fed.club_ids.filtered(lambda c: c.active).sorted(key=lambda c: (c.sequence, c.name))"/>
-                                        <t t-set="fed_accent" t-value="active_clubs[0].primary_color if active_clubs else '#073b2a'"/>
-                                        <div class="jj-accordion-item"
-                                             t-att-data-fed="str(fed.id)"
-                                             t-if="active_clubs">
-                                            <button type="button" class="jj-accordion-header"
-                                                    t-att-data-fed-search="fed.name.lower()"
-                                                    t-att-aria-label="'Expandir ' + (fed.name or '')"
-                                                    t-attf-data-count="{{len(active_clubs)}}"
-                                                    t-attf-style="border-left: 3px solid {{fed_accent}}">
-                                                <img t-if="fed.logo"
-                                                     t-att-src="'data:image/png;base64,' + fed.logo.decode()"
-                                                     class="jj-accordion-header-logo"
-                                                     width="22" height="22"
-                                                     style="width:22px;height:22px;object-fit:contain;border-radius:50%"/>
-                                                <span class="jj-accordion-header-name" t-esc="fed.name"/>
-                                                <span class="jj-accordion-header-count">
-                                                    <i class="fa fa-users"/>
-                                                    <t t-esc="str(len(active_clubs))"/>
-                                                    <small class="jj-count-label">clubes</small>
-                                                </span>
-                                                <i class="fa fa-chevron-down jj-accordion-chevron"/>
-                                            </button>
-                                            <div class="jj-accordion-body" style="display:none">
-                                                <t t-foreach="active_clubs" t-as="club">
-                                                    <button type="button" class="jj-club-option"
-                                                            t-att-data-id="club.id"
-                                                            t-att-data-name="club.name"
-                                                            t-att-data-search="(club.name + ' ' + (club.short_name or '') + ' ' + fed.name).lower()"
-                                                            t-attf-style="--club-accent: {{club.primary_color or '#31df72'}}">
-                                                        <span class="jj-club-option-badge"
-                                                              t-attf-style="background: {{club.primary_color or '#073b2a'}}">
-                                                            <img t-if="club.logo"
-                                                                 t-att-src="'data:image/png;base64,' + club.logo.decode()"
-                                                                 style="width:100%;height:100%;object-fit:cover;border-radius:50%"/>
-                                                            <t t-else="" t-esc="club.short_name or club.name[:2].upper()"/>
-                                                        </span>
-                                                        <span class="jj-club-option-copy">
-                                                            <strong t-esc="club.name"/>
-                                                            <small t-esc="club.short_name or fed.name"/>
-                                                        </span>
-                                                        <i class="fa fa-check jj-club-option-check"/>
-                                                    </button>
-                                                </t>
-                                            </div>
+                                        <div class="jj-club-group" t-if="active_clubs">
+                                            <div class="jj-club-group-title" t-esc="fed.name"/>
+                                            <t t-foreach="active_clubs" t-as="club">
+                                                <button type="button" class="jj-club-option"
+                                                        t-att-data-id="club.id"
+                                                        t-att-data-name="club.name"
+                                                        t-att-data-search="(club.name + ' ' + (club.short_name or '') + ' ' + fed.name).lower()">
+                                                    <span class="jj-club-option-badge"
+                                                          t-attf-style="background: {{club.primary_color or '#073b2a'}}">
+                                                        <img t-if="club.logo"
+                                                             t-att-src="'data:image/png;base64,' + club.logo.decode()"
+                                                             style="width:100%;height:100%;object-fit:cover;border-radius:50%"/>
+                                                        <t t-else="" t-esc="club.short_name or club.name[:2].upper()"/>
+                                                    </span>
+                                                    <span class="jj-club-option-copy">
+                                                        <strong t-esc="club.name"/>
+                                                        <small t-esc="club.short_name or fed.name"/>
+                                                    </span>
+                                                    <i class="fa fa-check jj-club-option-check"/>
+                                                </button>
+                                            </t>
                                         </div>
                                     </t>
-                                    <div class="jj-club-empty" hidden="1">
-                                        <svg class="jj-empty-icon" viewBox="0 0 64 64" width="48" height="48">
-                                            <circle cx="32" cy="32" r="30" fill="none" stroke="rgba(255,189,56,0.25)" stroke-width="2"/>
-                                            <path d="M32 2 C14 2, 2 16, 2 32 C2 48, 14 62, 32 62 C50 62, 62 48, 62 32 C62 16, 50 2, 32 2z" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="1" stroke-dasharray="4 4"/>
-                                            <circle cx="32" cy="32" r="5" fill="rgba(49,223,114,0.3)"/>
-                                        </svg>
-                                        <p class="jj-empty-title">Nenhum clube encontrado</p>
-                                        <p class="jj-empty-hint">Tente buscar por outro nome ou federação</p>
-                                    </div>
+                                    <div class="jj-club-empty">Nenhum clube encontrado.</div>
                                 </div>
                             </div>
                             <t t-if="cat.require_selection">
@@ -417,7 +306,7 @@
                 </t>
 
                 <div class="jj-form-actions" t-if="categories">
-                    <a href="/my/club-support" class="jj-btn jj-btn-primary">
+                    <a href="/my/club-support" class="jj-btn jj-btn-outline">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
                         Voltar
                     </a>
@@ -442,8 +331,8 @@
                 <div class="jj-confirmation-icon">
                     <div class="jj-confirmation-icon-inner">✓</div>
                 </div>
-                <h3>Bem-vindo, <t t-esc="partner.name or 'Torcedor'"/>! Seu cadastro foi concluído 🎉</h3>
-                <p>Tudo pronto! Seus clubes foram registrados com sucesso e suas apostas agora apoiam quem você escolheu.</p>
+                <h3>Cadastro concluído!</h3>
+                <p>Seus clubes foram registrados com sucesso. Suas apostas agora apoiam quem você escolheu.</p>
 
                 <div class="jj-confirmation-summary" t-if="selected_clubs">
                     <h4>Seus clubes</h4>
@@ -654,7 +543,7 @@
                  header and full-page shell. -->
             <t t-set="no_header" t-value="True"/>
             <t t-set="no_footer" t-value="True"/>
-            <t t-set="title" t-value="'JogaJunto — Cadastro'"/>
+            <t t-set="additional_title" t-value="''"/>
             <div class="jj-wrapper">
                 <div class="jj-split">
                     <!-- Brand Panel -->

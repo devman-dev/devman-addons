@@ -910,20 +910,3 @@
     .jj-mc-pagination { flex-direction: column; gap: 14px; }
     .jj-mc-stat-balance { font-size: 24px; }
 }
-/* ═══════════════════════════════════════════════════════
-   WEBSITE NAVBAR — White-to-Gold Gradient
-   ═══════════════════════════════════════════════════════ */
-#wrapwrap > header#top {
-    background: linear-gradient(180deg, #FFFFFF 0%, #00FF00 100%) !important;
-}
-#wrapwrap > header#top .navbar {
-    background: transparent !important;
-}
-
-/* ═══════════════════════════════════════════════════════
-   NAVBAR — Administrator button white text in normal state
-   Uses :not(:hover) so the inherited :hover color cascades through unchanged.
-   ═══════════════════════════════════════════════════════ */
-header .o_no_autohide_item > a.nav-link:not(:hover) span.me-auto.small {
-    color: #FFFFFF !important;
-}

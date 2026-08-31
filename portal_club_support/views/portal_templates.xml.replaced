@@ -1,0 +1,489 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+<data>
+
+    <!-- ============================================================
+     JJ GAMES/SHOP SECTION — Betano v2
+     Black/white/green only, interactive buttons
+     ============================================================ -->
+
+    <!-- Shop/Games Hero Banner -->
+    <template id="jj_shop_hero" name="JogaJunto — Shop Hero">
+        <div style="text-align:center; padding:60px 0 40px;">
+            <div class="jj-section-eyebrow">Jogos disponíveis</div>
+            <h2 style="font-size:36px;font-weight:800;color:#fff;margin-bottom:8px;letter-spacing:-0.5px;">
+                Encontre seu jogo
+            </h2>
+            <p style="font-size:16px;color:#999;max-width:480px;margin:0 auto;">
+                Escolha entre centenas de jogos e apoie seu clube do coração
+            </p>
+        </div>
+    </template>
+
+    <!-- ============================================================
+         HOW-TO-BET GAMES BAR — Betano-style info strip
+         ============================================================ -->
+    <template id="jj_shop_howto" name="JogaJunto — How To Bet Bar">
+        <div style="background:#0d0d0d; border-top:1px solid #222; border-bottom:1px solid #222; padding:20px 0; margin-bottom:40px;">
+            <div class="container">
+                <div style="display:flex; gap:32px; align-items:center; justify-content:center; flex-wrap:wrap;">
+                    <div style="display:flex;align-items:center;gap:10px;color:#999;font-size:13px;font-weight:500;">
+                        <span style="width:28px;height:28px;background:#00c853;color:#000;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;">1</span>
+                        Escolha o jogo
+                    </div>
+                    <div style="color:#333;">→</div>
+                    <div style="display:flex;align-items:center;gap:10px;color:#999;font-size:13px;font-weight:500;">
+                        <span style="width:28px;height:28px;background:#00c853;color:#000;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;">2</span>
+                        Faça sua aposta
+                    </div>
+                    <div style="color:#333;">→</div>
+                    <div style="display:flex;align-items:center;gap:10px;color:#999;font-size:13px;font-weight:500;">
+                        <span style="width:28px;height:28px;background:#00c853;color:#000;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;">3</span>
+                        Apoie seu clube
+                    </div>
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <!-- ============================================================
+         GAME CARD OVERRIDE — inject custom card markup
+         This is used when Odoo renders individual products
+         ============================================================ -->
+
+    <!-- Game card with Betano-style badges and interactive button -->
+    <template id="jj_game_card" name="JogaJunto — Game Card">
+        <div class="jj-game-card">
+            <!-- Badge -->
+            <div style="position:absolute;top:12px;left:12px;z-index:2;">
+                <span style="background:#00c853;color:#000;font-size:11px;font-weight:800;padding:4px 10px;border-radius:4px;text-transform:uppercase;letter-spacing:0.5px;">
+                    Destaque
+                </span>
+            </div>
+
+            <!-- Image -->
+            <div style="aspect-ratio:3/4;background:#0a0a0a;overflow:hidden;position:relative;">
+                <img t-att-src="product.image_1920 and '/web/image/product.product/' + str(product.id) + '/image_1920' or '/website_jogajunto/static/img/placeholder.png'"
+                     t-att-alt="product.name"
+                     style="width:100%;height:100%;object-fit:cover;transition:transform 0.3s ease;"
+                     loading="lazy"/>
+                <!-- Hover overlay with play button -->
+                <div style="position:absolute;inset:0;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity 0.25s ease;">
+                    <div style="width:52px;height:52px;background:#00c853;border-radius:50%;display:flex;align-items:center;justify-content:center;">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="#000"><polygon points="8,5 19,12 8,19"/></svg>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Info -->
+            <div style="padding:14px 16px 16px;">
+                <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;">
+                    <span style="font-size:11px;color:#666;font-weight:500;">⚽ Futebol</span>
+                </div>
+                <h3 style="font-size:14px;font-weight:700;color:#fff;margin:0 0 8px;line-height:1.3;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">
+                    <t t-esc="product.name"/>
+                </h3>
+                <div style="display:flex;align-items:center;justify-content:space-between;">
+                    <div>
+                        <span style="font-size:20px;font-weight:800;color:#00c853;">
+                            R$ <t t-esc="'%.2f' % (product.list_price or 0)"/>
+                        </span>
+                    </div>
+                    <a t-att-href="'/shop/product/' + slug(product)"
+                       style="display:inline-flex;align-items:center;gap:6px;background:#00c853;color:#000;font-size:12px;font-weight:700;padding:8px 16px;border-radius:6px;text-decoration:none;transition:all 0.2s ease;"
+                       onmouseover="this.style.background='#00a844';this.style.transform='translateY(-1px)';this.style.boxShadow='0 4px 16px rgba(0,200,83,0.3)'"
+                       onmouseout="this.style.background='#00c853';this.style.transform='none';this.style.boxShadow='none'">
+                        Apostar
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <!-- ============================================================
+         SHOP CATEGORY NAV PILLS
+         ============================================================ -->
+    <template id="jj_shop_categories_pills" name="JogaJunto — Category Pills">
+        <div style="display:flex;gap:10px;justify-content:center;margin-bottom:40px;flex-wrap:wrap;">
+            <a href="/shop" class="jj-cat-pill active">Todos</a>
+            <a href="/shop/category/futebol-1" class="jj-cat-pill">
+                ⚽ Futebol
+            </a>
+            <a href="/shop/category/basquete-2" class="jj-cat-pill">
+                🏀 Basquete
+            </a>
+            <a href="/shop/category/e-sports-3" class="jj-cat-pill">
+                🎮 E-Sports
+            </a>
+            <a href="/shop/category/casino-4" class="jj-cat-pill">
+                🎰 Cassino
+            </a>
+        </div>
+    </template>
+
+    CLUBS PAGE — auth="user", Step 2 "Seus clubes"
+         ============================================================ -->
+    <template id="jj_clubs_page"
+              name="JogaJunto — Seus Clubes">
+        <t t-call="portal_club_support.jj_register_layout">
+            <t t-set="step" t-value="2"/>
+
+            <div class="jj-step-label-top">PASSO 2 DE 3</div>
+            <h1 class="jj-heading">Escolha sua torcida</h1>
+            <p class="jj-subheading">Selecione um clube em cada modalidade. Você pode mudar quando quiser.</p>
+
+            <form method="POST" action="/my/club-support/save" id="jj_clubs_form">
+                <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                <input type="hidden" name="redirect_to" value="done"/>
+
+                <t t-foreach="categories" t-as="cat">
+                    <div class="jj-modality-card"
+                         t-att-data-required="'1' if cat.require_selection else '0'">
+                        <div class="jj-modality-header">
+                            <div class="jj-modality-icon" t-attf-style="background: {{cat.color or '#0f3d2a'}}1a; color: {{cat.color or '#0f3d2a'}}">
+                                <!-- PROTOTYPE_UI_MATCH: render the configured
+                                     FontAwesome class instead of its text. -->
+                                <i t-att-class="'fa ' + (cat.icon or 'fa-star')"/>
+                            </div>
+                            <div class="jj-modality-info">
+                                <h4 t-esc="cat.name"/>
+                                <p t-esc="cat.description or ''"/>
+                            </div>
+                        </div>
+                        <div class="jj-modality-body">
+                            <!-- FEDERATION_CLUB_PICKER: searchable catalogue
+                                 grouped by Brazilian football federation. -->
+                            <t t-set="current_pref" t-value="prefs_by_category.get(cat.id)"/>
+                            <t t-set="current_club" t-value="current_pref.casino_club_id if current_pref else False"/>
+                            <div class="jj-club-picker">
+                                <input type="hidden" class="jj-club-value"
+                                       t-att-name="'club_' + str(cat.id)"
+                                       t-att-value="current_club.id if current_club else ''"/>
+                                <div class="jj-club-search-wrap">
+                                    <i class="fa fa-search jj-club-search-icon"/>
+                                    <input type="text" class="jj-club-search"
+                                           autocomplete="off"
+                                           placeholder="Buscar seu clube..."
+                                           t-att-value="current_club.name if current_club else ''"/>
+                                    <button type="button" class="jj-club-clear"
+                                            aria-label="Limpar seleção">×</button>
+                                </div>
+                                <div class="jj-club-dropdown">
+                                    <t t-foreach="federations" t-as="fed">
+                                        <t t-set="active_clubs" t-value="fed.club_ids.filtered(lambda c: c.active).sorted(key=lambda c: (c.sequence, c.name))"/>
+                                        <div class="jj-club-group" t-if="active_clubs">
+                                            <div class="jj-club-group-title" t-esc="fed.name"/>
+                                            <t t-foreach="active_clubs" t-as="club">
+                                                <button type="button" class="jj-club-option"
+                                                        t-att-data-id="club.id"
+                                                        t-att-data-name="club.name"
+                                                        t-att-data-search="(club.name + ' ' + (club.short_name or '') + ' ' + fed.name).lower()">
+                                                    <span class="jj-club-option-badge"
+                                                          t-attf-style="background: {{club.primary_color or '#073b2a'}}">
+                                                        <img t-if="club.logo"
+                                                             t-att-src="'data:image/png;base64,' + club.logo.decode()"
+                                                             style="width:100%;height:100%;object-fit:cover;border-radius:50%"/>
+                                                        <t t-else="" t-esc="club.short_name or club.name[:2].upper()"/>
+                                                    </span>
+                                                    <span class="jj-club-option-copy">
+                                                        <strong t-esc="club.name"/>
+                                                        <small t-esc="club.short_name or fed.name"/>
+                                                    </span>
+                                                    <i class="fa fa-check jj-club-option-check"/>
+                                                </button>
+                                            </t>
+                                        </div>
+                                    </t>
+                                    <div class="jj-club-empty">Nenhum clube encontrado.</div>
+                                </div>
+                            </div>
+                            <t t-if="cat.require_selection">
+                                <p style="font-size: 11px; color: #6b7280; margin: 8px 0 0;">
+                                    ⚠ Seleção obrigatória nesta categoria.
+                                </p>
+                            </t>
+                        </div>
+                    </div>
+                </t>
+
+                <t t-if="not categories">
+                    <div style="text-align: center; padding: 40px; color: #6b7280;">
+                        <p>Nenhuma categoria disponível no momento.</p>
+                        <a href="/my/club-support" class="jj-btn jj-btn-outline" style="margin-top: 12px; display: inline-flex;">
+                            Ir para minha conta
+                        </a>
+                    </div>
+                </t>
+
+                <t t-if="error">
+                    <div style="color: #ef4444; font-size: 13px; margin: 16px 0; padding: 8px 12px; background: #fef2f2; border-radius: 8px;">
+                        <t t-esc="error"/>
+                    </div>
+                </t>
+
+                <div class="jj-form-actions" t-if="categories">
+                    <a href="/my/club-support" class="jj-btn jj-btn-outline">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+                        Voltar
+                    </a>
+                    <button type="submit" class="jj-btn jj-btn-primary" id="jj_clubs_submit">
+                        Confirmar escolhas
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+                    </button>
+                </div>
+            </form>
+        </t>
+    </template>
+
+    <!-- ============================================================
+         CONFIRMATION PAGE — Step 3 "Pronto"
+         ============================================================ -->
+    <template id="jj_done_page"
+              name="JogaJunto — Pronto">
+        <t t-call="portal_club_support.jj_register_layout">
+            <t t-set="step" t-value="3"/>
+
+            <div class="jj-confirmation">
+                <div class="jj-confirmation-icon">
+                    <div class="jj-confirmation-icon-inner">✓</div>
+                </div>
+                <h3>Cadastro concluído!</h3>
+                <p>Seus clubes foram registrados com sucesso. Suas apostas agora apoiam quem você escolheu.</p>
+
+                <div class="jj-confirmation-summary" t-if="selected_clubs">
+                    <h4>Seus clubes</h4>
+                    <t t-foreach="selected_clubs" t-as="item">
+                        <div class="jj-confirmation-club">
+                            <div class="jj-confirmation-club-dot" t-attf-style="background: {{item.get('color', '#0f3d2a')}}"/>
+                            <div class="jj-confirmation-club-info">
+                                <span class="jj-confirmation-club-cat" t-esc="item.get('category', '')"/>
+                                <span class="jj-confirmation-club-name" t-esc="item.get('club', '')"/>
+                            </div>
+                        </div>
+                    </t>
+                </div>
+
+                <div class="jj-form-actions end" style="justify-content: center;">
+                    <a href="/my/club-support" class="jj-btn jj-btn-primary">
+                        Ir para minha conta
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+                    </a>
+                </div>
+            </div>
+
+            <div class="jj-responsible">
+                <strong>Jogue com responsabilidade.</strong> Proibido para menores de 18 anos.
+            </div>
+        </t>
+    </template>
+
+    <!-- ============================================================
+         DASHBOARD — /my/club-support
+         ============================================================ -->
+    <template id="jj_dashboard_page"
+              name="JogaJunto — Minha Conta">
+        <t t-call="portal_club_support.jj_dashboard_layout">
+            <div class="jj-dash-eyebrow">MINHA CONTA</div>
+            <h1 class="jj-dash-heading">Olá, <t t-esc="partner.name or 'Torcedor'"/>! 👋</h1>
+            <p class="jj-dash-sub">Confira os clubes que recebem seu apoio e escolha onde jogar.</p>
+
+            <!-- Impact Banner -->
+            <div class="jj-impact-banner">
+                <div class="jj-impact-icon">♥</div>
+                <div>
+                    <div class="jj-impact-eyebrow">SEU IMPACTO</div>
+                    <div class="jj-impact-title">Cada jogo seu fortalece uma paixão.</div>
+                    <div class="jj-impact-text">As comissões são direcionadas automaticamente aos clubes que você escolheu.</div>
+                </div>
+            </div>
+
+            <!-- FEATURED_GAMES: configured catalogue, always preserving three slots. -->
+            <section class="jj-featured-games-section">
+                <div class="jj-section-header">
+                    <div>
+                        <div class="jj-section-eyebrow">AGORA É HORA DE JOGAR</div>
+                        <div class="jj-section-title">Jogos para você</div>
+                    </div>
+                    <a t-if="featured_games" href="/shop" class="jj-section-action">Ver todos</a>
+                </div>
+
+                <div class="jj-featured-games-grid">
+                    <t t-foreach="featured_games" t-as="game">
+                        <article class="jj-game-card">
+                            <a t-att-href="game.website_url or '/shop'" class="jj-game-card-cover">
+                                <img t-att-src="'/web/image/product.template/%s/image_512' % game.id"
+                                     t-att-alt="game.name" loading="lazy"/>
+                            </a>
+                            <div class="jj-game-card-content">
+                                <div class="jj-game-card-kicker">JOGO EM DESTAQUE</div>
+                                <h3 class="jj-game-card-name" t-esc="game.name"/>
+                                <p class="jj-game-card-description"
+                                   t-esc="game.description_sale or 'Jogue agora e fortaleça os clubes que você escolheu.'"/>
+                                <a t-att-href="game.website_url or '/shop'" class="jj-game-card-button">
+                                    Jogar agora <span aria-hidden="true">›</span>
+                                </a>
+                            </div>
+                        </article>
+                    </t>
+                    <t t-foreach="range(featured_game_empty_slots or 0)" t-as="slot">
+                        <article class="jj-game-card jj-game-card-placeholder">
+                            <div class="jj-game-placeholder-icon">+</div>
+                            <div class="jj-game-card-kicker">EM BREVE</div>
+                            <div class="jj-game-placeholder-title">Novo jogo</div>
+                            <p>Este espaço está reservado para o próximo lançamento.</p>
+                        </article>
+                    </t>
+                </div>
+                <p class="jj-games-priority-note">
+                    Damos prioridade aos jogos selecionados, sem interromper suas escolhas de apoio.
+                </p>
+            </section>
+
+            <!-- Clubes Section -->
+            <div class="jj-section-header" t-if="clubs_data">
+                <div>
+                    <div class="jj-section-eyebrow">SUAS ESCOLHAS</div>
+                    <div class="jj-section-title">Clubes apoiados</div>
+                </div>
+                <a href="/my/club-support/clubs" class="jj-section-action">
+                    ✎ Editar escolhas
+                </a>
+            </div>
+
+            <div class="jj-club-cards" t-if="clubs_data">
+                <t t-foreach="clubs_data" t-as="item">
+                    <div class="jj-club-card">
+                        <div class="jj-club-card-category">
+                            <t t-esc="item.get('category_name', '')"/>
+                        </div>
+                        <div class="jj-club-card-body">
+                            <div class="jj-club-card-logo"
+                                 t-attf-style="background: {{item.get('club_color', '#0f3d2a')}}">
+                                <t t-if="item.get('club_logo')">
+                                    <img t-att-src="'data:image/png;base64,' + item['club_logo'].decode() if isinstance(item['club_logo'], bytes) else 'data:image/png;base64,' + str(item['club_logo'])"
+                                         t-att-alt="item.get('club_name', '')"/>
+                                </t>
+                                <t t-else="">
+                                    <t t-esc="(item.get('club_name', '') or '?')[:2].upper()"/>
+                                </t>
+                            </div>
+                            <div>
+                                <div class="jj-club-card-name" t-esc="item.get('club_name', '')"/>
+                                <div class="jj-club-card-status">Clube selecionado</div>
+                            </div>
+                        </div>
+                        <div class="jj-club-card-footer">
+                            <t t-if="item.get('commission_description')">
+                                <t t-esc="item.get('commission_description', '')"/>
+                            </t>
+                            <t t-else="">Comissão direcionada ao clube.</t>
+                        </div>
+                    </div>
+                </t>
+            </div>
+
+            <!-- Empty state -->
+            <div t-if="not clubs_data" class="jj-impact-banner" style="text-align: center; flex-direction: column;">
+                <div class="jj-impact-icon">⚽</div>
+                <div>
+                    <div class="jj-impact-title">Você ainda não escolheu seus clubes</div>
+                    <div class="jj-impact-text" style="margin-top: 4px;">Escolha quem apoiar em cada modalidade e comece a fazer a diferença.</div>
+                    <a href="/my/club-support/clubs" class="jj-btn jj-btn-lime" style="margin-top: 16px; display: inline-flex;">
+                        Escolher clubes
+                    </a>
+                </div>
+            </div>
+
+            <!-- Dados Pessoais -->
+            <div class="jj-section-header" style="margin-top: 40px;">
+                <div>
+                    <div class="jj-section-eyebrow">DADOS PESSOAIS</div>
+                    <div class="jj-section-title">Seu cadastro</div>
+                </div>
+                <a href="/my/club-support/register" class="jj-section-action">Editar dados</a>
+            </div>
+
+            <div class="jj-data-card">
+                <div class="jj-data-grid">
+                    <div>
+                        <div class="jj-data-item-label">Nome</div>
+                        <div class="jj-data-item-value" t-esc="partner.name or '—'"/>
+                    </div>
+                    <div>
+                        <div class="jj-data-item-label">E-mail</div>
+                        <div class="jj-data-item-value" t-esc="partner.email or '—'"/>
+                    </div>
+                    <div>
+                        <div class="jj-data-item-label">CPF</div>
+                        <div class="jj-data-item-value">
+                            <t t-if="partner.l10n_br_cpf">
+                                <t t-esc="partner.l10n_br_cpf[:3] + '.***.***-**' if len(partner.l10n_br_cpf) >= 3 else partner.l10n_br_cpf"/>
+                            </t>
+                            <t t-else="">—</t>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="jj-data-item-label">Nascimento</div>
+                        <div class="jj-data-item-value">
+                            <t t-if="partner.birth_date">
+                                <t t-esc="partner.birth_date.strftime('%d/%m/%Y')"/>
+                            </t>
+                            <t t-else="">—</t>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="jj-responsible">
+                <strong>Jogue com responsabilidade.</strong> Proibido para menores de 18 anos.
+            </div>
+
+            <!-- Toast -->
+            <div id="jj_toast" class="jj-toast" t-if="success">
+                <div class="jj-toast-icon">✓</div>
+                <t t-esc="success_message or 'Cadastro concluído com sucesso!'"/>
+            </div>
+        </t>
+    </template>
+
+    <!-- ============================================================
+         LAYOUT TEMPLATES
+         ============================================================ -->
+
+    <!-- Split-screen layout (register + clubs) -->
+    
+
+    <!-- Dashboard layout -->
+    
+
+    <!-- ============================================================
+         /MY PORTAL ENTRY OVERRIDE
+         ============================================================ -->
+    <template id="jj_my_entry"
+              inherit_id="portal.portal_my_home"
+              name="JogaJunto /my entry">
+        <xpath expr="//div[hasclass('o_portal_my_home')]" position="inside">
+            <t t-set="pref_count" t-value="0"/>
+            <t t-if="request.env.user.partner_id">
+                <t t-set="pref_count"
+                   t-value="request.env['club.support.preference'].sudo().search_count([
+                       ('partner_id', '=', request.env.user.partner_id.id),
+                       ('active', '=', True)
+                   ])"/>
+            </t>
+            <div class="o_portal_my_home_item"
+                 style="border-left-color: #0a2e1f;">
+                <a href="/my/club-support">
+                    <span class="o_portal_my_home_item_badge" t-esc="pref_count"/>
+                    <span class="o_portal_my_home_item_text">
+                        <strong>Clubes Apoiados</strong><br/>
+                        <small>Gerencie os clubes que recebem seu apoio.</small>
+                    </span>
+                </a>
+            </div>
+        </xpath>
+    </template>
+
+</data>
+</odoo>

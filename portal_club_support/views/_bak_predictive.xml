@@ -322,17 +322,15 @@
                                             aria-label="Limpar seleção">×</button>
                                 </div>
                                 </t>
-                                <!-- Sticky global search bar (moved outside accordion for predictive dropdown) -->
+                                <!-- Federation accordion -->
+                                <div class="jj-federation-accordion">
+                                    <!-- Sticky global search bar inside accordion -->
                                     <div class="jj-accordion-search-wrap">
                                         <i class="fa fa-search jj-accordion-search-icon"/>
                                         <input type="text" class="jj-accordion-search"
                                                autocomplete="off"
-                                               placeholder="Digite o nome do clube..."/>
-                                        <!-- Predictive dropdown: populated by JS at runtime -->
+                                               placeholder="Buscar federação ou clube..."/>
                                     </div>
-                                <!-- Federation accordion -->
-                                <div class="jj-federation-accordion">
-                                    
                                     <t t-foreach="federations" t-as="fed">
                                         <t t-set="active_clubs" t-value="fed.club_ids.filtered(lambda c: c.active).sorted(key=lambda c: (c.sequence, c.name))"/>
                                         <t t-set="fed_accent" t-value="active_clubs[0].primary_color if active_clubs else '#073b2a'"/>
@@ -417,7 +415,7 @@
                 </t>
 
                 <div class="jj-form-actions" t-if="categories">
-                    <a href="/my/club-support" class="jj-btn jj-btn-primary">
+                    <a href="/my/club-support" class="jj-btn jj-btn-outline">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
                         Voltar
                     </a>
@@ -442,8 +440,8 @@
                 <div class="jj-confirmation-icon">
                     <div class="jj-confirmation-icon-inner">✓</div>
                 </div>
-                <h3>Bem-vindo, <t t-esc="partner.name or 'Torcedor'"/>! Seu cadastro foi concluído 🎉</h3>
-                <p>Tudo pronto! Seus clubes foram registrados com sucesso e suas apostas agora apoiam quem você escolheu.</p>
+                <h3>Cadastro concluído!</h3>
+                <p>Seus clubes foram registrados com sucesso. Suas apostas agora apoiam quem você escolheu.</p>
 
                 <div class="jj-confirmation-summary" t-if="selected_clubs">
                     <h4>Seus clubes</h4>

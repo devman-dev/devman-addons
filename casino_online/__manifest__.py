@@ -6,11 +6,7 @@
     'license': 'LGPL-3',
     'author': 'Gerlin Matos',
     'website': 'https://github.com/gerlinmatos',
-    'description': """
-        Casino Online Module
-        ===================
-        ...
-    """,
+    'description': 'Online casino platform with eCommerce integration.',
     'images': ['static/description/icon.png'],
     'depends': ['website_sale', 'portal', 'account', 'payment', 'web', 'auth_signup'],
     'data': [

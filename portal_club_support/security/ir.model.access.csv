@@ -2,9 +2,6 @@ id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
 access_game_category_admin,game.category.admin,model_club_support_game_category,base.group_system,1,1,1,1
 access_game_category_user,game.category.user,model_club_support_game_category,base.group_user,1,0,0,0
 access_game_category_portal,game.category.portal,model_club_support_game_category,base.group_portal,1,0,0,0
-access_club_admin,club.admin,model_club_support_club,base.group_system,1,1,1,1
-access_club_user,club.user,model_club_support_club,base.group_user,1,0,0,0
-access_club_portal,club.portal,model_club_support_club,base.group_portal,1,0,0,0
 access_casino_club_portal,casino.club.portal,model_casino_club,base.group_portal,1,0,0,0
 access_preference_admin,preference.admin,model_club_support_preference,base.group_system,1,1,1,1
 access_preference_user,preference.user,model_club_support_preference,base.group_user,1,1,1,1

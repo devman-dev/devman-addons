@@ -13,7 +13,7 @@
                     .jj-mc-sidebar{background:#F7F5F0!important;border-color:rgba(0,0,0,0.08)!important}
                     /* Cards: keep dark green, white text */
                     .jj-mc-card,.jj-mc-stat-card,.jj-mc-action-card{background:#0F1F17!important;border-color:rgba(255,255,255,0.14)!important}
-                    .jj-mc-card,.jj-mc-stat-card,.jj-mc-action-card,.jj-mc-action-card span{color:#F7F5F0!important}
+                    .jj-mc-action-card,.jj-mc-action-card span{color:#F7F5F0!important}
                     .jj-mc-card-title{color:#FFFFFF!important}
                     .jj-mc-panel-title{color:#1A1D1B!important}
                     .jj-mc-stat-label{color:rgba(255,255,255,0.85)!important}
@@ -42,7 +42,6 @@
                     .jj-mc-btn-withdraw:hover{border-color:#178A4E!important;background:rgba(27,122,74,0.08)!important}
                     .jj-mc-link{color:#1B7A4A!important;text-decoration:underline!important}
                     /* Link cards inside dark cards */
-                    .jj-mc-link-card,.jj-mc-link-card-body{background:transparent!important}
                     .jj-mc-link-card-title{color:#FFFFFF!important}
                     .jj-mc-link-card-desc{color:rgba(255,255,255,0.8)!important}
                     .jj-mc-link-card-icon{background:rgba(255,255,255,0.1)!important;color:#FFFFFF!important}
@@ -67,7 +66,7 @@
                         </svg>
                     </button>
                     <span class="jj-mc-mobile-title">Minha Conta</span>
-                    <span class="jj-mc-mobile-balance" t-esc="(currency.symbol or '') + ' ' + ('{:,.2f}'.format(abs(saldo_final) if saldo_final else 0)).replace(',','X').replace('.',',').replace('X','.')"/>
+                    <span class="jj-mc-mobile-balance" t-esc="currency.symbol + ' ' + ('{:,.2f}'.format(abs(saldo_final) if saldo_final else 0)).replace(',','X').replace('.',',').replace('X','.')"/>
                 </header>
 
                 <!-- Overlay for mobile sidebar -->
@@ -838,7 +837,6 @@
                 </nav>
 
             </div>
-<script>if(!window.location.hash)window.location.hash="visao-geral";</script>
 
         </t>
     </template>

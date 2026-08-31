@@ -46,13 +46,6 @@ class GameCategory(models.Model):
         translate=True,
         help="Texto explicativo de cómo funciona la comisión para esta categoría.",
     )
-    club_ids = fields.Many2many(
-        comodel_name="club.support.club",
-        relation="game_category_club_rel",
-        column1="category_id",
-        column2="club_id",
-        string="Clubes Disponibles",
-    )
     require_selection = fields.Boolean(
         string="Selección Obligatoria",
         default=True,

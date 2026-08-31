@@ -67,7 +67,7 @@
                         </svg>
                     </button>
                     <span class="jj-mc-mobile-title">Minha Conta</span>
-                    <span class="jj-mc-mobile-balance" t-esc="(currency.symbol or '') + ' ' + ('{:,.2f}'.format(abs(saldo_final) if saldo_final else 0)).replace(',','X').replace('.',',').replace('X','.')"/>
+                    <span class="jj-mc-mobile-balance" t-esc="currency.symbol + ' ' + ('{:,.2f}'.format(abs(saldo_final) if saldo_final else 0)).replace(',','X').replace('.',',').replace('X','.')"/>
                 </header>
 
                 <!-- Overlay for mobile sidebar -->
@@ -838,7 +838,6 @@
                 </nav>
 
             </div>
-<script>if(!window.location.hash)window.location.hash="visao-geral";</script>
 
         </t>
     </template>

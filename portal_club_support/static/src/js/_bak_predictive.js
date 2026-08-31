@@ -1,12 +1,3 @@
-
-/* GOOGLE FONTS — Bebas Neue + Montserrat */
-(function loadGoogleFonts() {
-    var l = document.createElement('link');
-    l.rel = 'stylesheet';
-    l.href = 'https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Montserrat:wght@400;500;600;700;800&display=swap';
-    document.head.appendChild(l);
-})();
-
 /* ============================================================
    JogaJunto — Portal Club Support JavaScript
    Odoo 18 native — no frameworks
@@ -191,7 +182,6 @@
 
             /* ----- global search (fed + club) ----- */
             search.addEventListener("input", function () {
-                return; // old-filter-disabled (predictive handles search now)
                 var query = search.value.trim().toLowerCase();
                 var anyVisible = false;
 
@@ -304,7 +294,6 @@
 
             /* ----- LOTE 2+1: auto-scroll to selected on search focus ----- */
             search.addEventListener("focus", function () {
-                return; // old-filter-disabled
                 var selId = hidden.value;
                 if (selId) {
                     var selOption = picker.querySelector('.jj-club-option[data-id="' + selId + '"]');
@@ -326,164 +315,6 @@
                 }
             });
 
-/* ============================================================
-               PREDICTIVE SEARCH — FIFA/PES style instant dropdown
-               Created as sibling of .jj-federation-accordion (outside, avoids clipping).
-               Original accordion filter is preserved untouched.
-            ============================================================ */
-
-            /* Create predictive dropdown outside the accordion */
-            var predDropdown = document.createElement("div");
-            predDropdown.className = "jj-predictive-dropdown";
-            search.parentNode.appendChild(predDropdown);
-
-            var predActiveIdx = -1;
-            var predResults = [];
-
-            function showPredictive(query) {
-                if (!query || query.length < 1) {
-                    predDropdown.classList.remove("show");
-                    predActiveIdx = -1;
-                    predResults = [];
-                    return;
-                }
-                var q = query.toLowerCase();
-
-                /* Collect ALL matching clubs from all options */
-                predResults = [];
-                options.forEach(function (opt) {
-                    var name = (opt.__jjName || "").toLowerCase();
-                    var fed = (opt.__jjFed || "").toLowerCase();
-                    var searchText = (opt.dataset.search || "").toLowerCase();
-                    if (name.indexOf(q) >= 0 || fed.indexOf(q) >= 0 || searchText.indexOf(q) >= 0) {
-                        predResults.push(opt);
-                    }
-                });
-
-                /* Limit to 10 */
-                predResults = predResults.slice(0, 10);
-
-                if (predResults.length === 0) {
-                    predDropdown.innerHTML = '<div class="jj-predictive-empty">Nenhum clube encontrado</div>';
-                } else {
-                    var html = predResults.map(function (opt, i) {
-                        var badgeEl = opt.querySelector(".jj-club-option-badge");
-                        var badgeHTML = badgeEl ? badgeEl.outerHTML : '<span class="jj-predictive-badge">??</span>';
-                        var accent = opt.style.getPropertyValue("--club-accent") || "#31df72";
-                        var name = opt.__jjName || "";
-                        var fed = opt.__jjFed || "";
-
-                        /* Highlight matching text */
-                        var hlName = name;
-                        var hlFed = fed;
-                        if (q) {
-                            var re = new RegExp("(" + q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ")", "gi");
-                            hlName = name.replace(re, '<mark class="jj-club-hl">$1</mark>');
-                            hlFed = fed.replace(re, '<mark class="jj-club-hl">$1</mark>');
-                        }
-
-                        return '<div class="jj-predictive-item" data-idx="' + i + '"' +
-                            ' style="--club-accent:' + accent + '"' +
-                            ' data-club-id="' + (opt.dataset.id || "") + '">' +
-                            '<span class="jj-predictive-badge" style="background:' + accent + '">' + badgeHTML + '</span>' +
-                            '<span class="jj-predictive-copy">' +
-                            '<strong>' + hlName + '</strong>' +
-                            '<small>' + hlFed + '</small>' +
-                            '</span>' +
-                            '</div>';
-                    }).join("");
-
-                    html += '<div class="jj-predictive-hint">' +
-                        '<kbd>↑↓</kbd> navegar &nbsp; <kbd>Enter</kbd> selecionar &nbsp; <kbd>Esc</kbd> fechar' +
-                        '</div>';
-
-                    predDropdown.innerHTML = html;
-                }
-
-                predDropdown.classList.add("show");
-                predActiveIdx = -1;
-            }
-
-            /* Click on predictive item */
-            predDropdown.addEventListener("click", function (e) {
-                var item = e.target.closest(".jj-predictive-item");
-                if (!item) return;
-                var idx = parseInt(item.dataset.idx);
-                if (idx >= 0 && idx < predResults.length) {
-                    var option = predResults[idx];
-                    selectOption(option);
-                    predDropdown.classList.remove("show");
-                    predActiveIdx = -1;
-                    search.blur();
-                }
-            });
-
-            /* Keyboard navigation */
-            search.addEventListener("keydown", function (e) {
-                if (!predDropdown.classList.contains("show")) return;
-                var items = predDropdown.querySelectorAll(".jj-predictive-item");
-
-                if (e.key === "ArrowDown") {
-                    e.preventDefault();
-                    predActiveIdx = Math.min(predActiveIdx + 1, items.length - 1);
-                    updatePredActive(items);
-                } else if (e.key === "ArrowUp") {
-                    e.preventDefault();
-                    predActiveIdx = Math.max(predActiveIdx - 1, -1);
-                    updatePredActive(items);
-                } else if (e.key === "Enter") {
-                    if (predActiveIdx >= 0 && predActiveIdx < predResults.length) {
-                        e.preventDefault();
-                        selectOption(predResults[predActiveIdx]);
-                        predDropdown.classList.remove("show");
-                        predActiveIdx = -1;
-                        search.blur();
-                    }
-                } else if (e.key === "Escape") {
-                    predDropdown.classList.remove("show");
-                    predActiveIdx = -1;
-                }
-            });
-
-            function updatePredActive(items) {
-                items.forEach(function (item, i) {
-                    if (i === predActiveIdx) {
-                        item.classList.add("active");
-                        item.scrollIntoView({ block: "nearest" });
-                    } else {
-                        item.classList.remove("active");
-                    }
-                });
-            }
-
-            /* Close dropdown on click outside */
-            document.addEventListener("click", function (e) {
-                if (!picker.contains(e.target)) {
-                    predDropdown.classList.remove("show");
-                    predActiveIdx = -1;
-                }
-            });
-
-            /* Hook: on search input, ALSO show predictive (original filter still runs) */
-            search.addEventListener("input", function () {
-                var query = search.value.trim();
-                showPredictive(query);
-            });
-
-            /* Close predictive on blur (but delay so click registers) */
-            search.addEventListener("blur", function () {
-                setTimeout(function () {
-                    predDropdown.classList.remove("show");
-                    predActiveIdx = -1;
-                }, 200);
-            });
-
-            /* Close predictive on focus (it opens via input event) */
-            search.addEventListener("focus", function () {
-                return; // old-filter-disabled
-                var query = search.value.trim();
-                if (query) showPredictive(query);
-            });
             /* ----- LOTE 2+1: TUS CLUBES chips ----- */
             var modalityBody = picker.closest(".jj-modality-body");
             if (modalityBody) {

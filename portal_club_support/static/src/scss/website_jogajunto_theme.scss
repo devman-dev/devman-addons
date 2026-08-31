@@ -62,7 +62,7 @@
 #wrapwrap header.o_top_fixed_element,
 #wrapwrap .o_header_standard,
 #wrapwrap nav.navbar:not(.jj-navbar) {
-  background: rgba(0,0,0,0.92) !important;
+  background: linear-gradient(180deg, #FFFFFF 0%, #00FF00 100%) !important;
   backdrop-filter: blur(20px) !important;
   -webkit-backdrop-filter: blur(20px) !important;
   border-bottom: 1px solid rgba(0,200,83,0.15) !important;

@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <!-- Menú principal en Configuración (o independiente) -->
     <menuitem
         id="menu_club_support_root"
         name="JogaJunto"
@@ -10,30 +9,23 @@
 
     <menuitem
         id="menu_club_support_config"
-        name="Configuración"
+        name="Configuracion"
         parent="menu_club_support_root"
         sequence="10"
     />
 
     <menuitem
         id="menu_game_category"
-        name="Categorías de Juego"
+        name="Categorias de Juego"
         parent="menu_club_support_config"
         action="action_game_category"
         sequence="10"
     />
 
-    <menuitem
-        id="menu_club"
-        name="Clubes"
-        parent="menu_club_support_config"
-        action="action_club"
-        sequence="20"
-    />
-
+    <!-- menu_club disabled: action_club not defined -->
     <menuitem
         id="menu_preference"
-        name="Preferencias de Usuarios"
+        name="Preferencias"
         parent="menu_club_support_root"
         action="action_preference"
         sequence="20"

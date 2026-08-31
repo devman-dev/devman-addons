@@ -1,30 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <!-- Extiende el formulario de casino.club para mostrar el campo logo/escudo -->
-
-    <record id="view_casino_club_form_inherit" model="ir.ui.view">
-        <field name="name">casino.club.form.inherit.logo</field>
+    <!-- Form view for casino.club with logo field -->
+    <record id="view_casino_club_form_logo" model="ir.ui.view">
+        <field name="name">casino.club.form.logo</field>
         <field name="model">casino.club</field>
-        <field name="inherit_id" ref="casino_federacion_club.view_casino_club_form"/>
         <field name="arch" type="xml">
-            <xpath expr="//sheet//group[1]" position="inside">
-                <group string="Escudo" colspan="2">
-                    <field name="logo" widget="image"
-                           options='{"preview_image": "logo"}'/>
-                </group>
-            </xpath>
+            <form>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="name"/>
+                            <field name="logo" widget="image"
+                                   options="{preview_image: logo}"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
         </field>
     </record>
-
-    <record id="view_casino_club_tree_inherit" model="ir.ui.view">
-        <field name="name">casino.club.tree.inherit.logo</field>
-        <field name="model">casino.club</field>
-        <field name="inherit_id" ref="casino_federacion_club.view_casino_club_tree"/>
-        <field name="arch" type="xml">
-            <xpath expr="//field[@name='name']" position="before">
-                <field name="logo" widget="image" class="oe-avatar"/>
-            </xpath>
-        </field>
-    </record>
-
 </odoo>
+
