@@ -1,5 +1,9 @@
+import logging
+
 from odoo import models, api, fields, _
 from odoo.exceptions import ValidationError
+
+_logger = logging.getLogger(__name__)
 
 class ResPartner(models.Model):
     _inherit = "res.partner"
@@ -168,9 +172,15 @@ class ResPartner(models.Model):
 
     @api.model
     def cron_update_balance_game(self):
-        # Este método debe estar alineado con el método website_wallet_balance y my/home
-        # Buscar todos los partners con token
+        """Cron de auditoría — compara balance_game contra contabilidad sin escribir.
+
+        Calcula el saldo desde account.move.line y lo compara contra
+        partner.balance_game. Si hay diferencias, registra un warning
+        pero NO modifica ningún saldo.
+        """
         partners = self.env['res.partner'].sudo().search([('token', '!=', False)])
+        total_checked = 0
+        total_mismatches = 0
         for partner in partners:
             company = partner.company_id or self.env.company
             domain = [
@@ -180,16 +190,29 @@ class ResPartner(models.Model):
                 ('parent_state', 'in', ['draft', 'posted']),
             ]
 
-            # Filtrar solo movimientos del journal de custodia si está configurado
-            # if company.casino_custodia_journal_id:
-            #     domain.append(('move_id.journal_id', '=', company.casino_custodia_journal_id.id))    
-            
             lines = self.env['account.move.line'].sudo().search(domain)
             total = sum(
                 float((l.amount_signed if l.amount_signed is not None else l.balance) or 0.0)
                 for l in lines
             )
-            partner.balance_game = round(total, 2)
+            accounting_balance = round(total, 2)
+            current_balance = partner.balance_game
+
+            total_checked += 1
+            if accounting_balance != current_balance:
+                total_mismatches += 1
+                _logger.warning(
+                    "CASINO AUDIT: balance_game mismatch for partner_id=%s | "
+                    "balance_game=%.2f | accounting=%.2f | diff=%.2f",
+                    partner.id, current_balance, accounting_balance,
+                    current_balance - accounting_balance,
+                )
+
+        _logger.info(
+            "CASINO AUDIT: cron_update_balance_game completed. "
+            "Checked %d partners, %d mismatches detected.",
+            total_checked, total_mismatches,
+        )
 
     def cron_update_balance_game_RESPA(self):
         # Buscar todos los partners con token

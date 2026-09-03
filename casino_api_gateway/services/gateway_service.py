@@ -366,25 +366,25 @@ class CasinoApiGatewayService(models.AbstractModel):
         if operation_type == "stake":
             if amount > previous_balance:
                 raise CasinoApiBusinessError("insufficient_funds", "Saldo insuficiente.", 422)
-            new_balance = float(
-                (Decimal(str(previous_balance)) - Decimal(str(amount))).quantize(
-                    Decimal("0.01"),
-                    rounding=ROUND_DOWN,
-                )
-            )
             result = "in_progress" if not data.get("round_finished") else "loss"
             state = "in_progress" if not data.get("round_finished") else "finished"
         else:
-            new_balance = float(
-                (Decimal(str(previous_balance)) + Decimal(str(amount))).quantize(
-                    Decimal("0.01"),
-                    rounding=ROUND_DOWN,
-                )
-            )
             result = "win"
             state = "finished"
 
-        partner.write({"balance_game": new_balance})
+        # Delegate to centralized money.flow — single writer of balance_game
+        flow_op = 'bet' if operation_type == 'stake' else 'win'
+        tx = self.env['casino.money.flow'].new().process_operation(
+            operation_type=flow_op,
+            partner_id=partner,
+            amount=amount,
+            idempotency_key=operation.idempotency_key,
+            external_reference=data["operation_id"],
+            origin_model='casino.api.operation',
+            origin_id=operation.id,
+            note='Gateway %s via %s' % (operation_type, normalized["meta"]["provider_code"]),
+        )
+        new_balance = tx.balance_after
 
         provider_request_payload = operation.provider_request_payload()
         provider_game_id = operation.provider_game_id or provider_request_payload.get("gameId")
