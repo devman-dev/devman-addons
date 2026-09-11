@@ -177,9 +177,18 @@ class SignUpApproveController(http.Controller):
                 _logger.warning(f"No se encontró partner para usuario {user.id}")
                 return
             
-            # Agregar 1000000 de saldo inicial
-            user.balance_game = 1000000.00
-            _logger.info(f"Saldo inicial agregado al usuario {user.id}: 1000000")
+            # Agregar 1000000 de saldo inicial via money.flow
+            flow_tx = request.env['casino.money.flow'].sudo().process_operation(
+                operation_type='bonus',
+                partner_id=partner,
+                amount=1000000.00,
+                idempotency_key=f"BONUS|{approval_record.id}",
+                external_reference=str(approval_record.id),
+                origin_model='website.signup.approval',
+                origin_id=approval_record.id,
+                note=f'Bono de bienvenida para {user.nickname or user.name}',
+            )
+            _logger.info(f"Saldo inicial agregado al usuario {user.id}: 1000000 | flow_tx_id={flow_tx.id} | balance_after={flow_tx.balance_after}")
             
             # Crear asiento contable de depósito inicial
             try:

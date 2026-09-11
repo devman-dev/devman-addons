@@ -19,25 +19,72 @@
 #    If not, see <http://www.gnu.org/licenses/>.
 #
 #############################################################################
+"""
+DEPRECATED — signup.approval (legacy model)
+
+This model is replaced by res.users.approve, which now includes full
+casino player integration (wallet, agent, welcome bonus).
+
+DO NOT USE this model for new signup approvals.
+Existing records are preserved for data integrity.
+
+Migration: new signups go through res.users.approve.
+"""
+
 from odoo import fields, models
 
 
 class SignupApproval(models.Model):
-    """Store Information's of User"""
+    """DEPRECATED — Legacy signup approval.
+
+    Replaced by res.users.approve with casino player integration.
+    This model only exists to preserve existing data.
+    """
     _name = 'signup.approval'
-    _description = "Approval Request Details"
+    _description = "DEPRECATED — Signup Approval (legacy)"
 
-    login = fields.Char(string='Email', help="Login details of user")
-    name = fields.Char(string='Name', help="Name of the user")
-    approved_date = fields.Datetime(string='Approved Date', copy=False,
-                                    help="Approval date of signup request")
-    for_approval_menu = fields.Boolean(string='For Approval Menu',
-                                       help="Check the request is approved")
+    partner_id = fields.Many2one(
+        'res.partner',
+        string="Partner",
+        help="Partner for the signup request",
+    )
+    name = fields.Char(
+        string='User Name',
+        help="Name of the user",
+    )
+    email = fields.Char(
+        string='User Email',
+        help="Email of the user",
+    )
+    message = fields.Char(
+        string='Message',
+        help="Message from the user",
+    )
+    company_id = fields.Many2one(
+        'res.company',
+        string='Company',
+        help="Company to signup to",
+    )
+    phone = fields.Char(
+        string='Phone',
+        help="Phone number of the user",
+    )
+    sale_team_id = fields.Many2one(
+        'crm.team',
+        string='Sales Team',
+        help="Sales team for the signup request",
+    )
+    state = fields.Selection(
+        [
+            ('draft', 'New'),
+            ('confirm', 'Waiting Approval'),
+            ('done', 'Approved'),
+            ('refuse', 'Refused'),
+        ],
+        string='State',
+        default='draft',
+        help="Status of the signup request",
+    )
 
-    def action_approve_login(self):
-        """To approve the request from website"""
-        self.env['res.users'].create({
-            'name': self.name,
-            'login': self.login,
-        })
-        self.env.ref('base.group_user').users.ids.pop()
+    # Prevent creation of new records in this legacy model
+    active = fields.Boolean(default=True)

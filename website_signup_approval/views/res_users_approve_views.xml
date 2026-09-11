@@ -9,12 +9,14 @@
             <list>
                 <field name="name"/>
                 <field name="email"/>
-                <!-- <field name="password"/> -->
+                <field name="agent_id"/>
+                <field name="for_approval_menu" widget="badge"
+                       decoration-success="for_approval_menu == True"/>
             </list>
         </field>
     </record>
 
-<!--    Res users approve model form view-->
+    <!-- Res users approve model form view -->
     <record id="res_user_approve_view_form" model="ir.ui.view">
         <field name="name">res.users.approve.view.form</field>
         <field name="model">res.users.approve</field>
@@ -44,10 +46,36 @@
                         <group>
                             <field name="email" readonly="1"/>
                         </group>
-                        <!-- <group>
-                            <field name="password" readonly="1"/>
-                        </group> -->
                     </group>
+
+                    <!-- Casino integration: agent assignment -->
+                    <group string="Casino — Asignación de Agente" colspan="2">
+                        <group>
+                            <field name="agent_id"
+                                   string="Agente"
+                                   domain="[('is_agent', '=', True)]"
+                                   context="{'default_is_agent': True}"
+                                   attrs="{'readonly': [('hide_button', '=', True)]}"
+                                   help="Seleccionar el agente responsable de este jugador. Obligatorio antes de aprobar."/>
+                        </group>
+                    </group>
+
+                    <!-- │ Approved and created partner -->
+                    <!-- Approval result (visible after approval) -->
+                    <group string="Resultado de Aprobación"
+                           colspan="2"
+                           invisible="for_approval_menu == False">
+                        <group>
+                            <field name="partner_id" readonly="1"
+                                   string="Partner"/>
+                            <field name="wallet_id" readonly="1"
+                                   string="Wallet"/>
+                            <field name="bonus_transaction_id" readonly="1"
+                                   string="Transacción de Bono"/>
+                            <field name="approved_date" readonly="1"/>
+                        </group>
+                    </group>
+
                     <notebook>
                         <page string='Documents'>
                             <field name="attachment_ids" readonly="1">
@@ -64,7 +92,8 @@
             </form>
         </field>
     </record>
-<!--    Res users approve action-->
+
+    <!-- │ Res users approve action -->
     <record id="res_users_approve_action" model="ir.actions.act_window">
         <field name="name">Portal Approval</field>
         <field name="res_model">res.users.approve</field>
@@ -72,7 +101,8 @@
         <field name="view_mode">list,form</field>
         <field name="view_id" ref="res_user_approve_view_tree"/>
     </record>
-<!--    Res users approve menu-->
+
+    <!-- │ Res users approve menu -->
     <menuitem id="res_users_approve_menu" parent="base.menu_users"
               action="res_users_approve_action"/>
 </odoo>
