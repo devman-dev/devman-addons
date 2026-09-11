@@ -55,7 +55,6 @@
                                    string="Agente"
                                    domain="[('is_agent', '=', True)]"
                                    context="{'default_is_agent': True}"
-                                   attrs="{'readonly': [('hide_button', '=', True)]}"
                                    help="Seleccionar el agente responsable de este jugador. Obligatorio antes de aprobar."/>
                         </group>
                     </group>
