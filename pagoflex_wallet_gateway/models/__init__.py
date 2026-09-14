@@ -23,6 +23,8 @@ from . import gateway_bank_movement
 from . import gateway_bank_movement_sync_wizard
 from . import gateway_user_statement_line
 from . import gateway_user_statement_summary
+from . import gateway_user_create_subaccount_wizard
+
 from . import gateway_transfer_response_wizard
 from . import gateway_transfer_update_fecha_wizard
 from . import account_summary_report
@@ -39,3 +41,5 @@ from . import reconciliation_control
 from . import gateway_manual_transfer_wizard
 
 from . import balance_adjustment
+from . import chained_traceability_report
+from . import gateway_global_settings

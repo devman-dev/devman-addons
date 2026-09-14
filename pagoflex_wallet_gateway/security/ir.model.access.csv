@@ -95,3 +95,14 @@
 "access_pagoflex_balance_adjustment_admin","pagoflex.balance.adjustment admin","model_pagoflex_balance_adjustment","pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_admin",1,1,1,1
 "access_pagoflex_balance_adjustment_operator","pagoflex.balance.adjustment operator","model_pagoflex_balance_adjustment","pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_operator",1,1,1,0
 "access_pagoflex_balance_adjustment_auditor","pagoflex.balance.adjustment auditor","model_pagoflex_balance_adjustment","pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_auditor",1,0,0,0
+"access_pf_gateway_traceability_wizard_admin","traceability wizard admin","model_pf_gateway_chained_traceability_report_wizard","pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_admin",1,1,1,1
+"access_pf_gateway_traceability_wizard_auditor","traceability wizard auditor","model_pf_gateway_chained_traceability_report_wizard","pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_auditor",1,1,1,1
+"access_pf_gateway_traceability_audit_admin","traceability audit admin","model_pf_gateway_traceability_report_audit","pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_admin",1,0,1,0
+"access_pf_gateway_traceability_audit_auditor","traceability audit auditor","model_pf_gateway_traceability_report_audit","pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_auditor",1,0,1,0
+"access_pf_gateway_traceability_event_admin","traceability audit event admin","model_pf_gateway_traceability_report_audit_event","pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_admin",1,0,1,0
+"access_pf_gateway_traceability_event_auditor","traceability audit event auditor","model_pf_gateway_traceability_report_audit_event","pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_auditor",1,0,1,0
+"access_gateway_global_settings_admin","gateway.global.settings admin","model_gateway_global_settings","pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_admin",1,1,1,1
+"access_gateway_global_settings_operator","gateway.global.settings operator","model_gateway_global_settings","pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_operator",1,1,1,0
+"access_gateway_global_settings_auditor","gateway.global.settings auditor","model_gateway_global_settings","pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_auditor",1,0,0,0
+"access_pf_gateway_user_create_subaccount_wizard_admin","pf.gateway.user.create.subaccount.wizard admin","model_pf_gateway_user_create_subaccount_wizard","pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_admin",1,1,1,1
+"access_pf_gateway_user_create_subaccount_wizard_operator","pf.gateway.user.create.subaccount.wizard operator","model_pf_gateway_user_create_subaccount_wizard","pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_operator",1,1,1,1

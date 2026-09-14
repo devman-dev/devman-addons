@@ -7,6 +7,7 @@ class TestPfGatewayTransfer(TransactionCase):
     def setUpClass(cls):
         super().setUpClass()
         cls.BankAccount = cls.env["pf.gateway.bank.account"]
+        cls.User = cls.env["pf.gateway.user"]
         cls.Transfer = cls.env["pf.gateway.transfer"]
 
     def test_app_search_filter_uses_dashboard_app_normalization(self):
@@ -92,3 +93,46 @@ class TestPfGatewayTransfer(TransactionCase):
         )
 
         self.assertIn(transfer, records)
+
+    def test_user_cuit_cuil_or_dni_uses_dni_fallback(self):
+        user_with_cuit = self.User.create(
+            {
+                "external_id": "user-cuit-1",
+                "gateway_display_name": "Alias Comercial",
+                "full_name": "Usuario Con Cuit",
+                "cuit_cuil": "20-12345678-9",
+                "dni": "12345678",
+            }
+        )
+        user_without_cuit = self.User.create(
+            {
+                "external_id": "user-dni-1",
+                "full_name": "Usuario Sin Cuit",
+                "dni": "87654321",
+            }
+        )
+        transfer = self.Transfer.create(
+            {
+                "external_id": "transfer-user-doc-1",
+                "movement_nature": "TRANSFER",
+                "status": "COMPLETED",
+                "amount": 50.0,
+                "source_user_id": user_with_cuit.id,
+                "destination_user_id": user_without_cuit.id,
+            }
+        )
+
+        self.assertEqual(user_with_cuit.cuit_cuil_or_dni, "20-12345678-9")
+        self.assertEqual(user_without_cuit.cuit_cuil_or_dni, "87654321")
+        self.assertEqual(user_with_cuit.cuit_cuil_or_dni_display, "20-12345678-9 - Usuario Con Cuit")
+        self.assertEqual(user_without_cuit.cuit_cuil_or_dni_display, "87654321 - Usuario Sin Cuit")
+        self.assertEqual(transfer.source_user_cuit_cuil_or_dni, "20-12345678-9")
+        self.assertEqual(transfer.destination_user_cuit_cuil_or_dni, "87654321")
+        self.assertEqual(
+            transfer.source_user_cuit_cuil_or_dni_display,
+            "20-12345678-9 - Usuario Con Cuit",
+        )
+        self.assertEqual(
+            transfer.destination_user_cuit_cuil_or_dni_display,
+            "87654321 - Usuario Sin Cuit",
+        )

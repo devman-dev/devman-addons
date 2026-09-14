@@ -8,6 +8,14 @@
         <field name="active">True</field>
     </record>
 
+    <record id="pf_gateway_sync_job_global_settings" model="pf.gateway.sync.job">
+        <field name="sequence">1</field>
+        <field name="name">Sincronizar Configuración Global del Gateway</field>
+        <field name="resource">global_settings</field>
+        <field name="sync_mode">full</field>
+        <field name="active">True</field>
+    </record>
+
     <record id="pf_gateway_sync_job_companies" model="pf.gateway.sync.job">
         <field name="sequence">15</field>
             <field name="name">Sincronizar Cuentas Empresas del Gateway</field>

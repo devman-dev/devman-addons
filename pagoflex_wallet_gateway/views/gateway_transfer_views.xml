@@ -121,6 +121,8 @@
                 <filter name="filter_other_status" string="Otras" domain="['|', ('status', '=', False), ('status', '!=', 'COMPLETED')]"/>
                 <filter name="filter_status_validation_exhausted" string="Validacion agotada" domain="[('status_validation_exhausted', '=', True)]"/>
                 <separator/>
+                <filter name="group_by_source_user_cuit_cuil_or_dni" string="Agrupar por usuario origen (CUIT/CUIL o DNI)" context="{'group_by': 'source_user_cuit_cuil_or_dni_display'}"/>
+                <filter name="group_by_destination_user_cuit_cuil_or_dni" string="Agrupar por usuario destino (CUIT/CUIL o DNI)" context="{'group_by': 'destination_user_cuit_cuil_or_dni_display'}"/>
                 <filter name="group_by_fecha_negocio_day" string="Fecha negocio: Día" context="{'group_by': 'fecha_negocio:day'}"/>
                 <filter name="group_by_fecha_negocio_month" string="Fecha negocio: Mes" context="{'group_by': 'fecha_negocio:month'}"/>
                 <filter name="group_by_fecha_negocio_year" string="Fecha negocio: Año" context="{'group_by': 'fecha_negocio:year'}"/>

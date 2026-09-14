@@ -24,6 +24,7 @@ class PfGatewaySyncJob(models.Model):
             ("negative_balance_limits", "Limites de Saldo Negativo"),
             ("balance_adjustments", "Ajustes de Saldo"),
             ("transfers", "Transferencias"),
+            ("global_settings", "Configuración Global"),
         ],
         required=True,
         index=True,
@@ -64,6 +65,7 @@ class PfGatewaySyncJob(models.Model):
             "negative_balance_limits": self.env["pf.gateway.negative.balance.limit"],
             "balance_adjustments": self.env["pagoflex.balance.adjustment"],
             "transfers": self.env["pf.gateway.transfer"],
+            "global_settings": self.env["gateway.global.settings"],
         }
         model = model_map.get(resource_key)
         if model is None:
@@ -114,6 +116,10 @@ class PfGatewaySyncJob(models.Model):
     @api.model
     def cron_sync_users(self):
         return self._run_named_job("users", cron_mode=True)
+
+    @api.model
+    def cron_sync_global_settings(self):
+        return self._run_named_job("global_settings", cron_mode=True)
 
     @api.model
     def cron_sync_companies(self):

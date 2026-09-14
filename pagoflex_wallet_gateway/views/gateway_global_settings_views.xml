@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_gateway_global_settings_form" model="ir.ui.view">
+        <field name="name">gateway.global.settings.form</field>
+        <field name="model">gateway.global.settings</field>
+        <field name="arch" type="xml">
+            <form string="Configuración Global Gateway" create="false" delete="false">
+                <header>
+                    <button name="action_sync_from_gateway" type="object" string="Obtener Configuración (GET)" class="btn-secondary" groups="pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_admin"/>
+                    <button name="action_push_to_gateway" type="object" string="Guardar en Gateway (PUT)" class="btn-primary" groups="pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_admin"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1>Configuración Global del Gateway</h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="psp_mode_enabled"/>
+                        </group>
+                    </group>
+                    <group invisible="psp_mode_enabled == True">
+                        <field name="personIdType" required="psp_mode_enabled == False"/>
+                        <field name="personId" required="psp_mode_enabled == False"/>
+                        <field name="personName" required="psp_mode_enabled == False"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_gateway_global_settings" model="ir.actions.server">
+        <field name="name">Configuración Global</field>
+        <field name="model_id" ref="model_gateway_global_settings"/>
+        <field name="state">code</field>
+        <field name="code">
+record = env['gateway.global.settings'].get_settings()
+action = {
+    'type': 'ir.actions.act_window',
+    'name': 'Configuración Global Gateway',
+    'res_model': 'gateway.global.settings',
+    'res_id': record.id,
+    'view_mode': 'form',
+    'target': 'current',
+}
+        </field>
+    </record>
+
+    <menuitem id="menu_gateway_global_settings" 
+              name="Configuración Global" 
+              parent="pagoflex_wallet_gateway.menu_pagoflex_wallet_gateway_config" 
+              action="action_gateway_global_settings" 
+              sequence="10"/>
+</odoo>

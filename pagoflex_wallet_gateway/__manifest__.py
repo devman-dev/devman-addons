@@ -1,7 +1,7 @@
 {
     "name": "Wallet Gateway",
     "summary": "Backoffice administrativo para sincronizar usuarios, cuentas y transferencias del gateway PagoFlex.",
-    "version": "19.0.1.1.0",
+    "version": "19.0.1.2.5",
     "category": "Tools",
     "author": "Hitofusion",
     "license": "LGPL-3",
@@ -22,6 +22,8 @@
         "views/incoming_transfer_commission_distribution_rule_views.xml",
         "views/incoming_transfer_commission_push_wizard_views.xml",
         "views/user_incoming_commission_load_default_wizard_views.xml",
+        "views/gateway_user_create_subaccount_wizard_views.xml",
+        "views/gateway_global_settings_views.xml",
         "views/incoming_transfer_commission_account_views.xml",
         "views/incoming_transfer_commission_account_sync_wizard_views.xml",
         "views/negative_balance_limit_views.xml",
@@ -47,6 +49,7 @@
         "views/commission_payable_report_views.xml",
         "views/daily_reference_report_views.xml",
         "views/reconciliation_control_views.xml",
+        "views/chained_traceability_report_views.xml",
         "data/sync_job_data.xml",
         "data/cron.xml",
         "data/cron_reconciliation.xml",
@@ -59,6 +62,7 @@
         ],
     },
     "images": ["static/description/icon.png"],
+    "external_dependencies": {"python": ["xlsxwriter", "pytz"]},
     "installable": True,
     "application": True,
 }

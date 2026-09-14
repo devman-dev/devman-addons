@@ -36,6 +36,40 @@ class PfGatewayBankAccount(models.Model):
     app = fields.Char(index=True)
     currency = fields.Char()
     balance = fields.Monetary(currency_field="currency_id")
+    statement_movement_count = fields.Integer(
+        string="Movimientos del CVU",
+        compute="_compute_statement_totals",
+        compute_sudo=True,
+        aggregator=False,
+    )
+    statement_incoming_total = fields.Monetary(
+        string="Entradas del CVU",
+        currency_field="currency_id",
+        compute="_compute_statement_totals",
+        compute_sudo=True,
+        aggregator=False,
+    )
+    statement_outgoing_total = fields.Monetary(
+        string="Salidas del CVU",
+        currency_field="currency_id",
+        compute="_compute_statement_totals",
+        compute_sudo=True,
+        aggregator=False,
+    )
+    statement_net_total = fields.Monetary(
+        string="Neto del CVU",
+        currency_field="currency_id",
+        compute="_compute_statement_totals",
+        compute_sudo=True,
+        aggregator=False,
+    )
+    statement_control_difference = fields.Monetary(
+        string="Diferencia contra saldo del CVU",
+        currency_field="currency_id",
+        compute="_compute_statement_totals",
+        compute_sudo=True,
+        aggregator=False,
+    )
     balance_sync_status = fields.Selection(
         [
             ("never", "Nunca consultado"),
@@ -63,6 +97,9 @@ class PfGatewayBankAccount(models.Model):
         compute="_compute_user_display_name",
         store=False,
     )
+    person_id_type = fields.Char(string="Tipo ID Persona")
+    person_id = fields.Char(string="ID Persona")
+    person_name = fields.Char(string="Nombre Persona")
 
     _sql_constraints = [
         ("pf_gateway_bank_account_external_id_uniq", "unique(external_id)", "El external_id de la cuenta bancaria del gateway debe ser único."),
@@ -77,6 +114,32 @@ class PfGatewayBankAccount(models.Model):
         for record in self:
             record.name = record.cvu_cbu or record.alias or str(record.origin_id or record.external_id)
 
+    def _compute_statement_totals(self):
+        """Expose the statement SQL-view totals on their owning bank account.
+
+        These values deliberately come from ``bank_account_id``.  Reading the
+        equivalent fields through ``gateway_user_id`` would repeat the global
+        totals of the user on every one of their CVUs during an export.
+        """
+        totals_by_account = {}
+        if self.ids:
+            summaries = self.env["pf.gateway.user.statement.summary"].search(
+                [("bank_account_id", "in", self.ids)]
+            )
+            totals_by_account = {
+                summary.bank_account_id.id: summary
+                for summary in summaries
+                if summary.bank_account_id
+            }
+
+        for account in self:
+            summary = totals_by_account.get(account.id)
+            account.statement_movement_count = summary.movement_count if summary else 0
+            account.statement_incoming_total = summary.incoming_total if summary else 0.0
+            account.statement_outgoing_total = summary.outgoing_total if summary else 0.0
+            account.statement_net_total = summary.net_total if summary else 0.0
+            account.statement_control_difference = summary.control_difference if summary else 0.0
+
     def _resolve_currency(self, currency_code):
         if not currency_code:
             return False
@@ -84,7 +147,7 @@ class PfGatewayBankAccount(models.Model):
 
     def _normalize_status(self, value):
         status = (value or "").strip().lower()
-        if status in {"active", "suspended"}:
+        if status in {"active", "suspended", "blocked"}:
             return status
         return False
 
@@ -697,6 +760,9 @@ class PfGatewayBankAccount(models.Model):
                     "currency": item.get("currency"),
                     "currency_id": self._resolve_currency(item.get("currency")),
                     "extra_metadata": self._payload_to_text(item.get("extra_metadata")),
+                    "person_id_type": item.get("person_id_type"),
+                    "person_id": item.get("person_id"),
+                    "person_name": item.get("person_name"),
                     "source_created_at": self._coerce_datetime(item.get("created_at"), field_name="created_at"),
                     "source_updated_at": self._coerce_datetime(item.get("updated_at"), field_name="updated_at"),
                     "last_sync_at": fields.Datetime.now(),

@@ -34,6 +34,7 @@
                     <!-- <button name="action_create_or_link_partner" type="object" string="Crear/vincular contacto" invisible="partner_id" groups="pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_admin,pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_operator"/> -->
                     <button name="action_add_costoapp_commission_agent" type="object" string="Agregar CostoAPP" invisible="not partner_is_company" groups="pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_admin"/>
                     <button name="action_open_account_statement" type="object" string="Ver resumen de cuenta" groups="pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_admin,pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_operator,pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_auditor"/>
+                    <button name="action_open_create_subaccount_wizard" type="object" string="Crear CVU" class="btn-primary" invisible="not external_id" groups="pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_admin,pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_operator"/>
                 </header>
                 <sheet>
                     <group>

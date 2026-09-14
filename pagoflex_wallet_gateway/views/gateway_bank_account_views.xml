@@ -18,6 +18,11 @@
                 <field name="app"/>
                 <field name="currency"/>
                 <field name="balance"/>
+                <field name="statement_movement_count" optional="hide"/>
+                <field name="statement_incoming_total" optional="hide"/>
+                <field name="statement_outgoing_total" optional="hide"/>
+                <field name="statement_net_total" optional="hide"/>
+                <field name="statement_control_difference" optional="hide"/>
                 <button name="action_refresh_balance_sync" type="object" icon="fa-refresh" title="Actualizar saldo" groups="pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_admin,pagoflex_wallet_gateway.group_pagoflex_wallet_gateway_operator"/>
                 <field name="source_updated_at"/>
             </list>
@@ -43,6 +48,9 @@
                             <field name="gateway_user_id" readonly="1"/>
                             <field name="cvu_cbu" readonly="1"/>
                             <field name="alias" readonly="1"/>
+                            <field name="person_id_type" readonly="1"/>
+                            <field name="person_id" readonly="1"/>
+                            <field name="person_name" readonly="1"/>
                         </group>
                         <group>
                             <field name="status"/>
@@ -52,6 +60,17 @@
                             <field name="app" readonly="1"/>
                             <field name="currency" readonly="1"/>
                             <field name="balance" readonly="1"/>
+                        </group>
+                    </group>
+                    <group string="Resumen de cuenta del CVU">
+                        <group>
+                            <field name="statement_movement_count" readonly="1"/>
+                            <field name="statement_incoming_total" readonly="1"/>
+                            <field name="statement_outgoing_total" readonly="1"/>
+                        </group>
+                        <group>
+                            <field name="statement_net_total" readonly="1"/>
+                            <field name="statement_control_difference" readonly="1"/>
                         </group>
                     </group>
                     <notebook>

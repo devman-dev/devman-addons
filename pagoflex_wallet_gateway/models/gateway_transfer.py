@@ -38,6 +38,30 @@ class PfGatewayTransfer(models.Model):
     destination_bank_account_id = fields.Many2one("pf.gateway.bank.account", string="Cuenta destino", ondelete="set null", index=True)
     source_user_id = fields.Many2one("pf.gateway.user", string="Usuario origen", ondelete="set null", index=True)
     destination_user_id = fields.Many2one("pf.gateway.user", string="Usuario destino", ondelete="set null", index=True)
+    source_user_cuit_cuil_or_dni = fields.Char(
+        related="source_user_id.cuit_cuil_or_dni",
+        string="CUIT/CUIL o DNI origen",
+        store=True,
+        index=True,
+    )
+    source_user_cuit_cuil_or_dni_display = fields.Char(
+        related="source_user_id.cuit_cuil_or_dni_display",
+        string="CUIT/CUIL o DNI con nombre origen",
+        store=True,
+        index=True,
+    )
+    destination_user_cuit_cuil_or_dni = fields.Char(
+        related="destination_user_id.cuit_cuil_or_dni",
+        string="CUIT/CUIL o DNI destino",
+        store=True,
+        index=True,
+    )
+    destination_user_cuit_cuil_or_dni_display = fields.Char(
+        related="destination_user_id.cuit_cuil_or_dni_display",
+        string="CUIT/CUIL o DNI con nombre destino",
+        store=True,
+        index=True,
+    )
     source_address = fields.Char()
     source_address_type = fields.Char()
     source_owner_id_type = fields.Char()

@@ -25,6 +25,18 @@ class PfGatewayUser(models.Model):
     dni = fields.Char()
     gender = fields.Char()
     cuit_cuil = fields.Char()
+    cuit_cuil_or_dni = fields.Char(
+        string="CUIT/CUIL o DNI",
+        compute="_compute_cuit_cuil_or_dni",
+        store=True,
+        index=True,
+    )
+    cuit_cuil_or_dni_display = fields.Char(
+        string="CUIT/CUIL o DNI con nombre",
+        compute="_compute_cuit_cuil_or_dni_display",
+        store=True,
+        index=True,
+    )
     cuit_owner = fields.Char(string="CUIT empresa vinculada", index=True)
     phone = fields.Char()
     nationality = fields.Char()
@@ -187,6 +199,20 @@ class PfGatewayUser(models.Model):
     def _compute_name(self):
         for record in self:
             record.name = record.gateway_display_name or record.full_name or record.email or record.external_id
+
+    @api.depends("cuit_cuil", "dni")
+    def _compute_cuit_cuil_or_dni(self):
+        for record in self:
+            record.cuit_cuil_or_dni = record.cuit_cuil or record.dni or False
+
+    @api.depends("cuit_cuil_or_dni", "full_name")
+    def _compute_cuit_cuil_or_dni_display(self):
+        for record in self:
+            display_name = record.full_name or False
+            if record.cuit_cuil_or_dni and display_name:
+                record.cuit_cuil_or_dni_display = f"{record.cuit_cuil_or_dni} - {display_name}"
+            else:
+                record.cuit_cuil_or_dni_display = record.cuit_cuil_or_dni or display_name or False
 
     @api.depends("commission_agent_line_ids.percentage", "commission_agent_line_ids.active")
     def _compute_commission_agent_total_percentage(self):
@@ -394,6 +420,21 @@ class PfGatewayUser(models.Model):
             "context": {
                 "default_gateway_user_id": self.id,
                 "default_app_name": self.incoming_commission_app_name or "pagoflex",
+            },
+        }
+
+    def action_open_create_subaccount_wizard(self):
+        self.ensure_one()
+        if not self.external_id:
+            raise UserError(_("El usuario debe tener un ID externo para crear cuentas."))
+        return {
+            "type": "ir.actions.act_window",
+            "name": _("Crear Nuevo CVU"),
+            "res_model": "pf.gateway.user.create.subaccount.wizard",
+            "view_mode": "form",
+            "target": "new",
+            "context": {
+                "default_user_id": self.id,
             },
         }
 
