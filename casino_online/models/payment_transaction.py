@@ -24,19 +24,26 @@ class PaymentTransaction(models.Model):
                     company = tx.company_id or self.env.company
                     
                     if partner and amount > 0:
-                        # Actualizar el balance_game del partner
-                        balance = partner.balance_game + amount
-                        partner.balance_game = balance
-                        partner.flush_recordset()
-                        partner.invalidate_recordset(['balance_game'])
+                        # Usar casino.money.flow para la actualización del balance
+                        flow_tx = self.env['casino.money.flow'].new().process_operation(
+                            operation_type='deposit',
+                            partner_id=partner,
+                            amount=amount,
+                            idempotency_key=f"DEP|{tx.reference}",
+                            external_reference=tx.reference,
+                            origin_model='payment.transaction',
+                            origin_id=tx.id,
+                            note=f'Depósito vía {tx.provider_id.name or "proveedor"}',
+                        )
+                        balance = flow_tx.balance_after
 
                         self.env['bus.bus']._sendone(
                             partner, "casino_wallet_update", {"partner_id": partner.id, "balance": balance}
                         )
                         _logger.info(
-                            "PaymentTransaction: Updated balance_game for partner %s (tx %s). "
+                            "PaymentTransaction: Updated balance_game for partner %s (tx %s) via money.flow. "
                             "Added %s. New balance: %s",
-                            partner.id, tx.id, amount, partner.balance_game
+                            partner.id, tx.id, amount, balance
                         )
                         
                         # Crear account.payment para registro contable

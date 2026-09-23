@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ASADITO — Juegos</title>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Oswald:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg-deep:#050a18; --bg-mid:#08102b; --bg-card:rgba(5,10,28,0.75);
+    --border:rgba(255,255,255,0.07); --border-focus:rgba(37,99,235,0.35);
+    --primary:#2563eb; --primary-dim:#1d4ed8; --gold:#f2c451; --gold-dim:#b8912a;
+    --crimson:#ff4d5e; --ink:#ffffff; --muted:#94a3b8;
+    --radius:16px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+  html,body{width:100%;min-height:100vh;font-family:'Inter',sans-serif;}
+  body{
+    background:radial-gradient(1000px 600px at 50% 0%,rgba(37,99,235,.08),transparent 60%),
+      radial-gradient(700px 450px at 75% 85%,rgba(242,196,81,.05),transparent 50%),
+      repeating-linear-gradient(90deg,#08102b 0 70px,#09122c 70px 140px),
+      linear-gradient(180deg,var(--bg-deep),#020618);
+    color:var(--ink);padding-bottom:40px;
+  }
+  @keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+  @keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
+
+  .topbar{position:sticky;top:0;z-index:50;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px 12px;padding:10px 16px;background:rgba(5,10,28,.85);border-bottom:1px solid var(--border);backdrop-filter:blur(8px);}
+  .tb-brand{display:flex;align-items:center;gap:8px;font-family:'Oswald';font-weight:700;font-size:15px;color:var(--ink);text-decoration:none;}
+  .tb-ball{width:18px;height:18px;border-radius:50%;background:radial-gradient(circle at 35% 28%,#fff,#cfd8dc 48%,#0e1b2e 52%);flex:none;}
+  .tb-player{display:flex;align-items:center;gap:10px;}
+  .tb-av{width:26px;height:26px;border-radius:50%;background:linear-gradient(150deg,var(--primary),var(--primary-dim));color:#03081a;font-weight:800;font-size:10px;display:flex;align-items:center;justify-content:center;}
+  .tb-balance{font-family:'JetBrains Mono';font-weight:700;font-size:14px;color:var(--primary);min-width:70px;text-align:right;}
+  .tb-logout{background:none;border:1px solid rgba(255,77,94,.25);color:var(--crimson);font-size:10.5px;padding:5px 12px;border-radius:999px;cursor:pointer;font-weight:600;}
+  .tb-logout:hover{background:rgba(255,77,94,.1);}
+
+  .nav{display:flex;justify-content:center;gap:4px;padding:12px 10px 0;flex-wrap:wrap;}
+  .nav a{text-decoration:none;color:var(--muted);font-family:'Oswald';font-size:13px;font-weight:600;letter-spacing:.04em;padding:8px 18px;border-radius:999px;background:rgba(0,0,0,.2);border:1px solid var(--border);transition:.15s;text-transform:uppercase;}
+  .nav a.active,.nav a:hover{background:rgba(37,99,235,.1);border-color:var(--primary-dim);color:var(--primary);}
+
+  .page{padding:24px 16px 40px;max-width:1100px;margin:0 auto;animation:fadeUp .45s cubic-bezier(.2,.9,.25,1);}
+  .page h2{font-family:'Oswald';font-size:24px;letter-spacing:.03em;text-align:center;margin:0 0 4px;}
+  .page .sub{color:var(--muted);font-size:13px;text-align:center;margin:0 0 24px;}
+
+  /* — SEARCH + FILTER — */
+  .controls{display:flex;gap:8px;margin-bottom:18px;flex-wrap:wrap;justify-content:center;align-items:center;}
+  .search-box{display:flex;align-items:center;background:rgba(0,0,0,.25);border:1.5px solid var(--border);border-radius:999px;padding:0 16px;flex:1;min-width:200px;max-width:420px;}
+  .search-box input{background:none;border:none;color:var(--ink);padding:10px 8px;width:100%;font-family:'Inter';font-size:14px;outline:none;}
+  .search-box input::placeholder{color:rgba(255,255,255,.18);}
+  .search-box .s-icon{color:var(--muted);font-size:16px;}
+  .chips{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;}
+  .chip{font-size:11px;font-weight:600;padding:5px 14px;border-radius:999px;border:1px solid var(--border);background:rgba(0,0,0,.2);color:var(--muted);cursor:pointer;transition:.15s;}
+  .chip.active{background:rgba(37,99,235,.12);border-color:var(--primary);color:var(--primary);}
+
+  /* — GRID — */
+  .games-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:18px;}
+  .gcard{
+    background:var(--bg-card);border:1.5px solid var(--border);border-radius:var(--radius);
+    overflow:hidden;cursor:pointer;text-decoration:none;color:var(--ink);
+    transition:transform .15s,border-color .15s;display:flex;flex-direction:column;
+    position:relative;
+  }
+  .gcard:hover{transform:translateY(-4px);border-color:var(--primary-dim);}
+  .gcard .gc-img{width:100%;height:160px;background:linear-gradient(150deg,#0c1e35,#0a1a30);display:flex;align-items:center;justify-content:center;font-size:48px;position:relative;overflow:hidden;}
+  .gcard .gc-img img{width:100%;height:100%;object-fit:cover;}
+  .gcard .provider-tag{position:absolute;top:10px;right:10px;background:rgba(0,0,0,.6);color:var(--gold);font-size:10px;font-weight:700;padding:3px 10px;border-radius:8px;backdrop-filter:blur(4px);}
+  .gcard .gc-body{padding:14px 16px 16px;flex:1;display:flex;flex-direction:column;gap:4px;}
+  .gcard .gc-body h3{margin:0;font-family:'Oswald';font-size:16px;letter-spacing:.02em;}
+  .gcard .gc-body .gc-provider{font-size:12px;color:var(--muted);}
+  .gcard .gc-body .gc-code{font-family:'JetBrains Mono';font-size:10px;color:var(--primary-dim);}
+  .gcard .gc-body .gc-play{display:inline-block;margin-top:8px;font-family:'Oswald';font-weight:600;font-size:13px;letter-spacing:.03em;color:var(--primary);border:1px solid rgba(37,99,235,.25);padding:6px 16px;border-radius:999px;text-align:center;transition:.15s;}
+  .gcard .gc-body .gc-play:hover{background:rgba(37,99,235,.1);}
+
+  /* — STATES — */
+  .state-msg{display:none;flex-direction:column;align-items:center;gap:12px;padding:40px 16px;color:var(--muted);font-size:14px;text-align:center;}
+  .state-msg.show{display:flex;}
+  .state-msg .icon{font-size:40px;}
+  .spinner{width:32px;height:32px;border:3px solid rgba(37,99,235,.1);border-top-color:var(--primary);border-radius:50%;animation:spin .7s linear infinite;}
+
+  .loading-overlay{position:fixed;inset:0;z-index:70;background:rgba(2,8,28,.7);backdrop-filter:blur(3px);display:none;align-items:center;justify-content:center;flex-direction:column;gap:14px;}
+  .loading-overlay.show{display:flex;}
+  .loading-text{font-size:13px;color:var(--muted);}
+  .app-toast{position:fixed;right:20px;bottom:30px;z-index:80;max-width:340px;background:#0a1b30;border:1px solid var(--border);color:var(--ink);padding:14px 18px;border-radius:12px;font-size:12.5px;box-shadow:0 16px 40px rgba(0,0,0,.45);transform:translateY(20px);opacity:0;transition:.3s;}
+  .app-toast.show{transform:none;opacity:1;}
+
+  @media(max-width:500px){
+    .games-grid{grid-template-columns:1fr 1fr;gap:10px;}
+    .gcard .gc-img{height:120px;}
+    .gcard .gc-body h3{font-size:14px;}
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar" id="topBar" style="display:none;">
+  <a href="/casino" class="tb-brand"><div class="tb-ball"></div> ASADITO</a>
+  <div class="tb-player">
+    <div class="tb-av" id="playerAv">J</div>
+    <span class="tb-balance" id="playerBalanceChip">$0.00</span>
+    <button class="tb-logout" onclick="adLogout()">Salir</button>
+  </div>
+</div>
+
+<nav class="nav">
+  <a href="/casino">Inicio</a>
+  <a href="/casino/juegos" class="active">Juegos</a>
+  <a href="/casino/movimientos">Movimientos</a>
+  <a href="/casino/perfil">Perfil</a>
+  <a href="/casino/soporte">Soporte</a>
+</nav>
+
+<div class="page">
+  <h2>🎰 Juegos</h2>
+  <p class="sub">Todos los juegos disponibles en ASADITO Casino</p>
+
+  <div class="controls">
+    <div class="search-box">
+      <span class="s-icon">🔍</span>
+      <input type="text" id="searchInput" placeholder="Buscar juego…" oninput="renderGames()">
+    </div>
+  </div>
+  <div class="chips" id="chipRow"></div>
+
+  <div class="state-msg" id="gamesLoading"><div class="spinner"></div><span>Cargando juegos…</span></div>
+  <div class="state-msg" id="gamesEmpty"><span class="icon">🎰</span><span>No hay juegos disponibles en este momento.<br>Volvé pronto — estamos agregando nuevos títulos.</span></div>
+  <div class="state-msg" id="gamesError"><span class="icon">⚠️</span><span id="gamesErrorMsg">Error al cargar</span></div>
+  <div class="games-grid" id="gamesGrid" style="display:none;"></div>
+</div>
+
+<div class="loading-overlay" id="loadingOverlay"><div class="spinner"></div><div class="loading-text" id="loadingText">Cargando…</div></div>
+<div class="app-toast" id="appToast"></div>
+
+<script src="/casino/shared.js"></script>
+<script>
+var allGames = [];
+var activeProvider = '';
+
+(function init(){
+  if(!initAuthedPage()) return;
+
+  loadGames().then(function(r){
+    el('gamesLoading').classList.remove('show');
+    allGames = r.games || [];
+    if(!allGames.length){ el('gamesEmpty').classList.add('show'); return; }
+    // Build provider chips
+    var providers = [];
+    allGames.forEach(function(g){
+      if(g.provider && providers.indexOf(g.provider)===-1) providers.push(g.provider);
+    });
+    if(providers.length>1){
+      var chipHtml = '<button class="chip active" onclick="filterProvider(\'\')">Todos</button>';
+      providers.forEach(function(p){ chipHtml += '<button class="chip" onclick="filterProvider(\''+esc(p)+'\')">'+esc(p)+'</button>'; });
+      el('chipRow').innerHTML = chipHtml;
+    }
+    renderGames();
+  }).catch(function(e){
+    el('gamesLoading').classList.remove('show');
+    el('gamesEmpty').classList.add('show');
+  });
+})();
+
+function filterProvider(p){
+  activeProvider = p;
+  var chips = document.querySelectorAll('.chip');
+  chips.forEach(function(c){
+    c.classList.toggle('active', (c.textContent==='Todos'&&!p) || c.textContent===p);
+  });
+  renderGames();
+}
+
+function renderGames(){
+  var q = (el('searchInput').value||'').toLowerCase();
+  var filtered = allGames.filter(function(g){
+    var matchSearch = !q || (g.name||'').toLowerCase().indexOf(q)!==-1 || (g.code||'').toLowerCase().indexOf(q)!==-1 || (g.provider||'').toLowerCase().indexOf(q)!==-1;
+    var matchProv = !activeProvider || g.provider===activeProvider;
+    return matchSearch && matchProv;
+  });
+
+  if(!allGames.length && !el('gamesEmpty').classList.contains('show')){
+    el('gamesEmpty').classList.add('show'); 
+    el('gamesGrid').style.display = 'none';
+    return;
+  }
+
+  if(!filtered.length){
+    el('gamesGrid').innerHTML = '<div class="state-msg show" style="grid-column:1/-1;"><span class="icon">🔍</span><span>No se encontraron juegos para esta búsqueda</span></div>';
+    el('gamesGrid').style.display = 'grid';
+    return;
+  }
+
+  var html = '';
+  filtered.forEach(function(g){
+    var img = g.image_url ? ODOO_BASE+g.image_url : '';
+    html += '<a class="gcard" href="/casino/jugar?id='+g.id+'">'+
+      '<div class="gc-img">'+(img?'<img src="'+esc(img)+'" alt="" loading="lazy" onerror="this.style.display=\'none\'">':'')+
+      '<span style="font-size:48px;">🎰</span>'+
+      '<span class="provider-tag">'+esc(g.provider||'')+'</span></div>'+
+      '<div class="gc-body"><h3>'+esc(g.name)+'</h3>'+
+      '<span class="gc-provider">Proveedor: '+esc(g.provider||'—')+'</span>'+
+      '<span class="gc-code">#'+esc(g.code||'-')+'</span>'+
+      '<span class="gc-play">JUGAR →</span></div>'+
+    '</a>';
+  });
+  el('gamesGrid').innerHTML = html;
+  el('gamesGrid').style.display = 'grid';
+  el('gamesEmpty').classList.remove('show');
+}
+</script>
+</body>
+</html>

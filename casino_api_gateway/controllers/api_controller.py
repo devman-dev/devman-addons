@@ -8,6 +8,19 @@ from ..models.casino_api_operation import CasinoApiBusinessError
 
 _logger = logging.getLogger(__name__)
 
+CORS_ORIGIN = "https://world-lottery.vercel.app"
+CORS_METHODS = "POST, GET, OPTIONS"
+CORS_HEADERS = "Content-Type"
+
+
+def _cors_headers():
+    return [
+        ("Access-Control-Allow-Origin", CORS_ORIGIN),
+        ("Access-Control-Allow-Methods", CORS_METHODS),
+        ("Access-Control-Allow-Headers", CORS_HEADERS),
+        ("Access-Control-Max-Age", "86400"),
+    ]
+
 
 class CasinoApiController(http.Controller):
     def _service(self):
@@ -18,7 +31,11 @@ class CasinoApiController(http.Controller):
             json.dumps(payload),
             status=status,
             content_type="application/json",
+            headers=_cors_headers(),
         )
+
+    def _cors_preflight(self):
+        return Response("", status=200, headers=_cors_headers())
 
     def _middleware_error_response(self, operation_code, payload, exc, status):
         return {
@@ -66,37 +83,57 @@ class CasinoApiController(http.Controller):
             )
             return self._json_response(body, status_code)
 
-    @http.route("/casino_api/v1/sessions/authorize", type="http", auth="public", methods=["POST"], csrf=False)
+    # ── /casino_api/v1 (legacy elPadrino format) ──
+
+    @http.route("/casino_api/v1/sessions/authorize", type="http", auth="public", methods=["POST", "OPTIONS"], csrf=False)
     def authorize_session(self, **kwargs):
+        if request.httprequest.method == "OPTIONS":
+            return self._cors_preflight()
         return self._handle("session.authorize")
 
-    @http.route("/casino_api/v1/wallet/balance", type="http", auth="public", methods=["POST"], csrf=False)
+    @http.route("/casino_api/v1/wallet/balance", type="http", auth="public", methods=["POST", "OPTIONS"], csrf=False)
     def wallet_balance(self, **kwargs):
+        if request.httprequest.method == "OPTIONS":
+            return self._cors_preflight()
         return self._handle("wallet.get_balance")
 
-    @http.route("/casino_api/v1/wallet/operations", type="http", auth="public", methods=["POST"], csrf=False)
+    @http.route("/casino_api/v1/wallet/operations", type="http", auth="public", methods=["POST", "OPTIONS"], csrf=False)
     def wallet_operation(self, **kwargs):
+        if request.httprequest.method == "OPTIONS":
+            return self._cors_preflight()
         return self._handle("wallet.apply_operation")
 
-    @http.route("/casino_api/v1/operations/<string:request_id>", type="http", auth="public", methods=["GET"], csrf=False)
+    @http.route("/casino_api/v1/operations/<string:request_id>", type="http", auth="public", methods=["GET", "OPTIONS"], csrf=False)
     def operation_status(self, request_id, **kwargs):
+        if request.httprequest.method == "OPTIONS":
+            return self._cors_preflight()
         result, status = self._service().get_status_payload(request_id)
         return self._json_response(result, status)
 
-    @http.route("/sessions/authorize", type="http", auth="public", methods=["POST"], csrf=False)
+    # ── Middleware-style routes ──
+
+    @http.route("/sessions/authorize", type="http", auth="public", methods=["POST", "OPTIONS"], csrf=False)
     def middleware_authorize_session(self, **kwargs):
+        if request.httprequest.method == "OPTIONS":
+            return self._cors_preflight()
         return self._handle("session.authorize", response_format="middleware")
 
-    @http.route("/wallets/balance", type="http", auth="public", methods=["POST"], csrf=False)
+    @http.route("/wallets/balance", type="http", auth="public", methods=["POST", "OPTIONS"], csrf=False)
     def middleware_wallet_balance(self, **kwargs):
+        if request.httprequest.method == "OPTIONS":
+            return self._cors_preflight()
         return self._handle("wallet.get_balance", response_format="middleware")
 
-    @http.route("/wallets/operations", type="http", auth="public", methods=["POST"], csrf=False)
+    @http.route("/wallets/operations", type="http", auth="public", methods=["POST", "OPTIONS"], csrf=False)
     def middleware_wallet_operation(self, **kwargs):
+        if request.httprequest.method == "OPTIONS":
+            return self._cors_preflight()
         return self._handle("wallet.apply_operation", response_format="middleware")
 
-    @http.route("/wallets/operations/status", type="http", auth="public", methods=["POST"], csrf=False)
+    @http.route("/wallets/operations/status", type="http", auth="public", methods=["POST", "OPTIONS"], csrf=False)
     def middleware_operation_status(self, **kwargs):
+        if request.httprequest.method == "OPTIONS":
+            return self._cors_preflight()
         payload = request.get_json_data() or {}
         try:
             result, status = self._service().get_status_from_payload(payload, response_format="middleware")

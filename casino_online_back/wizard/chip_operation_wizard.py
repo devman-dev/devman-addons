@@ -99,7 +99,7 @@ class ChipOperationWizard(models.TransientModel):
                 raise ValidationError('El importe debe ser mayor a cero.')
 
     def action_confirm(self):
-        """Confirmar y crear la operación"""
+        """Confirmar y crear la operación usando el flujo central de money.flow"""
         self.ensure_one()
         
         # Validar datos antes de crear
@@ -118,24 +118,34 @@ class ChipOperationWizard(models.TransientModel):
         operation_name = dict(self._fields['operation_type'].selection).get(self.operation_type)
         description = self.description or f"{operation_name} - {self.partner_id.name}"
         
-        # Crear el registro (el transaction_id y estado se generan automáticamente en el modelo)
-        vals = {
+        # Mapear operation_type del wizard a operation_type de money.flow
+        money_flow_op = 'deposit' if self.operation_type == 'load' else 'withdrawal'
+        
+        # PASO 1: Usar el flujo central de money.flow
+        # (único punto autorizado — crea wallet.transaction, actualiza balance_game y wallet.balance)
+        tx = self.env['casino.money.flow'].process_operation(
+            operation_type=money_flow_op,
+            partner_id=self.partner_id,
+            amount=self.amount,
+            note=description,
+            origin_model=self._name,
+            origin_id=self.id,
+        )
+        
+        # PASO 2: Crear registro administrativo de casino.game.withdrawals
+        # (historial/backoffice — vinculado a la transacción real del money flow)
+        withdrawal_vals = {
             'date': self.date,
             'description': description,
             'amount': self.amount,
             'partner_id': self.partner_id.id,
             'operation_type': self.operation_type,
         }
+        self.env["casino.game.withdrawals"].with_context(skip_money_flow=True).create(withdrawal_vals)
         
-        withdrawal = self.env['casino.game.withdrawals'].create(vals)
-        
-        # Mostrar mensaje de éxito
         message = f"Operación registrada exitosamente: {operation_name} por ${self.amount:,.2f}"
-        
-        # Cerrar el wizard y quedarse en la misma vista de usuarios
         return {'type': 'ir.actions.act_window_close'}
 
     def action_cancel(self):
         """Cancelar y cerrar el wizard"""
         return {'type': 'ir.actions.act_window_close'}
-        

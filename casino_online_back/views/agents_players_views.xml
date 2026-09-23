@@ -5,7 +5,7 @@
     <field name="name">res.partner.agents.players.list</field>
     <field name="model">res.partner</field>
     <field name="arch" type="xml">
-      <list string="Usuarios" create="0">
+      <list string="Usuarios" create="1">
         <field name="name" string="Nombre" />
         <field name="nickname" string="Nickname" optional="show" />
         <field name="supervisor_agent_id" string="Padre" />

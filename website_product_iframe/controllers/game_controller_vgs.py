@@ -1175,8 +1175,17 @@ class GameControllerVGS(http.Controller):
             if op == 'win':
                 _logger.info('Casino Iframe: WIN')
 
-                new_balance = current_balance + amt
-                user.balance_game = new_balance
+                flow_tx = request.env['casino.money.flow'].sudo().process_operation(
+                    operation_type='win',
+                    partner_id=partner,
+                    amount=amt,
+                    idempotency_key=f"IFRAME|{op}|{token}|{transaction_id or session_id}|{round_id or 'no_round'}",
+                    external_reference=str(transaction_id or ''),
+                    origin_model='casino.game.session',
+                    origin_id=0,
+                    note=f'Game {op} via iframe VGS | round={round_id}',
+                )
+                new_balance = flow_tx.balance_after
                 note = f'Jugada GANADA +{amt}'
                 result = 'win'
                 state = 'finished'
@@ -1192,8 +1201,17 @@ class GameControllerVGS(http.Controller):
                 }
             elif op == 'lose':
                 _logger.info('Casino Iframe: LOSE')
-                new_balance = current_balance - amt
-                user.balance_game = new_balance
+                flow_tx = request.env['casino.money.flow'].sudo().process_operation(
+                    operation_type='bet',
+                    partner_id=partner,
+                    amount=amt,
+                    idempotency_key=f"IFRAME|{op}|{token}|{transaction_id or session_id}|{round_id or 'no_round'}",
+                    external_reference=str(transaction_id or ''),
+                    origin_model='casino.game.session',
+                    origin_id=0,
+                    note=f'Game {op} via iframe VGS | round={round_id}',
+                )
+                new_balance = flow_tx.balance_after
                 note = f'Jugada PERDIDA -{amt}'
                 result = 'loss'
                 state = 'finished'
@@ -1209,8 +1227,17 @@ class GameControllerVGS(http.Controller):
                 }
             elif op == 'refund':
                 _logger.info('Casino Iframe: REFUND')
-                new_balance = current_balance + amt
-                user.balance_game = new_balance
+                flow_tx = request.env['casino.money.flow'].sudo().process_operation(
+                    operation_type='refund',
+                    partner_id=partner,
+                    amount=amt,
+                    idempotency_key=f"REFUND|{session_id}",
+                    external_reference=str(session_id),
+                    origin_model='casino.game.session',
+                    origin_id=0,
+                    note=f'Game refund via iframe VGS | session={session_id}',
+                )
+                new_balance = flow_tx.balance_after
                 note = f'Devolución +{amt}'
                 result = 'abandoned'
                 state = 'finished'

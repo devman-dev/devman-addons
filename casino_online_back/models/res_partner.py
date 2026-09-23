@@ -11,6 +11,12 @@ class ResPartner(models.Model):
     is_agent = fields.Boolean(string="Es agente")
     is_player = fields.Boolean(string="Es jugador")
 
+    password = fields.Char(
+        string='Contraseña', copy=False,
+        help='Se usa solo al crear un jugador. Se borra inmediatamente después de crear el usuario.')
+    confirm_password = fields.Char(
+        string='Confirmar Contraseña', copy=False)
+
     # Rol legible para vistas
     role = fields.Selection([
         ('agent', 'Agente'),
@@ -66,16 +72,164 @@ class ResPartner(models.Model):
         help="Distancia hasta el tope de la jerarquía de agentes."
     )
 
+
+    def _create_or_sync_user(self, partner, password, Users, portal_group, cr):
+        """Create or sync res.users for a player partner. Always called for is_player+email."""
+        existing_user = Users.search([('partner_id', '=', partner.id)], limit=1)
+        if existing_user:
+            if password:
+                try:
+                    existing_user.sudo().write({'password': password})
+                    _logger.info(
+                        "Password synced to existing res.users (login=%s) for partner_id=%s",
+                        partner.email, partner.id,
+                    )
+                except Exception as e:
+                    _logger.error(
+                        "Error syncing password for partner_id=%s: %s",
+                        partner.id, str(e),
+                    )
+            return
+
+        # Check for duplicate login
+        existing_by_login = Users.search([('login', '=', partner.email)], limit=1)
+        if existing_by_login:
+            _logger.warning(
+                "No se pudo crear res.users para partner_id=%s: "
+                "login=%s ya existe (user_id=%s). Vinculando partner...",
+                partner.id, partner.email, existing_by_login.id,
+            )
+            existing_by_login.sudo().write({'partner_id': partner.id})
+            if password:
+                existing_by_login.sudo().write({'password': password})
+            return
+
+        try:
+            user_vals = {
+                'name': partner.name,
+                'login': partner.email,
+                'partner_id': partner.id,
+            }
+            if portal_group:
+                user_vals['groups_id'] = [(6, 0, [portal_group.id])]
+            new_user = Users.create(user_vals)
+
+            if password:
+                new_user.sudo().write({'password': password})
+            else:
+                # Generate random password when none provided (player created without pw)
+                import secrets, string
+                random_pw = ''.join(secrets.choice(string.ascii_letters + string.digits) for _ in range(12))
+                try:
+                    new_user.sudo().write({'password': random_pw})
+                except Exception:
+                    pass
+                _logger.info(
+                    "Creado res.users (login=%s) para partner_id=%s "
+                    "[SIN password provisto — se generó uno aleatorio]",
+                    partner.email, partner.id,
+                )
+                return
+
+            cr.commit()
+            _logger.info(
+                "Creado res.users (login=%s) para partner_id=%s",
+                partner.email, partner.id,
+            )
+        except Exception as e:
+            _logger.error(
+                "Error creando res.users para partner_id=%s: %s",
+                partner.id, str(e),
+            )
+            cr.rollback()
+
     @api.model_create_multi
     def create(self, vals_list):
+        # Extraer passwords antes de super() — se usan solo para crear res.users
+        passwords = {}
+        for i, vals in enumerate(vals_list):
+            pw = vals.get('password')
+            if pw:
+                passwords[i] = pw
+
         partners = super().create(vals_list)
         BetLimits = self.env['casino.game.bet.limits'].sudo()
         default_company = self.env.company or self.env['res.company'].sudo().search([], limit=1)
+        Users = self.env['res.users'].sudo()
+        portal_group = self.env.ref('base.group_portal', raise_if_not_found=False)
 
-        for partner in partners:
+        for i, partner in enumerate(partners):
             BetLimits.get_or_create_for_partner(partner, company=default_company)
 
+            pw = passwords.get(i)
+            if pw and partner.is_player and partner.email:
+                # Buscar si ya existe un res.users para este partner
+                existing_user = Users.search([('partner_id', '=', partner.id)], limit=1)
+                if not existing_user:
+                    # También buscar por login para evitar error de duplicado
+                    existing_by_login = Users.search([('login', '=', partner.email)], limit=1)
+                    if existing_by_login:
+                        _logger.warning(
+                            "No se pudo crear res.users para partner_id=%s: "
+                            "login=%s ya existe (user_id=%s). Vincular manualmente.",
+                            partner.id, partner.email, existing_by_login.id,
+                        )
+                    else:
+                        try:
+                            user_vals = {
+                                'name': partner.name,
+                                'login': partner.email,
+                                'partner_id': partner.id,
+                            }
+                            if portal_group:
+                                user_vals['groups_id'] = [(6, 0, [portal_group.id])]
+                            new_user = Users.create(user_vals)
+                            # Odoo 18: password debe setearse via write (no en create vals)
+                            new_user.sudo().write({'password': pw})
+                            cr = self.env.cr
+                            cr.commit()
+                            _logger.info(
+                                "Creado res.users (login=%s) para partner_id=%s",
+                                partner.email, partner.id,
+                            )
+                        except Exception as e:
+                            _logger.error(
+                                "Error creando res.users para partner_id=%s: %s",
+                                partner.id, str(e),
+                            )
+                            self.env.cr.rollback()
+                # Limpiar contraseña del partner (no se almacena)
+                partner.sudo().write({'password': False, 'confirm_password': False})
+            elif pw and not partner.email:
+                raise ValidationError(_(
+                    'Se requiere un email para crear el acceso.\n'
+                    'Completá el campo Email antes de asignar una contraseña.'
+                ))
+
         return partners
+    def write(self, vals):
+        """Sync password changes from partner form to linked res.users."""
+        pw = vals.get('password')
+        if pw:
+            Users = self.env['res.users'].sudo()
+            for partner in self:
+                if partner.is_player and partner.email:
+                    user = Users.search([('partner_id', '=', partner.id)], limit=1)
+                    if user:
+                        try:
+                            user.write({'password': pw})
+                            _logger.info(
+                                "Password synced to res.users (login=%s) for partner_id=%s",
+                                partner.email, partner.id)
+                        except Exception as e:
+                            _logger.error("Error syncing password for partner_id=%s: %s",
+                                          partner.id, str(e))
+            # Don't store password on partner record
+            vals = dict(vals)
+            vals['password'] = False
+            vals['confirm_password'] = False
+        return super().write(vals)
+
 
     @api.depends("parent_agent_id", "parent_agent_id.agent_depth")
     def _compute_agent_depth(self):
@@ -107,6 +261,12 @@ class ResPartner(models.Model):
             # Evitar ciclos
             if not rec._check_recursion(parent="parent_agent_id"):
                 raise ValidationError(_("Ciclo detectado en la jerarquía de agentes."))
+
+    @api.constrains('password', 'confirm_password')
+    def _check_password_match(self):
+        for rec in self:
+            if rec.password and rec.password != rec.confirm_password:
+                raise ValidationError(_('Las contraseñas no coinciden.'))
 
     @api.constrains("agent_id", "is_player")
     def _check_player_agent(self):

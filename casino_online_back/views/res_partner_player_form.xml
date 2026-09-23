@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!--
+        Extensión del form de res.partner para agregar contraseña y agente.
+        NUEVA ESTRATEGIA: insertar antes del primer group del sheet
+        (en Odoo 18 el name está dentro de un h1, no podemos poner grupos ahí).
+    -->
+    <record id="view_partner_form_player_creation" model="ir.ui.view">
+        <field name="name">res.partner.form.player.creation</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_partner_form"/>
+        <field name="priority" eval="30"/>
+        <field name="arch" type="xml">
+
+            <!-- Insertar Contraseña y Rol antes de los grupos del sheet -->
+            <xpath expr="//sheet/group[1]" position="before">
+                <group string="Contraseña del Jugador" colspan="4"
+                       attrs="{'invisible': [('id', '!=', False)]}">
+                    <label for="password" string="Crear acceso con contraseña"
+                           colspan="4" class="oe_edit_only"/>
+                    <field name="password"
+                           widget="password"
+                           string="Contraseña"
+                           nolabel="1"
+                           placeholder="Ingresá la contraseña..."
+                           attrs="{'required': [('is_player', '=', True)]}"/>
+                    <field name="confirm_password"
+                           widget="password"
+                           string="Confirmar"
+                           nolabel="1"
+                           placeholder="Repetí la contraseña..."
+                           attrs="{'required': [('is_player', '=', True)]}"/>
+                </group>
+                <group string="Rol y Agente" colspan="4">
+                    <field name="is_player"
+                           string="Es jugador"
+                           widget="boolean_toggle"/>
+                    <field name="is_agent"
+                           string="Es agente"
+                           widget="boolean_toggle"/>
+                    <field name="agent_id"
+                           string="Agente asignado"
+                           domain="[('is_agent', '=', True)]"
+                           options="{'no_create': True}"
+                           attrs="{'invisible': [('is_player', '=', False)],
+                                   'required': [('is_player', '=', True)]}"/>
+                </group>
+            </xpath>
+
+        </field>
+    </record>
+
+    <!-- Formulario standalone de respaldo (para el menú "Crear Jugador") -->
+    <record id="view_partner_form_player_create_standalone" model="ir.ui.view">
+        <field name="name">res.partner.form.player.create.standalone</field>
+        <field name="model">res.partner</field>
+        <field name="priority" eval="50"/>
+        <field name="arch" type="xml">
+            <form string="Nuevo Jugador">
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" placeholder="Nombre del jugador" required="1"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group string="Datos del Jugador">
+                            <field name="email" widget="email" required="1"/>
+                            <field name="phone" widget="phone"/>
+                            <field name="mobile" widget="phone"/>
+                        </group>
+                        <group string="Contraseña">
+                            <field name="password"
+                                   widget="password"
+                                   string="Contraseña"
+                                   attrs="{'required': [('is_player', '=', True)]}"/>
+                            <field name="confirm_password"
+                                   widget="password"
+                                   string="Confirmar Contraseña"
+                                   attrs="{'required': [('is_player', '=', True)]}"/>
+                        </group>
+                    </group>
+                    <group>
+                        <group string="Rol y Agente">
+                            <field name="is_player"
+                                   string="Es jugador"
+                                   widget="boolean_toggle"/>
+                            <field name="is_agent"
+                                   string="Es agente"
+                                   widget="boolean_toggle"/>
+                            <field name="agent_id"
+                                   string="Agente asignado"
+                                   domain="[('is_agent', '=', True)]"
+                                   options="{'no_create': True}"
+                                   attrs="{'invisible': [('is_player', '=', False)],
+                                           'required': [('is_player', '=', True)]}"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Acción para crear jugador con la vista standalone -->
+    <record id="action_create_player" model="ir.actions.act_window">
+        <field name="name">Nuevo Jugador</field>
+        <field name="res_model">res.partner</field>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="view_partner_form_player_create_standalone"/>
+        <field name="domain">[('is_player', '=', True)]</field>
+        <field name="context">{'default_is_player': True}</field>
+    </record>
+
+    <!-- Menú directo: Crear Jugador -->
+    <menuitem id="menu_create_player"
+              name="Crear Jugador"
+              parent="casino_online_back.menu_root"
+              action="action_create_player"
+              sequence="99"/>
+
+</odoo>

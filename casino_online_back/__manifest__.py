@@ -19,6 +19,7 @@
         'wizard/exposure_report_wizard_views.xml',
         'views/global_report_views.xml',
         'views/agents_players_views.xml',
+        'views/res_partner_player_form.xml',
         'wizard/chip_operation_wizard_views.xml',
         'views/chip_operation_views.xml',
         'wizard/casino_session_report_wizard_views.xml',

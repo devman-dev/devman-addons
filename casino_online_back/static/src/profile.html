@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ASADITO — Perfil</title>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Oswald:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg-deep:#050a18;--bg-mid:#08102b;--bg-card:rgba(5,10,28,0.75);
+    --border:rgba(255,255,255,0.07);--border-focus:rgba(37,99,235,0.35);
+    --primary:#2563eb;--primary-dim:#1d4ed8;--gold:#f2c451;--gold-dim:#b8912a;
+    --crimson:#ff4d5e;--ink:#ffffff;--muted:#94a3b8;--radius:16px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+  html,body{width:100%;min-height:100vh;font-family:'Inter',sans-serif;}
+  body{
+    background:radial-gradient(1000px 600px at 50% 0%,rgba(37,99,235,.08),transparent 60%),
+      radial-gradient(700px 450px at 75% 85%,rgba(242,196,81,.05),transparent 50%),
+      repeating-linear-gradient(90deg,#08102b 0 70px,#09122c 70px 140px),
+      linear-gradient(180deg,var(--bg-deep),#020618);
+    color:var(--ink);padding-bottom:40px;
+  }
+  @keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+  @keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
+
+  .topbar{position:sticky;top:0;z-index:50;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px 12px;padding:10px 16px;background:rgba(5,10,28,.85);border-bottom:1px solid var(--border);backdrop-filter:blur(8px);}
+  .tb-brand{display:flex;align-items:center;gap:8px;font-family:'Oswald';font-weight:700;font-size:15px;color:var(--ink);text-decoration:none;}
+  .tb-ball{width:18px;height:18px;border-radius:50%;background:radial-gradient(circle at 35% 28%,#fff,#cfd8dc 48%,#0e1b2e 52%);flex:none;}
+  .tb-player{display:flex;align-items:center;gap:10px;}
+  .tb-av{width:26px;height:26px;border-radius:50%;background:linear-gradient(150deg,var(--primary),var(--primary-dim));color:#03081a;font-weight:800;font-size:10px;display:flex;align-items:center;justify-content:center;}
+  .tb-balance{font-family:'JetBrains Mono';font-weight:700;font-size:14px;color:var(--primary);min-width:70px;text-align:right;}
+  .tb-logout{background:none;border:1px solid rgba(255,77,94,.25);color:var(--crimson);font-size:10.5px;padding:5px 12px;border-radius:999px;cursor:pointer;font-weight:600;}
+  .tb-logout:hover{background:rgba(255,77,94,.1);}
+
+  .nav{display:flex;justify-content:center;gap:4px;padding:12px 10px 0;flex-wrap:wrap;}
+  .nav a{text-decoration:none;color:var(--muted);font-family:'Oswald';font-size:13px;font-weight:600;letter-spacing:.04em;padding:8px 18px;border-radius:999px;background:rgba(0,0,0,.2);border:1px solid var(--border);transition:.15s;text-transform:uppercase;}
+  .nav a.active,.nav a:hover{background:rgba(37,99,235,.1);border-color:var(--primary-dim);color:var(--primary);}
+
+  .page{padding:24px 16px 40px;max-width:900px;margin:0 auto;animation:fadeUp .45s cubic-bezier(.2,.9,.25,1);}
+  .page h2{font-family:'Oswald';font-size:24px;letter-spacing:.03em;text-align:center;margin:0 0 4px;}
+  .page .sub{color:var(--muted);font-size:13px;text-align:center;margin:0 0 24px;}
+
+  .pf-header{display:flex;align-items:center;gap:16px;padding:20px;background:var(--bg-card);border:1.5px solid var(--border);border-radius:var(--radius);margin-bottom:18px;flex-wrap:wrap;}
+  .pf-avatar{width:64px;height:64px;border-radius:50%;background:linear-gradient(150deg,var(--primary),var(--primary-dim));color:#03081a;font-weight:800;font-size:24px;display:flex;align-items:center;justify-content:center;flex:none;overflow:hidden;}
+  .pf-avatar img{width:100%;height:100%;object-fit:cover;}
+  .pf-hinfo{flex:1;min-width:150px;}
+  .pf-hname{font-family:'Oswald';font-size:20px;font-weight:600;}
+  .pf-hemail{color:var(--muted);font-size:13px;}
+  .pf-hbadge{display:inline-block;background:rgba(37,99,235,.1);color:var(--primary);font-size:10px;font-weight:700;padding:3px 10px;border-radius:8px;margin-top:4px;}
+
+  .pf-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+  @media(max-width:600px){.pf-grid{grid-template-columns:1fr;}}
+  .pf-card{background:var(--bg-card);border:1.5px solid var(--border);border-radius:var(--radius);padding:18px 20px;}
+  .pf-card h3{font-size:12.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin:0 0 14px;}
+
+  .pf-row{display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid rgba(255,255,255,.03);font-size:13px;}
+  .pf-row:last-child{border-bottom:none;}
+  .pf-k{color:var(--muted);font-size:12px;}
+  .pf-v{color:var(--ink);font-weight:500;text-align:right;}
+
+  .limit-block{margin-bottom:14px;}
+  .limit-block:last-child{margin-bottom:0;}
+  .limit-label-row{display:flex;justify-content:space-between;font-size:11px;margin-bottom:5px;}
+  .limit-bar{height:7px;border-radius:4px;background:rgba(255,255,255,.05);overflow:hidden;margin-bottom:3px;}
+  .limit-fill{height:100%;border-radius:4px;background:var(--primary);transition:width .3s;}
+  .limit-fill.warn{background:var(--gold);}
+  .limit-fill.danger{background:var(--crimson);}
+  .limit-nums{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);}
+
+  .bank-card{background:rgba(37,99,235,.04);border:1px solid rgba(37,99,235,.12);border-radius:12px;padding:12px 14px;margin-bottom:8px;}
+  .bank-name{font-weight:600;color:var(--primary);font-size:13px;}
+  .bank-cbu{font-family:'JetBrains Mono';font-size:11px;color:var(--muted);margin-top:2px;}
+
+  .agent-card{display:flex;align-items:center;gap:10px;}
+  .agent-av{width:40px;height:40px;border-radius:50%;background:rgba(242,196,81,.15);color:var(--gold);display:flex;align-items:center;justify-content:center;font-size:18px;flex:none;}
+
+  .pendiente-badge{display:inline-block;background:rgba(242,196,81,.1);color:var(--gold);font-size:10px;font-weight:700;padding:3px 10px;border-radius:8px;margin-top:8px;}
+  .pendiente-badge::before{content:'⚠️ ';}
+
+  .state-msg{display:none;flex-direction:column;align-items:center;gap:12px;padding:40px 16px;color:var(--muted);font-size:14px;text-align:center;}
+  .state-msg.show{display:flex;}
+  .state-msg .icon{font-size:36px;}
+  .spinner{width:32px;height:32px;border:3px solid rgba(37,99,235,.1);border-top-color:var(--primary);border-radius:50%;animation:spin .7s linear infinite;}
+
+  .loading-overlay{position:fixed;inset:0;z-index:70;background:rgba(2,8,28,.7);backdrop-filter:blur(3px);display:none;align-items:center;justify-content:center;flex-direction:column;gap:14px;}
+  .loading-overlay.show{display:flex;}
+  .loading-text{font-size:13px;color:var(--muted);}
+  .app-toast{position:fixed;right:20px;bottom:30px;z-index:80;max-width:340px;background:#0a1b30;border:1px solid var(--border);color:var(--ink);padding:14px 18px;border-radius:12px;font-size:12.5px;box-shadow:0 16px 40px rgba(0,0,0,.45);transform:translateY(20px);opacity:0;transition:.3s;}
+  .app-toast.show{transform:none;opacity:1;}
+</style>
+</head>
+<body>
+
+<div class="topbar" id="topBar" style="display:none;">
+  <a href="/casino" class="tb-brand"><div class="tb-ball"></div> ASADITO</a>
+  <div class="tb-player">
+    <div class="tb-av" id="playerAv">J</div>
+    <span class="tb-balance" id="playerBalanceChip">$0.00</span>
+    <button class="tb-logout" onclick="adLogout()">Salir</button>
+  </div>
+</div>
+
+<nav class="nav">
+  <a href="/casino">Inicio</a>
+  <a href="/casino/juegos">Juegos</a>
+  <a href="/casino/movimientos">Movimientos</a>
+  <a href="/casino/perfil" class="active">Perfil</a>
+  <a href="/casino/soporte">Soporte</a>
+</nav>
+
+<div class="page">
+  <h2>👤 Perfil de Jugador</h2>
+  <p class="sub">Tus datos, límites y cuentas</p>
+
+  <div class="state-msg" id="pfLoading"><div class="spinner"></div><span>Cargando perfil…</span></div>
+  <div class="state-msg" id="pfError"><span class="icon">⚠️</span><span id="pfErrorMsg">Error al cargar</span></div>
+
+  <div id="pfContent" style="display:none;">
+    <div class="pf-header">
+      <div class="pf-avatar" id="pfAvImg">J</div>
+      <div class="pf-hinfo">
+        <div class="pf-hname" id="pfName">---</div>
+        <div class="pf-hemail" id="pfEmail">---</div>
+        <span class="pf-hbadge">Jugador</span>
+      </div>
+    </div>
+
+    <div class="pf-grid">
+      <div class="pf-card">
+        <h3>📋 Datos personales</h3>
+        <div id="pfPersonal"></div>
+      </div>
+      <div class="pf-card">
+        <h3>📞 Contacto</h3>
+        <div id="pfContact"></div>
+      </div>
+    </div>
+
+    <div class="pf-grid" style="margin-top:14px;">
+      <div class="pf-card">
+        <h3>🎯 Límites de apuesta</h3>
+        <div id="pfLimits"></div>
+      </div>
+      <div class="pf-card">
+        <h3>🤝 Agente</h3>
+        <div id="pfAgent"></div>
+      </div>
+    </div>
+
+    <div class="pf-card" style="margin-top:14px;">
+      <h3>🏦 Cuentas bancarias</h3>
+      <div id="pfBanks"></div>
+      <div id="pfBanksPendiente"></div>
+    </div>
+
+    <p style="font-size:12px;color:var(--gold);margin:16px 0;text-align:center;">💡 Para depositar o retirar, contactá a tu agente o usá el portal Odoo.</p>
+  </div>
+</div>
+
+<div class="loading-overlay" id="loadingOverlay"><div class="spinner"></div><div class="loading-text" id="loadingText">Cargando…</div></div>
+<div class="app-toast" id="appToast"></div>
+
+<script src="/casino/shared.js"></script>
+<script>
+(function init(){
+  if(!initAuthedPage()) return;
+
+  loadProfile().then(function(p){
+    el('pfLoading').classList.remove('show');
+    el('pfContent').style.display='block';
+    profile = p;
+
+    // Header
+    el('pfName').textContent = p.display_name || p.name || 'Jugador';
+    el('pfEmail').textContent = p.email || 'Sin email';
+    var av = el('pfAvImg');
+    if(p.image_url){
+      av.innerHTML = '<img src="'+esc(ODOO_BASE+p.image_url)+'" alt="" onerror="this.style.display=\'none\';this.parentElement.textContent=\''+(p.name||'J')[0].toUpperCase()+'\'">';
+    }else{ av.textContent = (p.name||'J')[0].toUpperCase(); }
+
+    // Personal
+    var persRows = [
+      {k:'Nombre',v:p.display_name||p.name||'—'},
+      {k:'ID Jugador',v:'#'+p.id},
+      {k:'Email',v:p.email||'—'},
+      {k:'Jugador',v:p.is_player?'✅ Sí':'❌ No'}
+    ];
+    el('pfPersonal').innerHTML = persRows.map(function(r){return '<div class="pf-row"><span class="pf-k">'+esc(r.k)+'</span><span class="pf-v">'+esc(r.v)+'</span></div>';}).join('');
+
+    // Contact
+    var contRows = [
+      {k:'Teléfono',v:p.phone||'No registrado'},
+      {k:'Móvil',v:p.mobile||'No registrado'}
+    ];
+    el('pfContact').innerHTML = contRows.map(function(r){return '<div class="pf-row"><span class="pf-k">'+esc(r.k)+'</span><span class="pf-v">'+esc(r.v)+'</span></div>';}).join('');
+
+    // Limits
+    var limits = p.bet_limits||{};
+    var limHtml='';
+    var periods = [
+      {key:'daily',label:'Diario'},
+      {key:'weekly',label:'Semanal'},
+      {key:'monthly',label:'Mensual'}
+    ];
+    periods.forEach(function(per){
+      var l = limits[per.key]||{}, lim=l.limit||0, spent=l.spent||0;
+      var pct = lim>0 ? Math.min(100,(spent/lim)*100) : 0;
+      var cls = pct>80?'danger':pct>50?'warn':'';
+      limHtml += '<div class="limit-block"><div class="limit-label-row"><span>'+per.label+'</span><span style="color:var(--muted)">'+pct.toFixed(0)+'%</span></div>'+
+        '<div class="limit-bar"><div class="limit-fill '+cls+'" style="width:'+pct+'%"></div></div>'+
+        '<div class="limit-nums"><span>'+fmt$(spent)+'</span><span>'+fmt$(lim)+'</span></div></div>';
+    });
+    el('pfLimits').innerHTML = limHtml||'<span style="color:var(--muted);font-size:13px;">Sin límites configurados</span>';
+
+    // Agent
+    var a = p.agent;
+    if(a){
+      el('pfAgent').innerHTML = '<div class="agent-card"><div class="agent-av">🤝</div><div><div style="font-weight:600;font-size:14px;">'+esc(a.name||a.display_name||'Agente')+'</div><div style="color:var(--muted);font-size:12px;">'+esc(a.email||'')+'</div></div></div>';
+    }else{
+      el('pfAgent').innerHTML = '<span style="color:var(--muted);font-size:13px;">Sin agente asignado</span>';
+    }
+
+    // Banks
+    var banks = p.banks||[];
+    if(banks.length){
+      el('pfBanks').innerHTML = banks.map(function(b){
+        return '<div class="bank-card"><div class="bank-name">'+esc(b.bank_name||b.name||'Banco')+'</div><div class="bank-cbu">CBU: '+esc(b.cbu||'—')+'</div></div>';
+      }).join('');
+    }else{
+      el('pfBanks').innerHTML = '<span style="color:var(--muted);font-size:13px;">Sin cuentas bancarias registradas</span>';
+    }
+  }).catch(function(e){
+    el('pfLoading').classList.remove('show');
+    el('pfErrorMsg').textContent = e.message;
+    el('pfError').classList.add('show');
+  });
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ASADITO — Jugar</title>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Oswald:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg-deep:#050a18;--bg-card:rgba(5,10,28,.85);
+    --border:rgba(255,255,255,.08);--primary:#2563eb;--primary-dim:#1d4ed8;
+    --gold:#f2c451;--crimson:#ff4d5e;--ink:#ffffff;--muted:#94a3b8;--radius:12px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+  html,body{width:100%;height:100%;height:100dvh;overflow:hidden;font-family:'Inter',sans-serif;}
+  body{background:var(--bg-deep);color:var(--ink);}
+
+  @keyframes fadeIn{from{opacity:0}to{opacity:1}}
+  @keyframes slideDown{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:none}}
+  @keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
+
+  /* — TOP BAR (game mode) — */
+  .game-bar{
+    display:flex;align-items:center;justify-content:space-between;
+    height:50px;padding:0 14px;background:rgba(0,0,0,.88);
+    border-bottom:1px solid var(--border);backdrop-filter:blur(8px);
+    position:relative;z-index:50;gap:10px;
+  }
+  .gb-left{display:flex;align-items:center;gap:12px;}
+  .gb-back{
+    background:rgba(255,255,255,.06);border:1px solid var(--border);
+    color:var(--ink);font-weight:700;font-size:12px;padding:7px 14px;
+    border-radius:999px;cursor:pointer;transition:.15s;text-decoration:none;
+    display:inline-flex;align-items:center;gap:4px;white-space:nowrap;
+  }
+  .gb-back:hover{background:rgba(255,255,255,.12);}
+  .gb-game-info{display:flex;align-items:center;gap:8px;}
+  .gb-game-name{font-family:'Oswald';font-size:16px;font-weight:600;letter-spacing:.02em;color:var(--ink);}
+  .gb-provider{font-size:10px;color:var(--muted);background:rgba(255,255,255,.05);padding:2px 8px;border-radius:6px;}
+
+  .gb-right{display:flex;align-items:center;gap:10px;}
+  .gb-balance{font-family:'JetBrains Mono';font-weight:700;font-size:13px;color:var(--primary);}
+
+  /* — IFRAME WRAPPER — */
+  .iframe-wrap{position:fixed;top:50px;left:0;right:0;bottom:0;background:#000;}
+  .iframe-wrap iframe{width:100%;height:100%;border:none;}
+
+  /* — LOADING — */
+  .loading{position:fixed;top:50px;left:0;right:0;bottom:0;z-index:60;
+    background:radial-gradient(600px 400px at 50% 40%,rgba(37,99,235,.06),transparent 70%),rgba(2,8,28,.9);
+    display:flex;align-items:center;justify-content:center;flex-direction:column;gap:18px;
+    animation:fadeIn .3s;
+  }
+  .loading.hidden{display:none;}
+  .loading .spinner{width:40px;height:40px;border:3px solid rgba(37,99,235,.1);border-top-color:var(--primary);border-radius:50%;animation:spin .7s linear infinite;}
+  .loading .loading-title{font-family:'Oswald';font-size:18px;letter-spacing:.03em;}
+  .loading .loading-sub{color:var(--muted);font-size:13px;}
+  .loading .loading-tag{display:inline-block;background:rgba(242,196,81,.1);color:var(--gold);font-size:10px;font-weight:700;padding:3px 10px;border-radius:6px;}
+
+  /* — ERROR — */
+  .error-card{position:fixed;top:50px;left:0;right:0;bottom:0;z-index:60;
+    display:flex;align-items:center;justify-content:center;text-align:center;
+    background:radial-gradient(600px 400px at 50% 40%,rgba(255,77,94,.04),transparent 70%),rgba(2,8,28,.9);
+    animation:fadeIn .3s;
+  }
+  .error-card.hidden{display:none;}
+  .error-card .ec-inner{max-width:400px;padding:32px 24px;}
+  .error-card .ec-icon{font-size:48px;margin-bottom:12px;}
+  .error-card h3{font-family:'Oswald';font-size:20px;margin:0 0 6px;}
+  .error-card p{color:var(--muted);font-size:13px;margin:0 0 16px;}
+  .error-card .ec-back{font-family:'Oswald';font-weight:600;font-size:14px;color:var(--primary);display:inline-flex;align-items:center;gap:6px;text-decoration:none;border:1px solid rgba(37,99,235,.25);border-radius:999px;padding:10px 24px;transition:.15s;}
+  .error-card .ec-back:hover{background:rgba(37,99,235,.08);}
+
+  .app-toast{position:fixed;right:20px;bottom:30px;z-index:80;max-width:340px;background:#0a1b30;border:1px solid var(--border);color:var(--ink);padding:14px 18px;border-radius:12px;font-size:12.5px;box-shadow:0 16px 40px rgba(0,0,0,.45);transform:translateY(20px);opacity:0;transition:.3s;}
+  .app-toast.show{transform:none;opacity:1;}
+</style>
+</head>
+<body>
+
+<div class="game-bar">
+  <div class="gb-left">
+    <a href="/casino/juegos" class="gb-back">← Volver</a>
+    <div class="gb-game-info">
+      <span class="gb-game-name" id="gameName">Cargando…</span>
+      <span class="gb-provider" id="gameProvider">---</span>
+    </div>
+  </div>
+  <div class="gb-right">
+    <span class="gb-balance" id="playerBalanceChip">$0.00</span>
+  </div>
+</div>
+
+<div class="loading" id="loadingScreen">
+  <div class="spinner"></div>
+  <div class="loading-title" id="loadingTitle">Preparando juego</div>
+  <div class="loading-sub">Conectando con el proveedor…</div>
+</div>
+
+<div class="error-card hidden" id="errorScreen">
+  <div class="ec-inner">
+    <div class="ec-icon">⚠️</div>
+    <h3 id="errorTitle">Juego no disponible</h3>
+    <p id="errorMsg">No se pudo cargar el juego. Verificá que el ID sea correcto.</p>
+    <a href="/casino/juegos" class="ec-back">← Volver a juegos</a>
+  </div>
+</div>
+
+<div class="iframe-wrap" id="iframeWrap" style="display:none;">
+  <iframe id="gameIframe" src="" allow="camera; microphone; fullscreen"></iframe>
+</div>
+
+<div class="app-toast" id="appToast"></div>
+
+<script>
+var ODOO_BASE = 'https://asadito2.asartorio.online';
+var ODOO_DB   = 'asadito2.asartorio.online';
+var session   = null;
+
+function el(id){ return document.getElementById(id); }
+function esc(s){ if(!s)return''; var d=document.createElement('div');d.textContent=s;return d.innerHTML; }
+function fmt$(v){ return '$'+(Number(v)||0).toFixed(2); }
+
+function showError(title, msg){
+  el('loadingScreen').classList.add('hidden');
+  el('iframeWrap').style.display = 'none';
+  el('errorScreen').classList.remove('hidden');
+  el('errorTitle').textContent = title;
+  if(msg) el('errorMsg').textContent = msg;
+}
+
+function getSession(){
+  try{ return JSON.parse(sessionStorage.getItem('asadito_session')); }catch(e){ return null; }
+}
+
+function api(path, body){
+  return fetch(ODOO_BASE+path, {
+    method:'POST', credentials:'include',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify(body===undefined?{}:body)
+  }).then(function(r){
+    if(!r.ok) throw new Error('HTTP '+r.status);
+    return r.json();
+  }).then(function(d){
+    if(d.error) throw new Error(d.error.message||'API error');
+    return d.result;
+  });
+}
+
+(function init(){
+  // Check session
+  var s = getSession();
+  if(!s||!s.uid){ window.location.replace(ODOO_BASE+'/casino/login'); return; }
+  session = s;
+
+  // Get game ID from URL
+  var params = new URLSearchParams(window.location.search);
+  var gameId = params.get('id');
+  if(!gameId){ showError('Juego no especificado','No se proporcionó un ID de juego. Volvé al catálogo y seleccioná uno.'); return; }
+
+  // Load balance
+  api('/casino/balance').then(function(b){
+    el('playerBalanceChip').textContent = fmt$(b.balance_game);
+  }).catch(function(){});
+
+  // Load game data from /casino/games
+  api('/casino/games').then(function(r){
+    var games = r.games||[];
+    var game = games.find(function(g){ return String(g.id)===String(gameId); });
+    if(!game){ showError('Juego no encontrado','El juego con ID #'+gameId+' no existe o no está disponible en este momento.'); return; }
+
+    if(!game.iframe_url){ showError('Juego sin enlace','Este juego no tiene URL de iframe configurada. Contactá a tu agente.'); return; }
+
+    el('gameName').textContent = game.name;
+    el('gameProvider').textContent = game.provider||'';
+    el('loadingTitle').textContent = game.name;
+    el('loadingTitle').style.color = '';
+    el('loadingTitle').style.animation = '';
+
+    // Load iframe
+    var iframe = el('gameIframe');
+    iframe.src = game.iframe_url;
+    var loadTimeout = setTimeout(function(){
+      el('loadingScreen').classList.add('hidden');
+      el('iframeWrap').style.display = 'block';
+    }, 2000);
+
+    iframe.addEventListener('load', function(){
+      clearTimeout(loadTimeout);
+      el('loadingScreen').classList.add('hidden');
+      el('iframeWrap').style.display = 'block';
+    });
+
+    iframe.addEventListener('error', function(){
+      clearTimeout(loadTimeout);
+      showError('Error de conexión','No se pudo conectar con el proveedor del juego. Intentá de nuevo más tarde.');
+    });
+
+  }).catch(function(e){
+    showError('Error al cargar juego','No se pudieron obtener los datos del juego. '+e.message);
+  });
+})();
+</script>
+</body>
+</html>

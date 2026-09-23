@@ -10,3 +10,6 @@ from . import res_partner
 from . import res_company
 from . import global_report
 from . import casino_transfer_service
+from . import casino_money_flow
+from . import casino_wallet
+from . import casino_wallet_transaction

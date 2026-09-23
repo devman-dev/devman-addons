@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ASADITO — Soporte</title>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Oswald:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg-deep:#050f09;--bg-mid:#0a1f13;--bg-card:rgba(6,20,14,0.75);
+    --border:rgba(255,255,255,0.07);--border-focus:rgba(23,226,154,0.35);
+    --emerald:#17e29a;--emerald-dim:#0f9d6c;--gold:#f2c451;--gold-dim:#b8912a;
+    --crimson:#ff4d5e;--ink:#eef3f2;--muted:#7a9c8e;--radius:16px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+  html,body{width:100%;min-height:100vh;font-family:'Inter',sans-serif;}
+  body{
+    background:radial-gradient(1000px 600px at 50% 0%,rgba(23,226,154,.08),transparent 60%),
+      radial-gradient(700px 450px at 75% 85%,rgba(242,196,81,.05),transparent 50%),
+      repeating-linear-gradient(90deg,#081c12 0 70px,#0a2014 70px 140px),
+      linear-gradient(180deg,var(--bg-deep),#031107);
+    color:var(--ink);padding-bottom:40px;
+    display:flex;flex-direction:column;min-height:100vh;
+  }
+  @keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+  @keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
+
+  .topbar{position:sticky;top:0;z-index:50;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px 12px;padding:10px 16px;background:rgba(5,15,9,.85);border-bottom:1px solid var(--border);backdrop-filter:blur(8px);}
+  .tb-brand{display:flex;align-items:center;gap:8px;font-family:'Oswald';font-weight:700;font-size:15px;color:var(--ink);text-decoration:none;}
+  .tb-ball{width:18px;height:18px;border-radius:50%;background:radial-gradient(circle at 35% 28%,#fff,#cfd8dc 48%,#0e1b2e 52%);flex:none;}
+  .tb-player{display:flex;align-items:center;gap:10px;}
+  .tb-av{width:26px;height:26px;border-radius:50%;background:linear-gradient(150deg,var(--emerald),var(--emerald-dim));color:#04140d;font-weight:800;font-size:10px;display:flex;align-items:center;justify-content:center;}
+  .tb-balance{font-family:'JetBrains Mono';font-weight:700;font-size:14px;color:var(--emerald);min-width:70px;text-align:right;}
+  .tb-logout{background:none;border:1px solid rgba(255,77,94,.25);color:var(--crimson);font-size:10.5px;padding:5px 12px;border-radius:999px;cursor:pointer;font-weight:600;}
+  .tb-logout:hover{background:rgba(255,77,94,.1);}
+
+  .nav{display:flex;justify-content:center;gap:4px;padding:12px 10px 0;flex-wrap:wrap;}
+  .nav a{text-decoration:none;color:var(--muted);font-family:'Oswald';font-size:13px;font-weight:600;letter-spacing:.04em;padding:8px 18px;border-radius:999px;background:rgba(0,0,0,.2);border:1px solid var(--border);transition:.15s;text-transform:uppercase;}
+  .nav a.active,.nav a:hover{background:rgba(23,226,154,.1);border-color:var(--emerald-dim);color:var(--emerald);}
+
+  .page{flex:1;display:flex;align-items:center;justify-content:center;padding:24px 16px 40px;animation:fadeUp .45s cubic-bezier(.2,.9,.25,1);}
+
+  .sup-card{
+    width:min(520px,92vw);background:var(--bg-card);border:1.5px solid var(--border);
+    border-radius:var(--radius);padding:36px 30px;text-align:center;position:relative;overflow:hidden;
+    box-shadow:0 24px 48px -8px rgba(0,0,0,.35);
+  }
+  .sup-card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;
+    background:linear-gradient(90deg,transparent,rgba(23,226,154,.5),rgba(242,196,81,.3),transparent);}
+  .sup-icon{font-size:56px;margin-bottom:12px;}
+  .sup-card h2{font-family:'Oswald';font-size:24px;letter-spacing:.03em;margin:0 0 8px;}
+  .sup-card .desc{color:var(--muted);font-size:14px;line-height:1.5;margin:0 0 20px;}
+
+  .sup-options{display:flex;flex-direction:column;gap:10px;align-items:center;margin-bottom:8px;}
+  .sup-btn{
+    display:flex;align-items:center;justify-content:center;gap:8px;
+    font-family:'Oswald';font-weight:600;font-size:15px;letter-spacing:.03em;
+    border-radius:999px;padding:14px 28px;cursor:pointer;width:100%;max-width:340px;
+    border:1.5px solid;transition:transform .15s,opacity .15s;text-decoration:none;
+  }
+  .sup-btn:active{transform:scale(.97);}
+  .sup-btn.primary{color:#04140d;background:linear-gradient(150deg,var(--emerald),var(--emerald-dim));border-color:transparent;box-shadow:0 12px 30px -6px rgba(23,226,154,.35);}
+  .sup-btn.primary:disabled{opacity:.4;cursor:not-allowed;}
+  .sup-btn.outline{color:var(--emerald);background:transparent;border-color:rgba(23,226,154,.25);}
+  .sup-btn.outline:hover{background:rgba(23,226,154,.06);}
+
+  .pending-tag{display:inline-block;background:rgba(242,196,81,.1);color:var(--gold);font-size:10.5px;font-weight:700;padding:4px 12px;border-radius:8px;margin-top:4px;}
+  .pending-tag::before{content:'⚠️ ';}
+
+  .faq-section{margin-top:24px;text-align:left;}
+  .faq-section h3{font-family:'Oswald';font-size:16px;letter-spacing:.03em;margin:0 0 12px;color:var(--muted);}
+  .faq-item{background:rgba(0,0,0,.15);border:1px solid rgba(255,255,255,.04);border-radius:10px;padding:12px 14px;margin-bottom:8px;}
+  .faq-q{font-weight:600;font-size:13px;color:var(--ink);}
+  .faq-a{font-size:12px;color:var(--muted);margin-top:4px;line-height:1.4;}
+
+  .footer-info{font-size:11px;color:var(--muted);margin-top:18px;display:flex;align-items:center;justify-content:center;gap:6px;flex-wrap:wrap;}
+  .footer-info span{margin:0 4px;}
+
+  .loading-overlay{position:fixed;inset:0;z-index:70;background:rgba(3,8,5,.7);backdrop-filter:blur(3px);display:none;align-items:center;justify-content:center;flex-direction:column;gap:14px;}
+  .loading-overlay.show{display:flex;}
+  .loading-text{font-size:13px;color:var(--muted);}
+  .app-toast{position:fixed;right:20px;bottom:30px;z-index:80;max-width:340px;background:#0b1f14;border:1px solid var(--border);color:var(--ink);padding:14px 18px;border-radius:12px;font-size:12.5px;box-shadow:0 16px 40px rgba(0,0,0,.45);transform:translateY(20px);opacity:0;transition:.3s;}
+  .app-toast.show{transform:none;opacity:1;}
+</style>
+</head>
+<body>
+
+<div class="topbar" id="topBar" style="display:none;">
+  <a href="/casino" class="tb-brand"><div class="tb-ball"></div> ASADITO</a>
+  <div class="tb-player">
+    <div class="tb-av" id="playerAv">J</div>
+    <span class="tb-balance" id="playerBalanceChip">$0.00</span>
+    <button class="tb-logout" onclick="adLogout()">Salir</button>
+  </div>
+</div>
+
+<nav class="nav">
+  <a href="/casino">Inicio</a>
+  <a href="/casino/juegos">Juegos</a>
+  <a href="/casino/movimientos">Movimientos</a>
+  <a href="/casino/perfil">Perfil</a>
+  <a href="/casino/soporte" class="active">Soporte</a>
+</nav>
+
+<div class="page">
+  <div class="sup-card">
+    <div class="sup-icon">💬</div>
+    <h2>Centro de Soporte</h2>
+    <p class="desc">¿Necesitás ayuda con tu cuenta, depósitos, retiros o juegos?<br>Nuestro equipo está listo para asistirte.</p>
+
+    <div class="sup-options">
+      <button class="sup-btn primary" id="chatBtn" onclick="openLiveChat()" disabled>
+        🗨️ Chat en vivo
+      </button>
+      <span class="pending-tag" id="chatPending">Live Chat en preparación — disponible pronto</span>
+    </div>
+
+    <div class="faq-section">
+      <h3>📖 Preguntas frecuentes</h3>
+      <div class="faq-item">
+        <div class="faq-q">¿Cómo deposito créditos en mi cuenta?</div>
+        <div class="faq-a">Contactá a tu agente asignado o usá el portal de Odoo para gestionar tus depósitos.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">¿Cuánto tarda un retiro?</div>
+        <div class="faq-a">Los retiros son procesados por nuestro equipo. Una vez solicitado, recibirás confirmación por email.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">¿Cómo funcionan los límites de apuesta?</div>
+        <div class="faq-a">Tenés límites diarios, semanales y mensuales configurados en tu perfil. Podés consultarlos en la sección Perfil.</div>
+      </div>
+    </div>
+
+    <div class="footer-info">
+      <span>📧 soporte@asadito.com</span>
+      <span>·</span>
+      <span>📞 Contactá a tu agente</span>
+    </div>
+  </div>
+</div>
+
+<div class="loading-overlay" id="loadingOverlay"><div class="spinner"></div><div class="loading-text" id="loadingText">Cargando…</div></div>
+<div class="app-toast" id="appToast"></div>
+
+<script src="/casino/shared.js"></script>
+<script>
+(function init(){
+  if(!initAuthedPage()) return;
+
+  // Intentar conectar Live Chat de Odoo
+  fetch(ODOO_BASE + '/im_livechat/get_session', {
+    method:'POST', credentials:'include',
+    headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({jsonrpc:'2.0',method:'call',params:{channel_id:1}})
+  }).then(function(r){ return r.json(); }).then(function(d){
+    if(d.result && d.result.uuid){
+      livechatUuid = d.result.uuid;
+      el('chatBtn').disabled = false;
+      el('chatPending').style.display = 'none';
+    }
+  }).catch(function(){});
+})();
+
+var livechatUuid = null;
+
+function openLiveChat(){
+  if(livechatUuid){
+    window.open(ODOO_BASE + '/im_livechat/support/1', 'chat','width=400,height=600');
+  } else {
+    toast('Chat en vivo no disponible. Contactá a tu agente.', true);
+  }
+}
+</script>
+</body>
+</html>

@@ -85,7 +85,7 @@ class CasinoGameWithdrawals(models.Model):
     # --------------------
     @api.model_create_multi
     def create(self, vals_list):
-        """Generar automáticamente transaction_id si no se proporciona"""
+        """Generar automáticamente transaction_id y sincronizar con money.flow si no se indica skip"""
         for vals in vals_list:
             # Generar transaction_id si no existe
             if not vals.get('transaction_id') or vals.get('transaction_id') == '/':
@@ -124,5 +124,29 @@ class CasinoGameWithdrawals(models.Model):
                     vals['state'] = 'approved'
                     vals['approved_by_id'] = self.env.uid
                     vals['approved_date'] = fields.Datetime.now()
-        
-        return super(CasinoGameWithdrawals, self).create(vals_list)
+
+        # Crear registros (el super ya maneja transaction_id, state, etc.)
+        records = super(CasinoGameWithdrawals, self).create(vals_list)
+
+        # Sincronizar con money.flow para TODAS las cargas/retiros
+        # (a menos que el caller explícitamente pida skip — ej: el wizard ya llamó process_operation)
+        skip_money_flow = self.env.context.get('skip_money_flow')
+        if not skip_money_flow:
+            for rec in records:
+                if rec.operation_type in ['load', 'withdrawal']:
+                    money_flow_op = 'deposit' if rec.operation_type == 'load' else 'withdrawal'
+                    try:
+                        self.env['casino.money.flow'].process_operation(
+                            operation_type=money_flow_op,
+                            partner_id=rec.partner_id,
+                            amount=rec.amount,
+                            note=rec.description or f"{dict(self._fields['operation_type'].selection).get(rec.operation_type)} - {rec.partner_id.name}",
+                            origin_model=self._name,
+                            origin_id=rec.id,
+                        )
+                    except Exception:
+                        # Si process_operation falla (ej: idempotency duplicate), no romper el create
+                        # El registro de withdrawals igual queda creado para trazabilidad
+                        pass
+
+        return records

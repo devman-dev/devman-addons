@@ -5,7 +5,7 @@
       <t t-set="_partner" t-value="request.env.user.partner_id.commercial_partner_id" />
       <!-- <t t-set="nickname" t-value="(_partner.nickname or _partner.name)"/> -->
       <!-- <t t-set="saldo_final" t-value="_partner.sudo().website_wallet_balance()" /> -->
-      <t t-set="saldo_final" t-value="_partner.sudo().balance_game" />
+      <t t-set="saldo_final" t-value="_partner.sudo().website_wallet_balance()" />
       <t t-if="not request.env.user._is_public()">
         <li class="nav-item">
           <span class="nav-link text-nowrap"> Saldo: <span

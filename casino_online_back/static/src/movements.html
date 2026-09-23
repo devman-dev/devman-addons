@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ASADITO — Movimientos</title>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Oswald:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg-deep:#050a18;--bg-mid:#08102b;--bg-card:rgba(5,10,28,0.75);
+    --border:rgba(255,255,255,0.07);--border-focus:rgba(37,99,235,0.35);
+    --primary:#2563eb;--primary-dim:#1d4ed8;--gold:#f2c451;--gold-dim:#b8912a;
+    --crimson:#ff4d5e;--ink:#ffffff;--muted:#94a3b8;--radius:16px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+  html,body{width:100%;min-height:100vh;font-family:'Inter',sans-serif;}
+  body{
+    background:radial-gradient(1000px 600px at 50% 0%,rgba(37,99,235,0.08),transparent 60%),
+      radial-gradient(700px 450px at 75% 85%,rgba(242,196,81,0.05),transparent 50%),
+      repeating-linear-gradient(90deg,#08102b 0 70px,#09122c 70px 140px),
+      linear-gradient(180deg,var(--bg-deep),#020618);
+    color:var(--ink);padding-bottom:40px;
+  }
+  @keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+  @keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
+
+  .topbar{position:sticky;top:0;z-index:50;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px 12px;padding:10px 16px;background:rgba(5,10,28,0.85);border-bottom:1px solid var(--border);backdrop-filter:blur(8px);}
+  .tb-brand{display:flex;align-items:center;gap:8px;font-family:'Oswald';font-weight:700;font-size:15px;color:var(--ink);text-decoration:none;}
+  .tb-ball{width:18px;height:18px;border-radius:50%;background:radial-gradient(circle at 35% 28%,#fff,#cfd8dc 48%,#0e1b2e 52%);flex:none;}
+  .tb-player{display:flex;align-items:center;gap:10px;}
+  .tb-av{width:26px;height:26px;border-radius:50%;background:linear-gradient(150deg,var(--primary),var(--primary-dim));color:#03081a;font-weight:800;font-size:10px;display:flex;align-items:center;justify-content:center;}
+  .tb-balance{font-family:'JetBrains Mono';font-weight:700;font-size:14px;color:var(--primary);min-width:70px;text-align:right;}
+  .tb-logout{background:none;border:1px solid rgba(255,77,94,0.25);color:var(--crimson);font-size:10.5px;padding:5px 12px;border-radius:999px;cursor:pointer;font-weight:600;}
+  .tb-logout:hover{background:rgba(255,77,94,0.1);}
+
+  .nav{display:flex;justify-content:center;gap:4px;padding:12px 10px 0;flex-wrap:wrap;}
+  .nav a{text-decoration:none;color:var(--muted);font-family:'Oswald';font-size:13px;font-weight:600;letter-spacing:.04em;padding:8px 18px;border-radius:999px;background:rgba(0,0,0,0.25);border:1px solid var(--border);transition:.15s;text-transform:uppercase;}
+  .nav a.active,.nav a:hover{background:rgba(37,99,235,0.1);border-color:var(--primary-dim);color:var(--primary);}
+
+  .page{padding:24px 16px 40px;max-width:1000px;margin:0 auto;animation:fadeUp .45s cubic-bezier(.2,.9,.25,1);}
+  .page h2{font-family:'Oswald';font-size:24px;letter-spacing:.03em;text-align:center;margin:0 0 4px;}
+  .page .sub{color:var(--muted);font-size:13px;text-align:center;margin:0 0 20px;}
+
+  .chips{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;margin-bottom:18px;}
+  .chip{font-size:11px;font-weight:600;padding:5px 14px;border-radius:999px;border:1px solid var(--border);background:rgba(0,0,0,0.25);color:var(--muted);cursor:pointer;transition:.15s;}
+  .chip.active{background:rgba(37,99,235,0.12);border-color:var(--primary);color:var(--primary);}
+
+  .table-wrap{background:var(--bg-card);border:1.5px solid var(--border);border-radius:var(--radius);overflow:hidden;overflow-x:auto;}
+  .table-wrap table{width:100%;border-collapse:collapse;min-width:600px;}
+  .table-wrap th{font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);padding:14px 12px;text-align:left;background:rgba(0,0,0,0.25);border-bottom:1px solid var(--border);position:sticky;top:0;}
+  .table-wrap th:last-child,.table-wrap th:nth-last-child(2){text-align:right;}
+  .table-wrap td{font-size:13px;padding:12px;border-bottom:1px solid rgba(255,255,255,0.04);color:var(--ink);}
+  .table-wrap td:last-child,.table-wrap td:nth-last-child(2){text-align:right;}
+  .table-wrap tr:last-child td{border-bottom:none;}
+  .table-wrap tr:hover{background:rgba(37,99,235,0.03);}
+  .mv-pos{color:var(--primary);font-family:'JetBrains Mono';font-weight:600;}
+  .mv-neg{color:var(--crimson);font-family:'JetBrains Mono';font-weight:600;}
+
+  .type-badge{font-size:10px;font-weight:700;padding:3px 10px;border-radius:8px;display:inline-block;white-space:nowrap;}
+  .type-bonus{background:rgba(37,99,235,0.12);color:var(--primary);}
+  .type-dep{background:rgba(87,157,255,0.12);color:#579dff;}
+  .type-game{background:rgba(242,196,81,0.12);color:var(--gold);}
+  .type-adj{background:rgba(255,255,255,0.06);color:var(--muted);}
+
+  .pag{display:flex;align-items:center;justify-content:center;gap:12px;padding:14px;}
+  .pag button{background:rgba(255,255,255,0.06);border:1px solid var(--border);color:var(--ink);padding:8px 18px;border-radius:10px;cursor:pointer;font-weight:600;font-size:12px;transition:.15s;}
+  .pag button:hover:not(:disabled){background:rgba(37,99,235,0.08);border-color:var(--primary-dim);}
+  .pag button:disabled{opacity:.3;cursor:not-allowed;}
+  .pag .info{font-size:12px;color:var(--muted);font-family:'JetBrains Mono';}
+
+  .state-msg{display:none;flex-direction:column;align-items:center;gap:12px;padding:40px 16px;color:var(--muted);font-size:14px;text-align:center;}
+  .state-msg.show{display:flex;}
+  .state-msg .icon{font-size:40px;}
+  .spinner{width:32px;height:32px;border:3px solid rgba(37,99,235,0.1);border-top-color:var(--primary);border-radius:50%;animation:spin .7s linear infinite;}
+
+  .loading-overlay{position:fixed;inset:0;z-index:70;background:rgba(2,8,28,0.7);backdrop-filter:blur(3px);display:none;align-items:center;justify-content:center;flex-direction:column;gap:14px;}
+  .loading-overlay.show{display:flex;}
+  .loading-text{font-size:13px;color:var(--muted);}
+  .app-toast{position:fixed;right:20px;bottom:30px;z-index:80;max-width:340px;background:#0a1b30;border:1px solid var(--border);color:var(--ink);padding:14px 18px;border-radius:12px;font-size:12.5px;box-shadow:0 16px 40px rgba(0,0,0,0.45);transform:translateY(20px);opacity:0;transition:.3s;}
+  .app-toast.show{transform:none;opacity:1;}
+</style>
+</head>
+<body>
+
+<div class="topbar" id="topBar" style="display:none;">
+  <a href="/casino" class="tb-brand"><div class="tb-ball"></div> ASADITO</a>
+  <div class="tb-player">
+    <div class="tb-av" id="playerAv">J</div>
+    <span class="tb-balance" id="playerBalanceChip">$0.00</span>
+    <button class="tb-logout" onclick="adLogout()">Salir</button>
+  </div>
+</div>
+
+<nav class="nav">
+  <a href="/casino">Inicio</a>
+  <a href="/casino/juegos">Juegos</a>
+  <a href="/casino/movimientos" class="active">Movimientos</a>
+  <a href="/casino/perfil">Perfil</a>
+  <a href="/casino/soporte">Soporte</a>
+</nav>
+
+<div class="page">
+  <h2>📊 Movimientos</h2>
+  <p class="sub">Historial completo de transacciones</p>
+
+  <div class="chips" id="mvFilters">
+    <button class="chip active" onclick="filterMv('')">Todos</button>
+    <button class="chip" onclick="filterMv('bonus')">🎁 Bonificaciones</button>
+    <button class="chip" onclick="filterMv('deposito_retiro')">💳 Dep./Ret.</button>
+    <button class="chip" onclick="filterMv('juego')">🎲 Juegos</button>
+    <button class="chip" onclick="filterMv('ajuste')">⚙️ Ajustes</button>
+  </div>
+
+  <div class="state-msg" id="mvLoading"><div class="spinner"></div><span>Cargando movimientos…</span></div>
+  <div class="state-msg" id="mvEmpty"><span class="icon">📭</span><span>No se encontraron movimientos para este período</span></div>
+  <div class="state-msg" id="mvError"><span class="icon">⚠️</span><span id="mvErrorMsg">Error al cargar</span></div>
+  <div class="table-wrap" id="mvTable" style="display:none;">
+    <table>
+      <thead><tr><th>Fecha</th><th>Descripción</th><th>Tipo</th><th>Valor</th><th>Saldo</th></tr></thead>
+      <tbody id="mvBody"></tbody>
+    </table>
+    <div class="pag">
+      <button id="mvPrev" disabled onclick="goPage(-1)">← Anterior</button>
+      <span class="info" id="mvPageInfo">Pág. 1 / 1</span>
+      <button id="mvNext" disabled onclick="goPage(1)">Siguiente →</button>
+    </div>
+  </div>
+</div>
+
+<div class="loading-overlay" id="loadingOverlay"><div class="spinner"></div><div class="loading-text" id="loadingText">Cargando…</div></div>
+<div class="app-toast" id="appToast"></div>
+
+<script src="/casino/shared.js"></script>
+<script>
+var mvPage=1, mvTotalPages=1;
+
+var mvType = "";
+
+function filterMv(type){
+  mvType = type;
+  mvPage = 1;
+  document.querySelectorAll("#mvFilters .chip").forEach(function(c){
+    var chipType = (c.getAttribute("onclick") || "").match(/filterMv'([^']*)'/);
+    c.classList.toggle("active", chipType && chipType[1] === type);
+  });
+  fetchMv();
+}
+
+(function init(){
+  if(!initAuthedPage()) return;
+  fetchMv();
+})();
+
+function goPage(delta){ mvPage += delta; if(mvPage<1) mvPage=1; if(mvPage>mvTotalPages) mvPage=mvTotalPages; fetchMv(); }
+
+function fetchMv(){
+  el('mvLoading').classList.add('show');
+  el('mvEmpty').classList.remove('show');
+  el('mvError').classList.remove('show');
+  el('mvTable').style.display='none';
+
+  loadMovements({page:mvPage, page_size:20, type: mvType || undefined}).then(function(r){
+    el('mvLoading').classList.remove('show');
+    var ms = r.transactions||[];
+    mvTotalPages = r.page_count||1;
+    if(!ms.length){ el('mvEmpty').classList.add('show'); return; }
+
+    var html='';
+    ms.forEach(function(m){
+      var c = cls(m.amount);
+      var typeLabel = m.type || m.transaction_type || '—';
+      html += '<tr>'+
+        '<td style="white-space:nowrap;color:var(--muted);">'+esc((m.date||'').substring(0,10))+'</td>'+
+        '<td>'+esc(m.description||'—')+'</td>'+
+        '<td><span class="type-badge type-dep">'+esc(typeLabel)+'</span></td>'+
+        '<td class="'+c+'">'+sign(m.amount)+'</td>'+
+        '<td style="font-family:\'JetBrains Mono\';font-size:12px;color:var(--muted);">'+(m.balance_after!=null?fmt$(m.balance_after):'—')+'</td>'+
+      '</tr>';
+    });
+    el('mvBody').innerHTML = html;
+    el('mvTable').style.display='block';
+    el('mvPageInfo').textContent = 'Pág. '+mvPage+' / '+mvTotalPages;
+    el('mvPrev').disabled = mvPage<=1;
+    el('mvNext').disabled = mvPage>=mvTotalPages;
+  }).catch(function(e){
+    el('mvLoading').classList.remove('show');
+    if(e.message==='SESSION_EXPIRED') return; // ya redirigió
+    el('mvErrorMsg').textContent = e.message;
+    el('mvError').classList.add('show');
+  });
+}
+</script>
+</body>
+</html>
