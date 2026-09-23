@@ -8,6 +8,8 @@ import base64 as _b64
 from datetime import date, datetime
 
 from odoo import http, fields, _
+import logging
+_logger = logging.getLogger(__name__)
 from odoo.http import request
 from odoo.addons.portal.controllers.portal import CustomerPortal
 
@@ -145,12 +147,31 @@ class PortalClubSupport(CustomerPortal):
                 })
 
             request.env.cr.commit()
-            request.session.authenticate(request.db, {
-                "login": email,
-                "password": password,
-                "type": "password",
-            })
+            _logger.info("JJ-REG: commit OK for %s", email)
 
+            try:
+                result = request.session.authenticate(request.db, {
+                    "login": email,
+                    "password": password,
+                    "type": "password",
+                })
+                _logger.info("JJ-REG: authenticate OK result=%s uid=%s", result, request.session.uid)
+            except Exception as e:
+                _logger.error("JJ-REG: authenticate FAILED: %s", e, exc_info=True)
+                # fallback: lookup user and set session manually
+                user = request.env["res.users"].sudo().search([("login", "=", email)], limit=1)
+                if user:
+                    _logger.info("JJ-REG: fallback user found uid=%s", user.id)
+                    request.session.update({
+                        "db": request.db,
+                        "login": email,
+                        "uid": user.id,
+                        "session_token": user._compute_session_token(request.session.sid),
+                    })
+                    request.session.should_rotate = True
+                    _logger.info("JJ-REG: fallback session set uid=%s", request.session.uid)
+
+            _logger.info("JJ-REG: redirecting to clubs")
             return request.redirect("/my/club-support/clubs")
 
         except Exception as e:

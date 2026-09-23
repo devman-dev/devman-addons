@@ -1,0 +1,232 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <!-- ═══════════════════════════════════════════════════════════════
+         casino_shop_theme — Casino Lobby Redesign
+         Inherits website_sale.products to completely replace the /shop layout.
+         Uses existing context variables: products, categories
+         ═══════════════════════════════════════════════════════════════ -->
+
+    <template id="casino_shop_products"
+              inherit_id="website_sale.products"
+              name="Casino Shop — Lobby Redesign">
+
+        <xpath expr="//t[@t-call='website_sale.products_item']" position="replace" />
+
+        <xpath expr="//div[hasclass('o_wsale_products_main_row')]" position="replace">
+            <!-- ════════════════════════════════════════════
+                 CASINO LOBBY
+                 ════════════════════════════════════════════ -->
+            <div class="casino_lobby" style="max-width:100%!important;width:100%!important">
+
+                <style>.casino_clubs_track{animation:casinoClubScroll 900s linear infinite!important}.container.oe_website_sale{max-width:100%!important;padding:0!important}.casino_lobby{max-width:100%!important}</style>
+
+                <!-- ── CLUBS MARQUEE ── -->
+                <t t-set="clubs" t-value="request.env['casino.club'].sudo().search([('active','=',True)])"/>
+                <div t-if="clubs" class="casino_clubs_bar">
+                    <div class="casino_clubs_track">
+                        <t t-foreach="clubs" t-as="club">
+                            <div class="casino_club_item">
+                                <t t-if="club.logo">
+                                    <img class="casino_club_logo" t-attf-src="/web/image/casino.club/#{club.id}/logo/48x48" alt="" loading="lazy"/>
+                                </t>
+                                <t t-else="">
+                                    <span class="casino_club_fallback"><t t-esc="club.short_name[:3] if club.short_name else club.name[:3]"/></span>
+                                </t>
+                                <span class="casino_club_name"><t t-esc="club.short_name or club.name"/></span>
+                            </div>
+                        </t>
+                        <!-- duplicate for seamless infinite scroll -->
+                        <t t-foreach="clubs" t-as="club">
+                            <div class="casino_club_item">
+                                <t t-if="club.logo">
+                                    <img class="casino_club_logo" t-attf-src="/web/image/casino.club/#{club.id}/logo/48x48" alt="" loading="lazy"/>
+                                </t>
+                                <t t-else="">
+                                    <span class="casino_club_fallback"><t t-esc="club.short_name[:3] if club.short_name else club.name[:3]"/></span>
+                                </t>
+                                <span class="casino_club_name"><t t-esc="club.short_name or club.name"/></span>
+                            </div>
+                        </t>
+                    </div>
+                </div>
+
+                <!-- ── HERO ── -->
+                <div class="casino_hero">
+                    <h1 class="casino_hero_logo">JogaJunto</h1>
+                    <p class="casino_hero_tagline">Sua plataforma de jogos online</p>
+                    <div class="casino_hero_divider"></div>
+                </div>
+
+                <!-- ── TOP BAR: Search + Providers ── -->
+                <div class="casino_topbar">
+                    <div class="casino_search_wrap">
+                        <input type="text"
+                               class="casino_search_input"
+                               placeholder="Buscar juegos..."
+                               id="casino_search"
+                               autocomplete="off" />
+                        <i class="fa fa-search casino_search_icon"></i>
+                    </div>
+                    <button class="casino_btn_providers" id="casino_providers_btn">
+                        <span class="casino_live_dot"></span> Ao vivo
+                    </button>
+                </div>
+
+                <!-- ── CATEGORY PILLS ── -->
+                                                <t t-set="prov_info" t-value="{'JogaJunto Admin': ('JogaJunto', 'casino_prov_gold'), 'City Center Online': ('City Center', 'casino_prov_blue')}" />
+                <t t-set="game_badges" t-value="{'Kinagol': 'Kinagol', 'Raspadinha': 'Raspadinha', 'SenaGol': 'SenaGol'}" />
+                <t t-set="cat_icons" t-value="{1: 'fa-moon-o', 2: 'fa-gamepad', 4: 'fa-diamond', 8: 'fa-star', 9: 'fa-glass', 11: 'fa-trophy', 12: 'fa-sun-o'}" />
+                <t t-set="cat_names" t-value="{1: chr(76)+chr(117)+chr(97)+chr(115), 2: chr(84)+chr(101)+chr(114)+chr(231)+chr(97)+chr(45)+chr(102)+chr(101)+chr(105)+chr(114)+chr(97), 4: chr(81)+chr(117)+chr(97)+chr(114)+chr(116)+chr(97)+chr(45)+chr(102)+chr(101)+chr(105)+chr(114)+chr(97), 8: chr(81)+chr(117)+chr(105)+chr(110)+chr(116)+chr(97)+chr(45)+chr(102)+chr(101)+chr(105)+chr(114)+chr(97), 9: chr(83)+chr(101)+chr(120)+chr(116)+chr(97)+chr(45)+chr(102)+chr(101)+chr(105)+chr(114)+chr(97), 11: chr(83)+chr(225)+chr(98)+chr(97)+chr(100)+chr(111), 12: chr(68)+chr(111)+chr(109)+chr(105)+chr(110)+chr(103)+chr(111)}" />
+                <div class="casino_categories" id="casino_categories">
+                    <button class="casino_cat_pill active" data-cat="all">
+                        <i class="fa fa-th casino_cat_icon"></i>
+                        <span>Início</span>
+                    </button>
+                    <t t-foreach="categories" t-as="cat">
+                        <button class="casino_cat_pill" t-att-data-cat="cat.id">
+                            <i t-attf-class="fa {{cat_icons.get(cat.id, 'fa-star')}} casino_cat_icon"></i>
+                            <span t-esc="cat_names.get(cat.id, cat.name)" />
+                        </button>
+                    </t>
+                </div>
+
+                <!-- ── ALL GAMES CAROUSEL ── -->
+                <div class="casino_section" data-category="all">
+                    <div class="casino_section_header">
+                        <h2 class="casino_section_title">
+                            <i class="fa fa-gamepad casino_section_icon"></i>
+                            Nossa seleção de jogos
+                            <i class="fa fa-arrow-right casino_section_arrow"></i>
+                        </h2>
+                    </div>
+                    <div class="casino_carousel_wrap">
+                        <button class="casino_carousel_btn left" onclick="casinoScroll(this, -1)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg></button>
+                        <div class="casino_carousel" id="carousel_all">
+                            <t t-foreach="products.sudo()" t-as="game">
+                                <t t-if="game.is_game">
+                                    <t t-set="game_url" t-value="game.iframe_url or game.website_url" />
+                                    <div class="casino_card"
+                                         t-att-data-id="game.id"
+                                         t-att-data-url="game_url">
+                                        <div class="casino_card_img">
+                                            <img t-attf-src="/web/image/product.template/#{game.id}/image_512"
+                                                 style="width:100%;height:100%;object-fit:cover;object-position:center;"
+                                                 alt="" loading="lazy" />
+                                            <t t-if="game_badges.get(game.name)"><span class="casino_badge_type" t-esc="game_badges.get(game.name)" /></t>
+                                            <div class="casino_card_overlay">
+                                                <a t-att-href="game_url" class="casino_btn_play">JOGAR</a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </t>
+                            </t>
+                            <!-- BREVE placeholders -->
+                            <t t-foreach="[1, 2, 3]" t-as="i">
+                                <div class="casino_card casino_card_placeholder">
+                                    <div class="casino_card_img">
+                                        <div class="casino_card_overlay_breve">
+                                            <span class="casino_breve_text">EM BREVE</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </t>
+                        </div>
+                        <button class="casino_carousel_btn right" onclick="casinoScroll(this, 1)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></button>
+                    </div>
+                </div>
+
+                <!-- ── PER-CATEGORY CAROUSELS ── -->
+                <t t-foreach="categories" t-as="cat">
+                    <t t-set="cat_games" t-value="products.filtered(lambda g: g.is_game and cat.id in g.public_categ_ids.ids)" />
+                    <div class="casino_section"
+                         t-att-data-category="cat.id"
+                         t-attf-style="display: none"
+                         t-if="cat_games">
+                        <div class="casino_section_header">
+                            <h2 class="casino_section_title">
+                                <i t-attf-class="fa {{cat_icons.get(cat.id, 'fa-star')}} casino_section_icon"></i>
+                                <span t-esc="cat_names.get(cat.id, cat.name)" />
+                                <i class="fa fa-arrow-right casino_section_arrow"></i>
+                            </h2>
+                        </div>
+                        <div class="casino_carousel_wrap">
+                            <button class="casino_carousel_btn left" onclick="casinoScroll(this, -1)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg></button>
+                            <div class="casino_carousel" t-attf-id="carousel_#{cat.id}">
+                                <t t-foreach="cat_games" t-as="game">
+                                    <t t-set="game_url" t-value="game.iframe_url or game.website_url" />
+                                    <div class="casino_card"
+                                         t-att-data-id="game.id"
+                                         t-att-data-url="game_url">
+                                        <div class="casino_card_img">
+                                            <img t-attf-src="/web/image/product.template/#{game.id}/image_512"
+                                                 style="width:100%;height:100%;object-fit:cover;object-position:center;"
+                                                 alt="" loading="lazy" />
+                                            <t t-if="game_badges.get(game.name)"><span class="casino_badge_type" t-esc="game_badges.get(game.name)" /></t>
+                                            <div class="casino_card_overlay">
+                                                <a t-att-href="game_url" class="casino_btn_play">JOGAR</a>
+                                            </div>
+                                        </div>
+                                        <div class="casino_card_info">
+                                            <h3 class="casino_card_name" style="color:#00c896;font-size:14px;font-weight:700;">
+                                                <t t-esc="game.name" />
+                                            </h3>
+                                            <t t-if="game.provider_id"><span class="casino_card_provider"><t t-esc="game.provider_id.sudo().name" /></span></t>
+                                        </div>
+                                    </div>
+                                </t>
+                                <!-- BREVE placeholders -->
+                                <div class="casino_card casino_card_placeholder">
+                                    <div class="casino_card_img">
+                                        <div class="casino_card_overlay_breve">
+                                            <span class="casino_breve_text">EM BREVE</span>
+                                        </div>
+                                    </div>
+                                    <div class="casino_card_info">
+                                        <h3 class="casino_card_name" style="color:#00c896;font-size:14px;font-weight:700;">Próximamente</h3>
+                                    </div>
+                                </div>
+                                <div class="casino_card casino_card_placeholder">
+                                    <div class="casino_card_img">
+                                        <div class="casino_card_overlay_breve">
+                                            <span class="casino_breve_text">EM BREVE</span>
+                                        </div>
+                                    </div>
+                                    <div class="casino_card_info">
+                                        <h3 class="casino_card_name" style="color:#00c896;font-size:14px;font-weight:700;">Próximamente</h3>
+                                    </div>
+                                </div>
+                                <div class="casino_card casino_card_placeholder">
+                                    <div class="casino_card_img">
+                                        <div class="casino_card_overlay_breve">
+                                            <span class="casino_breve_text">EM BREVE</span>
+                                        </div>
+                                    </div>
+                                    <div class="casino_card_info">
+                                        <h3 class="casino_card_name" style="color:#00c896;font-size:14px;font-weight:700;">Próximamente</h3>
+                                    </div>
+                                </div>
+                            </div>
+                            <button class="casino_carousel_btn right" onclick="casinoScroll(this, 1)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></button>
+                        </div>
+                    </div>
+                </t>
+
+            </div><!-- /.casino_lobby -->
+
+        </xpath>
+
+    </template>
+
+    <!-- ── INLINE STYLES ── -->
+    <template id="casino_shop_inline_styles" inherit_id="website.layout" name="Casino Shop Inline Styles">
+        <xpath expr="//head" position="inside">
+            <style type="text/css">
+                .casino_lobby { padding: 0 20px 40px; max-width: 1400px; margin: 0 auto; }
+                @media (max-width: 768px) {
+                    .casino_lobby { padding: 0 10px 20px; }
+                }
+            </style>
+        </xpath>
+    </template>
+
+</odoo>

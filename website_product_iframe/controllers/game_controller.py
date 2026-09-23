@@ -1231,7 +1231,7 @@ class GameController(http.Controller):
                 _logger.info('Casino Iframe: WIN')
 
                 new_balance = current_balance + amt
-                user.balance_game = new_balance
+                partner.balance_game = new_balance
                 result = 'win' if op == 'win' else 'cancelled'
                 state = 'finished'
                 credit = amt
@@ -1247,7 +1247,7 @@ class GameController(http.Controller):
             elif op == 'lose':
                 _logger.info('Casino Iframe: LOSE')
                 new_balance = current_balance - amt
-                user.balance_game = new_balance
+                partner.balance_game = new_balance
                 result = 'loss'
                 state = 'finished'
                 debit = amt
@@ -1263,7 +1263,7 @@ class GameController(http.Controller):
             elif op == 'in_progress':
                 _logger.info('Casino Iframe: Pendiente')
                 new_balance = current_balance - amt
-                user.balance_game = new_balance
+                partner.balance_game = new_balance
                 result = 'in_progress'
                 state = 'in_progress'
                 credit = 0.0
@@ -1283,7 +1283,7 @@ class GameController(http.Controller):
             elif op == 'refund':
                 _logger.info('Casino Iframe: REFUND')
                 new_balance = current_balance + amt
-                user.balance_game = new_balance
+                partner.balance_game = new_balance
                 result = 'abandoned'
                 state = 'finished'
                 debit = amt
